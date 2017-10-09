@@ -189,6 +189,35 @@ func (rl *RecordList) RemoveSelected() error {
 	return nil
 }
 
+func (w *Window) dataRecords(data *core.QMimeData) ([]*codeplug.Record, string, error) {
+	str := data.Data("application/x.codeplug.record.list").Data()
+	reader := bufio.NewReader(strings.NewReader(str))
+	id, err := reader.ReadString('\n')
+	if err != nil {
+		err := fmt.Errorf("Data read error: %s", err.Error())
+		return nil, "", err
+	}
+
+	id = strings.TrimSuffix(id, "\n")
+	records, err := w.mainWindow.codeplug.ParseRecords(reader)
+	if err != nil {
+		err := fmt.Errorf("data format error: %s", err.Error())
+		return nil, "", err
+	}
+
+	if len(records) == 0 {
+		err := fmt.Errorf("No records received")
+		return nil, "", err
+	}
+
+	if records[0].Type() != w.recordType {
+		err := fmt.Errorf("Wrong data type")
+		return nil, "", err
+	}
+
+	return records, id, nil
+}
+
 func (w *Window) initRecordModel() {
 	record := w.record()
 	if record.NameField() == nil {
@@ -272,14 +301,41 @@ func (w *Window) initRecordModel() {
 			return false
 		}
 
+		var dRow int
+		if row != -1 {
+			dRow = row
+		} else if parent.IsValid() {
+			dRow = parent.Row()
+		} else {
+			dRow = model.RowCount(nil)
+		}
+
+		records, id, err := w.dataRecords(data)
+		if err != nil {
+			WarningPopup("Drop Error", err.Error())
+			return false
+		}
+
+		cp := w.mainWindow.codeplug
+		if action == core.Qt__MoveAction && id == cp.ID() {
+			previousSRow := -1
+			for i, r := range records {
+				r := cp.FindRecordByName(r.Type(), r.Name())
+				sRow := r.Index()
+				if sRow+len(records) != dRow+i {
+					return true
+				}
+				if previousSRow >= 0 && sRow != previousSRow+1 {
+					return true
+				}
+				previousSRow = sRow
+			}
+			return false
+		}
 		return true
 	})
 
 	model.ConnectDropMimeData(func(data *core.QMimeData, action core.Qt__DropAction, row int, column int, parent *core.QModelIndex) bool {
-		if !model.CanDropMimeData(data, action, row, column, parent) {
-			return false
-		}
-
 		if action == core.Qt__IgnoreAction {
 			return true
 		}
@@ -293,30 +349,9 @@ func (w *Window) initRecordModel() {
 			dRow = model.RowCount(nil)
 		}
 
-		str := data.Data("application/x.codeplug.record.list").Data()
-		reader := bufio.NewReader(strings.NewReader(str))
-		id, err := reader.ReadString('\n')
+		records, id, err := w.dataRecords(data)
 		if err != nil {
-			msg := fmt.Sprintf("Data read error: %s", err.Error())
-			WarningPopup("Drop Error", msg)
-			return false
-		}
-
-		id = strings.TrimSuffix(id, "\n")
-		records, err := w.mainWindow.codeplug.ParseRecords(reader)
-		if err != nil {
-			msg := fmt.Sprintf("data format error: %s", err.Error())
-			WarningPopup("Drop Error", msg)
-			return false
-		}
-
-		if len(records) == 0 {
-			WarningPopup("Drop Error", "No records received")
-			return false
-		}
-
-		if records[0].Type() != w.recordType {
-			WarningPopup("Drop Error", "Wrong data type")
+			WarningPopup("Drop Error", err.Error())
 			return false
 		}
 
