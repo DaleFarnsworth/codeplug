@@ -214,9 +214,6 @@ func (w *Window) initRecordModel() {
 	})
 
 	model.ConnectMoveRows(func(sParent *core.QModelIndex, sRow int, count int, dParent *core.QModelIndex, dRow int) bool {
-		if dRow == sRow {
-			return true
-		}
 		if count != 1 {
 			log.Fatal("ConnectMoveRows: count != 1")
 		}
@@ -335,6 +332,11 @@ func (w *Window) initRecordModel() {
 			for i, r := range records {
 				r := cp.FindRecordByName(r.Type(), r.Name())
 				sRow := r.Index()
+
+				if dRow == sRow || dRow == sRow+1 {
+					continue
+				}
+
 				model.MoveRows(sParent, sRow, 1, dParent, dRow)
 				if sRow < dRow {
 					dRow--
