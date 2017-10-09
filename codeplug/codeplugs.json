@@ -1,0 +1,1025 @@
+{
+    "comments": [
+        "Copyright 2017 Dale Farnsworth. All rights reserved.",
+        "",
+        "Dale Farnsworth",
+        "1007 W Mendoza Ave",
+        "Mesa, AZ  85210",
+        "USA",
+        "",
+        "dale@farnsworth.org",
+        "",
+        "This file describes the binary format of codeplug files.",
+        "",
+	"The information used to initially generate this file was obtained",
+        "from the excellent MD380 codeplug format description contained in",
+	"http://www.iz2uuf.net/wp/index.php/2016/06/04/tytera-dm380-codeplug-binary-format/"
+    ],
+    "codeplugs": [
+    {
+        "name":"md380",
+        "records": [
+            {
+                "typeName": "Rdt Header",
+                "type": "RdtHeader",
+                "offset": 0,
+                "size": 549,
+                "fields": [
+                    {
+                        "typeName": "Low Frequency",
+                        "type": "LowFrequency",
+                        "bitOffset": 2504,
+                        "bitSize": 16,
+                        "valueType": "rhFrequency"
+                    },
+                    {
+                        "typeName": "High Frequency",
+                        "type": "HighFrequency",
+                        "bitOffset": 2520,
+                        "bitSize": 16,
+                        "valueType": "rhFrequency"
+                    }
+                ]
+            },
+            {
+                "typeName": "General Settings",
+                "type": "GeneralSettings",
+                "offset": 8805,
+                "size": 144,
+                "fields": [
+                    {
+                        "typeName": "Intro Screen Line 1",
+                        "type": "IntroScreenLine1",
+                        "bitOffset": 0,
+                        "bitSize": 160,
+                        "valueType": "introLine"
+                    },
+                    {
+                        "typeName": "Intro Screen Line 2",
+                        "type": "IntroScreenLine2",
+                        "bitOffset": 160,
+                        "bitSize": 160,
+                        "valueType": "introLine"
+                    },
+                    {
+                        "typeName": "Monitor Type",
+                        "type": "MonitorType",
+                        "bitOffset": 515,
+                        "bitSize": 1,
+                        "valueType": "iStrings",
+                        "strings": [
+                            "Silent",
+                            "Open Squelch"
+                        ]
+                    },
+                    {
+                        "typeName": "Disable All LEDS",
+                        "type": "DisableAllLeds",
+                        "bitOffset": 517,
+                        "bitSize": 1,
+                        "valueType": "onOff"
+                    },
+                    {
+                        "typeName": "Talk Permit Tone",
+                        "type": "TalkPermitTone",
+                        "bitOffset": 520,
+                        "bitSize": 2,
+                        "valueType": "iStrings",
+                        "strings": [
+                            "None",
+                            "Digital",
+                            "Analog",
+                            "Digital and Analog"
+                        ]
+                    },
+                    {
+                        "typeName": "Password And Lock Enable",
+                        "type": "PwAndLockEnable",
+                        "bitOffset": 522,
+                        "bitSize": 1,
+                        "valueType": "onOff"
+                    },
+                    {
+                        "typeName": "Channel Free Indication Tone",
+                        "type": "ChFreeIndicationTone",
+                        "bitOffset": 523,
+                        "bitSize": 1,
+                        "valueType": "onOff"
+                    },
+                    {
+                        "typeName": "Disable All Tones",
+                        "type": "DisableAllTones",
+                        "bitOffset": 525,
+                        "bitSize": 1,
+                        "valueType": "onOff"
+                    },
+                    {
+                        "typeName": "Save Mode Receive",
+                        "type": "SaveModeReceive",
+                        "bitOffset": 526,
+                        "bitSize": 1,
+                        "valueType": "offOn"
+                    },
+                    {
+                        "typeName": "Save Preamble",
+                        "type": "SavePreamble",
+                        "bitOffset": 527,
+                        "bitSize": 1,
+                        "valueType": "offOn"
+                    },
+                    {
+                        "typeName": "Intro Screen",
+                        "type": "IntroScreen",
+                        "bitOffset": 531,
+                        "bitSize": 1,
+                        "valueType": "iStrings",
+                        "strings": [
+                            "Character string",
+                            "Picture"
+                        ]
+                    },
+                    {
+                        "typeName": "Radio ID",
+                        "type": "RadioID",
+                        "bitOffset": 544,
+                        "bitSize": 24,
+                        "valueType": "callID"
+                    },
+                    {
+                        "typeName": "Tx Preamble Duration (mS)",
+                        "type": "TxPreambleDuration",
+                        "bitOffset": 576,
+                        "bitSize": 8,
+                        "valueType": "span",
+                        "span": {
+                            "min": 0,
+                            "max": 144,
+                            "scale": 60
+                        }
+                    },
+                    {
+                        "typeName": "Group Call Hang Time (mS)",
+                        "type": "GroupCallHangTime",
+                        "bitOffset": 584,
+                        "bitSize": 8,
+                        "valueType": "span",
+                        "span": {
+                            "min": 0,
+                            "max": 70,
+                            "scale": 100,
+                            "interval": 5
+                        }
+                    },
+                    {
+                        "typeName": "Private Call Hang Time (mS)",
+                        "type": "PrivateCallHangTime",
+                        "bitOffset": 592,
+                        "bitSize": 8,
+                        "valueType": "span",
+                        "span": {
+                            "min": 0,
+                            "max": 70,
+                            "scale": 100,
+                            "interval": 5
+                        }
+                    },
+                    {
+                        "typeName": "VOX Sensitivity",
+                        "type": "VoxSensitivity",
+                        "bitOffset": 600,
+                        "bitSize": 8,
+                        "valueType": "span",
+                        "span": {
+                            "min": 1,
+                            "max": 10
+                        }
+                    },
+                    {
+                        "typeName": "Rx Low Battery Interval (S)",
+                        "type": "RxLowBatteryInterval",
+                        "bitOffset": 624,
+                        "bitSize": 8,
+                        "valueType": "span",
+                        "span": {
+                            "min": 0,
+                            "max": 127,
+                            "scale": 5
+                        }
+                    },
+                    {
+                        "typeName": "Call Alert Tone Duration (S)",
+                        "type": "CallAlertToneDuration",
+                        "bitOffset": 632,
+                        "bitSize": 8,
+                        "valueType": "span",
+                        "span": {
+                            "min": 0,
+                            "max": 240,
+                            "scale": 5,
+                            "interval": 1,
+                            "minString": "Continue"
+                        }
+                    },
+                    {
+                        "typeName": "Lone Worker Response Time (min)",
+                        "type": "LoneWorkerResponseTime",
+                        "bitOffset": 640,
+                        "bitSize": 8,
+                        "valueType": "span",
+                        "span": {
+                            "min": 1,
+                            "max": 255
+                        }
+                    },
+                    {
+                        "typeName": "Lone Worker Reminder Time (S)",
+                        "type": "LoneWorkerReminderTime",
+                        "bitOffset": 648,
+                        "bitSize": 8,
+                        "valueType": "span",
+                        "span": {
+                            "min": 1,
+                            "max": 255
+                        }
+                    },
+                    {
+                        "typeName": "Scan Digital Hang Time (mS)",
+                        "type": "ScanDigitalHangTime",
+                        "bitOffset": 664,
+                        "bitSize": 8,
+                        "valueType": "span",
+                        "span": {
+                            "min": 5,
+                            "max": 100,
+                            "scale": 100,
+                            "interval": 5
+                        }
+                    },
+                    {
+                        "typeName": "Scan Analog Hang Time (mS)",
+                        "type": "ScanAnalogHangTime",
+                        "bitOffset": 672,
+                        "bitSize": 8,
+                        "valueType": "span",
+                        "span": {
+                            "min": 5,
+                            "max": 100,
+                            "scale": 100,
+                            "interval": 5
+                        }
+                    },
+                    {
+                        "typeName": "Set Keypad Lock Time (S)",
+                        "type": "SetKeypadLockTime",
+                        "bitOffset": 688,
+                        "bitSize": 8,
+                        "valueType": "indexedStrings",
+                        "indexedStrings": [
+                            {
+                                "index": 255,
+                                "string": "Manual"
+                            },
+                            {
+                                "index": 5,
+                                "string": "5"
+                            },
+                            {
+                                "index": 10,
+                                "string": "10"
+                            },
+                            {
+                                "index": 15,
+                                "string": "15"
+                            }
+                        ]
+                    },
+                    {
+                        "typeName": "Mode",
+                        "type": "Mode",
+                        "bitOffset": 696,
+                        "bitSize": 8,
+                        "valueType": "indexedStrings",
+                        "indexedStrings": [
+                            {
+                                "index": 0,
+                                "string": "Memory"
+                            },
+                            {
+                                "index": 255,
+                                "string": "Channel"
+                            }
+                        ]
+                    },
+                    {
+                        "typeName": "Power On Password",
+                        "type": "PowerOnPassword",
+                        "bitOffset": 704,
+                        "bitSize": 32,
+                        "valueType": "radioPassword"
+                    },
+                    {
+                        "typeName": "Radio Programming Password",
+                        "type": "RadioProgPw",
+                        "bitOffset": 736,
+                        "bitSize": 32,
+                        "valueType": "radioPassword"
+                    },
+                    {
+                        "typeName": "PC Programming Password",
+                        "type": "PcProgPw",
+                        "bitOffset": 768,
+                        "bitSize": 64,
+                        "valueType": "pcPassword"
+                    },
+                    {
+                        "typeName": "Radio Name",
+                        "type": "RadioName",
+                        "bitOffset": 896,
+                        "bitSize": 256,
+                        "valueType": "radioName"
+                    }
+                ]
+            },
+            {
+                "typeName": "Text Message",
+                "type": "TextMessage",
+                "offset": 9125,
+                "size": 288,
+                "max": 50,
+                "delDescs": [
+                    {
+                        "offset": 0,
+                        "size": 8,
+                        "value": 0
+                    }
+                ],
+                "fields": [
+                    {
+                        "typeName": "Message",
+                        "type": "TextMessage",
+                        "bitOffset": 0,
+                        "bitSize": 2304,
+                        "valueType": "textMessage"
+                    }
+                ]
+            },
+            {
+                "typeName": "Digital Contacts",
+                "type": "DigitalContacts",
+                "offset": 24997,
+                "size": 36,
+                "max": 1000,
+                "delDescs": [
+                    {
+                        "offset": 0,
+                        "size": 3,
+                        "value": 255
+                    },
+                    {
+                        "offset": 4,
+                        "size": 2,
+                        "value": 0
+                    },
+                    {
+                        "offset": 4,
+                        "size": 16,
+                        "value": 0
+                    }
+                ],
+                "fields": [
+                    {
+                        "typeName": "Call ID",
+                        "type": "CallID",
+                        "bitOffset": 0,
+                        "bitSize": 24,
+                        "valueType": "callID"
+                    },
+                    {
+                        "typeName": "Call Receive Tone",
+                        "type": "CallReceiveTone",
+                        "bitOffset": 26,
+                        "bitSize": 1,
+                        "valueType": "iStrings",
+                        "strings": [
+                            "No",
+                            "Yes"
+                        ]
+                    },
+                    {
+                        "typeName": "Call Type",
+                        "type": "CallType",
+                        "bitOffset": 30,
+                        "bitSize": 2,
+                        "valueType": "iStrings",
+                        "strings": [
+                            "",
+                            "Group",
+                            "Private",
+                            "All"
+                        ]
+                    },
+                    {
+                        "typeName": "Contact Name",
+                        "type": "ContactName",
+                        "bitOffset": 32,
+                        "bitSize": 256,
+                        "valueType": "name"
+                    }
+                ]
+            },
+            {
+                "typeName": "Digital Rx Group List",
+                "type": "GroupList",
+                "offset": 60997,
+                "size": 96,
+                "max": 250,
+                "delDescs": [
+                    {
+                        "offset": 0,
+                        "size": 1,
+                        "value": 0
+                    }
+                ],
+                "fields": [
+                    {
+                        "typeName": "Group List Name",
+                        "type": "Name",
+                        "bitOffset": 0,
+                        "bitSize": 256,
+                        "valueType": "name"
+                    },
+                    {
+                        "typeName": "Contact Member",
+                        "type": "ContactMember",
+                        "bitOffset": 256,
+                        "bitSize": 16,
+                        "max": 32,
+                        "valueType": "listIndex",
+                        "listType": "DigitalContacts"
+                    }
+                ]
+            },
+            {
+                "typeName": "Zone Information",
+                "type": "ZoneInformation",
+                "offset": 84997,
+                "size": 64,
+                "max": 250,
+                "delDescs": [
+                    {
+                        "offset": 0,
+                        "size": 1,
+                        "value": 0
+                    }
+                ],
+                "fields": [
+                    {
+                        "typeName": "Zone Name",
+                        "type": "Name",
+                        "bitOffset": 0,
+                        "bitSize": 256,
+                        "valueType": "name"
+                    },
+                    {
+                        "typeName": "Channel Member",
+                        "type": "ChannelMember",
+                        "bitOffset": 256,
+                        "bitSize": 16,
+                        "max": 16,
+                        "valueType": "listIndex",
+                        "listType": "ChannelInformation"
+                    }
+                ]
+            },
+            {
+                "typeName": "Scan List",
+                "type": "ScanList",
+                "offset": 100997,
+                "size": 104,
+                "max": 250,
+                "delDescs": [
+                    {
+                        "offset": 0,
+                        "size": 1,
+                        "value": 0
+                    }
+                ],
+                "fields": [
+                    {
+                        "typeName": "Scan List Name",
+                        "type": "Name",
+                        "bitOffset": 0,
+                        "bitSize": 256,
+                        "valueType": "name"
+                    },
+                    {
+                        "typeName": "Priority Channel 1",
+                        "type": "PriorityChannel1",
+                        "bitOffset": 256,
+                        "bitSize": 16,
+                        "valueType": "memberListIndex",
+                        "listType": "ChannelInformation",
+                        "indexedStrings": [
+                            {
+                                "index": 0,
+                                "string": "Selected"
+                            },
+                            {
+                                "index": 65535,
+                                "string": "None"
+                            }
+                        ]
+                    },
+                    {
+                        "typeName": "Priority Channel 2",
+                        "type": "PriorityChannel2",
+                        "bitOffset": 272,
+                        "bitSize": 16,
+                        "valueType": "memberListIndex",
+                        "listType": "ChannelInformation",
+                        "indexedStrings": [
+                            {
+                                "index": 0,
+                                "string": "Selected"
+                            },
+                            {
+                                "index": 65535,
+                                "string": "None"
+                            }
+                        ]
+                    },
+                    {
+                        "typeName": "Tx Designated Channel",
+                        "type": "TxDesignatedChannel",
+                        "bitOffset": 288,
+                        "bitSize": 16,
+                        "valueType": "listIndex",
+                        "listType": "ChannelInformation",
+                        "indexedStrings": [
+                            {
+                                "index": 0,
+                                "string": "Selected"
+                            },
+                            {
+                                "index": 65535,
+                                "string": "Last Active Channel"
+                            }
+                        ]
+                    },
+                    {
+                        "typeName": "Signalling Hold Time (mS)",
+                        "type": "SignallingHoldTime",
+                        "bitOffset": 312,
+                        "bitSize": 8,
+                        "valueType": "span",
+                        "span": {
+                            "min": 2,
+                            "max": 255,
+                            "scale": 25
+                        }
+                    },
+                    {
+                        "typeName": "Priority Sample Time (mS)",
+                        "type": "PrioritySampleTime",
+                        "bitOffset": 320,
+                        "bitSize": 8,
+                        "valueType": "span",
+                        "span": {
+                            "min": 3,
+                            "max": 31,
+                            "scale": 250
+                        }
+                    },
+                    {
+                        "typeName": "Channel Member",
+                        "type": "ChannelMember",
+                        "bitOffset": 336,
+                        "bitSize": 16,
+                        "max": 31,
+                        "valueType": "listIndex",
+                        "listType": "ChannelInformation"
+                    }
+                ]
+            },
+            {
+                "typeName": "Channel Information",
+                "type": "ChannelInformation",
+                "offset": 127013,
+                "size": 64,
+                "max": 1000,
+                "delDescs": [
+                    {
+                        "offset": 16,
+                        "size": 1,
+                        "value": 255
+                    }
+                ],
+                "fields": [
+                    {
+                        "typeName": "Lone Worker",
+                        "type": "LoneWorker",
+                        "bitOffset": 0,
+                        "bitSize": 1,
+                        "valueType": "offOn"
+                    },
+                    {
+                        "typeName": "Squelch",
+                        "type": "Squelch",
+                        "bitOffset": 2,
+                        "bitSize": 1,
+                        "valueType": "iStrings",
+                        "strings": [
+                            "Tight",
+                            "Normal"
+                        ]
+                    },
+                    {
+                        "typeName": "Autoscan",
+                        "type": "Autoscan",
+                        "bitOffset": 3,
+                        "bitSize": 1,
+                        "valueType": "offOn"
+                    },
+                    {
+                        "typeName": "Bandwidth",
+                        "type": "Bandwidth",
+                        "bitOffset": 4,
+                        "bitSize": 1,
+                        "valueType": "iStrings",
+                        "strings": [
+                            "12.5",
+                            "25"
+                        ]
+                    },
+                    {
+                        "typeName": "Channel Mode",
+                        "type": "ChannelMode",
+                        "bitOffset": 6,
+                        "bitSize": 2,
+                        "valueType": "iStrings",
+                        "strings": [
+                            "",
+                            "Analog",
+                            "Digital"
+                        ]
+                    },
+                    {
+                        "typeName": "Color Code",
+                        "type": "ColorCode",
+                        "bitOffset": 8,
+                        "bitSize": 4,
+                        "valueType": "span",
+                        "span": {
+                            "min": 0,
+                            "max": 15
+                        }
+                    },
+                    {
+                        "typeName": "Repeater Slot",
+                        "type": "RepeaterSlot",
+                        "bitOffset": 12,
+                        "bitSize": 2,
+                        "valueType": "iStrings",
+                        "strings": [
+                            "",
+                            "1",
+                            "2"
+                        ]
+                    },
+                    {
+                        "typeName": "Rx Only",
+                        "type": "RxOnly",
+                        "bitOffset": 14,
+                        "bitSize": 1,
+                        "valueType": "offOn"
+                    },
+                    {
+                        "typeName": "Allow Talkaround",
+                        "type": "AllowTalkaround",
+                        "bitOffset": 15,
+                        "bitSize": 1,
+                        "valueType": "offOn"
+                    },
+                    {
+                        "typeName": "Data Call Confirmed",
+                        "type": "DataCallConfirmed",
+                        "bitOffset": 16,
+                        "bitSize": 1,
+                        "valueType": "offOn"
+                    },
+                    {
+                        "typeName": "Private Call Confimed",
+                        "type": "PrivateCallConfirmed",
+                        "bitOffset": 17,
+                        "bitSize": 1,
+                        "valueType": "offOn"
+                    },
+                    {
+                        "typeName": "Privacy",
+                        "type": "Privacy",
+                        "bitOffset": 18,
+                        "bitSize": 2,
+                        "valueType": "iStrings",
+                        "strings": [
+                            "None",
+                            "Basic",
+                            "Enhanced"
+                        ]
+                    },
+                    {
+                        "typeName": "Privacy Number",
+                        "type": "PrivacyNumber",
+                        "bitOffset": 20,
+                        "bitSize": 4,
+                        "valueType": "privacyNumber",
+                        "span": {
+                            "min": 0,
+                            "max": 15
+                        }
+                    },
+                    {
+                        "typeName": "Display PTT ID",
+                        "type": "DisplayPTTID",
+                        "bitOffset": 24,
+                        "bitSize": 1,
+                        "valueType": "onOff"
+                    },
+                    {
+                        "typeName": "Compressed UDP Data Header",
+                        "type": "CompressedUdpDataHeader",
+                        "bitOffset": 25,
+                        "bitSize": 1,
+                        "valueType": "offOn"
+                    },
+                    {
+                        "typeName": "Emergency Alarm Ack",
+                        "type": "EmergencyAlarmAck",
+                        "bitOffset": 28,
+                        "bitSize": 1,
+                        "valueType": "offOn"
+                    },
+                    {
+                        "typeName": "Rx Ref Frequency",
+                        "type": "RxRefFrequency",
+                        "bitOffset": 30,
+                        "bitSize": 2,
+                        "valueType": "iStrings",
+                        "strings": [
+                            "Low",
+                            "Medium",
+                            "High"
+                        ]
+                    },
+                    {
+                        "typeName": "Admit Criteria",
+                        "type": "AdmitCriteria",
+                        "bitOffset": 32,
+                        "bitSize": 2,
+                        "valueType": "iStrings",
+                        "strings": [
+                            "Always",
+                            "Channel free",
+                            "CTCSS/DCS",
+                            "Color code"
+                        ]
+                    },
+                    {
+                        "typeName": "Power",
+                        "type": "Power",
+                        "bitOffset": 34,
+                        "bitSize": 1,
+                        "valueType": "iStrings",
+                        "strings": [
+                            "Low",
+                            "High"
+                        ]
+                    },
+                    {
+                        "typeName": "VOX",
+                        "type": "Vox",
+                        "bitOffset": 35,
+                        "bitSize": 1,
+                        "valueType": "offOn"
+                    },
+                    {
+                        "typeName": "QT Reverse",
+                        "type": "QtReverse",
+                        "bitOffset": 36,
+                        "bitSize": 1,
+                        "valueType": "iStrings",
+                        "strings": [
+                            "180",
+                            "120"
+                        ]
+                    },
+                    {
+                        "typeName": "Reverse Burst/Turn Off Code",
+                        "type": "ReverseBurst",
+                        "bitOffset": 37,
+                        "bitSize": 1,
+                        "valueType": "offOn"
+                    },
+                    {
+                        "typeName": "Tx Ref Frequency",
+                        "type": "TxRefFrequency",
+                        "bitOffset": 38,
+                        "bitSize": 2,
+                        "valueType": "iStrings",
+                        "strings": [
+                            "Low",
+                            "Medium",
+                            "High"
+                        ]
+                    },
+                    {
+                        "typeName": "Contact Name",
+                        "type": "ContactName",
+                        "bitOffset": 48,
+                        "bitSize": 16,
+                        "valueType": "listIndex",
+                        "listType": "DigitalContacts",
+                        "indexedStrings": [
+                            {
+                                "index": 0,
+                                "string": "None"
+                            }
+                        ]
+                    },
+                    {
+                        "typeName": "TOT (S)",
+                        "type": "Tot",
+                        "bitOffset": 66,
+                        "bitSize": 6,
+                        "valueType": "span",
+                        "span": {
+                            "min": 0,
+                            "max": 63,
+                            "scale": 15,
+                            "interval": 1,
+                            "minString": "Infinite"
+                        }
+                    },
+                    {
+                        "typeName": "TOT Rekey Delay (S)",
+                        "type": "TotRekeyDelay",
+                        "bitOffset": 72,
+                        "bitSize": 8,
+                        "valueType": "span",
+                        "span": {
+                            "min": 0,
+                            "max": 255
+                        }
+                    },
+                    {
+                        "typeName": "Scan List",
+                        "type": "ScanList",
+                        "bitOffset": 88,
+                        "bitSize": 8,
+                        "valueType": "listIndex",
+                        "listType": "ScanList",
+                        "indexedStrings": [
+                            {
+                                "index": 0,
+                                "string": "None"
+                            }
+                        ]
+                    },
+                    {
+                        "typeName": "Group List",
+                        "type": "GroupList",
+                        "bitOffset": 96,
+                        "bitSize": 8,
+                        "valueType": "listIndex",
+                        "listType": "GroupList",
+                        "indexedStrings": [
+                            {
+                                "index": 0,
+                                "string": "None"
+                            }
+                        ]
+                    },
+                    {
+                        "typeName": "Decode 1",
+                        "type": "Decode1",
+                        "bitOffset": 112,
+                        "bitSize": 1,
+                        "valueType": "offOn"
+                    },
+                    {
+                        "typeName": "Decode 2",
+                        "type": "Decode2",
+                        "bitOffset": 113,
+                        "bitSize": 1,
+                        "valueType": "offOn"
+                    },
+                    {
+                        "typeName": "Decode 3",
+                        "type": "Decode3",
+                        "bitOffset": 114,
+                        "bitSize": 1,
+                        "valueType": "offOn"
+                    },
+                    {
+                        "typeName": "Decode 4",
+                        "type": "Decode4",
+                        "bitOffset": 115,
+                        "bitSize": 1,
+                        "valueType": "offOn"
+                    },
+                    {
+                        "typeName": "Decode 5",
+                        "type": "Decode5",
+                        "bitOffset": 116,
+                        "bitSize": 1,
+                        "valueType": "offOn"
+                    },
+                    {
+                        "typeName": "Decode 6",
+                        "type": "Decode6",
+                        "bitOffset": 117,
+                        "bitSize": 1,
+                        "valueType": "offOn"
+                    },
+                    {
+                        "typeName": "Decode 7",
+                        "type": "Decode7",
+                        "bitOffset": 118,
+                        "bitSize": 1,
+                        "valueType": "offOn"
+                    },
+                    {
+                        "typeName": "Decode 8",
+                        "type": "Decode8",
+                        "bitOffset": 119,
+                        "bitSize": 1,
+                        "valueType": "offOn"
+                    },
+                    {
+                        "typeName": "Rx Frequency (MHz)",
+                        "type": "RxFrequency",
+                        "bitOffset": 128,
+                        "bitSize": 32,
+                        "valueType": "frequency"
+                    },
+                    {
+                        "typeName": "Tx Frequency (MHz)",
+                        "type": "TxFrequency",
+                        "bitOffset": 160,
+                        "bitSize": 32,
+                        "valueType": "frequency"
+                    },
+                    {
+                        "typeName": "CTCSS/DCS Decode",
+                        "type": "CtcssDecode",
+                        "bitOffset": 192,
+                        "bitSize": 16,
+                        "valueType": "ctcssDcs"
+                    },
+                    {
+                        "typeName": "CTCSS/DCS Encode",
+                        "type": "CtcssEncode",
+                        "bitOffset": 208,
+                        "bitSize": 16,
+                        "valueType": "ctcssDcs"
+                    },
+                    {
+                        "typeName": "Rx Signaling System",
+                        "type": "RxSignallingSystem",
+                        "bitOffset": 229,
+                        "bitSize": 3,
+                        "valueType": "iStrings",
+                        "strings": [
+                            "Off",
+                            "DTMF-1",
+                            "DTMF-2",
+                            "DTMF-3",
+                            "DTMF-4"
+                        ]
+                    },
+                    {
+                        "typeName": "Tx Signaling System",
+                        "type": "TxSignallingSystem",
+                        "bitOffset": 237,
+                        "bitSize": 3,
+                        "valueType": "iStrings",
+                        "strings": [
+                            "Off",
+                            "DTMF-1",
+                            "DTMF-2",
+                            "DTMF-3",
+                            "DTMF-4"
+                        ]
+                    },
+                    {
+                        "typeName": "Channel Name",
+                        "type": "ChannelName",
+                        "bitOffset": 256,
+                        "bitSize": 256,
+                        "valueType": "name"
+                    }
+                ]
+            }
+        ]
+    }
+]
+}

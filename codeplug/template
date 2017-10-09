@@ -1,0 +1,113 @@
+
+// Codeplug types
+const (
+{{- range $c, $i := $.CodeplugMap}}
+	Ct{{call $.Capitalize $c}} CodeplugType = "{{$c}}"
+{{- end}}
+)
+
+// Record types
+const (
+{{- range $k, $i := $.RecordMap}}
+	Rt{{$k}} RecordType = "{{$k}}"
+{{- end}}
+)
+
+// Field types
+const (
+{{- range $k, $i := $.FieldMap}}
+	Ft{{$k}} FieldType = "{{$k}}"
+{{- end}}
+)
+
+// The value types a field may contain
+const (
+{{- range $k, $i := $.ValueTypeMap}}
+	Vt{{call $.Capitalize $k}} ValueType = "{{$k}}"
+{{- end}}
+)
+
+// newValue returns a new value of the given ValueType
+func newValue(vt ValueType) value {
+	switch vt {
+	{{- range $k, $i := $.ValueTypeMap}}
+	case Vt{{call $.Capitalize $k}}:
+		return new({{$k}})
+	{{- end}}
+	}
+
+	return nil
+}
+
+// Codeplug types and their records, fields, with offsets, sizes, etc.
+var cpTypes = map[CodeplugType][]rInfo{
+{{- range $c := $.Codeplugs}}
+	Ct{{call $.Capitalize $c.Name}}: []rInfo{
+	{{- range $r := $c.Records}}
+		rInfo{
+			rType: Rt{{$r.Type}},
+			typeName: "{{$r.TypeName}}",
+			max: {{$r.Max}},
+			offset: {{$r.Offset}},
+			size: {{$r.Size}},
+		{{- if $r.DelDescs}}
+			delDescs: []delDesc{
+			{{- range $d := $r.DelDescs}}
+				delDesc{
+					offset: {{$d.Offset}},
+					size: {{$d.Size}},
+					value: {{$d.Value}},
+				},
+			{{- end}}
+			},
+		{{- end}}
+			fInfos: []fInfo{
+			{{- range $f := $r.Fields}}
+				fInfo{
+					fType: Ft{{$f.Type}},
+					typeName: "{{$f.TypeName}}",
+					max: {{$f.Max}},
+					bitOffset: {{$f.BitOffset}},
+					bitSize: {{$f.BitSize}},
+					valueType: Vt{{call $.Capitalize $f.ValueType}},
+				{{- if $f.Strings}}
+					strings: &[]string{
+					{{- range $s := $f.Strings}}
+						"{{$s}}",
+					{{- end}}
+					},
+				{{- end}}
+				{{- if $f.Span}}{{$s := $f.Span}}
+					span: &Span{
+						min: {{$s.Min}},
+						max: {{$s.Max}},
+					{{- if $s.Scale}}
+						scale: {{$s.Scale}},
+					{{- end}}
+					{{- if $s.Interval}}
+						interval: {{$s.Interval}},
+					{{- end}}
+					{{- if $s.MinString}}
+						minString: "{{$s.MinString}}",
+					{{- end}}
+					},
+				{{- end}}
+				{{- if $f.IndexedStrings}}
+					indexedStrings: &[]IndexedString{
+					{{- range $i := $f.IndexedStrings}}
+						IndexedString{ {{$i.Index}}, "{{$i.String}}"},
+					{{- end}}
+					},
+				{{- end}}
+				{{- if $f.ListType}}
+					listRecordType: Rt{{$f.ListType}},
+				{{- end}}
+				},
+			{{- end}}
+			},
+		},
+	{{- end}}
+	},
+{{- end}}
+}
+
