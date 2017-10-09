@@ -156,7 +156,7 @@ func (fnl *fieldNameList) initMemberModel(model *core.QStringListModel, r *codep
 			return false
 		}
 
-		id, _, _, err := fnl.parseMimeData(mimeType, data)
+		id, sfl, fieldNames, err := fnl.parseMimeData(mimeType, data)
 		if err != nil {
 			return false
 		}
@@ -165,6 +165,29 @@ func (fnl *fieldNameList) initMemberModel(model *core.QStringListModel, r *codep
 			return false
 		}
 
+		fields, err := fieldNamesToFields(r, fieldNames, fType)
+		if err != nil {
+			return false
+		}
+
+		var dRow int
+		if row != -1 {
+			dRow = row
+		} else if parent.IsValid() {
+			dRow = parent.Row()
+		} else {
+			dRow = model.RowCount(nil)
+		}
+		if action == core.Qt__MoveAction && sfl == fnl {
+			for i, f := range fields {
+				f := r.FindFieldByName(f.Type(), f.String())
+				sRow := f.Index()
+				if sRow+len(fields) != dRow+i {
+					return true
+				}
+			}
+			return false
+		}
 		return true
 	})
 
@@ -193,15 +216,10 @@ func (fnl *fieldNameList) initMemberModel(model *core.QStringListModel, r *codep
 			return false
 		}
 
-		fields := make([]*codeplug.Field, len(fieldNames))
-		for i, name := range fieldNames {
-			f, err := r.NewFieldWithValue(fType, 0, name)
-			if err != nil {
-				WarningPopup("Drop Error", err.Error())
-				return false
-			}
-
-			fields[i] = f
+		fields, err := fieldNamesToFields(r, fieldNames, fType)
+		if err != nil {
+			WarningPopup("Field Name Error", err.Error())
+			return false
 		}
 
 		sParent := core.NewQModelIndex()
@@ -329,17 +347,12 @@ func (fnl *fieldNameList) initAvailableModel(model *core.QStringListModel, r *co
 			return false
 		}
 
-		fm := sfl.fieldMembers
-		r := fm.record
+		r := sfl.fieldMembers.record
 
-		fields := make([]*codeplug.Field, len(fieldNames))
-		for i, name := range fieldNames {
-			f, err := r.NewFieldWithValue(fType, 0, name)
-			if err != nil {
-				WarningPopup("Drop Error", err.Error())
-				return false
-			}
-			fields[i] = r.FindFieldByName(f.Type(), f.String())
+		fields, err := fieldNamesToFields(r, fieldNames, fType)
+		if err != nil {
+			WarningPopup("Add Member", err.Error())
+			return false
 		}
 
 		model := sfl.qListView.Model()
@@ -392,16 +405,31 @@ func (fnl *fieldNameList) parseMimeData(mimeType string, data *core.QMimeData) (
 	}
 	lists := []*fieldNameList{fnl, otherList}
 
+	fnl = nil
 	for _, rfnl = range lists {
 		for _, str := range rfnl.fieldNames {
 			if str == fieldNames[0] {
-				return id, rfnl, fieldNames, err
+				return id, rfnl, fieldNames, nil
 			}
 		}
 	}
 	log.Fatal("field name not found")
 
 	return id, rfnl, fieldNames, err
+}
+
+func fieldNamesToFields(r *codeplug.Record, fieldNames []string, fType codeplug.FieldType) ([]*codeplug.Field, error) {
+	fields := make([]*codeplug.Field, len(fieldNames))
+	for i, name := range fieldNames {
+		f, err := r.NewFieldWithValue(fType, 0, name)
+		if err != nil {
+			err = fmt.Errorf("fieldNameToField:", err.Error())
+			return nil, err
+		}
+		fields[i] = r.FindFieldByName(fType, f.String())
+	}
+
+	return fields, nil
 }
 
 func (fnl *fieldNameList) initFieldNameModel(model *core.QStringListModel, r *codeplug.Record, fType codeplug.FieldType) {
@@ -567,10 +595,9 @@ func (vBox *VBox) AddFieldMembers(r *codeplug.Record, sortAvailable *bool, nameT
 			return
 		}
 
-		fields := make([]*codeplug.Field, len(names))
-		for i, name := range names {
-			f, _ := r.NewFieldWithValue(memberType, 0, name)
-			fields[i] = f
+		fields, err := fieldNamesToFields(r, names, memberType)
+		if err != nil {
+			WarningPopup("Add Member", err.Error())
 		}
 
 		model := membersList.model
@@ -599,10 +626,9 @@ func (vBox *VBox) AddFieldMembers(r *codeplug.Record, sortAvailable *bool, nameT
 			return
 		}
 
-		fields := make([]*codeplug.Field, len(names))
-		for i, name := range names {
-			f, _ := r.NewFieldWithValue(memberType, 0, name)
-			fields[i] = r.FindFieldByName(f.Type(), f.String())
+		fields, err := fieldNamesToFields(r, names, memberType)
+		if err != nil {
+			WarningPopup("Delete Member", err.Error())
 		}
 
 		model := membersList.model
