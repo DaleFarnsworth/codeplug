@@ -145,12 +145,13 @@ func intToBytes(i int, len int) []byte {
 // reverse4Bytes returns an integer containing the low four bytes of
 // the input in reverse order.
 func reverse4Bytes(in int) int {
-	out := (in & 0x000000ff) << 24
-	out |= (in & 0x0000ff00) << 8
-	out |= (in & 0x00ff0000) >> 8
-	out |= (in & 0xff000000) >> 24
+	uin := uint(in)
+	out := (uin & 0x000000ff) << 24
+	out |= (uin & 0x0000ff00) << 8
+	out |= (uin & 0x00ff0000) >> 8
+	out |= (uin & 0xff000000) >> 24
 
-	return out
+	return int(out)
 }
 
 // bcdToBinary converts an BCD integer (in standard order) to a binary integer.
