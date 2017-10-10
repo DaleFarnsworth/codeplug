@@ -29,6 +29,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math"
 	"sort"
 	"strings"
 
@@ -165,9 +166,30 @@ func (fnl *fieldNameList) initMemberModel(model *core.QStringListModel, r *codep
 			return false
 		}
 
+		if action != core.Qt__MoveAction {
+			return true
+		}
+
+		if sfl != fnl {
+			return true
+		}
+
 		fields, err := fieldNamesToFields(r, fieldNames, fType)
 		if err != nil {
 			return false
+		}
+
+		firstSRow := math.MaxInt32
+		lastSRow := -1
+		for _, f := range fields {
+			f := r.FindFieldByName(f.Type(), f.String())
+			sRow := f.Index()
+			if sRow < firstSRow {
+				firstSRow = sRow
+			}
+			if sRow > lastSRow {
+				lastSRow = sRow
+			}
 		}
 
 		var dRow int
@@ -178,16 +200,11 @@ func (fnl *fieldNameList) initMemberModel(model *core.QStringListModel, r *codep
 		} else {
 			dRow = model.RowCount(nil)
 		}
-		if action == core.Qt__MoveAction && sfl == fnl {
-			for i, f := range fields {
-				f := r.FindFieldByName(f.Type(), f.String())
-				sRow := f.Index()
-				if sRow+len(fields) != dRow+i {
-					return true
-				}
-			}
+
+		if dRow >= firstSRow && dRow <= lastSRow+1 {
 			return false
 		}
+
 		return true
 	})
 
