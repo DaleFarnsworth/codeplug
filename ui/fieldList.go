@@ -444,6 +444,9 @@ func fieldNamesToFields(r *codeplug.Record, fieldNames []string, fType codeplug.
 			return nil, err
 		}
 		fields[i] = r.FindFieldByName(fType, f.String())
+		if fields[i] == nil {
+			fields[i] = f
+		}
 	}
 
 	return fields, nil
