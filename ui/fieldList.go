@@ -430,8 +430,8 @@ func (fnl *fieldNameList) parseMimeData(mimeType string, data *core.QMimeData) (
 			}
 		}
 	}
-	log.Fatal("field name not found")
 
+	err = fmt.Errorf("field name not found")
 	return id, rfnl, fieldNames, err
 }
 
