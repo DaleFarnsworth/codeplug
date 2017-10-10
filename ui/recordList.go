@@ -28,6 +28,7 @@ import (
 	"bytes"
 	"fmt"
 	"log"
+	"math"
 	"strings"
 
 	"github.com/dalefarnsworth/codeplug/codeplug"
@@ -301,6 +302,30 @@ func (w *Window) initRecordModel() {
 			return false
 		}
 
+		records, id, err := w.dataRecords(data)
+		if err != nil {
+			WarningPopup("Drop Error", err.Error())
+			return false
+		}
+
+		cp := w.mainWindow.codeplug
+		if id != cp.ID() {
+			return true
+		}
+
+		firstSRow := math.MaxInt32
+		lastSRow := -1
+		for _, r := range records {
+			r := cp.FindRecordByName(r.Type(), r.Name())
+			sRow := r.Index()
+			if sRow < firstSRow {
+				firstSRow = sRow
+			}
+			if sRow > lastSRow {
+				lastSRow = sRow
+			}
+		}
+
 		var dRow int
 		if row != -1 {
 			dRow = row
@@ -310,28 +335,10 @@ func (w *Window) initRecordModel() {
 			dRow = model.RowCount(nil)
 		}
 
-		records, id, err := w.dataRecords(data)
-		if err != nil {
-			WarningPopup("Drop Error", err.Error())
+		if dRow >= firstSRow && dRow <= lastSRow+1 {
 			return false
 		}
 
-		cp := w.mainWindow.codeplug
-		if action == core.Qt__MoveAction && id == cp.ID() {
-			previousSRow := -1
-			for i, r := range records {
-				r := cp.FindRecordByName(r.Type(), r.Name())
-				sRow := r.Index()
-				if sRow+len(records) != dRow+i {
-					return true
-				}
-				if previousSRow >= 0 && sRow != previousSRow+1 {
-					return true
-				}
-				previousSRow = sRow
-			}
-			return false
-		}
 		return true
 	})
 
