@@ -710,11 +710,11 @@ func (parent *Form) AddRow(label string, w *Widget) {
 
 func (parent *Form) AddFieldRows(r *codeplug.Record, fTypes ...codeplug.FieldType) {
 	for _, fType := range fTypes {
-		parent.AddFieldRow(r, fType)
+		parent.addFieldRow(r, fType)
 	}
 }
 
-func (parent *Form) AddFieldRow(r *codeplug.Record, fType codeplug.FieldType) {
+func (parent *Form) addFieldRow(r *codeplug.Record, fType codeplug.FieldType) {
 	f := r.Field(fType)
 	w := newFieldWidget[f.ValueType()](f)
 	w.label = widgets.NewQLabel2(f.TypeName(), nil, 0)
