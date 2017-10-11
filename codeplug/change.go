@@ -215,7 +215,8 @@ func (f *Field) Change(previousValue string) *Change {
 
 	change := cp.currentChange()
 	if change != nil && change.cType == FieldChange &&
-		change.Field() == f && f.String() != change.previousValue() {
+		change.Field() == f && f.String() != change.previousValue() &&
+		change.previousValue() != invalidValueString {
 
 		return change
 	}

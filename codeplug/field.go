@@ -34,6 +34,8 @@ import (
 	"unicode/utf8"
 )
 
+const invalidValueString = "*INVALID*"
+
 // A Field represents a field within a Record.
 type Field struct {
 	*fDesc
@@ -121,14 +123,25 @@ func (span *Span) MinString() string {
 
 // String returns the fields value as a string.
 func (f Field) String() string {
+	if _, invalid := f.value.(invalidValue); invalid {
+		return invalidValueString
+	}
 	return f.value.String(&f)
 }
 
 // SetString set the strings value from the given string.
 func (f *Field) SetString(s string) error {
+	if s == invalidValueString {
+		f.value = invalidValue{value: f.value}
+		return nil
+	}
 	err := f.value.SetString(f, s)
 	if err != nil {
 		return err
+	}
+
+	if invalidValue, invalid := f.value.(invalidValue); invalid {
+		f.value = invalidValue.value
 	}
 
 	if f.fType == f.record.nameFieldType {
@@ -266,7 +279,16 @@ func (f *Field) fullTypeName() string {
 
 // valid returns nil if the field's value is valid.
 func (f *Field) valid() error {
-	return f.value.valid(f)
+	err := f.value.valid(f)
+	if err != nil {
+		if _, invalid := f.value.(invalidValue); !invalid {
+			f.value = invalidValue{value: f.value}
+		}
+	}
+	if !f.IsEnabled() {
+		return nil
+	}
+	return err
 }
 
 // load sets the field's value from the field's part of recordBytes.
@@ -274,8 +296,15 @@ func (f *Field) load(recordBytes []byte) {
 	f.value.load(f, recordBytes)
 }
 
-// store extracts the field's value into the field's part of recordBytes.
+// store inserts the field's value into the field's part of recordBytes.
 func (f *Field) store(recordBytes []byte) {
+	if !f.IsEnabled() {
+		if _, invalid := f.value.(invalidValue); invalid {
+			// Leave invalid value in the codeplug as we loaded it.
+			return
+		}
+	}
+
 	f.value.store(f, recordBytes)
 }
 
@@ -410,7 +439,7 @@ func (fd *fDesc) bytes(fIndex int, recordBytes []byte) []byte {
 	return bytes
 }
 
-// storeBytes stores the field's bytes into recordBytes.
+// storeBytes inserts bytes value into the field's bits in recordBytes.
 func (fd *fDesc) storeBytes(bytes []byte, fIndex int, recordBytes []byte) {
 	size := fd.size()
 	if size != len(bytes) {
@@ -1322,6 +1351,10 @@ type deferredValue struct {
 	value
 	str string
 	pos position
+}
+
+type invalidValue struct {
+	value
 }
 
 // load sets the listIndex's value from its bits in recordBytes.
