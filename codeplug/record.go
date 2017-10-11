@@ -539,8 +539,8 @@ func updateDeferredFields(records []*Record) (error, *Field) {
 	for _, r := range records {
 		for _, fType := range r.FieldTypes() {
 			for _, f := range r.Fields(fType) {
-				dValue, ok := f.value.(deferredValue)
-				if ok {
+				dValue, deferred := f.value.(deferredValue)
+				if deferred {
 					f.value = dValue.value
 					err := f.SetString(dValue.str)
 					if err != nil {
