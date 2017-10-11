@@ -68,6 +68,9 @@ type fInfo struct {
 	span           *Span
 	strings        *[]string
 	indexedStrings *[]IndexedString
+	enablingValue  string
+	enabler        FieldType
+	disabler       FieldType
 	listRecordType RecordType
 	rInfo          *rInfo
 }
@@ -302,14 +305,63 @@ func (f *Field) ListRecordType() RecordType {
 }
 
 // sibling returns the field's sibling field of the given type.
-func (f *Field) Sibling(fType FieldType) *Field {
-	return (*f.record.fDesc)[fType].fields[0]
+func (f *Field) sibling(fType FieldType) *Field {
+	fields := (*f.record.fDesc)[fType].fields
+	if len(fields) == 0 {
+		return nil
+	}
+	return fields[0]
 }
 
 // Copy returns a deep copy of the field.
 func (f *Field) Copy() *Field {
 	f, _ = f.record.NewFieldWithValue(f.fType, f.fIndex, f.String())
 	return f
+}
+
+func (f *Field) IsEnabled() bool {
+	enablingField := f.enablingField()
+	if enablingField == nil {
+		return true
+	}
+
+	if !enablingField.IsEnabled() {
+		return false
+	}
+
+	if f.enabler != "" {
+		return enablingField.String() == enablingField.enablingValue
+	}
+
+	if f.disabler != "" {
+		return enablingField.String() != enablingField.enablingValue
+	}
+
+	return true
+}
+
+func (f *Field) enablingField() *Field {
+	siblingType := f.EnablingFieldType()
+
+	if siblingType == "" {
+		return nil
+	}
+
+	return f.sibling(siblingType)
+}
+
+func (f *Field) EnablingFieldType() FieldType {
+	var siblingType FieldType
+
+	if f.enabler != "" {
+		siblingType = f.enabler
+	}
+
+	if f.disabler != "" {
+		siblingType = f.disabler
+	}
+
+	return siblingType
 }
 
 // fieldDeleted returns true if the field at fIndex is deleted.
@@ -1065,7 +1117,7 @@ type privacyNumber struct {
 
 // String returns the privacyNumber's value as a string.
 func (v *privacyNumber) String(f *Field) string {
-	ss := f.Sibling(FtPrivacy).String()
+	ss := f.sibling(FtPrivacy).String()
 
 	value := int(v.span)
 	if ss == "Enhanced" && value >= 8 {
@@ -1080,7 +1132,7 @@ func (v *privacyNumber) String(f *Field) string {
 
 // SetString sets the privacyNumber's value from a string.
 func (v *privacyNumber) SetString(f *Field, s string) error {
-	ss := f.Sibling(FtPrivacy).String()
+	ss := f.sibling(FtPrivacy).String()
 
 	if ss == "Enhanced" && int(v.span) >= 8 {
 		return fmt.Errorf("must be less than 8 for enhanced privacy")
@@ -1091,7 +1143,7 @@ func (v *privacyNumber) SetString(f *Field, s string) error {
 
 // valid returns nil if the privacyNumber's value is valid.
 func (v *privacyNumber) valid(f *Field) error {
-	sibling := f.Sibling(FtPrivacy)
+	sibling := f.sibling(FtPrivacy)
 	if sibling == nil {
 		deferredValidFields = append(deferredValidFields, f)
 		return nil

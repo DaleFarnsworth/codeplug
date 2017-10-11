@@ -102,6 +102,15 @@ var cpTypes = map[CodeplugType][]rInfo{
 				{{- if $f.ListType}}
 					listRecordType: Rt{{$f.ListType}},
 				{{- end}}
+				{{- if $f.EnablingValue}}
+					enablingValue: "{{$f.EnablingValue}}",
+				{{- end}}
+				{{- if $f.Enabler}}
+					enabler: Ft{{$f.Enabler}},
+				{{- end}}
+				{{- if $f.Disabler}}
+					disabler: Ft{{$f.Disabler}},
+				{{- end}}
 				},
 			{{- end}}
 			},

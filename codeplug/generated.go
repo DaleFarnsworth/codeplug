@@ -285,12 +285,13 @@ var cpTypes = map[CodeplugType][]rInfo{
 					},
 				},
 				fInfo{
-					fType:     FtPwAndLockEnable,
-					typeName:  "Password And Lock Enable",
-					max:       1,
-					bitOffset: 522,
-					bitSize:   1,
-					valueType: VtOnOff,
+					fType:         FtPwAndLockEnable,
+					typeName:      "Password And Lock Enable",
+					max:           1,
+					bitOffset:     522,
+					bitSize:       1,
+					valueType:     VtOnOff,
+					enablingValue: "On",
 				},
 				fInfo{
 					fType:     FtChFreeIndicationTone,
@@ -510,6 +511,7 @@ var cpTypes = map[CodeplugType][]rInfo{
 					bitOffset: 704,
 					bitSize:   32,
 					valueType: VtRadioPassword,
+					enabler:   FtPwAndLockEnable,
 				},
 				fInfo{
 					fType:     FtRadioProgPw,
@@ -729,6 +731,7 @@ var cpTypes = map[CodeplugType][]rInfo{
 						IndexedString{65535, "None"},
 					},
 					listRecordType: RtChannelInformation,
+					enablingValue:  "None",
 				},
 				fInfo{
 					fType:     FtPriorityChannel2,
@@ -742,6 +745,7 @@ var cpTypes = map[CodeplugType][]rInfo{
 						IndexedString{65535, "None"},
 					},
 					listRecordType: RtChannelInformation,
+					disabler:       FtPriorityChannel1,
 				},
 				fInfo{
 					fType:     FtTxDesignatedChannel,
@@ -859,6 +863,7 @@ var cpTypes = map[CodeplugType][]rInfo{
 						"Analog",
 						"Digital",
 					},
+					enablingValue: "Digital",
 				},
 				fInfo{
 					fType:     FtColorCode,
@@ -871,6 +876,7 @@ var cpTypes = map[CodeplugType][]rInfo{
 						min: 0,
 						max: 15,
 					},
+					enabler: FtChannelMode,
 				},
 				fInfo{
 					fType:     FtRepeaterSlot,
@@ -884,6 +890,7 @@ var cpTypes = map[CodeplugType][]rInfo{
 						"1",
 						"2",
 					},
+					enabler: FtChannelMode,
 				},
 				fInfo{
 					fType:     FtRxOnly,
@@ -908,6 +915,7 @@ var cpTypes = map[CodeplugType][]rInfo{
 					bitOffset: 16,
 					bitSize:   1,
 					valueType: VtOffOn,
+					enabler:   FtChannelMode,
 				},
 				fInfo{
 					fType:     FtPrivateCallConfirmed,
@@ -916,6 +924,7 @@ var cpTypes = map[CodeplugType][]rInfo{
 					bitOffset: 17,
 					bitSize:   1,
 					valueType: VtOffOn,
+					enabler:   FtChannelMode,
 				},
 				fInfo{
 					fType:     FtPrivacy,
@@ -929,6 +938,8 @@ var cpTypes = map[CodeplugType][]rInfo{
 						"Basic",
 						"Enhanced",
 					},
+					enablingValue: "None",
+					enabler:       FtChannelMode,
 				},
 				fInfo{
 					fType:     FtPrivacyNumber,
@@ -941,6 +952,7 @@ var cpTypes = map[CodeplugType][]rInfo{
 						min: 0,
 						max: 15,
 					},
+					disabler: FtPrivacy,
 				},
 				fInfo{
 					fType:     FtDisplayPTTID,
@@ -949,6 +961,7 @@ var cpTypes = map[CodeplugType][]rInfo{
 					bitOffset: 24,
 					bitSize:   1,
 					valueType: VtOnOff,
+					disabler:  FtChannelMode,
 				},
 				fInfo{
 					fType:     FtCompressedUdpDataHeader,
@@ -957,6 +970,7 @@ var cpTypes = map[CodeplugType][]rInfo{
 					bitOffset: 25,
 					bitSize:   1,
 					valueType: VtOffOn,
+					enabler:   FtChannelMode,
 				},
 				fInfo{
 					fType:     FtEmergencyAlarmAck,
@@ -965,6 +979,7 @@ var cpTypes = map[CodeplugType][]rInfo{
 					bitOffset: 28,
 					bitSize:   1,
 					valueType: VtOffOn,
+					enabler:   FtChannelMode,
 				},
 				fInfo{
 					fType:     FtRxRefFrequency,
@@ -1024,6 +1039,7 @@ var cpTypes = map[CodeplugType][]rInfo{
 						"180",
 						"120",
 					},
+					disabler: FtCtcssEncode,
 				},
 				fInfo{
 					fType:     FtReverseBurst,
@@ -1032,6 +1048,7 @@ var cpTypes = map[CodeplugType][]rInfo{
 					bitOffset: 37,
 					bitSize:   1,
 					valueType: VtOffOn,
+					disabler:  FtCtcssEncode,
 				},
 				fInfo{
 					fType:     FtTxRefFrequency,
@@ -1057,6 +1074,7 @@ var cpTypes = map[CodeplugType][]rInfo{
 						IndexedString{0, "None"},
 					},
 					listRecordType: RtDigitalContacts,
+					enabler:        FtChannelMode,
 				},
 				fInfo{
 					fType:     FtTot,
@@ -1108,6 +1126,7 @@ var cpTypes = map[CodeplugType][]rInfo{
 						IndexedString{0, "None"},
 					},
 					listRecordType: RtGroupList,
+					enabler:        FtChannelMode,
 				},
 				fInfo{
 					fType:     FtDecode1,
@@ -1116,6 +1135,7 @@ var cpTypes = map[CodeplugType][]rInfo{
 					bitOffset: 112,
 					bitSize:   1,
 					valueType: VtOffOn,
+					disabler:  FtRxSignallingSystem,
 				},
 				fInfo{
 					fType:     FtDecode2,
@@ -1124,6 +1144,7 @@ var cpTypes = map[CodeplugType][]rInfo{
 					bitOffset: 113,
 					bitSize:   1,
 					valueType: VtOffOn,
+					disabler:  FtRxSignallingSystem,
 				},
 				fInfo{
 					fType:     FtDecode3,
@@ -1132,6 +1153,7 @@ var cpTypes = map[CodeplugType][]rInfo{
 					bitOffset: 114,
 					bitSize:   1,
 					valueType: VtOffOn,
+					disabler:  FtRxSignallingSystem,
 				},
 				fInfo{
 					fType:     FtDecode4,
@@ -1140,6 +1162,7 @@ var cpTypes = map[CodeplugType][]rInfo{
 					bitOffset: 115,
 					bitSize:   1,
 					valueType: VtOffOn,
+					disabler:  FtRxSignallingSystem,
 				},
 				fInfo{
 					fType:     FtDecode5,
@@ -1148,6 +1171,7 @@ var cpTypes = map[CodeplugType][]rInfo{
 					bitOffset: 116,
 					bitSize:   1,
 					valueType: VtOffOn,
+					disabler:  FtRxSignallingSystem,
 				},
 				fInfo{
 					fType:     FtDecode6,
@@ -1156,6 +1180,7 @@ var cpTypes = map[CodeplugType][]rInfo{
 					bitOffset: 117,
 					bitSize:   1,
 					valueType: VtOffOn,
+					disabler:  FtRxSignallingSystem,
 				},
 				fInfo{
 					fType:     FtDecode7,
@@ -1164,6 +1189,7 @@ var cpTypes = map[CodeplugType][]rInfo{
 					bitOffset: 118,
 					bitSize:   1,
 					valueType: VtOffOn,
+					disabler:  FtRxSignallingSystem,
 				},
 				fInfo{
 					fType:     FtDecode8,
@@ -1172,6 +1198,7 @@ var cpTypes = map[CodeplugType][]rInfo{
 					bitOffset: 119,
 					bitSize:   1,
 					valueType: VtOffOn,
+					disabler:  FtRxSignallingSystem,
 				},
 				fInfo{
 					fType:     FtRxFrequency,
@@ -1196,14 +1223,17 @@ var cpTypes = map[CodeplugType][]rInfo{
 					bitOffset: 192,
 					bitSize:   16,
 					valueType: VtCtcssDcs,
+					disabler:  FtChannelMode,
 				},
 				fInfo{
-					fType:     FtCtcssEncode,
-					typeName:  "CTCSS/DCS Encode",
-					max:       1,
-					bitOffset: 208,
-					bitSize:   16,
-					valueType: VtCtcssDcs,
+					fType:         FtCtcssEncode,
+					typeName:      "CTCSS/DCS Encode",
+					max:           1,
+					bitOffset:     208,
+					bitSize:       16,
+					valueType:     VtCtcssDcs,
+					enablingValue: "None",
+					disabler:      FtChannelMode,
 				},
 				fInfo{
 					fType:     FtRxSignallingSystem,
@@ -1219,6 +1249,8 @@ var cpTypes = map[CodeplugType][]rInfo{
 						"DTMF-3",
 						"DTMF-4",
 					},
+					enablingValue: "Off",
+					disabler:      FtChannelMode,
 				},
 				fInfo{
 					fType:     FtTxSignallingSystem,
@@ -1234,6 +1266,7 @@ var cpTypes = map[CodeplugType][]rInfo{
 						"DTMF-3",
 						"DTMF-4",
 					},
+					disabler: FtChannelMode,
 				},
 				fInfo{
 					fType:     FtChannelName,

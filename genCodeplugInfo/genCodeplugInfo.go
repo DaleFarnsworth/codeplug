@@ -75,7 +75,11 @@ type Field struct {
 	Strings        *Strings        `json:"strings"`
 	Span           *Span           `json:"span"`
 	IndexedStrings *IndexedStrings `json:"indexedStrings"`
-	ListType       *string         `json:"listType"`
+	Enabling       *Enabling       `json:"enabling"`
+	EnablingValue  string
+	Enabler        string
+	Disabler       string
+	ListType       *string `json:"listType"`
 }
 
 type Strings []string
@@ -93,6 +97,12 @@ type Span struct {
 	Scale     int    `json:"scale"`
 	Interval  int    `json:"interval"`
 	MinString string `json:"minString"`
+}
+
+type Enabling struct {
+	Value    string   `json:"value"`
+	Enables  []string `json:"enables"`
+	Disables []string `json:"disables"`
 }
 
 var codeplugs Codeplugs
@@ -156,6 +166,25 @@ func sortAndEnumTypes(m map[string]int) map[string]int {
 	return m
 }
 
+func doEnables(r *Record, f *Field) {
+	enabling := f.Enabling
+	f.EnablingValue = enabling.Value
+	for _, fType := range enabling.Enables {
+		for _, f2 := range r.Fields {
+			if f2.Type == fType {
+				f2.Enabler = f.Type
+			}
+		}
+	}
+	for _, fType := range enabling.Disables {
+		for _, f2 := range r.Fields {
+			if f2.Type == fType {
+				f2.Disabler = f.Type
+			}
+		}
+	}
+}
+
 func readCodeplugJson(filename string) {
 	bytes, err := ioutil.ReadFile(filename)
 	if err != nil {
@@ -181,6 +210,9 @@ func readCodeplugJson(filename string) {
 					if span.MinString != "" {
 						span.Min = 0
 					}
+				}
+				if f.Enabling != nil {
+					doEnables(r, f)
 				}
 			}
 		}

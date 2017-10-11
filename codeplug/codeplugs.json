@@ -97,7 +97,13 @@
                         "type": "PwAndLockEnable",
                         "bitOffset": 522,
                         "bitSize": 1,
-                        "valueType": "onOff"
+                        "valueType": "onOff",
+			"enabling": {
+			    "value": "On",
+			    "enables": [
+				"PowerOnPassword"
+			    ]
+			}
                     },
                     {
                         "typeName": "Channel Free Indication Tone",
@@ -528,7 +534,13 @@
                                 "index": 65535,
                                 "string": "None"
                             }
-                        ]
+                        ],
+			"enabling": {
+			    "value": "None",
+			    "disables": [
+				"PriorityChannel2"
+			    ]
+			}
                     },
                     {
                         "typeName": "Priority Channel 2",
@@ -661,7 +673,28 @@
                             "",
                             "Analog",
                             "Digital"
-                        ]
+                        ],
+			"enabling": {
+			    "value": "Digital",
+			    "enables": [
+				"PrivateCallConfirmed",
+				"EmergencyAlarmAck",
+				"DataCallConfirmed",
+				"CompressedUdpDataHeader",
+				"ContactName",
+				"GroupList",
+				"ColorCode",
+				"RepeaterSlot",
+				"Privacy"
+			    ],
+			    "disables": [
+				"CtcssDecode",
+				"RxSignallingSystem",
+				"DisplayPTTID",
+				"CtcssEncode",
+				"TxSignallingSystem"
+			    ]
+			}
                     },
                     {
                         "typeName": "Color Code",
@@ -724,7 +757,13 @@
                             "None",
                             "Basic",
                             "Enhanced"
-                        ]
+                        ],
+			"enabling": {
+			    "value": "None",
+			    "disables": [
+				"PrivacyNumber"
+			    ]
+			}
                     },
                     {
                         "typeName": "Privacy Number",
@@ -980,7 +1019,14 @@
                         "type": "CtcssEncode",
                         "bitOffset": 208,
                         "bitSize": 16,
-                        "valueType": "ctcssDcs"
+                        "valueType": "ctcssDcs",
+			"enabling": {
+			    "value": "None",
+			    "disables": [
+				"ReverseBurst",
+				"QtReverse"
+			    ]
+			}
                     },
                     {
                         "typeName": "Rx Signaling System",
@@ -994,7 +1040,20 @@
                             "DTMF-2",
                             "DTMF-3",
                             "DTMF-4"
-                        ]
+                        ],
+			"enabling": {
+			    "value": "Off",
+			    "disables": [
+				"Decode1",
+				"Decode2",
+				"Decode3",
+				"Decode4",
+				"Decode5",
+				"Decode6",
+				"Decode7",
+				"Decode8"
+			    ]
+			}
                     },
                     {
                         "typeName": "Tx Signaling System",

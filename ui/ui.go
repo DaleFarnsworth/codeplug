@@ -710,23 +710,11 @@ func (parent *Form) AddRow(label string, w *Widget) {
 
 func (parent *Form) AddFieldRows(r *codeplug.Record, fTypes ...codeplug.FieldType) {
 	for _, fType := range fTypes {
-		parent.AddConditionalFieldRow(r, "", "", true, fType)
+		parent.AddFieldRow(r, fType)
 	}
 }
 
-func (parent *Form) AddEnabledFieldRows(r *codeplug.Record, siblingType codeplug.FieldType, str string, fTypes ...codeplug.FieldType) {
-	for _, fType := range fTypes {
-		parent.AddConditionalFieldRow(r, siblingType, str, true, fType)
-	}
-}
-
-func (parent *Form) AddDisabledFieldRows(r *codeplug.Record, siblingType codeplug.FieldType, str string, fTypes ...codeplug.FieldType) {
-	for _, fType := range fTypes {
-		parent.AddConditionalFieldRow(r, siblingType, str, false, fType)
-	}
-}
-
-func (parent *Form) AddConditionalFieldRow(r *codeplug.Record, siblingType codeplug.FieldType, str string, enable bool, fType codeplug.FieldType) {
+func (parent *Form) AddFieldRow(r *codeplug.Record, fType codeplug.FieldType) {
 	f := r.Field(fType)
 	w := newFieldWidget[f.ValueType()](f)
 	w.label = widgets.NewQLabel2(f.TypeName(), nil, 0)
@@ -734,6 +722,8 @@ func (parent *Form) AddConditionalFieldRow(r *codeplug.Record, siblingType codep
 
 	widgets := parent.window.widgets
 	widgets[fType] = w
+
+	enablingFieldType := f.EnablingFieldType()
 
 	w.receive = func(sender *Widget) {
 		if sender.field.Record().Type() != w.field.Record().Type() {
@@ -746,6 +736,9 @@ func (parent *Form) AddConditionalFieldRow(r *codeplug.Record, siblingType codep
 			log.Fatal("sender field index", sender.field.Index(), "receiver field index", w.field.Index())
 		}
 		switch sender.field.Type() {
+		case "":
+			log.Fatal("receive(): invalid field type")
+
 		case fType:
 			w.update()
 			subs := parent.window.subscriptions[fType]
@@ -753,30 +746,24 @@ func (parent *Form) AddConditionalFieldRow(r *codeplug.Record, siblingType codep
 				widgets[sub].receive(w)
 			}
 
-		case siblingType:
-			enabled := false
-			if sender.qWidget.QWidget_PTR().IsEnabled() {
-				enabled = sender.field.String() == str
-				if !enable {
-					enabled = !enabled
-				}
-			}
+		case enablingFieldType:
+			enabled := f.IsEnabled()
 			qWidget := w.qWidget.QWidget_PTR()
 			if qWidget.IsEnabled() != enabled {
 				qWidget.SetEnabled(enabled)
 				w.label.SetEnabled(enabled)
 				w.receive(w)
 			}
+
 		default:
 			log.Fatal("receive(): unexpected field type")
 		}
 	}
 
-	if str == "" {
-		return
+	if enablingFieldType != "" {
+		parent.subscribe(enablingFieldType, w.field.Type())
 	}
 
-	parent.subscribe(siblingType, w.field.Type())
 }
 
 type Widget struct {
