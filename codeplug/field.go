@@ -67,6 +67,7 @@ type fInfo struct {
 	bitOffset      int
 	bitSize        int
 	valueType      ValueType
+	defaultValue   string
 	span           *Span
 	strings        *[]string
 	indexedStrings *[]IndexedString
@@ -257,10 +258,10 @@ func (f *Field) SetIndex(index int) {
 	f.fIndex = index
 }
 
-// fullTypeName returns a string containing the field's record's type name
+// FullTypeName returns a string containing the field's record's type name
 // and index as well as the field's type name and index. The index is omitted
 // if the MaxRecords or MaxFields is 1.
-func (f *Field) fullTypeName() string {
+func (f *Field) FullTypeName() string {
 	r := f.record
 	s := r.typeName
 
@@ -289,6 +290,18 @@ func (f *Field) valid() error {
 		return nil
 	}
 	return err
+}
+
+// IsValid returns false if the field has previously been determined
+// to be invalid. The field can only be invalid if the value read from
+// the codeplug file was invalid.
+func (f *Field) IsValid() bool {
+	_, invalid := f.value.(invalidValue)
+	return !invalid
+}
+
+func (f *Field) DefaultValue() string {
+	return f.defaultValue
 }
 
 // load sets the field's value from the field's part of recordBytes.

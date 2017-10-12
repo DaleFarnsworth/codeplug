@@ -70,6 +70,9 @@ var cpTypes = map[CodeplugType][]rInfo{
 					bitOffset: {{$f.BitOffset}},
 					bitSize: {{$f.BitSize}},
 					valueType: Vt{{call $.Capitalize $f.ValueType}},
+				{{- if $f.DefaultValue}}
+					defaultValue: "{{$f.DefaultValue}}",
+				{{- end}}
 				{{- if $f.Strings}}
 					strings: &[]string{
 					{{- range $s := $f.Strings}}

@@ -72,6 +72,7 @@ type Field struct {
 	BitSize        int             `json:"bitSize"`
 	Max            int             `json:"max"`
 	ValueType      string          `json:"valueType"`
+	DefaultValue   string          `json:"defaultValue"`
 	Strings        *Strings        `json:"strings"`
 	Span           *Span           `json:"span"`
 	IndexedStrings *IndexedStrings `json:"indexedStrings"`

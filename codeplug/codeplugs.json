@@ -140,7 +140,7 @@
                         "bitSize": 1,
                         "valueType": "iStrings",
                         "strings": [
-                            "Character string",
+                            "Character String",
                             "Picture"
                         ]
                     },
@@ -321,7 +321,8 @@
                         "type": "PowerOnPassword",
                         "bitOffset": 704,
                         "bitSize": 32,
-                        "valueType": "radioPassword"
+                        "valueType": "radioPassword",
+			"defaultValue": "00000000"
                     },
                     {
                         "typeName": "Radio Programming Password",
@@ -548,6 +549,7 @@
                         "bitOffset": 272,
                         "bitSize": 16,
                         "valueType": "memberListIndex",
+			"defaultValue": "None",
                         "listType": "ChannelInformation",
                         "indexedStrings": [
                             {
@@ -713,6 +715,7 @@
                         "bitOffset": 12,
                         "bitSize": 2,
                         "valueType": "iStrings",
+			"defaultValue": "1",
                         "strings": [
                             "",
                             "1",
@@ -753,6 +756,7 @@
                         "bitOffset": 18,
                         "bitSize": 2,
                         "valueType": "iStrings",
+			"defaultValue": "None",
                         "strings": [
                             "None",
                             "Basic",
@@ -771,6 +775,7 @@
                         "bitOffset": 20,
                         "bitSize": 4,
                         "valueType": "privacyNumber",
+			"defaultValue": "0",
                         "span": {
                             "min": 0,
                             "max": 15
@@ -876,6 +881,7 @@
                         "bitOffset": 48,
                         "bitSize": 16,
                         "valueType": "listIndex",
+			"defaultValue": "None",
                         "listType": "DigitalContacts",
                         "indexedStrings": [
                             {
@@ -929,6 +935,7 @@
                         "bitOffset": 96,
                         "bitSize": 8,
                         "valueType": "listIndex",
+			"defaultValue": "None",
                         "listType": "GroupList",
                         "indexedStrings": [
                             {
@@ -1012,7 +1019,8 @@
                         "type": "CtcssDecode",
                         "bitOffset": 192,
                         "bitSize": 16,
-                        "valueType": "ctcssDcs"
+                        "valueType": "ctcssDcs",
+			"defaultValue": "None"
                     },
                     {
                         "typeName": "CTCSS/DCS Encode",
@@ -1020,6 +1028,7 @@
                         "bitOffset": 208,
                         "bitSize": 16,
                         "valueType": "ctcssDcs",
+			"defaultValue": "None",
 			"enabling": {
 			    "value": "None",
 			    "disables": [
@@ -1034,6 +1043,7 @@
                         "bitOffset": 229,
                         "bitSize": 3,
                         "valueType": "iStrings",
+			"defaultValue": "Off",
                         "strings": [
                             "Off",
                             "DTMF-1",
@@ -1061,6 +1071,7 @@
                         "bitOffset": 237,
                         "bitSize": 3,
                         "valueType": "iStrings",
+			"defaultValue": "Off",
                         "strings": [
                             "Off",
                             "DTMF-1",

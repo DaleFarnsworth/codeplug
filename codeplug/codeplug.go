@@ -440,7 +440,7 @@ func (cp *Codeplug) valid() error {
 
 	for _, f := range deferredValidFields {
 		if err := f.valid(); err != nil {
-			errStr += fmt.Sprintf("%s %s\n", f.fullTypeName(), err.Error())
+			errStr += fmt.Sprintf("%s %s\n", f.FullTypeName(), err.Error())
 		}
 	}
 

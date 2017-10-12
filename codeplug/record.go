@@ -207,7 +207,7 @@ func (r *Record) valid() error {
 	for _, fType := range r.FieldTypes() {
 		for _, f := range r.Fields(fType) {
 			if err := f.valid(); err != nil {
-				errStr += f.fullTypeName() + ": " + err.Error() + "\n"
+				errStr += f.FullTypeName() + ": " + err.Error() + "\n"
 			}
 		}
 	}

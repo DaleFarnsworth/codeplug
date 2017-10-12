@@ -747,13 +747,7 @@ func (parent *Form) AddFieldRow(r *codeplug.Record, fType codeplug.FieldType) {
 			}
 
 		case enablingFieldType:
-			enabled := f.IsEnabled()
-			qWidget := w.qWidget.QWidget_PTR()
-			if qWidget.IsEnabled() != enabled {
-				qWidget.SetEnabled(enabled)
-				w.label.SetEnabled(enabled)
-				w.receive(w)
-			}
+			setEnabled(w, f)
 
 		default:
 			log.Fatal("receive(): unexpected field type")
@@ -764,6 +758,25 @@ func (parent *Form) AddFieldRow(r *codeplug.Record, fType codeplug.FieldType) {
 		parent.subscribe(enablingFieldType, w.field.Type())
 	}
 
+}
+
+func setEnabled(w *Widget, f *codeplug.Field) {
+	enabled := f.IsEnabled()
+	qWidget := w.qWidget.QWidget_PTR()
+	if qWidget.IsEnabled() == enabled {
+		return
+	}
+
+	if enabled && !f.IsValid() {
+		setString(f, f.DefaultValue())
+		msg := fmt.Sprintf("%s has been set to %s", f.FullTypeName(),
+			f.String())
+		WarningPopup("Invalid Value", msg)
+	}
+
+	qWidget.SetEnabled(enabled)
+	w.label.SetEnabled(enabled)
+	w.receive(w)
 }
 
 type Widget struct {
