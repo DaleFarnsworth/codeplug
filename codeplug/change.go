@@ -614,7 +614,7 @@ func (cp *Codeplug) undoChange(change *Change) *Change {
 		previousValue := f.String()
 		err := f.SetString(change.previousValue())
 		if err != nil {
-			log.Fatal("UndoChange: FieldChange error", err.Error())
+			log.Fatal("UndoChange: FieldChange error ", err.Error())
 		}
 
 		*change = *fieldChange(f, previousValue)
@@ -749,7 +749,7 @@ func (cp *Codeplug) redoChange(change *Change) *Change {
 		previousValue := f.String()
 		err := f.SetString(change.previousValue())
 		if err != nil {
-			log.Fatal("RedoChange: FieldChange error", err.Error())
+			log.Fatal("RedoChange: FieldChange error ", err.Error())
 		}
 
 		*change = *fieldChange(f, previousValue)
