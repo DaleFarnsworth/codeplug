@@ -582,6 +582,8 @@ func (vBox *VBox) AddFieldMembers(r *codeplug.Record, sortAvailable *bool, nameT
 	availableList.SetWidth(width)
 	membersList.SetWidth(width)
 
+	groupRow.AddFiller()
+
 	groupRow = groupColumn.AddHbox()
 	form = groupRow.AddForm()
 	label := widgets.NewQLabel2("Sort", nil, 0)

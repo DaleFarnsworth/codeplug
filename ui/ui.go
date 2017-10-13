@@ -669,14 +669,10 @@ func (parent *HBox) AddFiller() {
 	h := 0
 	hPolicy := widgets.QSizePolicy__Expanding
 	vPolicy := widgets.QSizePolicy__Expanding
-	filler := widgets.NewQSpacerItem(w, h, hPolicy, vPolicy)
-	parent.layout.AddItem(filler)
-	filler = widgets.NewQSpacerItem(w, h, hPolicy, vPolicy)
-	parent.layout.AddItem(filler)
-	filler = widgets.NewQSpacerItem(w, h, hPolicy, vPolicy)
-	parent.layout.AddItem(filler)
-	filler = widgets.NewQSpacerItem(w, h, hPolicy, vPolicy)
-	parent.layout.AddItem(filler)
+	for i := 0; i < 30; i++ {
+		filler := widgets.NewQSpacerItem(w, h, hPolicy, vPolicy)
+		parent.layout.AddItem(filler)
+	}
 }
 
 func (parent *VBox) AddFiller() {
@@ -684,14 +680,10 @@ func (parent *VBox) AddFiller() {
 	h := 0
 	hPolicy := widgets.QSizePolicy__Expanding
 	vPolicy := widgets.QSizePolicy__Expanding
-	filler := widgets.NewQSpacerItem(w, h, hPolicy, vPolicy)
-	parent.layout.AddItem(filler)
-	filler = widgets.NewQSpacerItem(w, h, hPolicy, vPolicy)
-	parent.layout.AddItem(filler)
-	filler = widgets.NewQSpacerItem(w, h, hPolicy, vPolicy)
-	parent.layout.AddItem(filler)
-	filler = widgets.NewQSpacerItem(w, h, hPolicy, vPolicy)
-	parent.layout.AddItem(filler)
+	for i := 0; i < 30; i++ {
+		filler := widgets.NewQSpacerItem(w, h, hPolicy, vPolicy)
+		parent.layout.AddItem(filler)
+	}
 }
 
 func (parent *Form) AddWidget(w *Widget) {
