@@ -953,8 +953,12 @@ func (v *radioPassword) valid(f *Field) error {
 
 // load sets the radioPassword's value from its bits in recordBytes.
 func (v *radioPassword) load(f *Field, recordBytes []byte) {
-	*v = radioPassword(fmt.Sprintf("%08d",
-		bcdToBinary(bytesToInt(f.bytes(recordBytes)))))
+	intValue := bytesToInt(f.bytes(recordBytes))
+	if intValue == 0xffffffff {
+		*v = radioPassword("00000000")
+		return
+	}
+	*v = radioPassword(fmt.Sprintf("%08d", bcdToBinary(intValue)))
 }
 
 // store stores the radioPassword's value into its bits in recordBytes.
