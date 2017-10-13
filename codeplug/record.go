@@ -104,6 +104,10 @@ func (rd *rDesc) loadRecords(cpBytes []byte) {
 			}
 
 			r.load(recordBytes)
+			nameField := r.NameField()
+			if nameField != nil && nameField.String() == "" {
+				continue
+			}
 
 			records[length] = r
 			length++
