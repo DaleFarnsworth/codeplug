@@ -1126,7 +1126,7 @@ func (v *name) String(f *Field) string {
 
 // SetString sets the name's value from a string.
 func (v *name) SetString(f *Field, s string) error {
-	if utf8.RuneCountInString(s) >= f.size()/2 {
+	if utf8.RuneCountInString(s) > f.size()/2 {
 		return fmt.Errorf("name too long")
 	}
 
