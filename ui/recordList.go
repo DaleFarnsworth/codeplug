@@ -304,7 +304,6 @@ func (w *Window) initRecordModel() {
 
 		records, id, err := w.dataRecords(data)
 		if err != nil {
-			WarningPopup("Drop Error", err.Error())
 			return false
 		}
 
