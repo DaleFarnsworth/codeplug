@@ -136,12 +136,31 @@ type MainWindow struct {
 	connectChange func(*codeplug.Change)
 }
 
-func NewMainWindow(cp *codeplug.Codeplug) *MainWindow {
-	mw := new(MainWindow)
-	mainWindows = append(mainWindows, mw)
-
+func (mw *MainWindow) SetCodeplug(cp *codeplug.Codeplug) {
 	mw.codeplug = cp
 	mw.recordWindows = make(map[codeplug.RecordType]*Window)
+
+	mw.codeplug.ConnectChange(func(change *codeplug.Change) {
+		for _, mw := range mainWindows {
+			if mw.codeplug != change.Codeplug() {
+				continue
+			}
+			changes := append(change.Changes(), change)
+			for _, change := range changes {
+				w := mw.recordWindows[change.RecordType()]
+				if w != nil {
+					w.handleChange(change)
+				}
+			}
+
+			mw.connectChange(change)
+		}
+	})
+}
+
+func NewMainWindow() *MainWindow {
+	mw := new(MainWindow)
+	mainWindows = append(mainWindows, mw)
 
 	qmw := widgets.NewQMainWindow(nil, 0)
 
@@ -173,23 +192,6 @@ func NewMainWindow(cp *codeplug.Codeplug) *MainWindow {
 		}
 
 		event.Accept()
-	})
-
-	mw.codeplug.ConnectChange(func(change *codeplug.Change) {
-		for _, mw := range mainWindows {
-			if mw.codeplug != change.Codeplug() {
-				continue
-			}
-			changes := append(change.Changes(), change)
-			for _, change := range changes {
-				w := mw.recordWindows[change.RecordType()]
-				if w != nil {
-					w.handleChange(change)
-				}
-			}
-
-			mw.connectChange(change)
-		}
 	})
 
 	return mw
