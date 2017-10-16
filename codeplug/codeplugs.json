@@ -145,6 +145,61 @@
                         ]
                     },
                     {
+                        "typeName": "Lock/Unlock",
+                        "type": "LockUnlock",
+                        "bitOffset": 539,
+                        "bitSize": 1,
+                        "valueType": "iStrings",
+                        "strings": [
+                            "Unlock",
+                            "Lock"
+                        ]
+                    },
+                    {
+                        "typeName": "Freq/Channel Mode",
+                        "type": "FreqChannelMode",
+                        "bitOffset": 540,
+                        "bitSize": 1,
+                        "valueType": "iStrings",
+                        "strings": [
+                            "Frequency",
+                            "Channel"
+                        ],
+			"enabling": {
+			    "value": "Frequency",
+			    "enables": [
+				"ModeSelect"
+			    ],
+			    "disables": [
+				"LockUnlock"
+			    ]
+			}
+                    },
+                    {
+                        "typeName": "Mode Select",
+                        "type": "ModeSelect",
+                        "bitOffset": 541,
+                        "bitSize": 1,
+                        "valueType": "iStrings",
+                        "strings": [
+                            "VFO",
+                            "Memory"
+                        ]
+                    },
+		    {
+			"typeName": "Backlight Color",
+			"type": "BacklightColor",
+			"bitOffset": 542,
+			"bitSize": 2,
+			"valueType": "iStrings",
+			"strings": [
+			    "Off",
+			    "Orange",
+			    "White",
+			    "Sakura"
+			]
+		    },
+                    {
                         "typeName": "Radio ID",
                         "type": "RadioID",
                         "bitOffset": 544,
@@ -274,6 +329,19 @@
                             "interval": 5
                         }
                     },
+		    {
+			"typeName": "Backlight Time (S)",
+			"type": "BacklightTime",
+			"bitOffset": 686,
+			"bitSize": 2,
+			"valueType": "iStrings",
+			"strings": [
+			    "Always",
+			    "5",
+			    "10",
+			    "15"
+			]
+		    },
                     {
                         "typeName": "Set Keypad Lock Time (S)",
                         "type": "SetKeypadLockTime",

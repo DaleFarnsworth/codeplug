@@ -49,6 +49,8 @@ const (
 	FtAdmitCriteria           FieldType = "AdmitCriteria"
 	FtAllowTalkaround         FieldType = "AllowTalkaround"
 	FtAutoscan                FieldType = "Autoscan"
+	FtBacklightColor          FieldType = "BacklightColor"
+	FtBacklightTime           FieldType = "BacklightTime"
 	FtBandwidth               FieldType = "Bandwidth"
 	FtCallAlertToneDuration   FieldType = "CallAlertToneDuration"
 	FtCallID                  FieldType = "CallID"
@@ -77,17 +79,20 @@ const (
 	FtDisableAllTones         FieldType = "DisableAllTones"
 	FtDisplayPTTID            FieldType = "DisplayPTTID"
 	FtEmergencyAlarmAck       FieldType = "EmergencyAlarmAck"
+	FtFreqChannelMode         FieldType = "FreqChannelMode"
 	FtGroupCallHangTime       FieldType = "GroupCallHangTime"
 	FtGroupList               FieldType = "GroupList"
 	FtHighFrequency           FieldType = "HighFrequency"
 	FtIntroScreen             FieldType = "IntroScreen"
 	FtIntroScreenLine1        FieldType = "IntroScreenLine1"
 	FtIntroScreenLine2        FieldType = "IntroScreenLine2"
+	FtLockUnlock              FieldType = "LockUnlock"
 	FtLoneWorker              FieldType = "LoneWorker"
 	FtLoneWorkerReminderTime  FieldType = "LoneWorkerReminderTime"
 	FtLoneWorkerResponseTime  FieldType = "LoneWorkerResponseTime"
 	FtLowFrequency            FieldType = "LowFrequency"
 	FtMode                    FieldType = "Mode"
+	FtModeSelect              FieldType = "ModeSelect"
 	FtMonitorType             FieldType = "MonitorType"
 	FtName                    FieldType = "Name"
 	FtPcProgPw                FieldType = "PcProgPw"
@@ -338,6 +343,59 @@ var cpTypes = map[CodeplugType][]rInfo{
 					},
 				},
 				fInfo{
+					fType:     FtLockUnlock,
+					typeName:  "Lock/Unlock",
+					max:       1,
+					bitOffset: 539,
+					bitSize:   1,
+					valueType: VtIStrings,
+					strings: &[]string{
+						"Unlock",
+						"Lock",
+					},
+					disabler: FtFreqChannelMode,
+				},
+				fInfo{
+					fType:     FtFreqChannelMode,
+					typeName:  "Freq/Channel Mode",
+					max:       1,
+					bitOffset: 540,
+					bitSize:   1,
+					valueType: VtIStrings,
+					strings: &[]string{
+						"Frequency",
+						"Channel",
+					},
+					enablingValue: "Frequency",
+				},
+				fInfo{
+					fType:     FtModeSelect,
+					typeName:  "Mode Select",
+					max:       1,
+					bitOffset: 541,
+					bitSize:   1,
+					valueType: VtIStrings,
+					strings: &[]string{
+						"VFO",
+						"Memory",
+					},
+					enabler: FtFreqChannelMode,
+				},
+				fInfo{
+					fType:     FtBacklightColor,
+					typeName:  "Backlight Color",
+					max:       1,
+					bitOffset: 542,
+					bitSize:   2,
+					valueType: VtIStrings,
+					strings: &[]string{
+						"Off",
+						"Orange",
+						"White",
+						"Sakura",
+					},
+				},
+				fInfo{
 					fType:     FtRadioID,
 					typeName:  "Radio ID",
 					max:       1,
@@ -476,6 +534,20 @@ var cpTypes = map[CodeplugType][]rInfo{
 						max:      100,
 						scale:    100,
 						interval: 5,
+					},
+				},
+				fInfo{
+					fType:     FtBacklightTime,
+					typeName:  "Backlight Time (S)",
+					max:       1,
+					bitOffset: 686,
+					bitSize:   2,
+					valueType: VtIStrings,
+					strings: &[]string{
+						"Always",
+						"5",
+						"10",
+						"15",
 					},
 				},
 				fInfo{
