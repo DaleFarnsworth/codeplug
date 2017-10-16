@@ -277,7 +277,7 @@ func (cp *Codeplug) listIndexChanges(change *Change) []*Change {
 
 func rDescChanges(rd *rDesc, rType RecordType, fType FieldType) []*Change {
 	changes := []*Change{}
-	for _, fi := range rd.fInfos {
+	for _, fi := range rd.fieldInfos {
 		if fi.listRecordType != rType || fi.fType == fType {
 			continue
 		}

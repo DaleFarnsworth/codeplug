@@ -1,125 +1,142 @@
 
 // Codeplug types
 const (
-{{- range $c, $i := $.CodeplugMap}}
-	Ct{{call $.Capitalize $c}} CodeplugType = "{{$c}}"
+{{- range $c := $.Codeplugs}}
+	Ct{{call $.Capitalize $c.Type}} CodeplugType = "{{$c.Type}}"
 {{- end}}
 )
 
 // Record types
 const (
-{{- range $k, $i := $.RecordMap}}
-	Rt{{$k}} RecordType = "{{$k}}"
+{{- range $r := $.Records}}
+	Rt{{$r.Type}} RecordType = "{{$r.Type}}"
 {{- end}}
 )
 
 // Field types
 const (
-{{- range $k, $i := $.FieldMap}}
-	Ft{{$k}} FieldType = "{{$k}}"
+{{- range $f := $.Fields}}
+	Ft{{$f.Type}} FieldType = "{{$f.Type}}"
 {{- end}}
 )
 
 // The value types a field may contain
 const (
-{{- range $k, $i := $.ValueTypeMap}}
-	Vt{{call $.Capitalize $k}} ValueType = "{{$k}}"
+{{- range $vt := $.ValueTypes}}
+	Vt{{call $.Capitalize $vt}} ValueType = "{{$vt}}"
 {{- end}}
 )
 
 // newValue returns a new value of the given ValueType
 func newValue(vt ValueType) value {
 	switch vt {
-	{{- range $k, $i := $.ValueTypeMap}}
-	case Vt{{call $.Capitalize $k}}:
-		return new({{$k}})
+	{{- range $vt := $.ValueTypes}}
+	case Vt{{call $.Capitalize $vt}}:
+		return new({{$vt}})
 	{{- end}}
 	}
 
 	return nil
 }
 
-// Codeplug types and their records, fields, with offsets, sizes, etc.
-var cpTypes = map[CodeplugType][]rInfo{
+var codeplugInfos = map[CodeplugType]*CodeplugInfo{
 {{- range $c := $.Codeplugs}}
-	Ct{{call $.Capitalize $c.Name}}: []rInfo{
-	{{- range $r := $c.Records}}
-		rInfo{
-			rType: Rt{{$r.Type}},
-			typeName: "{{$r.TypeName}}",
-			max: {{$r.Max}},
-			offset: {{$r.Offset}},
-			size: {{$r.Size}},
-		{{- if $r.DelDescs}}
-			delDescs: []delDesc{
-			{{- range $d := $r.DelDescs}}
-				delDesc{
-					offset: {{$d.Offset}},
-					size: {{$d.Size}},
-					value: {{$d.Value}},
-				},
-			{{- end}}
-			},
-		{{- end}}
-			fInfos: []fInfo{
-			{{- range $f := $r.Fields}}
-				fInfo{
-					fType: Ft{{$f.Type}},
-					typeName: "{{$f.TypeName}}",
-					max: {{$f.Max}},
-					bitOffset: {{$f.BitOffset}},
-					bitSize: {{$f.BitSize}},
-					valueType: Vt{{call $.Capitalize $f.ValueType}},
-				{{- if $f.DefaultValue}}
-					defaultValue: "{{$f.DefaultValue}}",
-				{{- end}}
-				{{- if $f.Strings}}
-					strings: &[]string{
-					{{- range $s := $f.Strings}}
-						"{{$s}}",
-					{{- end}}
-					},
-				{{- end}}
-				{{- if $f.Span}}{{$s := $f.Span}}
-					span: &Span{
-						min: {{$s.Min}},
-						max: {{$s.Max}},
-					{{- if $s.Scale}}
-						scale: {{$s.Scale}},
-					{{- end}}
-					{{- if $s.Interval}}
-						interval: {{$s.Interval}},
-					{{- end}}
-					{{- if $s.MinString}}
-						minString: "{{$s.MinString}}",
-					{{- end}}
-					},
-				{{- end}}
-				{{- if $f.IndexedStrings}}
-					indexedStrings: &[]IndexedString{
-					{{- range $i := $f.IndexedStrings}}
-						IndexedString{ {{$i.Index}}, "{{$i.String}}"},
-					{{- end}}
-					},
-				{{- end}}
-				{{- if $f.ListType}}
-					listRecordType: Rt{{$f.ListType}},
-				{{- end}}
-				{{- if $f.EnablingValue}}
-					enablingValue: "{{$f.EnablingValue}}",
-				{{- end}}
-				{{- if $f.Enabler}}
-					enabler: Ft{{$f.Enabler}},
-				{{- end}}
-				{{- if $f.Disabler}}
-					disabler: Ft{{$f.Disabler}},
-				{{- end}}
-				},
-			{{- end}}
-			},
+	Ct{{call $.Capitalize $c.Type}}: &cp{{call $.Capitalize $c.Type}},
+{{- end}}
+}
+
+{{- range $c := $.Codeplugs}}
+
+var cp{{call $.Capitalize $c.Type}} = CodeplugInfo{
+	Type: Ct{{call $.Capitalize $c.Type}},
+	TypeName: "{{$c.TypeName}}",
+	RecordInfos: []*recordInfo{
+	{{- range $rt := $c.RecordTypes}}
+		&ri{{$rt}},
+	{{- end}}
+	},
+}
+{{- end}}
+
+{{- range $r := $.Records}}
+
+var ri{{$r.Type}} = recordInfo{
+	rType: Rt{{$r.Type}},
+	typeName: "{{$r.TypeName}}",
+	max: {{$r.Max}},
+	offset: {{$r.Offset}},
+	size: {{$r.Size}},
+{{- if $r.DelDescs}}
+	delDescs: []delDesc{
+	{{- range $d := $r.DelDescs}}
+		delDesc{
+			offset: {{$d.Offset}},
+			size: {{$d.Size}},
+			value: {{$d.Value}},
 		},
 	{{- end}}
 	},
 {{- end}}
+	fieldInfos: []*fieldInfo{
+	{{- range $ft := $r.FieldTypes}}
+		&fi{{$ft}},
+	{{- end}}
+	},
 }
+{{ end}}
 
+{{- range $f := $.Fields}}
+
+var fi{{$f.Type}} = fieldInfo{
+	fType: Ft{{$f.Type}},
+	typeName: "{{$f.TypeName}}",
+	max: {{$f.Max}},
+	bitOffset: {{$f.BitOffset}},
+	bitSize: {{$f.BitSize}},
+	valueType: Vt{{call $.Capitalize $f.ValueType}},
+{{- if $f.DefaultValue}}
+	defaultValue: "{{$f.DefaultValue}}",
+{{- end}}
+{{- if $f.Strings}}
+	strings: &[]string{
+	{{- range $s := $f.Strings}}
+		"{{$s}}",
+	{{- end}}
+	},
+{{- end}}
+{{- if $f.Span}}{{$s := $f.Span}}
+	span: &Span{
+		min: {{$s.Min}},
+		max: {{$s.Max}},
+	{{- if $s.Scale}}
+		scale: {{$s.Scale}},
+	{{- end}}
+	{{- if $s.Interval}}
+		interval: {{$s.Interval}},
+	{{- end}}
+	{{- if $s.MinString}}
+		minString: "{{$s.MinString}}",
+	{{- end}}
+	},
+{{- end}}
+{{- if $f.IndexedStrings}}
+	indexedStrings: &[]IndexedString{
+	{{- range $i := $f.IndexedStrings}}
+		IndexedString{ {{$i.Index}}, "{{$i.String}}"},
+	{{- end}}
+	},
+{{- end}}
+{{- if $f.ListType}}
+	listRecordType: Rt{{$f.ListType}},
+{{- end}}
+{{- if $f.EnablingValue}}
+	enablingValue: "{{$f.EnablingValue}}",
+{{- end}}
+{{- if $f.Enabler}}
+	enabler: Ft{{$f.Enabler}},
+{{- end}}
+{{- if $f.Disabler}}
+	disabler: Ft{{$f.Disabler}},
+{{- end}}
+}
+{{- end}}

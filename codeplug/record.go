@@ -40,21 +40,21 @@ type Record struct {
 
 // An rDesc contains a record type's dynamic information.
 type rDesc struct {
-	*rInfo
+	*recordInfo
 	codeplug        *Codeplug
 	records         []*Record
 	cachedListNames *[]string
 }
 
-// An rInfo contains a record type's static information.
-type rInfo struct {
+// A recordInfo contains a record type's static information.
+type recordInfo struct {
 	rType         RecordType
 	typeName      string
 	max           int
 	offset        int
 	size          int
 	delDescs      []delDesc
-	fInfos        []fInfo
+	fieldInfos    []*fieldInfo
 	nameFieldType FieldType
 }
 
@@ -147,15 +147,15 @@ func (r *Record) addField(f *Field) error {
 // load replaces the record's contents with those corresponding
 // to the byte slice.
 func (r *Record) load(recordBytes []byte) {
-	ri := r.rDesc.rInfo
+	ri := r.rDesc.recordInfo
 
-	for i := range ri.fInfos {
-		fi := &ri.fInfos[i]
+	for i := range ri.fieldInfos {
+		fi := ri.fieldInfos[i]
 		if fi.max == 0 {
 			fi.max = 1
 		}
-		fi.rInfo = ri
-		fd := &fDesc{fInfo: fi}
+		fi.recordInfo = ri
+		fd := &fDesc{fieldInfo: fi}
 		(*r.fDesc)[fi.fType] = fd
 		if fi.valueType == VtName {
 			ri.nameFieldType = fi.fType
@@ -164,7 +164,7 @@ func (r *Record) load(recordBytes []byte) {
 	}
 
 	for _, fd := range *r.fDesc {
-		fi := fd.fInfo
+		fi := fd.fieldInfo
 		fields := fd.fields
 		if len(fields) > 0 {
 			fields = fields[0:cap(fields)]
@@ -425,9 +425,9 @@ func (r *Record) nameToField(name string, index int, value string) (*Field, erro
 func (r *Record) NewFieldWithValue(fType FieldType, index int, str string) (*Field, error) {
 	fd := (*r.fDesc)[fType]
 	if fd == nil {
-		for _, fi := range r.rDesc.fInfos {
+		for _, fi := range r.rDesc.fieldInfos {
 			if fi.fType == fType {
-				fd = &fDesc{&fi, r, make([]*Field, 0)}
+				fd = &fDesc{fi, r, make([]*Field, 0)}
 				break
 			}
 		}

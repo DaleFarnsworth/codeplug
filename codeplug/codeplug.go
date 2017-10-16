@@ -76,6 +76,12 @@ type Codeplug struct {
 	changeIndex   int
 }
 
+type CodeplugInfo struct {
+	TypeName    string
+	Type        CodeplugType
+	RecordInfos []*recordInfo
+}
+
 // NewCodeplug returns a Codeplug, given a filename and codeplug type.
 func NewCodeplug(filename string, cpType CodeplugType) (*Codeplug, error) {
 	var err error
@@ -401,15 +407,15 @@ func (cp *Codeplug) bytesToRecord(rType RecordType, rIndex int, rBytes []byte) *
 
 // load loads all the records into the codeplug from its file.
 func (cp *Codeplug) load(cpBytes []byte) {
-	rInfos := cpTypes[cp.codeplugType]
+	recordInfos := codeplugInfos[cp.codeplugType].RecordInfos
 
-	for i := range rInfos {
-		ri := &rInfos[i]
+	for i := range recordInfos {
+		ri := recordInfos[i]
 		if ri.max == 0 {
 			ri.max = 1
 		}
 
-		rd := &rDesc{rInfo: ri}
+		rd := &rDesc{recordInfo: ri}
 		cp.rDesc[ri.rType] = rd
 		rd.codeplug = cp
 		rd.loadRecords(cpBytes)
@@ -513,9 +519,9 @@ func (cp *Codeplug) write(file *os.File, cpBytes []byte) (err error) {
 func (cp *Codeplug) frequencyValid(freq float64) error {
 	if cp.lowFrequency == 0 {
 		fDescs := cp.rDesc[RtRdtHeader].records[0].fDesc
-		s := (*fDescs)[FtLowFrequency].fields[0].String()
+		s := (*fDescs)[FtRhLowFrequency].fields[0].String()
 		cp.lowFrequency, _ = strconv.ParseFloat(s, 64)
-		s = (*fDescs)[FtHighFrequency].fields[0].String()
+		s = (*fDescs)[FtRhHighFrequency].fields[0].String()
 		cp.highFrequency, _ = strconv.ParseFloat(s, 64)
 	}
 
@@ -550,7 +556,7 @@ func (cp *Codeplug) inferFrequencyRange() (low float64, high float64) {
 	var rang frequencyRange
 
 	for _, record := range cp.rDesc[RtChannelInformation].records {
-		f := (*record.fDesc)[FtRxFrequency].fields[0]
+		f := (*record.fDesc)[FtCiRxFrequency].fields[0]
 		rxFreq := float64(*f.value.(*frequency))
 		index := -1
 
@@ -849,7 +855,7 @@ func (cp *Codeplug) ParseRecords(iRdr io.Reader) ([]*Record, error) {
 		nameToFt = make(map[RecordType]map[string]FieldType)
 		for _, rType := range cp.RecordTypes() {
 			m := make(map[string]FieldType)
-			for _, fi := range cp.rDesc[rType].fInfos {
+			for _, fi := range cp.rDesc[rType].fieldInfos {
 				fType := fi.fType
 				name := string(fType)
 				m[name] = fType

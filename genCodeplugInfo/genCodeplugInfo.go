@@ -40,23 +40,26 @@ import (
 	"unicode/utf8"
 )
 
-type Codeplugs struct {
+type top struct {
 	Codeplugs []*Codeplug `json:"codeplugs"`
+	Records   []*Record   `json:"records"`
+	Fields    []*Field    `json:"fields"`
 }
 
 type Codeplug struct {
-	Name    string    `json:"name"`
-	Records []*Record `json:"records"`
+	TypeName    string   `json:"typeName"`
+	Type        string   `json:"type"`
+	RecordTypes []string `json:"recordTypes"`
 }
 
 type Record struct {
-	TypeName string    `json:"typeName"`
-	Type     string    `json:"type"`
-	Offset   int       `json:"offset"`
-	Size     int       `json:"size"`
-	Max      int       `json:"max"`
-	DelDescs []DelDesc `json:"delDescs"`
-	Fields   []*Field  `json:"fields"`
+	TypeName   string    `json:"typeName"`
+	Type       string    `json:"type"`
+	Offset     int       `json:"offset"`
+	Size       int       `json:"size"`
+	Max        int       `json:"max"`
+	DelDescs   []DelDesc `json:"delDescs"`
+	FieldTypes []string  `json:"fieldTypes"`
 }
 
 type DelDesc struct {
@@ -106,29 +109,15 @@ type Enabling struct {
 	Disables []string `json:"disables"`
 }
 
-var codeplugs Codeplugs
-
-type CodeplugMap map[string]int
-type RecordMap map[string]int
-type FieldMap map[string]int
 type ValueTypeMap map[string]int
 
 type TemplateVars struct {
-	CodeplugMap  CodeplugMap
-	RecordMap    RecordMap
-	FieldMap     FieldMap
-	ValueTypeMap ValueTypeMap
-	Codeplugs    []*Codeplug
-	Capitalize   func(string) string
-	SliceAfter2  func(string) string
-}
-
-var templateVars = TemplateVars{
-	RecordMap:    RecordMap{},
-	FieldMap:     FieldMap{},
-	ValueTypeMap: ValueTypeMap{},
-	Capitalize:   strings.Title,
-	SliceAfter2:  sliceAfter2,
+	Codeplugs   []*Codeplug
+	Records     []*Record
+	Fields      []*Field
+	ValueTypes  []string
+	Capitalize  func(string) string
+	SliceAfter2 func(string) string
 }
 
 func capitalize(s string) string {
@@ -151,102 +140,139 @@ func sliceAfter2(s string) string {
 	return s[2:]
 }
 
-func sortAndEnumTypes(m map[string]int) map[string]int {
-	types := []string{}
-	for k := range m {
-		types = append(types, k)
-	}
-	sort.Strings(types)
+func doEnables(r *Record, fieldMap map[string]*Field) {
+	for _, fType := range r.FieldTypes {
+		f := fieldMap[fType]
+		if f == nil {
+			fmt.Fprintf(os.Stderr, "found no field type: %s\n", fType)
+			os.Exit(1)
+		}
 
-	m = map[string]int{}
+		if f.Enabling == nil {
+			continue
+		}
 
-	for i, t := range types {
-		m[t] = i
-	}
+		f.EnablingValue = f.Enabling.Value
 
-	return m
-}
-
-func doEnables(r *Record, f *Field) {
-	enabling := f.Enabling
-	f.EnablingValue = enabling.Value
-	for _, fType := range enabling.Enables {
-		for _, f2 := range r.Fields {
-			if f2.Type == fType {
-				f2.Enabler = f.Type
+		for _, fTypeEn := range f.Enabling.Enables {
+			f := fieldMap[fTypeEn]
+			if f == nil {
+				fmt.Fprintf(os.Stderr, "found no field type: %s\n", fType)
+				os.Exit(1)
 			}
+			f.Enabler = fType
+		}
+
+		for _, fTypeDis := range f.Enabling.Disables {
+			f := fieldMap[fTypeDis]
+			if f == nil {
+				fmt.Fprintf(os.Stderr, "found no field type: %s\n", fType)
+				os.Exit(1)
+			}
+			f.Disabler = fType
 		}
 	}
-	for _, fType := range enabling.Disables {
-		for _, f2 := range r.Fields {
-			if f2.Type == fType {
-				f2.Disabler = f.Type
-			}
-		}
+}
+
+func sortCodeplugs(codeplugs []*Codeplug) {
+	codeplugTypes := make([]string, len(codeplugs))
+	codeplugMap := make(map[string]*Codeplug)
+	for i, cp := range codeplugs {
+		codeplugTypes[i] = cp.Type
+		codeplugMap[cp.Type] = cp
+	}
+	sort.Strings(codeplugTypes)
+	for i, typ := range codeplugTypes {
+		codeplugs[i] = codeplugMap[typ]
 	}
 }
 
-func readCodeplugJson(filename string) {
+func sortRecords(records []*Record) {
+	recordTypes := make([]string, len(records))
+	recordMap := make(map[string]*Record)
+	for i, r := range records {
+		recordTypes[i] = r.Type
+		recordMap[r.Type] = r
+	}
+	sort.Strings(recordTypes)
+	for i, typ := range recordTypes {
+		records[i] = recordMap[typ]
+	}
+}
+
+func sortFields(fields []*Field) {
+	fieldTypes := make([]string, len(fields))
+	fieldMap := make(map[string]*Field)
+	for i, f := range fields {
+		fieldTypes[i] = f.Type
+		fieldMap[f.Type] = f
+	}
+	sort.Strings(fieldTypes)
+	for i, typ := range fieldTypes {
+		fields[i] = fieldMap[typ]
+	}
+}
+
+func readCodeplugJson(filename string) TemplateVars {
 	bytes, err := ioutil.ReadFile(filename)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	err = json.Unmarshal(bytes, &codeplugs)
+	var top top
+	err = json.Unmarshal(bytes, &top)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	for _, c := range codeplugs.Codeplugs {
-		for _, r := range c.Records {
-			if r.Max == 0 {
-				r.Max = 1
-			}
-			for _, f := range r.Fields {
-				if f.Max == 0 {
-					f.Max = 1
-				}
-				span := f.Span
-				if span != nil {
-					if span.MinString != "" {
-						span.Min = 0
-					}
-				}
-				if f.Enabling != nil {
-					doEnables(r, f)
-				}
+	var templateVars TemplateVars
+
+	sortCodeplugs(top.Codeplugs)
+	templateVars.Codeplugs = top.Codeplugs
+
+	fieldMap := make(map[string]*Field)
+	valueTypeMap := make(map[string]int)
+
+	sortFields(top.Fields)
+	for _, f := range top.Fields {
+		if f.Max == 0 {
+			f.Max = 1
+		}
+		span := f.Span
+		if span != nil {
+			if span.MinString != "" {
+				span.Min = 0
 			}
 		}
+		fieldMap[f.Type] = f
+		valueTypeMap[f.ValueType]++
 	}
+	templateVars.Fields = top.Fields
 
-	templateVars.Codeplugs = codeplugs.Codeplugs
-
-	codeplugMap := map[string]int{}
-	recordMap := map[string]int{}
-	fieldMap := map[string]int{}
-	valueTypeMap := map[string]int{}
-
-	for _, c := range templateVars.Codeplugs {
-		codeplugMap[c.Name]++
-		for _, r := range c.Records {
-			recordMap[r.Type]++
-			for _, f := range r.Fields {
-				fieldMap[f.Type]++
-				valueTypeMap[f.ValueType]++
-			}
+	sortRecords(top.Records)
+	for _, r := range top.Records {
+		if r.Max == 0 {
+			r.Max = 1
 		}
+		doEnables(r, fieldMap)
 	}
+	templateVars.Records = top.Records
 
-	templateVars.CodeplugMap = sortAndEnumTypes(codeplugMap)
-	templateVars.RecordMap = sortAndEnumTypes(recordMap)
-	templateVars.FieldMap = sortAndEnumTypes(fieldMap)
-	templateVars.ValueTypeMap = sortAndEnumTypes(valueTypeMap)
+	valueTypes := make([]string, 0, len(valueTypeMap))
+	for valueType := range valueTypeMap {
+		valueTypes = append(valueTypes, valueType)
+	}
+	sort.Strings(valueTypes)
+	templateVars.ValueTypes = valueTypes
+
+	templateVars.Capitalize = strings.Title
+	templateVars.SliceAfter2 = sliceAfter2
+
+	return templateVars
 }
 
-func writeTypesFile(codeFilename string, inFilenames []string) {
-	for _, filename := range inFilenames {
-		readCodeplugJson(filename)
-	}
+func writeTypesFile(codeFilename string, filename string) {
+	templateVars := readCodeplugJson(filename)
 
 	template, err := template.ParseFiles("template")
 	if err != nil {
@@ -284,7 +310,7 @@ func main() {
 
 	filenames := os.Args[1:]
 	if len(filenames) > 0 {
-		writeTypesFile(codeFilename, filenames)
+		writeTypesFile(codeFilename, filenames[0])
 	}
 
 	goFilename := os.Getenv("GOFILE")

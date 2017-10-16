@@ -54,13 +54,13 @@ type value interface {
 
 // An fDesc contains a field type's dynamic information.
 type fDesc struct {
-	*fInfo
+	*fieldInfo
 	record *Record
 	fields []*Field
 }
 
-// An fInfo contains a field type's static information.
-type fInfo struct {
+// A fieldInfo contains a field type's static information.
+type fieldInfo struct {
 	fType          FieldType
 	typeName       string
 	max            int
@@ -75,7 +75,7 @@ type fInfo struct {
 	enabler        FieldType
 	disabler       FieldType
 	listRecordType RecordType
-	rInfo          *rInfo
+	recordInfo     *recordInfo
 }
 
 // A FieldType represents a field's type
@@ -161,9 +161,9 @@ func (f *Field) listNames() []string {
 // memberListNames returns a slice of the names of the field's member records.
 func (f *Field) memberListNames() []string {
 	r := f.record
-	fInfos := r.fInfos
-	fInfo := fInfos[len(fInfos)-1]
-	fDesc := (*r.fDesc)[fInfo.fType]
+	fieldInfos := r.fieldInfos
+	fieldInfo := fieldInfos[len(fieldInfos)-1]
+	fDesc := (*r.fDesc)[fieldInfo.fType]
 	fields := fDesc.fields
 	memberNames := make([]string, len(fields))
 	for i, f := range fields {
@@ -484,12 +484,12 @@ func (fd *fDesc) storeBytes(bytes []byte, fIndex int, recordBytes []byte) {
 
 // offset returns the byte offset of the field at fIndex within the field's
 // record bytes.
-func (fi *fInfo) offset(fIndex int) int {
+func (fi *fieldInfo) offset(fIndex int) int {
 	return (fi.bitOffset + fIndex*fi.bitSize) / 8
 }
 
 // size returns the field's size in bytes
-func (fi *fInfo) size() (fSize int) {
+func (fi *fieldInfo) size() (fSize int) {
 	return (fi.bitSize + 7) / 8
 }
 
@@ -1163,7 +1163,7 @@ type privacyNumber struct {
 
 // String returns the privacyNumber's value as a string.
 func (v *privacyNumber) String(f *Field) string {
-	ss := f.sibling(FtPrivacy).String()
+	ss := f.sibling(FtCiPrivacy).String()
 
 	value := int(v.span)
 	if ss == "Enhanced" && value >= 8 {
@@ -1178,7 +1178,7 @@ func (v *privacyNumber) String(f *Field) string {
 
 // SetString sets the privacyNumber's value from a string.
 func (v *privacyNumber) SetString(f *Field, s string) error {
-	ss := f.sibling(FtPrivacy).String()
+	ss := f.sibling(FtCiPrivacy).String()
 
 	if ss == "Enhanced" && int(v.span) >= 8 {
 		return fmt.Errorf("must be less than 8 for enhanced privacy")
@@ -1189,7 +1189,7 @@ func (v *privacyNumber) SetString(f *Field, s string) error {
 
 // valid returns nil if the privacyNumber's value is valid.
 func (v *privacyNumber) valid(f *Field) error {
-	sibling := f.sibling(FtPrivacy)
+	sibling := f.sibling(FtCiPrivacy)
 	if sibling == nil {
 		deferredValidFields = append(deferredValidFields, f)
 		return nil
