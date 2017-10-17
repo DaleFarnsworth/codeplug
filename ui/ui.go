@@ -714,6 +714,11 @@ func (parent *Form) AddFieldRows(r *codeplug.Record, fTypes ...codeplug.FieldTyp
 
 func (parent *Form) addFieldRow(r *codeplug.Record, fType codeplug.FieldType) {
 	f := r.Field(fType)
+	if f == nil {
+		log.Printf("Record type %s has no field type %s", r.Type(), fType)
+		return
+	}
+
 	w := newFieldWidget[f.ValueType()](f)
 	w.label = widgets.NewQLabel2(f.TypeName(), nil, 0)
 	parent.layout.AddRow(w.label, w.qWidget)

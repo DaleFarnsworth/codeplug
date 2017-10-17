@@ -76,6 +76,8 @@ type fieldInfo struct {
 	disabler       FieldType
 	listRecordType RecordType
 	recordInfo     *recordInfo
+	extOffset      int
+	extIndex       int
 }
 
 // A FieldType represents a field's type
@@ -1117,15 +1119,15 @@ func (v *textMessage) store(f *Field, recordBytes []byte) {
 }
 
 // name is a field value representing a utf8 name.
-type name string
+type strng string
 
-// String returns the name's value as a string.
-func (v *name) String(f *Field) string {
+// String returns the strng's value as a string.
+func (v *strng) String(f *Field) string {
 	return string(*v)
 }
 
-// SetString sets the name's value from a string.
-func (v *name) SetString(f *Field, s string) error {
+// SetString sets the strng's value from a string.
+func (v *strng) SetString(f *Field, s string) error {
 	if utf8.RuneCountInString(s) > f.size()/2 {
 		return fmt.Errorf("name too long")
 	}
@@ -1135,25 +1137,30 @@ func (v *name) SetString(f *Field, s string) error {
 		return err
 	}
 
-	*v = name(s)
+	*v = strng(s)
 
 	return nil
 }
 
-// valid returns nil if the name's value is valid.
-func (v *name) valid(f *Field) error {
+// valid returns nil if the strng's value is valid.
+func (v *strng) valid(f *Field) error {
 	return nil
 }
 
-// load sets the name's value from its bits in recordBytes.
-func (v *name) load(f *Field, recordBytes []byte) {
-	*v = name(ucs2BytesToString(f.bytes(recordBytes)))
+// load sets the strng's value from its bits in recordBytes.
+func (v *strng) load(f *Field, recordBytes []byte) {
+	*v = strng(ucs2BytesToString(f.bytes(recordBytes)))
 }
 
-// store stores the name's value into its bits in recordBytes.
-func (v *name) store(f *Field, recordBytes []byte) {
+// store stores the strng's value into its bits in recordBytes.
+func (v *strng) store(f *Field, recordBytes []byte) {
 	ucs2, _ := stringToUcs2Bytes(string(*v), f.size())
 	f.storeBytes(ucs2, recordBytes)
+}
+
+// name is a field value representing a utf8 name.
+type name struct {
+	strng
 }
 
 // privacyNumber is a field value representing a privacy number.

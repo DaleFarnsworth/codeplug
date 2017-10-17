@@ -257,7 +257,11 @@ func (r *Record) FieldTypes() []FieldType {
 
 // Fields returns a slice of all fields of the given type in the record.
 func (r *Record) Fields(fType FieldType) []*Field {
-	return (*r.fDesc)[fType].fields
+	fDesc := (*r.fDesc)[fType]
+	if fDesc == nil {
+		return nil
+	}
+	return fDesc.fields
 }
 
 // Field returns the first field of the given type in the record.

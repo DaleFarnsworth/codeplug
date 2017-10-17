@@ -79,6 +79,7 @@ type Codeplug struct {
 type CodeplugInfo struct {
 	TypeName    string
 	Type        CodeplugType
+	RdtLabel    string
 	RecordInfos []*recordInfo
 }
 

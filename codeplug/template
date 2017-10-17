@@ -50,6 +50,7 @@ var codeplugInfos = map[CodeplugType]*CodeplugInfo{
 var cp{{call $.Capitalize $c.Type}} = CodeplugInfo{
 	Type: Ct{{call $.Capitalize $c.Type}},
 	TypeName: "{{$c.TypeName}}",
+	RdtLabel: "{{$c.RdtLabel}}",
 	RecordInfos: []*recordInfo{
 	{{- range $rt := $c.RecordTypes}}
 		&ri{{$rt}},
@@ -137,6 +138,10 @@ var fi{{$f.Type}} = fieldInfo{
 {{- end}}
 {{- if $f.Disabler}}
 	disabler: Ft{{$f.Disabler}},
+{{- end}}
+{{- if $f.ExtIndex}}
+	extOffset: {{$f.ExtOffset}},
+	extIndex: {{$f.ExtIndex}},
 {{- end}}
 }
 {{- end}}

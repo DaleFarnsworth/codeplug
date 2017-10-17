@@ -19,13 +19,29 @@
     {
       "typeName": "MD-380/390",
       "type": "md380",
+      "rdtLabel": "DR780",
       "recordTypes": [
         "RdtHeader",
         "GeneralSettings",
         "TextMessage",
         "DigitalContacts",
         "GroupList",
-        "ZoneInformation",
+        "ZoneInformation_md380",
+        "ScanList",
+        "ChannelInformation"
+      ]
+    },
+    {
+      "typeName": "DJ-MD40",
+      "type": "md40",
+      "rdtLabel": "DJ-MD40",
+      "recordTypes": [
+        "RdtHeader",
+        "GeneralSettings",
+        "TextMessage",
+        "DigitalContacts",
+        "GroupList",
+        "ZoneInformation_md40",
         "ScanList",
         "ChannelInformation"
       ]
@@ -150,7 +166,7 @@
     },
     {
       "typeName": "Zone Information",
-      "type": "ZoneInformation",
+      "type": "ZoneInformation_md380",
       "offset": 84997,
       "size": 64,
       "max": 250,
@@ -163,7 +179,25 @@
       ],
       "fieldTypes": [
         "ZiName",
-        "ZiChannelMember"
+        "ZiChannelMember_md380"
+      ]
+    },
+    {
+      "typeName": "Zone Information",
+      "type": "ZoneInformation_md40",
+      "offset": 84997,
+      "size": 64,
+      "max": 250,
+      "delDescs": [
+        {
+          "offset": 0,
+          "size": 1,
+          "value": 0
+        }
+      ],
+      "fieldTypes": [
+        "ZiName",
+        "ZiChannelMember_md40"
       ]
     },
     {
@@ -250,6 +284,13 @@
     }
   ],
   "fields": [
+    {
+      "typeName": "Codeplug Label",
+      "type": "CodeplugLabel",
+      "bitOffset": 2344,
+      "bitSize": 256,
+      "valueType": "strng"
+    },
     {
       "typeName": "Low Frequency",
       "type": "RhLowFrequency",
@@ -700,12 +741,23 @@
     },
     {
       "typeName": "Channel Member",
-      "type": "ZiChannelMember",
+      "type": "ZiChannelMember_md380",
       "bitOffset": 256,
       "bitSize": 16,
       "max": 16,
       "valueType": "listIndex",
       "listType": "ChannelInformation"
+    },
+    {
+      "typeName": "Channel Member",
+      "type": "ZiChannelMember_md40",
+      "bitOffset": 256,
+      "bitSize": 16,
+      "max": 64,
+      "valueType": "listIndex",
+      "listType": "ChannelInformation",
+      "extOffset": 201253,
+      "extIndex": 16
     },
     {
       "typeName": "Scan List Name",

@@ -30,18 +30,20 @@ package codeplug
 // Codeplug types
 const (
 	CtMd380 CodeplugType = "md380"
+	CtMd40  CodeplugType = "md40"
 )
 
 // Record types
 const (
-	RtChannelInformation RecordType = "ChannelInformation"
-	RtDigitalContacts    RecordType = "DigitalContacts"
-	RtGeneralSettings    RecordType = "GeneralSettings"
-	RtGroupList          RecordType = "GroupList"
-	RtRdtHeader          RecordType = "RdtHeader"
-	RtScanList           RecordType = "ScanList"
-	RtTextMessage        RecordType = "TextMessage"
-	RtZoneInformation    RecordType = "ZoneInformation"
+	RtChannelInformation    RecordType = "ChannelInformation"
+	RtDigitalContacts       RecordType = "DigitalContacts"
+	RtGeneralSettings       RecordType = "GeneralSettings"
+	RtGroupList             RecordType = "GroupList"
+	RtRdtHeader             RecordType = "RdtHeader"
+	RtScanList              RecordType = "ScanList"
+	RtTextMessage           RecordType = "TextMessage"
+	RtZoneInformation_md380 RecordType = "ZoneInformation_md380"
+	RtZoneInformation_md40  RecordType = "ZoneInformation_md40"
 )
 
 // Field types
@@ -89,6 +91,7 @@ const (
 	FtCiTxRefFrequency          FieldType = "CiTxRefFrequency"
 	FtCiTxSignallingSystem      FieldType = "CiTxSignallingSystem"
 	FtCiVox                     FieldType = "CiVox"
+	FtCodeplugLabel             FieldType = "CodeplugLabel"
 	FtDcCallID                  FieldType = "DcCallID"
 	FtDcCallReceiveTone         FieldType = "DcCallReceiveTone"
 	FtDcCallType                FieldType = "DcCallType"
@@ -138,7 +141,8 @@ const (
 	FtSlSignallingHoldTime      FieldType = "SlSignallingHoldTime"
 	FtSlTxDesignatedChannel     FieldType = "SlTxDesignatedChannel"
 	FtTmTextMessage             FieldType = "TmTextMessage"
-	FtZiChannelMember           FieldType = "ZiChannelMember"
+	FtZiChannelMember_md380     FieldType = "ZiChannelMember_md380"
+	FtZiChannelMember_md40      FieldType = "ZiChannelMember_md40"
 	FtZiName                    FieldType = "ZiName"
 )
 
@@ -161,6 +165,7 @@ const (
 	VtRadioPassword   ValueType = "radioPassword"
 	VtRhFrequency     ValueType = "rhFrequency"
 	VtSpan            ValueType = "span"
+	VtStrng           ValueType = "strng"
 	VtTextMessage     ValueType = "textMessage"
 )
 
@@ -201,6 +206,8 @@ func newValue(vt ValueType) value {
 		return new(rhFrequency)
 	case VtSpan:
 		return new(span)
+	case VtStrng:
+		return new(strng)
 	case VtTextMessage:
 		return new(textMessage)
 	}
@@ -210,18 +217,36 @@ func newValue(vt ValueType) value {
 
 var codeplugInfos = map[CodeplugType]*CodeplugInfo{
 	CtMd380: &cpMd380,
+	CtMd40:  &cpMd40,
 }
 
 var cpMd380 = CodeplugInfo{
 	Type:     CtMd380,
 	TypeName: "MD-380/390",
+	RdtLabel: "DR780",
 	RecordInfos: []*recordInfo{
 		&riRdtHeader,
 		&riGeneralSettings,
 		&riTextMessage,
 		&riDigitalContacts,
 		&riGroupList,
-		&riZoneInformation,
+		&riZoneInformation_md380,
+		&riScanList,
+		&riChannelInformation,
+	},
+}
+
+var cpMd40 = CodeplugInfo{
+	Type:     CtMd40,
+	TypeName: "DJ-MD40",
+	RdtLabel: "DJ-MD40",
+	RecordInfos: []*recordInfo{
+		&riRdtHeader,
+		&riGeneralSettings,
+		&riTextMessage,
+		&riDigitalContacts,
+		&riGroupList,
+		&riZoneInformation_md40,
 		&riScanList,
 		&riChannelInformation,
 	},
@@ -434,8 +459,8 @@ var riTextMessage = recordInfo{
 	},
 }
 
-var riZoneInformation = recordInfo{
-	rType:    RtZoneInformation,
+var riZoneInformation_md380 = recordInfo{
+	rType:    RtZoneInformation_md380,
 	typeName: "Zone Information",
 	max:      250,
 	offset:   84997,
@@ -449,7 +474,26 @@ var riZoneInformation = recordInfo{
 	},
 	fieldInfos: []*fieldInfo{
 		&fiZiName,
-		&fiZiChannelMember,
+		&fiZiChannelMember_md380,
+	},
+}
+
+var riZoneInformation_md40 = recordInfo{
+	rType:    RtZoneInformation_md40,
+	typeName: "Zone Information",
+	max:      250,
+	offset:   84997,
+	size:     64,
+	delDescs: []delDesc{
+		delDesc{
+			offset: 0,
+			size:   1,
+			value:  0,
+		},
+	},
+	fieldInfos: []*fieldInfo{
+		&fiZiName,
+		&fiZiChannelMember_md40,
 	},
 }
 
@@ -968,6 +1012,15 @@ var fiCiVox = fieldInfo{
 	bitOffset: 35,
 	bitSize:   1,
 	valueType: VtOffOn,
+}
+
+var fiCodeplugLabel = fieldInfo{
+	fType:     FtCodeplugLabel,
+	typeName:  "Codeplug Label",
+	max:       1,
+	bitOffset: 2344,
+	bitSize:   256,
+	valueType: VtStrng,
 }
 
 var fiDcCallID = fieldInfo{
@@ -1558,14 +1611,26 @@ var fiTmTextMessage = fieldInfo{
 	valueType: VtTextMessage,
 }
 
-var fiZiChannelMember = fieldInfo{
-	fType:          FtZiChannelMember,
+var fiZiChannelMember_md380 = fieldInfo{
+	fType:          FtZiChannelMember_md380,
 	typeName:       "Channel Member",
 	max:            16,
 	bitOffset:      256,
 	bitSize:        16,
 	valueType:      VtListIndex,
 	listRecordType: RtChannelInformation,
+}
+
+var fiZiChannelMember_md40 = fieldInfo{
+	fType:          FtZiChannelMember_md40,
+	typeName:       "Channel Member",
+	max:            64,
+	bitOffset:      256,
+	bitSize:        16,
+	valueType:      VtListIndex,
+	listRecordType: RtChannelInformation,
+	extOffset:      201253,
+	extIndex:       16,
 }
 
 var fiZiName = fieldInfo{
