@@ -46,13 +46,17 @@ type App struct {
 	filename string
 }
 
-func NewApp() *App {
+func NewApp() (*App, error) {
 	app := new(App)
 	qApp := widgets.NewQApplication(len(os.Args), os.Args)
 
+	if qApp == nil {
+		return nil, fmt.Errorf("Not built with QT")
+	}
+
 	app.qApp = *qApp
 
-	return app
+	return app, nil
 }
 
 func (app *App) SetOrganizationName(str string) {
