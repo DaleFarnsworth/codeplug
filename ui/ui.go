@@ -1145,12 +1145,12 @@ func YesNoPopup(title string, msg string) PopupValue {
 	return PopupNo
 }
 
-func OpenFilename(title string) string {
-	return widgets.QFileDialog_GetOpenFileName(nil, title, "", "", "", 0)
+func OpenFilename(title string, dir string) string {
+	return widgets.QFileDialog_GetOpenFileName(nil, title, dir, "", "", 0)
 }
 
-func SaveFilename(title string) string {
-	return widgets.QFileDialog_GetSaveFileName(nil, title, "", "", "", 0)
+func SaveFilename(title string, dir string) string {
+	return widgets.QFileDialog_GetSaveFileName(nil, title, dir, "", "", 0)
 }
 
 func ResetWindows(cp *codeplug.Codeplug) {
