@@ -48,8 +48,8 @@ type value interface {
 	String(*Field) string
 	SetString(*Field, string) error
 	valid(*Field) error
-	load(*Field, []byte)
-	store(*Field, []byte)
+	load(*Field)
+	store(*Field)
 }
 
 // An fDesc contains a field type's dynamic information.
@@ -306,13 +306,13 @@ func (f *Field) DefaultValue() string {
 	return f.defaultValue
 }
 
-// load sets the field's value from the field's part of recordBytes.
-func (f *Field) load(recordBytes []byte) {
-	f.value.load(f, recordBytes)
+// load sets the field's value from the field's part of cp.bytes.
+func (f *Field) load() {
+	f.value.load(f)
 }
 
-// store inserts the field's value into the field's part of recordBytes.
-func (f *Field) store(recordBytes []byte) {
+// store inserts the field's value into the field's part of cp.bytes.
+func (f *Field) store() {
 	if !f.IsEnabled() {
 		if _, invalid := f.value.(invalidValue); invalid {
 			// Leave invalid value in the codeplug as we loaded it.
@@ -320,17 +320,17 @@ func (f *Field) store(recordBytes []byte) {
 		}
 	}
 
-	f.value.store(f, recordBytes)
+	f.value.store(f)
 }
 
-// bytes returns the field's part of recordBytes.
-func (f *Field) bytes(recordBytes []byte) []byte {
-	return f.fDesc.bytes(f.fIndex, recordBytes)
+// bytes returns the field's part of cp.bytes.
+func (f *Field) bytes() []byte {
+	return f.fDesc.bytes(f.record, f.fIndex)
 }
 
-// storeBytes stores the field's value into the field's part of recordBytes.
-func (f *Field) storeBytes(bytes []byte, recordBytes []byte) {
-	f.fDesc.storeBytes(bytes, f.fIndex, recordBytes)
+// storeBytes stores the field's value into the field's part of cp.bytes.
+func (f *Field) storeBytes(bytes []byte) {
+	f.fDesc.storeBytes(bytes, f.record, f.fIndex)
 }
 
 // TypeName returns the field's type's name.
@@ -409,12 +409,12 @@ func (f *Field) EnablingFieldType() FieldType {
 }
 
 // fieldDeleted returns true if the field at fIndex is deleted.
-func (fd *fDesc) fieldDeleted(fIndex int, recordBytes []byte) bool {
+func (fd *fDesc) fieldDeleted(r *Record, fIndex int) bool {
 	if fd.max == 1 {
 		return false
 	}
 
-	bytes := fd.bytes(fIndex, recordBytes)
+	bytes := fd.bytes(r, fIndex)
 	for i := range bytes {
 		if bytes[i] != 0 {
 			return false
@@ -425,18 +425,23 @@ func (fd *fDesc) fieldDeleted(fIndex int, recordBytes []byte) bool {
 }
 
 // deleteField marks the field at fIndex as deleted.
-func (fd *fDesc) deleteField(fIndex int, recordBytes []byte) {
-	bytes := fd.bytes(fIndex, recordBytes)
+func (fd *fDesc) deleteField(r *Record, fIndex int) {
+	bytes := fd.bytes(r, fIndex)
 	for i := range bytes {
 		bytes[i] = 0
 	}
 }
 
-// bytes returns the bytes of the field from recordBytes.
-func (fd *fDesc) bytes(fIndex int, recordBytes []byte) []byte {
+// bytes returns the bytes of the field from cp.bytes.
+func (fd *fDesc) bytes(r *Record, fIndex int) []byte {
 	size := fd.size()
-	offset := fd.offset(fIndex)
-	fieldBytes := recordBytes[offset : offset+size]
+	offset := fd.extOffset
+	if fd.extIndex == 0 || fIndex < fd.extIndex {
+		offset = r.offset + r.size*r.rIndex + fd.offset(fIndex)
+	}
+
+	cp := r.codeplug
+	fieldBytes := cp.bytes[offset : offset+size]
 
 	bytes := make([]byte, len(fieldBytes))
 	copy(bytes, fieldBytes)
@@ -454,16 +459,20 @@ func (fd *fDesc) bytes(fIndex int, recordBytes []byte) []byte {
 	return bytes
 }
 
-// storeBytes inserts bytes value into the field's bits in recordBytes.
-func (fd *fDesc) storeBytes(bytes []byte, fIndex int, recordBytes []byte) {
+// storeBytes inserts bytes value into the field's bits in cp.bytes.
+func (fd *fDesc) storeBytes(bytes []byte, r *Record, fIndex int) {
 	size := fd.size()
 	if size != len(bytes) {
 		panic(fmt.Sprintf("%s: storeBytes(%v) size mismatch",
 			fd.typeName, bytes))
 	}
-	offset := fd.offset(fIndex)
+	offset := fd.extOffset
+	if fd.extIndex == 0 || fIndex < fd.extIndex {
+		offset = r.offset + r.size*r.rIndex + fd.offset(fIndex)
+	}
+	cp := r.codeplug
 	if fd.bitSize >= 8 {
-		copy(recordBytes[offset:offset+size], bytes)
+		copy(cp.bytes[offset:offset+size], bytes)
 		return
 	}
 
@@ -480,8 +489,8 @@ func (fd *fDesc) storeBytes(bytes []byte, fIndex int, recordBytes []byte) {
 		panic("value wider than bitSize")
 	}
 
-	recordBytes[offset] &= byte(mask)
-	recordBytes[offset] |= byte(value)
+	cp.bytes[offset] &= byte(mask)
+	cp.bytes[offset] |= byte(value)
 }
 
 // offset returns the byte offset of the field at fIndex within the field's
@@ -530,14 +539,14 @@ func (v *frequency) valid(f *Field) error {
 	return f.record.codeplug.frequencyValid(float64(*v))
 }
 
-// load sets the frequency's value from its bits in recordBytes.
-func (v *frequency) load(f *Field, recordBytes []byte) {
-	*v = frequency(bytesToFrequency(f.bytes(recordBytes)))
+// load sets the frequency's value from its bits in cp.bytes.
+func (v *frequency) load(f *Field) {
+	*v = frequency(bytesToFrequency(f.bytes()))
 }
 
-// store stores the frequency's value into its bits in recordBytes.
-func (v *frequency) store(f *Field, recordBytes []byte) {
-	f.storeBytes(frequencyToBytes(float64(*v)), recordBytes)
+// store stores the frequency's value into its bits in cp.bytes.
+func (v *frequency) store(f *Field) {
+	f.storeBytes(frequencyToBytes(float64(*v)))
 }
 
 // onOff is a field value representing a boolean value.
@@ -575,21 +584,21 @@ func (v *onOff) valid(f *Field) error {
 	return nil
 }
 
-// load sets the onOff's value from its bits in recordBytes.
-func (v *onOff) load(f *Field, recordBytes []byte) {
+// load sets the onOff's value from its bits in cp.bytes.
+func (v *onOff) load(f *Field) {
 	*v = false
-	if f.bytes(recordBytes)[0] == 0 {
+	if f.bytes()[0] == 0 {
 		*v = true
 	}
 }
 
-// store stores the onOff's value into its bits in recordBytes.
-func (v *onOff) store(f *Field, recordBytes []byte) {
+// store stores the onOff's value into its bits in cp.bytes.
+func (v *onOff) store(f *Field) {
 	b := 1
 	if *v {
 		b = 0
 	}
-	f.storeBytes([]byte{byte(b)}, recordBytes)
+	f.storeBytes([]byte{byte(b)})
 }
 
 // offOn is a field value representing a boolean value.
@@ -598,21 +607,21 @@ type offOn struct {
 	onOff
 }
 
-// load sets the offOn's value from its bits in recordBytes.
-func (v *offOn) load(f *Field, recordBytes []byte) {
+// load sets the offOn's value from its bits in cp.bytes.
+func (v *offOn) load(f *Field) {
 	v.onOff = false
-	if f.bytes(recordBytes)[0] != 0 {
+	if f.bytes()[0] != 0 {
 		v.onOff = true
 	}
 }
 
-// store stores the offOn's value into its bits in recordBytes.
-func (v *offOn) store(f *Field, recordBytes []byte) {
+// store stores the offOn's value into its bits in cp.bytes.
+func (v *offOn) store(f *Field) {
 	b := 0
 	if v.onOff {
 		b = 1
 	}
-	f.storeBytes([]byte{byte(b)}, recordBytes)
+	f.storeBytes([]byte{byte(b)})
 }
 
 // iStrings is a field value where an integer value is used to index
@@ -666,13 +675,13 @@ func (v *iStrings) valid(f *Field) error {
 }
 
 // valid returns nil if the iStrings' value is valid.
-func (v *iStrings) load(f *Field, recordBytes []byte) {
-	*v = iStrings(f.bytes(recordBytes)[0])
+func (v *iStrings) load(f *Field) {
+	*v = iStrings(f.bytes()[0])
 }
 
-// store stores the iStrings' value into its bits in recordBytes.
-func (v *iStrings) store(f *Field, recordBytes []byte) {
-	f.storeBytes([]byte{byte(*v)}, recordBytes)
+// store stores the iStrings' value into its bits in cp.bytes.
+func (v *iStrings) store(f *Field) {
+	f.storeBytes([]byte{byte(*v)})
 }
 
 // span is a field value representing a range of integer values
@@ -737,14 +746,14 @@ func (v *span) validValue(f *Field, value int) error {
 	return nil
 }
 
-// load sets the span's value from its bits in recordBytes.
-func (v *span) load(f *Field, recordBytes []byte) {
-	*v = span(f.bytes(recordBytes)[0])
+// load sets the span's value from its bits in cp.bytes.
+func (v *span) load(f *Field) {
+	*v = span(f.bytes()[0])
 }
 
-// store stores the span's value into its bits in recordBytes.
-func (v *span) store(f *Field, recordBytes []byte) {
-	f.storeBytes([]byte{byte(*v)}, recordBytes)
+// store stores the span's value into its bits in cp.bytes.
+func (v *span) store(f *Field) {
+	f.storeBytes([]byte{byte(*v)})
 }
 
 // findexedStrings is a field value where specific integer values
@@ -794,14 +803,14 @@ func (v *indexedStrings) valid(f *Field) error {
 	return fmt.Errorf("%d: invalid index", uint16(*v))
 }
 
-// load sets the indexedStrings's value from its bits in recordBytes.
-func (v *indexedStrings) load(f *Field, recordBytes []byte) {
-	*v = indexedStrings(f.bytes(recordBytes)[0])
+// load sets the indexedStrings's value from its bits in cp.bytes.
+func (v *indexedStrings) load(f *Field) {
+	*v = indexedStrings(f.bytes()[0])
 }
 
-// store stores the indexedStrings's value into its bits in recordBytes.
-func (v *indexedStrings) store(f *Field, recordBytes []byte) {
-	f.storeBytes([]byte{byte(*v)}, recordBytes)
+// store stores the indexedStrings's value into its bits in cp.bytes.
+func (v *indexedStrings) store(f *Field) {
+	f.storeBytes([]byte{byte(*v)})
 }
 
 // rhFrequency is a field value representing a frequency in Hertz.
@@ -829,15 +838,15 @@ func (v *rhFrequency) valid(f *Field) error {
 	return nil
 }
 
-// load sets the rhFrequency's value from its bits in recordBytes.
-func (v *rhFrequency) load(f *Field, recordBytes []byte) {
-	*v = rhFrequency(bcdToBinary(bytesToInt(f.bytes(recordBytes)))) / 10
+// load sets the rhFrequency's value from its bits in cp.bytes.
+func (v *rhFrequency) load(f *Field) {
+	*v = rhFrequency(bcdToBinary(bytesToInt(f.bytes()))) / 10
 }
 
-// store stores the rhFrequency's value into its bits in recordBytes.
-func (v *rhFrequency) store(f *Field, recordBytes []byte) {
+// store stores the rhFrequency's value into its bits in cp.bytes.
+func (v *rhFrequency) store(f *Field) {
 	i := binaryToBcd(int(*v) * 10)
-	f.storeBytes(intToBytes(i, f.size()), recordBytes)
+	f.storeBytes(intToBytes(i, f.size()))
 }
 
 // introLine is a field value representing a introductory line of text
@@ -875,15 +884,15 @@ func (v *introLine) validValue(f *Field, value string) error {
 	return err
 }
 
-// load sets the introLine's value from its bits in recordBytes.
-func (v *introLine) load(f *Field, recordBytes []byte) {
-	*v = introLine(ucs2BytesToString(f.bytes(recordBytes)))
+// load sets the introLine's value from its bits in cp.bytes.
+func (v *introLine) load(f *Field) {
+	*v = introLine(ucs2BytesToString(f.bytes()))
 }
 
-// store stores the introLine's value into its bits in recordBytes.
-func (v *introLine) store(f *Field, recordBytes []byte) {
+// store stores the introLine's value into its bits in cp.bytes.
+func (v *introLine) store(f *Field) {
 	ucs2, _ := stringToUcs2Bytes(string(*v), f.size())
-	f.storeBytes(ucs2, recordBytes)
+	f.storeBytes(ucs2)
 }
 
 // callID is a field value representing a DMR Call ID
@@ -915,14 +924,14 @@ func (v *callID) valid(f *Field) error {
 	return nil
 }
 
-// load sets the callID's value from its bits in recordBytes.
-func (v *callID) load(f *Field, recordBytes []byte) {
-	*v = callID(bytesToInt(f.bytes(recordBytes)))
+// load sets the callID's value from its bits in cp.bytes.
+func (v *callID) load(f *Field) {
+	*v = callID(bytesToInt(f.bytes()))
 }
 
-// store stores the callID's value into its bits in recordBytes.
-func (v *callID) store(f *Field, recordBytes []byte) {
-	f.storeBytes(intToBytes(int(*v), f.size()), recordBytes)
+// store stores the callID's value into its bits in cp.bytes.
+func (v *callID) store(f *Field) {
+	f.storeBytes(intToBytes(int(*v), f.size()))
 }
 
 // radioPassword is a field value representing password for the radio.
@@ -953,9 +962,9 @@ func (v *radioPassword) valid(f *Field) error {
 	return mustBeNumericAscii(string(*v))
 }
 
-// load sets the radioPassword's value from its bits in recordBytes.
-func (v *radioPassword) load(f *Field, recordBytes []byte) {
-	intValue := bytesToInt(f.bytes(recordBytes))
+// load sets the radioPassword's value from its bits in cp.bytes.
+func (v *radioPassword) load(f *Field) {
+	intValue := bytesToInt(f.bytes())
 	if uint(intValue) == 0xffffffff {
 		*v = radioPassword("00000000")
 		return
@@ -963,11 +972,11 @@ func (v *radioPassword) load(f *Field, recordBytes []byte) {
 	*v = radioPassword(fmt.Sprintf("%08d", bcdToBinary(intValue)))
 }
 
-// store stores the radioPassword's value into its bits in recordBytes.
-func (v *radioPassword) store(f *Field, recordBytes []byte) {
+// store stores the radioPassword's value into its bits in cp.bytes.
+func (v *radioPassword) store(f *Field) {
 	val, _ := strconv.ParseUint(string(*v), 10, 32)
 	bytes := intToBytes(binaryToBcd(int(val)), f.size())
-	f.storeBytes(bytes, recordBytes)
+	f.storeBytes(bytes)
 }
 
 // pcPassword is a field value representing a password for the computer.
@@ -1012,20 +1021,20 @@ func (v *pcPassword) valid(f *Field) error {
 	return mustBePrintableAscii(string(*v))
 }
 
-// load sets the pcPassword's value from its bits in recordBytes.
-func (v *pcPassword) load(f *Field, recordBytes []byte) {
-	*v = pcPassword(f.bytes(recordBytes))
+// load sets the pcPassword's value from its bits in cp.bytes.
+func (v *pcPassword) load(f *Field) {
+	*v = pcPassword(f.bytes())
 }
 
-// store stores the pcPassword's value into its bits in recordBytes.
-func (v *pcPassword) store(f *Field, recordBytes []byte) {
+// store stores the pcPassword's value into its bits in cp.bytes.
+func (v *pcPassword) store(f *Field) {
 	if string(*v) == "" {
 		bytes := []byte("\xff\xff\xff\xff\xff\xff\xff\xff")
-		f.storeBytes(bytes, recordBytes)
+		f.storeBytes(bytes)
 		return
 	}
 
-	f.storeBytes([]byte(*v), recordBytes)
+	f.storeBytes([]byte(*v))
 }
 
 // radioName is a field value representing the name of the radio.
@@ -1066,15 +1075,15 @@ func (v *radioName) validValue(f *Field, s string) error {
 	return mustBePrintableAscii(string(*v))
 }
 
-// load sets the radioName's value from its bits in recordBytes.
-func (v *radioName) load(f *Field, recordBytes []byte) {
-	*v = radioName(ucs2BytesToString(f.bytes(recordBytes)))
+// load sets the radioName's value from its bits in cp.bytes.
+func (v *radioName) load(f *Field) {
+	*v = radioName(ucs2BytesToString(f.bytes()))
 }
 
-// store stores the radioName's value into its bits in recordBytes.
-func (v *radioName) store(f *Field, recordBytes []byte) {
+// store stores the radioName's value into its bits in cp.bytes.
+func (v *radioName) store(f *Field) {
 	ucs2, _ := stringToUcs2Bytes(string(*v), f.size())
-	f.storeBytes(ucs2, recordBytes)
+	f.storeBytes(ucs2)
 }
 
 // textMessage is a field value representing a text message
@@ -1107,15 +1116,15 @@ func (v *textMessage) valid(f *Field) error {
 	return err
 }
 
-// load sets the textMessage's value from its bits in recordBytes.
-func (v *textMessage) load(f *Field, recordBytes []byte) {
-	*v = textMessage(ucs2BytesToString(f.bytes(recordBytes)))
+// load sets the textMessage's value from its bits in cp.bytes.
+func (v *textMessage) load(f *Field) {
+	*v = textMessage(ucs2BytesToString(f.bytes()))
 }
 
-// store stores the textMessage's value into its bits in recordBytes.
-func (v *textMessage) store(f *Field, recordBytes []byte) {
+// store stores the textMessage's value into its bits in cp.bytes.
+func (v *textMessage) store(f *Field) {
 	ucs2, _ := stringToUcs2Bytes(string(*v), f.size())
-	f.storeBytes(ucs2, recordBytes)
+	f.storeBytes(ucs2)
 }
 
 // name is a field value representing a utf8 name.
@@ -1147,15 +1156,15 @@ func (v *strng) valid(f *Field) error {
 	return nil
 }
 
-// load sets the strng's value from its bits in recordBytes.
-func (v *strng) load(f *Field, recordBytes []byte) {
-	*v = strng(ucs2BytesToString(f.bytes(recordBytes)))
+// load sets the strng's value from its bits in cp.bytes.
+func (v *strng) load(f *Field) {
+	*v = strng(ucs2BytesToString(f.bytes()))
 }
 
-// store stores the strng's value into its bits in recordBytes.
-func (v *strng) store(f *Field, recordBytes []byte) {
+// store stores the strng's value into its bits in cp.bytes.
+func (v *strng) store(f *Field) {
 	ucs2, _ := stringToUcs2Bytes(string(*v), f.size())
-	f.storeBytes(ucs2, recordBytes)
+	f.storeBytes(ucs2)
 }
 
 // name is a field value representing a utf8 name.
@@ -1240,14 +1249,14 @@ func (v *ctcssDcs) valid(f *Field) error {
 	return nil
 }
 
-// load sets the ctcssDcs's value from its bits in recordBytes.
-func (v *ctcssDcs) load(f *Field, recordBytes []byte) {
-	*v = ctcssDcs(bytesToInt(f.bytes(recordBytes)))
+// load sets the ctcssDcs's value from its bits in cp.bytes.
+func (v *ctcssDcs) load(f *Field) {
+	*v = ctcssDcs(bytesToInt(f.bytes()))
 }
 
-// store stores the ctcssDcs's value into its bits in recordBytes.
-func (v *ctcssDcs) store(f *Field, recordBytes []byte) {
-	f.storeBytes(intToBytes(int(*v), f.size()), recordBytes)
+// store stores the ctcssDcs's value into its bits in cp.bytes.
+func (v *ctcssDcs) store(f *Field) {
+	f.storeBytes(intToBytes(int(*v), f.size()))
 }
 
 // memberListIndex is a field value representing an index into a slice
@@ -1381,14 +1390,14 @@ type invalidValue struct {
 	value
 }
 
-// load sets the listIndex's value from its bits in recordBytes.
-func (v *listIndex) load(f *Field, recordBytes []byte) {
-	*v = listIndex(bytesToInt(f.bytes(recordBytes)))
+// load sets the listIndex's value from its bits in cp.bytes.
+func (v *listIndex) load(f *Field) {
+	*v = listIndex(bytesToInt(f.bytes()))
 }
 
-// store stores the listIndex's value into its bits in recordBytes.
-func (v *listIndex) store(f *Field, recordBytes []byte) {
-	f.storeBytes(intToBytes(int(*v), f.size()), recordBytes)
+// store stores the listIndex's value into its bits in cp.bytes.
+func (v *listIndex) store(f *Field) {
+	f.storeBytes(intToBytes(int(*v), f.size()))
 }
 
 var cachedCtcssDcsStrings []string

@@ -75,16 +75,8 @@ func deleteRecord(records *[]*Record, i int) {
 	*records = (*records)[:len(*records)-1]
 }
 
-// recordBytes returns the byte slice making up the record.
-func (r *Record) recordBytes() []byte {
-	recordBytes := make([]byte, r.size)
-	r.store(recordBytes)
-
-	return recordBytes
-}
-
 // loadRecords loads all the records in rDesc from the codeplug's file.
-func (rd *rDesc) loadRecords(cpBytes []byte) {
+func (rd *rDesc) loadRecords() {
 	records := rd.records
 	if len(records) > 0 {
 		records = records[0:cap(records)]
@@ -95,15 +87,13 @@ func (rd *rDesc) loadRecords(cpBytes []byte) {
 	cp := rd.codeplug
 	length := 0
 	for rIndex := range records {
-		if !rd.recordIsDeleted(rIndex, cpBytes) {
-			offset := rd.offset + rd.size*rIndex
-			recordBytes := cpBytes[offset : offset+rd.size]
+		if !rd.recordIsDeleted(cp, rIndex) {
 			r := records[rIndex]
 			if r == nil {
 				r = cp.newRecord(rd.rType, rIndex)
 			}
 
-			r.load(recordBytes)
+			r.load()
 			nameField := r.NameField()
 			if nameField != nil && nameField.String() == "" {
 				continue
@@ -144,9 +134,9 @@ func (r *Record) addField(f *Field) error {
 	return nil
 }
 
-// load replaces the record's contents with those corresponding
-// to the byte slice.
-func (r *Record) load(recordBytes []byte) {
+// load replaces the record's contents with the fields found in
+// the codeplug.
+func (r *Record) load() {
 	ri := r.rDesc.recordInfo
 
 	for i := range ri.fieldInfos {
@@ -174,7 +164,7 @@ func (r *Record) load(recordBytes []byte) {
 
 		length := 0
 		for fIndex := range fields {
-			if !fd.fieldDeleted(fIndex, recordBytes) {
+			if !fd.fieldDeleted(r, fIndex) {
 				f := fields[fIndex]
 				if f == nil {
 					f = &Field{}
@@ -184,7 +174,7 @@ func (r *Record) load(recordBytes []byte) {
 				f.fIndex = fIndex
 				f.value = newValue(fi.valueType)
 
-				f.load(recordBytes)
+				f.load()
 
 				span := f.span
 				if span != nil {
@@ -224,13 +214,13 @@ func (r *Record) valid() error {
 }
 
 // stores stores all all fields of the record into the given byte slice.
-func (r *Record) store(recordBytes []byte) {
+func (r *Record) store() {
 	for _, fd := range *r.fDesc {
 		for fIndex := 0; fIndex < fd.max; fIndex++ {
 			if fIndex < len(fd.fields) {
-				fd.fields[fIndex].store(recordBytes)
+				fd.fields[fIndex].store()
 			} else {
-				fd.deleteField(fIndex, recordBytes)
+				fd.deleteField(r, fIndex)
 			}
 		}
 	}
@@ -384,13 +374,13 @@ func (rd *rDesc) ListNames() *[]string {
 }
 
 // recordIsDeleted returns true if the record at rIndex is deleted.
-func (rd *rDesc) recordIsDeleted(rIndex int, cpBytes []byte) bool {
+func (rd *rDesc) recordIsDeleted(cp *Codeplug, rIndex int) bool {
 nextDelDesc:
 	for _, dd := range rd.delDescs {
 		offset := rd.offset + rIndex*rd.size + int(dd.offset)
 
 		for i := 0; i < int(dd.size); i++ {
-			if cpBytes[offset+i] != dd.value {
+			if cp.bytes[offset+i] != dd.value {
 				continue nextDelDesc
 			}
 		}
@@ -401,12 +391,12 @@ nextDelDesc:
 }
 
 // deleteRecord marks the record at rIndex as deleted.
-func (rd *rDesc) deleteRecord(rIndex int, cpBytes []byte) {
+func (rd *rDesc) deleteRecord(cp *Codeplug, rIndex int) {
 	for _, dd := range rd.delDescs {
 		offset := rd.offset + rIndex*rd.size + int(dd.offset)
 
 		for i := 0; i < int(dd.size); i++ {
-			cpBytes[offset+i] = dd.value
+			cp.bytes[offset+i] = dd.value
 		}
 	}
 }

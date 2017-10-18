@@ -98,7 +98,7 @@ func NewCodeplug(filename string, cpType CodeplugType) (*Codeplug, error) {
 		return nil, err
 	}
 
-	cp.bytes, err = cp.Open(cp.filename, cp.codeplugType)
+	err = cp.Read(cp.filename, cp.codeplugType)
 	if err != nil {
 		return nil, err
 	}
@@ -130,22 +130,20 @@ func (cp *Codeplug) Free() {
 	}
 }
 
-// Open returns a Codeplug of the given type representing the given file.
-// An error is returned if the file does not represent a valid codeplug of
-// that type.
-func (cp *Codeplug) Open(filename string, cpType CodeplugType) ([]byte, error) {
+// Read opens a file and reads its contents into cp.bytes.
+func (cp *Codeplug) Read(filename string, cpType CodeplugType) error {
 	cp.filename = filename
 	cp.codeplugType = cpType
 
 	fType, err := getFileType(filename)
 	cp.fileType = fType
 	if err != nil {
-		return []byte{}, err
+		return err
 	}
 
 	file, err := os.Open(filename)
 	if err != nil {
-		return []byte{}, err
+		return err
 	}
 	defer file.Close()
 
@@ -165,18 +163,19 @@ func (cp *Codeplug) Open(filename string, cpType CodeplugType) ([]byte, error) {
 	bytesRead, err := file.Read(bytes)
 	if err != nil {
 		cp.fileType = FileTypeNone
-		return []byte{}, err
+		return err
 	}
 
 	if bytesRead != cp.fileSize {
 		cp.fileType = FileTypeNone
 		err = fmt.Errorf("Failed to read all of %s", cp.filename)
-		return []byte{}, err
+		return err
 	}
 
+	cp.bytes = cpBytes
 	cp.fileType = fType
 
-	return cpBytes, nil
+	return nil
 }
 
 // Revert reverts the codeplug to its state after the most recent open or
@@ -185,7 +184,7 @@ func (cp *Codeplug) Open(filename string, cpType CodeplugType) ([]byte, error) {
 func (cp *Codeplug) Revert() error {
 	cp.clearCachedListNames()
 
-	cp.load(cp.bytes)
+	cp.load()
 
 	if err := cp.valid(); err != nil {
 		return err
@@ -231,9 +230,7 @@ func (cp *Codeplug) SaveToFile(filename string) error {
 		return err
 	}
 
-	cpBytes := make([]byte, fileSizeRdt)
-	copy(cpBytes, cp.bytes)
-	cp.store(cpBytes)
+	cp.store()
 
 	dir, base := filepath.Split(filename)
 	tmpFile, err := ioutil.TempFile(dir, base)
@@ -241,7 +238,7 @@ func (cp *Codeplug) SaveToFile(filename string) error {
 		return err
 	}
 
-	if err = cp.write(tmpFile, cpBytes); err != nil {
+	if err = cp.write(tmpFile); err != nil {
 		os.Remove(tmpFile.Name())
 		return err
 	}
@@ -267,7 +264,10 @@ func (cp *Codeplug) CurrentHash() [sha256.Size]byte {
 
 	bytes := make([]byte, fileSizeRdt)
 	copy(bytes, cp.bytes)
-	cp.store(bytes)
+	saveBytes := cp.bytes
+	cp.bytes = bytes
+	cp.store()
+	cp.bytes = saveBytes
 
 	return sha256.Sum256(bytes)
 }
@@ -398,16 +398,8 @@ func (cp *Codeplug) ConnectChange(fn func(*Change)) {
 	cp.connectChange = fn
 }
 
-// bytesToRecord creates a record from the given byte slice.
-func (cp *Codeplug) bytesToRecord(rType RecordType, rIndex int, rBytes []byte) *Record {
-	r := cp.newRecord(rType, rIndex)
-	r.load(rBytes)
-
-	return r
-}
-
 // load loads all the records into the codeplug from its file.
-func (cp *Codeplug) load(cpBytes []byte) {
+func (cp *Codeplug) load() {
 	recordInfos := codeplugInfos[cp.codeplugType].RecordInfos
 
 	for i := range recordInfos {
@@ -419,7 +411,7 @@ func (cp *Codeplug) load(cpBytes []byte) {
 		rd := &rDesc{recordInfo: ri}
 		cp.rDesc[ri.rType] = rd
 		rd.codeplug = cp
-		rd.loadRecords(cpBytes)
+		rd.loadRecords()
 	}
 }
 
@@ -481,28 +473,26 @@ func getFileType(filename string) (FileType, error) {
 }
 
 // store stores all all fields of the codeplug into its byte slice.
-func (cp *Codeplug) store(cpBytes []byte) {
+func (cp *Codeplug) store() {
 	for _, rd := range cp.rDesc {
 		for rIndex := 0; rIndex < rd.max; rIndex++ {
 			if rIndex < len(rd.records) {
-				offset := rd.offset + rd.size*rIndex
-				recordBytes := cpBytes[offset : offset+rd.size]
-				rd.records[rIndex].store(recordBytes)
+				rd.records[rIndex].store()
 			} else {
-				rd.deleteRecord(rIndex, cpBytes)
+				rd.deleteRecord(cp, rIndex)
 			}
 		}
 	}
 }
 
 // write writes the codeplug's byte slice into the given file.
-func (cp *Codeplug) write(file *os.File, cpBytes []byte) (err error) {
+func (cp *Codeplug) write(file *os.File) (err error) {
 	defer func() {
 		err = file.Close()
 		return
 	}()
 
-	bytes := cpBytes[cp.fileOffset : cp.fileOffset+cp.fileSize]
+	bytes := cp.bytes[cp.fileOffset : cp.fileOffset+cp.fileSize]
 	bytesWritten, err := file.Write(bytes)
 	if err != nil {
 		return err
@@ -1078,9 +1068,7 @@ func (cp *Codeplug) ImportFrom(filename string) error {
 	}
 	defer file.Close()
 
-	cpBytes := make([]byte, fileSizeRdt)
-	copy(cpBytes, cp.bytes)
-	cp.store(cpBytes)
+	cp.store()
 
 	for _, rType := range cp.RecordTypes() {
 		records := cp.Records(rType)
@@ -1091,7 +1079,7 @@ func (cp *Codeplug) ImportFrom(filename string) error {
 
 	records, err := cp.ParseRecords(file)
 	if err != nil {
-		cp.load(cpBytes)
+		cp.load()
 		return err
 	}
 
@@ -1102,7 +1090,7 @@ func (cp *Codeplug) ImportFrom(filename string) error {
 
 	err, f := updateDeferredFields(records)
 	if err != nil {
-		cp.load(cpBytes)
+		cp.load()
 		dValue := f.value.(deferredValue)
 		err = fmt.Errorf("no %s: %s", f.typeName, dValue.str)
 		return positionError{err, dValue.pos}
@@ -1110,7 +1098,7 @@ func (cp *Codeplug) ImportFrom(filename string) error {
 
 	for _, rd := range cp.rDesc {
 		if len(rd.records) == 0 {
-			cp.load(cpBytes)
+			cp.load()
 			rtName := string(rd.rType)
 			err := fmt.Errorf("no %s records found", rtName)
 			return err
