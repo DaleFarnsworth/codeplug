@@ -78,11 +78,7 @@ func deleteRecord(records *[]*Record, i int) {
 // loadRecords loads all the records in rDesc from the codeplug's file.
 func (rd *rDesc) loadRecords() {
 	records := rd.records
-	if len(records) > 0 {
-		records = records[0:cap(records)]
-	} else {
-		records = make([]*Record, rd.max)
-	}
+	records = make([]*Record, rd.max)
 
 	cp := rd.codeplug
 	length := 0
@@ -155,12 +151,7 @@ func (r *Record) load() {
 
 	for _, fd := range *r.fDesc {
 		fi := fd.fieldInfo
-		fields := fd.fields
-		if len(fields) > 0 {
-			fields = fields[0:cap(fields)]
-		} else {
-			fields = make([]*Field, fi.max)
-		}
+		fields := make([]*Field, fi.max)
 
 		length := 0
 		for fIndex := range fields {

@@ -1,11 +1,4 @@
 
-// Codeplug types
-const (
-{{- range $c := $.Codeplugs}}
-	Ct{{call $.Capitalize $c.Type}} CodeplugType = "{{$c.Type}}"
-{{- end}}
-)
-
 // Record types
 const (
 {{- range $r := $.Records}}
@@ -39,18 +32,25 @@ func newValue(vt ValueType) value {
 	return nil
 }
 
-var codeplugInfos = map[CodeplugType]*CodeplugInfo{
+var codeplugInfos = []*CodeplugInfo{
 {{- range $c := $.Codeplugs}}
-	Ct{{call $.Capitalize $c.Type}}: &cp{{call $.Capitalize $c.Type}},
+	&cp{{call $.Capitalize $c.Type}},
 {{- end}}
 }
 
 {{- range $c := $.Codeplugs}}
 
 var cp{{call $.Capitalize $c.Type}} = CodeplugInfo{
-	Type: Ct{{call $.Capitalize $c.Type}},
-	TypeName: "{{$c.TypeName}}",
-	RdtLabel: "{{$c.RdtLabel}}",
+	Name: "{{$c.Name}}",
+	Type: "{{$c.Type}}",
+	Labels: []string{
+	{{- range $label := $c.Labels}}
+		"{{$label}}",
+	{{- end}}
+	},
+	RdtSize: {{$c.RdtSize}},
+	BinSize: {{$c.BinSize}},
+	BinOffset: {{$c.BinOffset}},
 	RecordInfos: []*recordInfo{
 	{{- range $rt := $c.RecordTypes}}
 		&ri{{$rt}},
@@ -141,6 +141,7 @@ var fi{{$f.Type}} = fieldInfo{
 {{- end}}
 {{- if $f.ExtIndex}}
 	extOffset: {{$f.ExtOffset}},
+	extSize: {{$f.ExtSize}},
 	extIndex: {{$f.ExtIndex}},
 {{- end}}
 }

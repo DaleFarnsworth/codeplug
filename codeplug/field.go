@@ -26,6 +26,7 @@
 package codeplug
 
 import (
+	"bytes"
 	"fmt"
 	"log"
 	"sort"
@@ -77,6 +78,7 @@ type fieldInfo struct {
 	listRecordType RecordType
 	recordInfo     *recordInfo
 	extOffset      int
+	extSize        int
 	extIndex       int
 }
 
@@ -432,16 +434,23 @@ func (fd *fDesc) deleteField(r *Record, fIndex int) {
 	}
 }
 
-// bytes returns the bytes of the field from cp.bytes.
-func (fd *fDesc) bytes(r *Record, fIndex int) []byte {
-	size := fd.size()
-	offset := fd.extOffset
+func (fd *fDesc) fieldOffset(r *Record, fIndex int) int {
+	var offset int
 	if fd.extIndex == 0 || fIndex < fd.extIndex {
-		offset = r.offset + r.size*r.rIndex + fd.offset(fIndex)
+		offset = r.offset + r.rIndex*r.size + fd.offset(fIndex)
+	} else {
+		fExtOffset := (fIndex - fd.extIndex) * fd.size()
+		offset = fd.extOffset + r.rIndex*fd.extSize + fExtOffset
 	}
 
+	return offset
+}
+
+// bytes returns the bytes of the field from cp.bytes.
+func (fd *fDesc) bytes(r *Record, fIndex int) []byte {
 	cp := r.codeplug
-	fieldBytes := cp.bytes[offset : offset+size]
+	offset := fd.fieldOffset(r, fIndex)
+	fieldBytes := cp.bytes[offset : offset+fd.size()]
 
 	bytes := make([]byte, len(fieldBytes))
 	copy(bytes, fieldBytes)
@@ -461,18 +470,15 @@ func (fd *fDesc) bytes(r *Record, fIndex int) []byte {
 
 // storeBytes inserts bytes value into the field's bits in cp.bytes.
 func (fd *fDesc) storeBytes(bytes []byte, r *Record, fIndex int) {
-	size := fd.size()
-	if size != len(bytes) {
+	if fd.size() != len(bytes) {
 		panic(fmt.Sprintf("%s: storeBytes(%v) size mismatch",
 			fd.typeName, bytes))
 	}
-	offset := fd.extOffset
-	if fd.extIndex == 0 || fIndex < fd.extIndex {
-		offset = r.offset + r.size*r.rIndex + fd.offset(fIndex)
-	}
+
 	cp := r.codeplug
+	offset := fd.fieldOffset(r, fIndex)
 	if fd.bitSize >= 8 {
-		copy(cp.bytes[offset:offset+size], bytes)
+		copy(cp.bytes[offset:offset+fd.size()], bytes)
 		return
 	}
 
@@ -1128,15 +1134,15 @@ func (v *textMessage) store(f *Field) {
 }
 
 // name is a field value representing a utf8 name.
-type strng string
+type name string
 
-// String returns the strng's value as a string.
-func (v *strng) String(f *Field) string {
+// String returns the name's value as a string.
+func (v *name) String(f *Field) string {
 	return string(*v)
 }
 
-// SetString sets the strng's value from a string.
-func (v *strng) SetString(f *Field, s string) error {
+// SetString sets the name's value from a string.
+func (v *name) SetString(f *Field, s string) error {
 	if utf8.RuneCountInString(s) > f.size()/2 {
 		return fmt.Errorf("name too long")
 	}
@@ -1146,30 +1152,25 @@ func (v *strng) SetString(f *Field, s string) error {
 		return err
 	}
 
-	*v = strng(s)
+	*v = name(s)
 
 	return nil
 }
 
-// valid returns nil if the strng's value is valid.
-func (v *strng) valid(f *Field) error {
+// valid returns nil if the name's value is valid.
+func (v *name) valid(f *Field) error {
 	return nil
 }
 
-// load sets the strng's value from its bits in cp.bytes.
-func (v *strng) load(f *Field) {
-	*v = strng(ucs2BytesToString(f.bytes()))
+// load sets the name's value from its bits in cp.bytes.
+func (v *name) load(f *Field) {
+	*v = name(ucs2BytesToString(f.bytes()))
 }
 
-// store stores the strng's value into its bits in cp.bytes.
-func (v *strng) store(f *Field) {
+// store stores the name's value into its bits in cp.bytes.
+func (v *name) store(f *Field) {
 	ucs2, _ := stringToUcs2Bytes(string(*v), f.size())
 	f.storeBytes(ucs2)
-}
-
-// name is a field value representing a utf8 name.
-type name struct {
-	strng
 }
 
 // privacyNumber is a field value representing a privacy number.
@@ -1378,6 +1379,47 @@ func (v *listIndex) valid(f *Field) error {
 	}
 
 	return fmt.Errorf("index out of range")
+}
+
+// ascii is a field value representing a ASCII string.
+type ascii string
+
+// String returns the ascii's value as a string.
+func (v *ascii) String(f *Field) string {
+	return string(*v)
+}
+
+// SetString sets the ascii's value from a string.
+func (v *ascii) SetString(f *Field, s string) error {
+	if len(s) > f.size() {
+		return fmt.Errorf("string too long")
+	}
+
+	*v = ascii(s)
+
+	return nil
+}
+
+// valid returns nil if the ascii's value is valid.
+func (v *ascii) valid(f *Field) error {
+	return nil
+}
+
+// load sets the ascii's value from its bits in cp.bytes.
+func (v *ascii) load(f *Field) {
+	fBytes := f.bytes()
+	nullIndex := bytes.IndexByte(fBytes, 0)
+	if nullIndex >= 0 {
+		fBytes = fBytes[:nullIndex]
+	}
+	*v = ascii(string(fBytes))
+}
+
+// store stores the ascii's value into its bits in cp.bytes.
+func (v *ascii) store(f *Field) {
+	bytes := make([]byte, f.size())
+	copy(bytes, []byte(string(*v)))
+	f.storeBytes(bytes)
 }
 
 type deferredValue struct {

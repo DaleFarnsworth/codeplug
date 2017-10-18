@@ -39,11 +39,6 @@ import (
 	"unicode"
 )
 
-const fileSizeRdt = 262709
-const fileSizeBin = 262144
-const fileOffsetRdt = 0
-const fileOffsetBin = 549
-
 // FileType tells whether the codeplug is an rdt file or a bin file.
 type FileType int
 
@@ -53,63 +48,119 @@ const (
 	FileTypeBin
 )
 
-// A CodeplugType contain the type of codeplug. Currently only MD380-style
-// codeplugs are supported.
-type CodeplugType string
-
 // A Codeplug represents a codeplug file.
 type Codeplug struct {
 	filename      string
-	fileSize      int
-	fileOffset    int
 	fileType      FileType
 	id            string
 	bytes         []byte
 	hash          [sha256.Size]byte
 	rDesc         map[RecordType]*rDesc
-	codeplugType  CodeplugType
 	changed       bool
 	lowFrequency  float64
 	highFrequency float64
 	connectChange func(*Change)
 	changeList    []*Change
 	changeIndex   int
+	codeplugInfo  *CodeplugInfo
 }
 
 type CodeplugInfo struct {
-	TypeName    string
-	Type        CodeplugType
-	RdtLabel    string
+	Name        string
+	Type        string
+	Labels      []string
+	RdtSize     int
+	BinSize     int
+	BinOffset   int
 	RecordInfos []*recordInfo
 }
 
 // NewCodeplug returns a Codeplug, given a filename and codeplug type.
-func NewCodeplug(filename string, cpType CodeplugType) (*Codeplug, error) {
-	var err error
+func NewCodeplug(filename string) (*Codeplug, error) {
 	cp := new(Codeplug)
 	cp.filename = filename
-	cp.codeplugType = cpType
 	cp.rDesc = make(map[RecordType]*rDesc)
 	cp.changeList = []*Change{&Change{}}
 	cp.changeIndex = 0
+
+	err := cp.findFileType()
+	if err != nil {
+		return nil, err
+	}
 
 	cp.id, err = randomString(64)
 	if err != nil {
 		return nil, err
 	}
 
-	err = cp.Read(cp.filename, cp.codeplugType)
+	err = cp.Read()
 	if err != nil {
 		return nil, err
 	}
 
-	if err = cp.Revert(); err != nil {
-		return nil, err
+	return cp, nil
+}
+
+// Names return the potential codeplug names of the codeplug's file
+func (cp *Codeplug) Names() []string {
+	cp.clearCachedListNames()
+	cp.load()
+
+	infos := make([]*CodeplugInfo, 0)
+	names := make([]string, 0)
+	for _, cpi := range codeplugInfos {
+		if cpi.RdtSize != cp.codeplugInfo.RdtSize {
+			continue
+		}
+		infos = append(infos, cpi)
+		names = append(names, cpi.Name)
+	}
+
+	if len(names) == 1 {
+		return names
+	}
+
+	if cp.fileType != FileTypeRdt {
+		return names
+	}
+
+	fDescs := cp.rDesc[RtRdtHeader].records[0].fDesc
+	label := (*fDescs)[FtRhLabel].fields[0].String()
+	for _, cpi := range infos {
+		for _, cLabel := range cpi.Labels {
+			if label == cLabel {
+				return []string{cpi.Name}
+			}
+		}
+	}
+	return []string{label}
+}
+
+func (cp *Codeplug) Type() string {
+	return cp.codeplugInfo.Type
+}
+
+func (cp *Codeplug) Load(name string) error {
+	found := false
+	for _, cpi := range codeplugInfos {
+		if cpi.Name == name {
+			cp.codeplugInfo = cpi
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		return fmt.Errorf("Codeplug type not found: %s", name)
+	}
+
+	if err := cp.Revert(); err != nil {
+		return err
 	}
 
 	codeplugs = append(codeplugs, cp)
 
-	return cp, nil
+	return nil
 }
 
 // Codeplugs return a slice containing all currently open codeplugs.
@@ -131,34 +182,24 @@ func (cp *Codeplug) Free() {
 }
 
 // Read opens a file and reads its contents into cp.bytes.
-func (cp *Codeplug) Read(filename string, cpType CodeplugType) error {
-	cp.filename = filename
-	cp.codeplugType = cpType
-
-	fType, err := getFileType(filename)
-	cp.fileType = fType
-	if err != nil {
-		return err
-	}
-
-	file, err := os.Open(filename)
+func (cp *Codeplug) Read() error {
+	file, err := os.Open(cp.filename)
 	if err != nil {
 		return err
 	}
 	defer file.Close()
 
-	switch fType {
-	case FileTypeRdt:
-		cp.fileSize = fileSizeRdt
-		cp.fileOffset = fileOffsetRdt
+	cpi := cp.codeplugInfo
 
-	case FileTypeBin:
-		cp.fileSize = fileSizeBin
-		cp.fileOffset = fileOffsetBin
+	fileSize := cpi.RdtSize
+	fileOffset := 0
+	if cp.fileType == FileTypeBin {
+		fileSize = cpi.BinSize
+		fileOffset = cpi.BinOffset
 	}
 
-	cpBytes := make([]byte, fileSizeRdt)
-	bytes := cpBytes[cp.fileOffset : cp.fileOffset+cp.fileSize]
+	cpBytes := make([]byte, cpi.RdtSize)
+	bytes := cpBytes[fileOffset : fileOffset+fileSize]
 
 	bytesRead, err := file.Read(bytes)
 	if err != nil {
@@ -166,14 +207,13 @@ func (cp *Codeplug) Read(filename string, cpType CodeplugType) error {
 		return err
 	}
 
-	if bytesRead != cp.fileSize {
+	if bytesRead != fileSize {
 		cp.fileType = FileTypeNone
 		err = fmt.Errorf("Failed to read all of %s", cp.filename)
 		return err
 	}
 
 	cp.bytes = cpBytes
-	cp.fileType = fType
 
 	return nil
 }
@@ -262,7 +302,13 @@ func (cp *Codeplug) CurrentHash() [sha256.Size]byte {
 		return cp.hash
 	}
 
-	bytes := make([]byte, fileSizeRdt)
+	cpi := cp.codeplugInfo
+	fileSize := cpi.RdtSize
+	if cp.fileType == FileTypeBin {
+		fileSize = cpi.BinSize
+	}
+
+	bytes := make([]byte, fileSize)
 	copy(bytes, cp.bytes)
 	saveBytes := cp.bytes
 	cp.bytes = bytes
@@ -400,10 +446,7 @@ func (cp *Codeplug) ConnectChange(fn func(*Change)) {
 
 // load loads all the records into the codeplug from its file.
 func (cp *Codeplug) load() {
-	recordInfos := codeplugInfos[cp.codeplugType].RecordInfos
-
-	for i := range recordInfos {
-		ri := recordInfos[i]
+	for _, ri := range cp.codeplugInfo.RecordInfos {
 		if ri.max == 0 {
 			ri.max = 1
 		}
@@ -450,26 +493,34 @@ func (cp *Codeplug) valid() error {
 	return nil
 }
 
-// getFileType return the type of the file corresponding to the given filename.
-func getFileType(filename string) (FileType, error) {
-	fileInfo, err := os.Stat(filename)
+// findFileType sets the codeplug type based on file size
+func (cp *Codeplug) findFileType() error {
+	fileInfo, err := os.Stat(cp.filename)
 	if err != nil {
 		if os.IsNotExist(err) {
-			err = fmt.Errorf("%s: does not exist", filename)
+			err = fmt.Errorf("%s: does not exist", cp.filename)
 		}
-		return FileTypeNone, err
+		cp.fileType = FileTypeNone
+		return err
 	}
 
-	switch fileInfo.Size() {
-	case fileSizeRdt:
-		return FileTypeRdt, nil
+	for _, cpi := range codeplugInfos {
+		switch fileInfo.Size() {
+		case int64(cpi.RdtSize):
+			cp.fileType = FileTypeRdt
+			cp.codeplugInfo = cpi
+			return nil
 
-	case fileSizeBin:
-		return FileTypeBin, nil
+		case int64(cpi.BinSize):
+			cp.fileType = FileTypeBin
+			cp.codeplugInfo = cpi
+			return nil
+		}
 	}
 
-	err = fmt.Errorf("%s is not a valid rdt or bin file", filename)
-	return FileTypeNone, err
+	cp.fileType = FileTypeNone
+	err = fmt.Errorf("%s is not a known rdt or bin file", cp.filename)
+	return err
 }
 
 // store stores all all fields of the codeplug into its byte slice.
@@ -492,13 +543,21 @@ func (cp *Codeplug) write(file *os.File) (err error) {
 		return
 	}()
 
-	bytes := cp.bytes[cp.fileOffset : cp.fileOffset+cp.fileSize]
+	cpi := cp.codeplugInfo
+	fileSize := cpi.RdtSize
+	fileOffset := 0
+	if cp.fileType == FileTypeBin {
+		fileSize = cpi.BinSize
+		fileOffset = cpi.BinOffset
+	}
+
+	bytes := cp.bytes[fileOffset : fileOffset+fileSize]
 	bytesWritten, err := file.Write(bytes)
 	if err != nil {
 		return err
 	}
 
-	if bytesWritten != cp.fileSize {
+	if bytesWritten != fileSize {
 		return fmt.Errorf("write to %s failed", cp.filename)
 	}
 

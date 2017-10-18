@@ -27,12 +27,6 @@ package codeplug
 
 //go:generate genCodeplugInfo codeplugs.json
 
-// Codeplug types
-const (
-	CtMd380 CodeplugType = "md380"
-	CtMd40  CodeplugType = "md40"
-)
-
 // Record types
 const (
 	RtChannelInformation    RecordType = "ChannelInformation"
@@ -91,7 +85,6 @@ const (
 	FtCiTxRefFrequency          FieldType = "CiTxRefFrequency"
 	FtCiTxSignallingSystem      FieldType = "CiTxSignallingSystem"
 	FtCiVox                     FieldType = "CiVox"
-	FtCodeplugLabel             FieldType = "CodeplugLabel"
 	FtDcCallID                  FieldType = "DcCallID"
 	FtDcCallReceiveTone         FieldType = "DcCallReceiveTone"
 	FtDcCallType                FieldType = "DcCallType"
@@ -132,6 +125,7 @@ const (
 	FtGsTxPreambleDuration      FieldType = "GsTxPreambleDuration"
 	FtGsVoxSensitivity          FieldType = "GsVoxSensitivity"
 	FtRhHighFrequency           FieldType = "RhHighFrequency"
+	FtRhLabel                   FieldType = "RhLabel"
 	FtRhLowFrequency            FieldType = "RhLowFrequency"
 	FtSlChannelMember           FieldType = "SlChannelMember"
 	FtSlName                    FieldType = "SlName"
@@ -148,6 +142,7 @@ const (
 
 // The value types a field may contain
 const (
+	VtAscii           ValueType = "ascii"
 	VtCallID          ValueType = "callID"
 	VtCtcssDcs        ValueType = "ctcssDcs"
 	VtFrequency       ValueType = "frequency"
@@ -165,13 +160,14 @@ const (
 	VtRadioPassword   ValueType = "radioPassword"
 	VtRhFrequency     ValueType = "rhFrequency"
 	VtSpan            ValueType = "span"
-	VtStrng           ValueType = "strng"
 	VtTextMessage     ValueType = "textMessage"
 )
 
 // newValue returns a new value of the given ValueType
 func newValue(vt ValueType) value {
 	switch vt {
+	case VtAscii:
+		return new(ascii)
 	case VtCallID:
 		return new(callID)
 	case VtCtcssDcs:
@@ -206,8 +202,6 @@ func newValue(vt ValueType) value {
 		return new(rhFrequency)
 	case VtSpan:
 		return new(span)
-	case VtStrng:
-		return new(strng)
 	case VtTextMessage:
 		return new(textMessage)
 	}
@@ -215,15 +209,22 @@ func newValue(vt ValueType) value {
 	return nil
 }
 
-var codeplugInfos = map[CodeplugType]*CodeplugInfo{
-	CtMd380: &cpMd380,
-	CtMd40:  &cpMd40,
+var codeplugInfos = []*CodeplugInfo{
+	&cpMd380,
+	&cpMd40,
 }
 
 var cpMd380 = CodeplugInfo{
-	Type:     CtMd380,
-	TypeName: "MD-380/390",
-	RdtLabel: "DR780",
+	Name: "MD380/MD390/DR780",
+	Type: "md380",
+	Labels: []string{
+		"MD380",
+		"MD390",
+		"DR780",
+	},
+	RdtSize:   262709,
+	BinSize:   262144,
+	BinOffset: 549,
 	RecordInfos: []*recordInfo{
 		&riRdtHeader,
 		&riGeneralSettings,
@@ -237,9 +238,14 @@ var cpMd380 = CodeplugInfo{
 }
 
 var cpMd40 = CodeplugInfo{
-	Type:     CtMd40,
-	TypeName: "DJ-MD40",
-	RdtLabel: "DJ-MD40",
+	Name: "DJ-MD40",
+	Type: "md40",
+	Labels: []string{
+		"DJ-MD40",
+	},
+	RdtSize:   262709,
+	BinSize:   262144,
+	BinOffset: 549,
 	RecordInfos: []*recordInfo{
 		&riRdtHeader,
 		&riGeneralSettings,
@@ -412,6 +418,7 @@ var riRdtHeader = recordInfo{
 	offset:   0,
 	size:     549,
 	fieldInfos: []*fieldInfo{
+		&fiRhLabel,
 		&fiRhLowFrequency,
 		&fiRhHighFrequency,
 	},
@@ -1014,15 +1021,6 @@ var fiCiVox = fieldInfo{
 	valueType: VtOffOn,
 }
 
-var fiCodeplugLabel = fieldInfo{
-	fType:     FtCodeplugLabel,
-	typeName:  "Codeplug Label",
-	max:       1,
-	bitOffset: 2344,
-	bitSize:   256,
-	valueType: VtStrng,
-}
-
 var fiDcCallID = fieldInfo{
 	fType:     FtDcCallID,
 	typeName:  "Call ID",
@@ -1501,6 +1499,15 @@ var fiRhHighFrequency = fieldInfo{
 	valueType: VtRhFrequency,
 }
 
+var fiRhLabel = fieldInfo{
+	fType:     FtRhLabel,
+	typeName:  "Codeplug Label",
+	max:       1,
+	bitOffset: 2344,
+	bitSize:   128,
+	valueType: VtAscii,
+}
+
 var fiRhLowFrequency = fieldInfo{
 	fType:     FtRhLowFrequency,
 	typeName:  "Low Frequency",
@@ -1630,6 +1637,7 @@ var fiZiChannelMember_md40 = fieldInfo{
 	valueType:      VtListIndex,
 	listRecordType: RtChannelInformation,
 	extOffset:      201253,
+	extSize:        224,
 	extIndex:       16,
 }
 

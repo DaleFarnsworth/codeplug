@@ -17,9 +17,16 @@
   ],
   "codeplugs": [
     {
-      "typeName": "MD-380/390",
+      "name": "MD380/MD390/DR780",
       "type": "md380",
-      "rdtLabel": "DR780",
+      "labels": [
+	      "MD380",
+	      "MD390",
+	      "DR780"
+      ],
+      "rdtSize": 262709,
+      "binSize": 262144,
+      "binOffset": 549,
       "recordTypes": [
         "RdtHeader",
         "GeneralSettings",
@@ -32,9 +39,14 @@
       ]
     },
     {
-      "typeName": "DJ-MD40",
+      "name": "DJ-MD40",
       "type": "md40",
-      "rdtLabel": "DJ-MD40",
+      "labels": [
+	      "DJ-MD40"
+      ],
+      "rdtSize": 262709,
+      "binSize": 262144,
+      "binOffset": 549,
       "recordTypes": [
         "RdtHeader",
         "GeneralSettings",
@@ -54,6 +66,7 @@
       "offset": 0,
       "size": 549,
       "fieldTypes": [
+        "RhLabel",
         "RhLowFrequency",
         "RhHighFrequency"
       ]
@@ -286,10 +299,10 @@
   "fields": [
     {
       "typeName": "Codeplug Label",
-      "type": "CodeplugLabel",
+      "type": "RhLabel",
       "bitOffset": 2344,
-      "bitSize": 256,
-      "valueType": "strng"
+      "bitSize": 128,
+      "valueType": "ascii"
     },
     {
       "typeName": "Low Frequency",
@@ -757,6 +770,7 @@
       "valueType": "listIndex",
       "listType": "ChannelInformation",
       "extOffset": 201253,
+      "extSize": 224,
       "extIndex": 16
     },
     {

@@ -47,9 +47,12 @@ type top struct {
 }
 
 type Codeplug struct {
-	TypeName    string   `json:"typeName"`
+	Name        string   `json:"name"`
 	Type        string   `json:"type"`
-	RdtLabel    string   `json:"rdtLabel"`
+	Labels      []string `json:"labels"`
+	RdtSize     int      `json:"rdtSize"`
+	BinSize     int      `json:"binSize"`
+	BinOffset   int      `json:"binOffset"`
 	RecordTypes []string `json:"recordTypes"`
 }
 
@@ -81,6 +84,7 @@ type Field struct {
 	Span           *Span           `json:"span"`
 	IndexedStrings *IndexedStrings `json:"indexedStrings"`
 	ExtOffset      int             `json:"extOffset"`
+	ExtSize        int             `json:"extSize"`
 	ExtIndex       int             `json:"extIndex"`
 	ListType       *string         `json:"listType"`
 	Enabling       *Enabling       `json:"enabling"`

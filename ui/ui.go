@@ -1150,6 +1150,60 @@ func YesNoPopup(title string, msg string) PopupValue {
 	return PopupNo
 }
 
+func RadioPopup(title string, msg string, selected string, options ...string) string {
+	dialog := widgets.NewQDialog(nil, core.Qt__Dialog)
+	dialogLayout := widgets.NewQVBoxLayout2(dialog)
+
+	dialog.SetWindowTitle(title)
+
+	label := widgets.NewQLabel2(msg, nil, 0)
+	dialogLayout.AddWidget(label, 0, 0)
+
+	var retval string
+
+	for _, option := range options {
+		button := widgets.NewQRadioButton2(option, nil)
+		if option == selected {
+			button.SetChecked(true)
+			retval = selected
+		}
+		opt := option
+		button.ConnectClicked(func(checked bool) {
+			if checked {
+				retval = opt
+			}
+		})
+		dialogLayout.AddWidget(button, 0, 0)
+	}
+
+	boxWidget := widgets.NewQWidget(nil, 0)
+	boxLayout := widgets.NewQHBoxLayout2(boxWidget)
+	dialogLayout.AddWidget(boxWidget, 0, 0)
+
+	button := widgets.NewQPushButton2("Cancel", nil)
+	button.ConnectClicked(func(checked bool) {
+		dialog.Reject()
+	})
+	button.SetSizePolicy2(widgets.QSizePolicy__Fixed,
+		widgets.QSizePolicy__Preferred)
+	boxLayout.AddWidget(button, 0, 0)
+
+	button = widgets.NewQPushButton2("Done", nil)
+	button.ConnectClicked(func(checked bool) {
+		dialog.Accept()
+	})
+	button.SetSizePolicy2(widgets.QSizePolicy__Fixed,
+		widgets.QSizePolicy__Preferred)
+	boxLayout.AddWidget(button, 0, 0)
+
+	rv := dialog.Exec()
+	if rv == int(widgets.QDialog__Rejected) {
+		retval = ""
+	}
+
+	return retval
+}
+
 func OpenFilename(title string, dir string) string {
 	return widgets.QFileDialog_GetOpenFileName(nil, title, dir, "", "", 0)
 }
