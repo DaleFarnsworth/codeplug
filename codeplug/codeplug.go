@@ -163,6 +163,26 @@ func (cp *Codeplug) Load(name string) error {
 	return nil
 }
 
+func AmbiguousCodeplugNames() [][]string {
+	nameMap := make(map[int][]string)
+	for _, cpi := range codeplugInfos {
+		size := cpi.RdtSize
+		if nameMap[size] == nil {
+			nameMap[size] = make([]string, 0)
+		}
+		nameMap[size] = append(nameMap[size], cpi.Name)
+	}
+
+	ambig := make([][]string, 0)
+	for _, names := range nameMap {
+		if len(names) <= 1 {
+			continue
+		}
+		ambig = append(ambig, names)
+	}
+	return ambig
+}
+
 // Codeplugs return a slice containing all currently open codeplugs.
 func Codeplugs() []*Codeplug {
 	return codeplugs

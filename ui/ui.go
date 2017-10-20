@@ -296,6 +296,10 @@ func (w *Window) Clear() {
 	clear(w.qWidget)
 }
 
+func (w *Window) DeleteLater() {
+	w.qWidget.DeleteLater()
+}
+
 func (w *Window) MainWindow() *MainWindow {
 	return w.mainWindow
 }
@@ -358,6 +362,17 @@ func (mw *MainWindow) NewWindow() *Window {
 	w.layout = widgets.NewQHBoxLayout2(&w.qWidget)
 	w.mainWindow = mw
 	w.window = w
+
+	w.qWidget.ConnectCloseEvent(func(event *gui.QCloseEvent) {
+		if w.connectClose != nil {
+			if !w.connectClose() {
+				event.Ignore()
+				return
+			}
+
+		}
+		event.Accept()
+	})
 
 	return w
 }
@@ -664,6 +679,15 @@ func (parent *VBox) AddLabel(str string) {
 func (parent *HBox) AddSpace(width int) {
 	w := gui.NewQFontMetrics(gui.NewQFont()).AverageCharWidth() * width
 	h := 0
+	hPolicy := widgets.QSizePolicy__Fixed
+	vPolicy := widgets.QSizePolicy__Fixed
+	filler := widgets.NewQSpacerItem(w, h, hPolicy, vPolicy)
+	parent.layout.AddItem(filler)
+}
+
+func (parent *VBox) AddSpace(height int) {
+	w := 0
+	h := gui.NewQFontMetrics(gui.NewQFont()).AverageCharWidth() * height
 	hPolicy := widgets.QSizePolicy__Fixed
 	vPolicy := widgets.QSizePolicy__Fixed
 	filler := widgets.NewQSpacerItem(w, h, hPolicy, vPolicy)
@@ -1061,6 +1085,36 @@ func (a *Action) SetText(s string) {
 
 func (a *Action) SetDisabled(disable bool) {
 	a.qAction.SetDisabled(disable)
+}
+
+type RadioButton struct {
+	qButton *widgets.QRadioButton
+}
+
+func (parent *HBox) AddRadioButton(option string) *RadioButton {
+	b := new(RadioButton)
+	b.qButton = widgets.NewQRadioButton2(option, nil)
+	parent.layout.AddWidget(b.qButton, 0, 0)
+
+	return b
+}
+
+func (b *RadioButton) ConnectClicked(fn func(checked bool)) {
+	b.qButton.ConnectClicked(func(checked bool) {
+		fn(checked)
+	})
+}
+
+func (b *RadioButton) SetChecked(bo bool) {
+	b.qButton.SetChecked(bo)
+}
+
+func (b *RadioButton) IsChecked() bool {
+	return b.qButton.IsChecked()
+}
+
+func (b *RadioButton) Text() string {
+	return b.qButton.Text()
 }
 
 type Button struct {
