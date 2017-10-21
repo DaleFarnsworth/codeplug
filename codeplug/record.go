@@ -335,7 +335,7 @@ func (r *Record) makeNameUnique(names []string) error {
 	suffixRunes := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 	for _, c := range suffixRunes {
-		newName = baseName + "." + string(c)
+		newName = strings.TrimSpace(baseName) + "." + string(c)
 		if !stringInSlice(newName, names) {
 			nameField.value = newValue(nameField.ValueType())
 			nameField.value.SetString(nameField, newName)
