@@ -125,8 +125,8 @@ const (
 	FtGsTxPreambleDuration      FieldType = "TxPreambleDuration"
 	FtGsVoxSensitivity          FieldType = "VoxSensitivity"
 	FtRhHighFrequency           FieldType = "HighFrequency"
-	FtRhLabel                   FieldType = "Label"
 	FtRhLowFrequency            FieldType = "LowFrequency"
+	FtRhModel                   FieldType = "Model"
 	FtSlChannelMember           FieldType = "ChannelMember"
 	FtSlName                    FieldType = "Name"
 	FtSlPriorityChannel1        FieldType = "PriorityChannel1"
@@ -220,7 +220,7 @@ var codeplugInfos = []*CodeplugInfo{
 var cpMd380 = CodeplugInfo{
 	Name: "MD380/MD390/DR780",
 	Type: "md380",
-	Labels: []string{
+	Models: []string{
 		"MD380",
 		"MD390",
 		"DR780",
@@ -243,7 +243,7 @@ var cpMd380 = CodeplugInfo{
 var cpMd40 = CodeplugInfo{
 	Name: "DJ-MD40",
 	Type: "md40",
-	Labels: []string{
+	Models: []string{
 		"DJ-MD40",
 	},
 	RdtSize:   262709,
@@ -421,7 +421,7 @@ var riRdtHeader = recordInfo{
 	offset:   0,
 	size:     549,
 	fieldInfos: []*fieldInfo{
-		&fiRhLabel,
+		&fiRhModel,
 		&fiRhLowFrequency,
 		&fiRhHighFrequency,
 	},
@@ -1502,15 +1502,6 @@ var fiRhHighFrequency = fieldInfo{
 	valueType: VtRhFrequency,
 }
 
-var fiRhLabel = fieldInfo{
-	fType:     FtRhLabel,
-	typeName:  "Codeplug Label",
-	max:       1,
-	bitOffset: 2344,
-	bitSize:   128,
-	valueType: VtAscii,
-}
-
 var fiRhLowFrequency = fieldInfo{
 	fType:     FtRhLowFrequency,
 	typeName:  "Low Frequency",
@@ -1518,6 +1509,15 @@ var fiRhLowFrequency = fieldInfo{
 	bitOffset: 2504,
 	bitSize:   16,
 	valueType: VtRhFrequency,
+}
+
+var fiRhModel = fieldInfo{
+	fType:     FtRhModel,
+	typeName:  "Codeplug Model",
+	max:       1,
+	bitOffset: 2344,
+	bitSize:   128,
+	valueType: VtAscii,
 }
 
 var fiSlChannelMember = fieldInfo{

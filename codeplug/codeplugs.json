@@ -19,7 +19,7 @@
     {
       "name": "MD380/MD390/DR780",
       "type": "md380",
-      "labels": [
+      "models": [
 	      "MD380",
 	      "MD390",
 	      "DR780"
@@ -41,7 +41,7 @@
     {
       "name": "DJ-MD40",
       "type": "md40",
-      "labels": [
+      "models": [
 	      "DJ-MD40"
       ],
       "rdtSize": 262709,
@@ -66,7 +66,7 @@
       "offset": 0,
       "size": 549,
       "fieldTypes": [
-        "RhLabel",
+        "RhModel",
         "RhLowFrequency",
         "RhHighFrequency"
       ]
@@ -298,8 +298,8 @@
   ],
   "fields": [
     {
-      "typeName": "Codeplug Label",
-      "type": "RhLabel",
+      "typeName": "Codeplug Model",
+      "type": "RhModel",
       "bitOffset": 2344,
       "bitSize": 128,
       "valueType": "ascii"

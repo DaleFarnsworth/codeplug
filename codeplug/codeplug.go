@@ -68,7 +68,7 @@ type Codeplug struct {
 type CodeplugInfo struct {
 	Name        string
 	Type        string
-	Labels      []string
+	Models      []string
 	RdtSize     int
 	BinSize     int
 	BinOffset   int
@@ -125,10 +125,10 @@ func (cp *Codeplug) Names() []string {
 	}
 
 	fDescs := cp.rDesc[RtRdtHeader].records[0].fDesc
-	label := (*fDescs)[FtRhLabel].fields[0].String()
+	label := (*fDescs)[FtRhModel].fields[0].String()
 	for _, cpi := range infos {
-		for _, cLabel := range cpi.Labels {
-			if label == cLabel {
+		for _, cModel := range cpi.Models {
+			if label == cModel {
 				return []string{cpi.Name}
 			}
 		}
