@@ -2,14 +2,14 @@
 // Record types
 const (
 {{- range $r := $.Records}}
-	Rt{{$r.Type}} RecordType = "{{$r.Type}}"
+	Rt{{$r.Type}} RecordType = "{{call $.RecordTypeString $r.Type}}"
 {{- end}}
 )
 
 // Field types
 const (
 {{- range $f := $.Fields}}
-	Ft{{$f.Type}} FieldType = "{{$f.Type}}"
+	Ft{{$f.Type}} FieldType = "{{call $.FieldTypeString $f.Type}}"
 {{- end}}
 )
 

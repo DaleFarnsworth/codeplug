@@ -119,12 +119,13 @@ type Enabling struct {
 type ValueTypeMap map[string]int
 
 type TemplateVars struct {
-	Codeplugs   []*Codeplug
-	Records     []*Record
-	Fields      []*Field
-	ValueTypes  []string
-	Capitalize  func(string) string
-	SliceAfter2 func(string) string
+	Codeplugs        []*Codeplug
+	Records          []*Record
+	Fields           []*Field
+	ValueTypes       []string
+	Capitalize       func(string) string
+	RecordTypeString func(string) string
+	FieldTypeString  func(string) string
 }
 
 func capitalize(s string) string {
@@ -143,7 +144,19 @@ func unCapitalize(s string) string {
 	return string(unicode.ToLower(r)) + s[n:]
 }
 
-func sliceAfter2(s string) string {
+func RecordTypeString(s string) string {
+	index := strings.LastIndex(s, "_")
+	if index > 0 {
+		s = s[:index]
+	}
+	return s
+}
+
+func FieldTypeString(s string) string {
+	index := strings.LastIndex(s, "_")
+	if index > 0 {
+		s = s[:index]
+	}
 	return s[2:]
 }
 
@@ -273,7 +286,8 @@ func readCodeplugJson(filename string) TemplateVars {
 	templateVars.ValueTypes = valueTypes
 
 	templateVars.Capitalize = strings.Title
-	templateVars.SliceAfter2 = sliceAfter2
+	templateVars.RecordTypeString = RecordTypeString
+	templateVars.FieldTypeString = FieldTypeString
 
 	return templateVars
 }
