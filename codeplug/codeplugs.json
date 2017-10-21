@@ -734,7 +734,7 @@
       "type": "GlName",
       "bitOffset": 0,
       "bitSize": 256,
-      "valueType": "name"
+      "valueType": "uniqueName"
     },
     {
       "typeName": "Contact Member",
@@ -750,7 +750,7 @@
       "type": "ZiName",
       "bitOffset": 0,
       "bitSize": 256,
-      "valueType": "name"
+      "valueType": "uniqueName"
     },
     {
       "typeName": "Channel Member",
@@ -778,7 +778,7 @@
       "type": "SlName",
       "bitOffset": 0,
       "bitSize": 256,
-      "valueType": "name"
+      "valueType": "uniqueName"
     },
     {
       "typeName": "Priority Channel 1",
@@ -1330,7 +1330,7 @@
       "type": "CiChannelName",
       "bitOffset": 256,
       "bitSize": 256,
-      "valueType": "name"
+      "valueType": "uniqueName"
     }
   ]
 }

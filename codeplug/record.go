@@ -144,7 +144,7 @@ func (r *Record) load() {
 		fi.recordInfo = ri
 		fd := &fDesc{fieldInfo: fi}
 		(*r.fDesc)[fi.fType] = fd
-		if fi.valueType == VtName {
+		if fi.valueType == VtName || fi.valueType == VtUniqueName {
 			ri.nameFieldType = fi.fType
 		}
 		fd.record = r
@@ -305,6 +305,16 @@ func (r *Record) Name() string {
 		return r.NameField().String()
 	}
 	return ""
+}
+
+func (r *Record) hasUniqueNames() bool {
+	nameField := r.NameField()
+	if nameField == nil {
+		return false
+	}
+
+	_, unique := r.NameField().value.(*uniqueName)
+	return unique
 }
 
 // makeNameUnique renames the record to make it different than all of

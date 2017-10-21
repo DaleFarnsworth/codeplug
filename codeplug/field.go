@@ -1133,6 +1133,12 @@ func (v *textMessage) store(f *Field) {
 	f.storeBytes(ucs2)
 }
 
+// name is a field value representing a utf8 name that must be unique
+// among all records containing the field
+type uniqueName struct {
+	name
+}
+
 // name is a field value representing a utf8 name.
 type name string
 

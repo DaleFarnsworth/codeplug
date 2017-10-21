@@ -161,6 +161,7 @@ const (
 	VtRhFrequency     ValueType = "rhFrequency"
 	VtSpan            ValueType = "span"
 	VtTextMessage     ValueType = "textMessage"
+	VtUniqueName      ValueType = "uniqueName"
 )
 
 // newValue returns a new value of the given ValueType
@@ -204,6 +205,8 @@ func newValue(vt ValueType) value {
 		return new(span)
 	case VtTextMessage:
 		return new(textMessage)
+	case VtUniqueName:
+		return new(uniqueName)
 	}
 
 	return nil
@@ -571,7 +574,7 @@ var fiCiChannelName = fieldInfo{
 	max:       1,
 	bitOffset: 256,
 	bitSize:   256,
-	valueType: VtName,
+	valueType: VtUniqueName,
 }
 
 var fiCiColorCode = fieldInfo{
@@ -1083,7 +1086,7 @@ var fiGlName = fieldInfo{
 	max:       1,
 	bitOffset: 0,
 	bitSize:   256,
-	valueType: VtName,
+	valueType: VtUniqueName,
 }
 
 var fiGsBacklightColor = fieldInfo{
@@ -1533,7 +1536,7 @@ var fiSlName = fieldInfo{
 	max:       1,
 	bitOffset: 0,
 	bitSize:   256,
-	valueType: VtName,
+	valueType: VtUniqueName,
 }
 
 var fiSlPriorityChannel1 = fieldInfo{
@@ -1647,7 +1650,7 @@ var fiZiName = fieldInfo{
 	max:       1,
 	bitOffset: 0,
 	bitSize:   256,
-	valueType: VtName,
+	valueType: VtUniqueName,
 }
 
 //go:generate genCodeplugInfo

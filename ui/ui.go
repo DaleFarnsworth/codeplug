@@ -1013,6 +1013,7 @@ var newFieldWidget = map[codeplug.ValueType]func(*codeplug.Field) *Widget{
 	codeplug.VtIStrings:        newFieldCombobox,
 	codeplug.VtSpan:            newFieldSpinbox,
 	codeplug.VtTextMessage:     newFieldTextEdit,
+	codeplug.VtUniqueName:      newFieldLineEdit,
 }
 
 type MenuBar struct {
