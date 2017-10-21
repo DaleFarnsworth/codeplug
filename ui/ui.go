@@ -796,9 +796,6 @@ func setEnabled(w *Widget, f *codeplug.Field) {
 
 	if enabled && !f.IsValid() {
 		setString(f, f.DefaultValue())
-		msg := fmt.Sprintf("%s has been set to %s", f.FullTypeName(),
-			f.String())
-		WarningPopup("Invalid Value", msg)
 	}
 
 	qWidget.SetEnabled(enabled)
