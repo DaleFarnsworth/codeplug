@@ -29,6 +29,7 @@ import (
 	"fmt"
 	"log"
 	"sort"
+	"strings"
 )
 
 // A Record represents a record within a Codeplug.
@@ -308,7 +309,12 @@ func (r *Record) Name() string {
 
 // makeNameUnique renames the record to make it different than all of
 // the passed names.
-func (r *Record) makeNameUnique(names []string) error {
+func (r *Record) makeNameUnique(namesp *[]string) error {
+	if namesp == nil {
+		return nil
+	}
+
+	names := *namesp
 	if len(names) == 0 {
 		return nil
 	}

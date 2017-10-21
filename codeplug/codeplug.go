@@ -416,7 +416,7 @@ func (cp *Codeplug) InsertRecord(r *Record) error {
 		return fmt.Errorf("too many records")
 	}
 
-	err := r.makeNameUnique(*r.ListNames())
+	err := r.makeNameUnique(r.ListNames())
 	if err != nil {
 		return err
 	}
