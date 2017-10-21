@@ -140,6 +140,7 @@ func (f *Field) SetString(s string) error {
 		f.value = invalidValue{value: f.value}
 		return nil
 	}
+	s = strings.TrimSpace(s)
 	err := f.value.SetString(f, s)
 	if err != nil {
 		return err
