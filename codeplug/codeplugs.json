@@ -74,9 +74,10 @@
     {
       "typeName": "General Settings",
       "type": "GeneralSettings",
-      "offset": 8805,
-      "size": 144,
+      "offset": 8742,
+      "size": 383,
       "fieldTypes": [
+        "GsTimeStamp",
         "GsIntroScreenLine1",
         "GsIntroScreenLine2",
         "GsMonitorType",
@@ -309,23 +310,30 @@
       "valueType": "rhFrequency"
     },
     {
+      "typeName": "Time Stamp",
+      "type": "GsTimeStamp",
+      "bitOffset": 0,
+      "bitSize": 56,
+      "valueType": "timeStamp"
+    },
+    {
       "typeName": "Intro Screen Line 1",
       "type": "GsIntroScreenLine1",
-      "bitOffset": 0,
+      "bitOffset": 504,
       "bitSize": 160,
       "valueType": "introLine"
     },
     {
       "typeName": "Intro Screen Line 2",
       "type": "GsIntroScreenLine2",
-      "bitOffset": 160,
+      "bitOffset": 664,
       "bitSize": 160,
       "valueType": "introLine"
     },
     {
       "typeName": "Monitor Type",
       "type": "GsMonitorType",
-      "bitOffset": 515,
+      "bitOffset": 1019,
       "bitSize": 1,
       "valueType": "iStrings",
       "strings": [
@@ -336,14 +344,14 @@
     {
       "typeName": "Disable All LEDS",
       "type": "GsDisableAllLeds",
-      "bitOffset": 517,
+      "bitOffset": 1021,
       "bitSize": 1,
       "valueType": "onOff"
     },
     {
       "typeName": "Talk Permit Tone",
       "type": "GsTalkPermitTone",
-      "bitOffset": 520,
+      "bitOffset": 1024,
       "bitSize": 2,
       "valueType": "iStrings",
       "strings": [
@@ -356,7 +364,7 @@
     {
       "typeName": "Password And Lock Enable",
       "type": "GsPwAndLockEnable",
-      "bitOffset": 522,
+      "bitOffset": 1026,
       "bitSize": 1,
       "valueType": "onOff",
       "enabling": {
@@ -369,35 +377,35 @@
     {
       "typeName": "Channel Free Indication Tone",
       "type": "GsChFreeIndicationTone",
-      "bitOffset": 523,
+      "bitOffset": 1027,
       "bitSize": 1,
       "valueType": "onOff"
     },
     {
       "typeName": "Disable All Tones",
       "type": "GsDisableAllTones",
-      "bitOffset": 525,
+      "bitOffset": 1029,
       "bitSize": 1,
       "valueType": "onOff"
     },
     {
       "typeName": "Save Mode Receive",
       "type": "GsSaveModeReceive",
-      "bitOffset": 526,
+      "bitOffset": 1030,
       "bitSize": 1,
       "valueType": "offOn"
     },
     {
       "typeName": "Save Preamble",
       "type": "GsSavePreamble",
-      "bitOffset": 527,
+      "bitOffset": 1031,
       "bitSize": 1,
       "valueType": "offOn"
     },
     {
       "typeName": "Intro Screen",
       "type": "GsIntroScreen",
-      "bitOffset": 531,
+      "bitOffset": 1035,
       "bitSize": 1,
       "valueType": "iStrings",
       "strings": [
@@ -408,7 +416,7 @@
     {
       "typeName": "Lock/Unlock",
       "type": "GsLockUnlock",
-      "bitOffset": 539,
+      "bitOffset": 1043,
       "bitSize": 1,
       "valueType": "iStrings",
       "strings": [
@@ -419,7 +427,7 @@
     {
       "typeName": "Freq/Channel Mode",
       "type": "GsFreqChannelMode",
-      "bitOffset": 540,
+      "bitOffset": 1044,
       "bitSize": 1,
       "valueType": "iStrings",
       "strings": [
@@ -439,7 +447,7 @@
     {
       "typeName": "Mode Select",
       "type": "GsModeSelect",
-      "bitOffset": 541,
+      "bitOffset": 1045,
       "bitSize": 1,
       "valueType": "iStrings",
       "strings": [
@@ -450,7 +458,7 @@
     {
       "typeName": "Backlight Color",
       "type": "GsBacklightColor",
-      "bitOffset": 542,
+      "bitOffset": 1046,
       "bitSize": 2,
       "valueType": "iStrings",
       "strings": [
@@ -463,14 +471,14 @@
     {
       "typeName": "Radio ID",
       "type": "GsRadioID",
-      "bitOffset": 544,
+      "bitOffset": 1048,
       "bitSize": 24,
       "valueType": "callID"
     },
     {
       "typeName": "Tx Preamble Duration (mS)",
       "type": "GsTxPreambleDuration",
-      "bitOffset": 576,
+      "bitOffset": 1080,
       "bitSize": 8,
       "valueType": "span",
       "span": {
@@ -482,7 +490,7 @@
     {
       "typeName": "Group Call Hang Time (mS)",
       "type": "GsGroupCallHangTime",
-      "bitOffset": 584,
+      "bitOffset": 1088,
       "bitSize": 8,
       "valueType": "span",
       "span": {
@@ -495,7 +503,7 @@
     {
       "typeName": "Private Call Hang Time (mS)",
       "type": "GsPrivateCallHangTime",
-      "bitOffset": 592,
+      "bitOffset": 1096,
       "bitSize": 8,
       "valueType": "span",
       "span": {
@@ -508,7 +516,7 @@
     {
       "typeName": "VOX Sensitivity",
       "type": "GsVoxSensitivity",
-      "bitOffset": 600,
+      "bitOffset": 1104,
       "bitSize": 8,
       "valueType": "span",
       "span": {
@@ -519,7 +527,7 @@
     {
       "typeName": "Rx Low Battery Interval (S)",
       "type": "GsRxLowBatteryInterval",
-      "bitOffset": 624,
+      "bitOffset": 1128,
       "bitSize": 8,
       "valueType": "span",
       "span": {
@@ -531,7 +539,7 @@
     {
       "typeName": "Call Alert Tone Duration (S)",
       "type": "GsCallAlertToneDuration",
-      "bitOffset": 632,
+      "bitOffset": 1136,
       "bitSize": 8,
       "valueType": "span",
       "span": {
@@ -545,7 +553,7 @@
     {
       "typeName": "Lone Worker Response Time (min)",
       "type": "GsLoneWorkerResponseTime",
-      "bitOffset": 640,
+      "bitOffset": 1144,
       "bitSize": 8,
       "valueType": "span",
       "span": {
@@ -556,7 +564,7 @@
     {
       "typeName": "Lone Worker Reminder Time (S)",
       "type": "GsLoneWorkerReminderTime",
-      "bitOffset": 648,
+      "bitOffset": 1152,
       "bitSize": 8,
       "valueType": "span",
       "span": {
@@ -567,7 +575,7 @@
     {
       "typeName": "Scan Digital Hang Time (mS)",
       "type": "GsScanDigitalHangTime",
-      "bitOffset": 664,
+      "bitOffset": 1168,
       "bitSize": 8,
       "valueType": "span",
       "span": {
@@ -580,7 +588,7 @@
     {
       "typeName": "Scan Analog Hang Time (mS)",
       "type": "GsScanAnalogHangTime",
-      "bitOffset": 672,
+      "bitOffset": 1176,
       "bitSize": 8,
       "valueType": "span",
       "span": {
@@ -593,7 +601,7 @@
     {
       "typeName": "Backlight Time (S)",
       "type": "GsBacklightTime",
-      "bitOffset": 686,
+      "bitOffset": 1190,
       "bitSize": 2,
       "valueType": "iStrings",
       "strings": [
@@ -606,7 +614,7 @@
     {
       "typeName": "Set Keypad Lock Time (S)",
       "type": "GsSetKeypadLockTime",
-      "bitOffset": 688,
+      "bitOffset": 1192,
       "bitSize": 8,
       "valueType": "indexedStrings",
       "indexedStrings": [
@@ -631,7 +639,7 @@
     {
       "typeName": "Mode",
       "type": "GsMode",
-      "bitOffset": 696,
+      "bitOffset": 1200,
       "bitSize": 8,
       "valueType": "indexedStrings",
       "indexedStrings": [
@@ -648,7 +656,7 @@
     {
       "typeName": "Power On Password",
       "type": "GsPowerOnPassword",
-      "bitOffset": 704,
+      "bitOffset": 1208,
       "bitSize": 32,
       "valueType": "radioPassword",
       "defaultValue": "00000000"
@@ -656,21 +664,21 @@
     {
       "typeName": "Radio Programming Password",
       "type": "GsRadioProgPw",
-      "bitOffset": 736,
+      "bitOffset": 1240,
       "bitSize": 32,
       "valueType": "radioPassword"
     },
     {
       "typeName": "PC Programming Password",
       "type": "GsPcProgPw",
-      "bitOffset": 768,
+      "bitOffset": 1272,
       "bitSize": 64,
       "valueType": "pcPassword"
     },
     {
       "typeName": "Radio Name",
       "type": "GsRadioName",
-      "bitOffset": 896,
+      "bitOffset": 1400,
       "bitSize": 256,
       "valueType": "radioName"
     },

@@ -194,6 +194,25 @@ func binaryToRevBcd(binary int) int {
 	return reverse4Bytes(binaryToBcd(binary))
 }
 
+// bcdBytesToString converts a BCD-encodd byte slice to a decimal string
+func bcdBytesToString(bytes []byte) string {
+	s := ""
+	for _, b := range bytes {
+		s += string('0' + ((int32(b) >> 4) & 0xf))
+		s += string('0' + uint32(b)&0xf)
+	}
+	return s
+}
+
+// stringToBcdBytes converts a decimal string into a BCD-encoded byte slice
+func stringToBcdBytes(s string) []byte {
+	bytes := make([]byte, len(s)/2)
+	for i := range bytes {
+		bytes[i] = byte(((s[i*2] - '0') << 4) + s[i*2+1])
+	}
+	return bytes
+}
+
 // ucs2BytesToString converts a utf16 byte slice into a utf8 string.
 func ucs2BytesToString(b []byte) string {
 	ucs2S := make([]uint16, 1)

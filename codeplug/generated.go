@@ -122,6 +122,7 @@ const (
 	FtGsScanDigitalHangTime     FieldType = "ScanDigitalHangTime"
 	FtGsSetKeypadLockTime       FieldType = "SetKeypadLockTime"
 	FtGsTalkPermitTone          FieldType = "TalkPermitTone"
+	FtGsTimeStamp               FieldType = "TimeStamp"
 	FtGsTxPreambleDuration      FieldType = "TxPreambleDuration"
 	FtGsVoxSensitivity          FieldType = "VoxSensitivity"
 	FtRhHighFrequency           FieldType = "HighFrequency"
@@ -162,6 +163,7 @@ const (
 	VtRhFrequency     ValueType = "rhFrequency"
 	VtSpan            ValueType = "span"
 	VtTextMessage     ValueType = "textMessage"
+	VtTimeStamp       ValueType = "timeStamp"
 	VtUniqueName      ValueType = "uniqueName"
 )
 
@@ -208,6 +210,8 @@ func newValue(vt ValueType) value {
 		return new(span)
 	case VtTextMessage:
 		return new(textMessage)
+	case VtTimeStamp:
+		return new(timeStamp)
 	case VtUniqueName:
 		return new(uniqueName)
 	}
@@ -349,9 +353,10 @@ var riGeneralSettings = recordInfo{
 	rType:    RtGeneralSettings,
 	typeName: "General Settings",
 	max:      1,
-	offset:   8805,
-	size:     144,
+	offset:   8742,
+	size:     383,
 	fieldInfos: []*fieldInfo{
+		&fiGsTimeStamp,
 		&fiGsIntroScreenLine1,
 		&fiGsIntroScreenLine2,
 		&fiGsMonitorType,
@@ -1086,7 +1091,7 @@ var fiGsBacklightColor = fieldInfo{
 	fType:     FtGsBacklightColor,
 	typeName:  "Backlight Color",
 	max:       1,
-	bitOffset: 542,
+	bitOffset: 1046,
 	bitSize:   2,
 	valueType: VtIStrings,
 	strings: &[]string{
@@ -1101,7 +1106,7 @@ var fiGsBacklightTime = fieldInfo{
 	fType:     FtGsBacklightTime,
 	typeName:  "Backlight Time (S)",
 	max:       1,
-	bitOffset: 686,
+	bitOffset: 1190,
 	bitSize:   2,
 	valueType: VtIStrings,
 	strings: &[]string{
@@ -1116,7 +1121,7 @@ var fiGsCallAlertToneDuration = fieldInfo{
 	fType:     FtGsCallAlertToneDuration,
 	typeName:  "Call Alert Tone Duration (S)",
 	max:       1,
-	bitOffset: 632,
+	bitOffset: 1136,
 	bitSize:   8,
 	valueType: VtSpan,
 	span: &Span{
@@ -1132,7 +1137,7 @@ var fiGsChFreeIndicationTone = fieldInfo{
 	fType:     FtGsChFreeIndicationTone,
 	typeName:  "Channel Free Indication Tone",
 	max:       1,
-	bitOffset: 523,
+	bitOffset: 1027,
 	bitSize:   1,
 	valueType: VtOnOff,
 }
@@ -1141,7 +1146,7 @@ var fiGsDisableAllLeds = fieldInfo{
 	fType:     FtGsDisableAllLeds,
 	typeName:  "Disable All LEDS",
 	max:       1,
-	bitOffset: 517,
+	bitOffset: 1021,
 	bitSize:   1,
 	valueType: VtOnOff,
 }
@@ -1150,7 +1155,7 @@ var fiGsDisableAllTones = fieldInfo{
 	fType:     FtGsDisableAllTones,
 	typeName:  "Disable All Tones",
 	max:       1,
-	bitOffset: 525,
+	bitOffset: 1029,
 	bitSize:   1,
 	valueType: VtOnOff,
 }
@@ -1159,7 +1164,7 @@ var fiGsFreqChannelMode = fieldInfo{
 	fType:     FtGsFreqChannelMode,
 	typeName:  "Freq/Channel Mode",
 	max:       1,
-	bitOffset: 540,
+	bitOffset: 1044,
 	bitSize:   1,
 	valueType: VtIStrings,
 	strings: &[]string{
@@ -1173,7 +1178,7 @@ var fiGsGroupCallHangTime = fieldInfo{
 	fType:     FtGsGroupCallHangTime,
 	typeName:  "Group Call Hang Time (mS)",
 	max:       1,
-	bitOffset: 584,
+	bitOffset: 1088,
 	bitSize:   8,
 	valueType: VtSpan,
 	span: &Span{
@@ -1188,7 +1193,7 @@ var fiGsIntroScreen = fieldInfo{
 	fType:     FtGsIntroScreen,
 	typeName:  "Intro Screen",
 	max:       1,
-	bitOffset: 531,
+	bitOffset: 1035,
 	bitSize:   1,
 	valueType: VtIStrings,
 	strings: &[]string{
@@ -1201,7 +1206,7 @@ var fiGsIntroScreenLine1 = fieldInfo{
 	fType:     FtGsIntroScreenLine1,
 	typeName:  "Intro Screen Line 1",
 	max:       1,
-	bitOffset: 0,
+	bitOffset: 504,
 	bitSize:   160,
 	valueType: VtIntroLine,
 }
@@ -1210,7 +1215,7 @@ var fiGsIntroScreenLine2 = fieldInfo{
 	fType:     FtGsIntroScreenLine2,
 	typeName:  "Intro Screen Line 2",
 	max:       1,
-	bitOffset: 160,
+	bitOffset: 664,
 	bitSize:   160,
 	valueType: VtIntroLine,
 }
@@ -1219,7 +1224,7 @@ var fiGsLockUnlock = fieldInfo{
 	fType:     FtGsLockUnlock,
 	typeName:  "Lock/Unlock",
 	max:       1,
-	bitOffset: 539,
+	bitOffset: 1043,
 	bitSize:   1,
 	valueType: VtIStrings,
 	strings: &[]string{
@@ -1233,7 +1238,7 @@ var fiGsLoneWorkerReminderTime = fieldInfo{
 	fType:     FtGsLoneWorkerReminderTime,
 	typeName:  "Lone Worker Reminder Time (S)",
 	max:       1,
-	bitOffset: 648,
+	bitOffset: 1152,
 	bitSize:   8,
 	valueType: VtSpan,
 	span: &Span{
@@ -1246,7 +1251,7 @@ var fiGsLoneWorkerResponseTime = fieldInfo{
 	fType:     FtGsLoneWorkerResponseTime,
 	typeName:  "Lone Worker Response Time (min)",
 	max:       1,
-	bitOffset: 640,
+	bitOffset: 1144,
 	bitSize:   8,
 	valueType: VtSpan,
 	span: &Span{
@@ -1259,7 +1264,7 @@ var fiGsMode = fieldInfo{
 	fType:     FtGsMode,
 	typeName:  "Mode",
 	max:       1,
-	bitOffset: 696,
+	bitOffset: 1200,
 	bitSize:   8,
 	valueType: VtIndexedStrings,
 	indexedStrings: &[]IndexedString{
@@ -1272,7 +1277,7 @@ var fiGsModeSelect = fieldInfo{
 	fType:     FtGsModeSelect,
 	typeName:  "Mode Select",
 	max:       1,
-	bitOffset: 541,
+	bitOffset: 1045,
 	bitSize:   1,
 	valueType: VtIStrings,
 	strings: &[]string{
@@ -1286,7 +1291,7 @@ var fiGsMonitorType = fieldInfo{
 	fType:     FtGsMonitorType,
 	typeName:  "Monitor Type",
 	max:       1,
-	bitOffset: 515,
+	bitOffset: 1019,
 	bitSize:   1,
 	valueType: VtIStrings,
 	strings: &[]string{
@@ -1299,7 +1304,7 @@ var fiGsPcProgPw = fieldInfo{
 	fType:     FtGsPcProgPw,
 	typeName:  "PC Programming Password",
 	max:       1,
-	bitOffset: 768,
+	bitOffset: 1272,
 	bitSize:   64,
 	valueType: VtPcPassword,
 }
@@ -1308,7 +1313,7 @@ var fiGsPowerOnPassword = fieldInfo{
 	fType:        FtGsPowerOnPassword,
 	typeName:     "Power On Password",
 	max:          1,
-	bitOffset:    704,
+	bitOffset:    1208,
 	bitSize:      32,
 	valueType:    VtRadioPassword,
 	defaultValue: "00000000",
@@ -1319,7 +1324,7 @@ var fiGsPrivateCallHangTime = fieldInfo{
 	fType:     FtGsPrivateCallHangTime,
 	typeName:  "Private Call Hang Time (mS)",
 	max:       1,
-	bitOffset: 592,
+	bitOffset: 1096,
 	bitSize:   8,
 	valueType: VtSpan,
 	span: &Span{
@@ -1334,7 +1339,7 @@ var fiGsPwAndLockEnable = fieldInfo{
 	fType:         FtGsPwAndLockEnable,
 	typeName:      "Password And Lock Enable",
 	max:           1,
-	bitOffset:     522,
+	bitOffset:     1026,
 	bitSize:       1,
 	valueType:     VtOnOff,
 	enablingValue: "On",
@@ -1344,7 +1349,7 @@ var fiGsRadioID = fieldInfo{
 	fType:     FtGsRadioID,
 	typeName:  "Radio ID",
 	max:       1,
-	bitOffset: 544,
+	bitOffset: 1048,
 	bitSize:   24,
 	valueType: VtCallID,
 }
@@ -1353,7 +1358,7 @@ var fiGsRadioName = fieldInfo{
 	fType:     FtGsRadioName,
 	typeName:  "Radio Name",
 	max:       1,
-	bitOffset: 896,
+	bitOffset: 1400,
 	bitSize:   256,
 	valueType: VtRadioName,
 }
@@ -1362,7 +1367,7 @@ var fiGsRadioProgPw = fieldInfo{
 	fType:     FtGsRadioProgPw,
 	typeName:  "Radio Programming Password",
 	max:       1,
-	bitOffset: 736,
+	bitOffset: 1240,
 	bitSize:   32,
 	valueType: VtRadioPassword,
 }
@@ -1371,7 +1376,7 @@ var fiGsRxLowBatteryInterval = fieldInfo{
 	fType:     FtGsRxLowBatteryInterval,
 	typeName:  "Rx Low Battery Interval (S)",
 	max:       1,
-	bitOffset: 624,
+	bitOffset: 1128,
 	bitSize:   8,
 	valueType: VtSpan,
 	span: &Span{
@@ -1385,7 +1390,7 @@ var fiGsSaveModeReceive = fieldInfo{
 	fType:     FtGsSaveModeReceive,
 	typeName:  "Save Mode Receive",
 	max:       1,
-	bitOffset: 526,
+	bitOffset: 1030,
 	bitSize:   1,
 	valueType: VtOffOn,
 }
@@ -1394,7 +1399,7 @@ var fiGsSavePreamble = fieldInfo{
 	fType:     FtGsSavePreamble,
 	typeName:  "Save Preamble",
 	max:       1,
-	bitOffset: 527,
+	bitOffset: 1031,
 	bitSize:   1,
 	valueType: VtOffOn,
 }
@@ -1403,7 +1408,7 @@ var fiGsScanAnalogHangTime = fieldInfo{
 	fType:     FtGsScanAnalogHangTime,
 	typeName:  "Scan Analog Hang Time (mS)",
 	max:       1,
-	bitOffset: 672,
+	bitOffset: 1176,
 	bitSize:   8,
 	valueType: VtSpan,
 	span: &Span{
@@ -1418,7 +1423,7 @@ var fiGsScanDigitalHangTime = fieldInfo{
 	fType:     FtGsScanDigitalHangTime,
 	typeName:  "Scan Digital Hang Time (mS)",
 	max:       1,
-	bitOffset: 664,
+	bitOffset: 1168,
 	bitSize:   8,
 	valueType: VtSpan,
 	span: &Span{
@@ -1433,7 +1438,7 @@ var fiGsSetKeypadLockTime = fieldInfo{
 	fType:     FtGsSetKeypadLockTime,
 	typeName:  "Set Keypad Lock Time (S)",
 	max:       1,
-	bitOffset: 688,
+	bitOffset: 1192,
 	bitSize:   8,
 	valueType: VtIndexedStrings,
 	indexedStrings: &[]IndexedString{
@@ -1448,7 +1453,7 @@ var fiGsTalkPermitTone = fieldInfo{
 	fType:     FtGsTalkPermitTone,
 	typeName:  "Talk Permit Tone",
 	max:       1,
-	bitOffset: 520,
+	bitOffset: 1024,
 	bitSize:   2,
 	valueType: VtIStrings,
 	strings: &[]string{
@@ -1459,11 +1464,20 @@ var fiGsTalkPermitTone = fieldInfo{
 	},
 }
 
+var fiGsTimeStamp = fieldInfo{
+	fType:     FtGsTimeStamp,
+	typeName:  "Time Stamp",
+	max:       1,
+	bitOffset: 0,
+	bitSize:   56,
+	valueType: VtTimeStamp,
+}
+
 var fiGsTxPreambleDuration = fieldInfo{
 	fType:     FtGsTxPreambleDuration,
 	typeName:  "Tx Preamble Duration (mS)",
 	max:       1,
-	bitOffset: 576,
+	bitOffset: 1080,
 	bitSize:   8,
 	valueType: VtSpan,
 	span: &Span{
@@ -1477,7 +1491,7 @@ var fiGsVoxSensitivity = fieldInfo{
 	fType:     FtGsVoxSensitivity,
 	typeName:  "VOX Sensitivity",
 	max:       1,
-	bitOffset: 600,
+	bitOffset: 1104,
 	bitSize:   8,
 	valueType: VtSpan,
 	span: &Span{

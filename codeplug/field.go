@@ -1489,6 +1489,45 @@ func (v *ascii) store(f *Field) {
 	f.storeBytes(bytes)
 }
 
+// timeStamp is a field value representing a BCD-encoded time string
+type timeStamp string
+
+// String returns the timeStamp's value as a string.
+func (v *timeStamp) String(f *Field) string {
+	return string(*v)
+}
+
+// SetString sets the timeStamp's value from a string.
+func (v *timeStamp) SetString(f *Field, s string) error {
+	if len(s) != f.size()*2 {
+		return fmt.Errorf("bad string length")
+	}
+
+	*v = timeStamp(s)
+
+	return nil
+}
+
+// valid returns nil if the timeStamp's value is valid.
+func (v *timeStamp) valid(f *Field) error {
+	for _, r := range string(*v) {
+		if r < '0' && r > '9' {
+			return fmt.Errorf("timeStamp is not a decimal value")
+		}
+	}
+	return nil
+}
+
+// load sets the timeStamp's value from its bits in cp.bytes.
+func (v *timeStamp) load(f *Field) {
+	*v = timeStamp(bcdBytesToString(f.bytes()))
+}
+
+// store stores the timeStamp's value into its bits in cp.bytes.
+func (v *timeStamp) store(f *Field) {
+	f.storeBytes(stringToBcdBytes(string(*v)))
+}
+
 type deferredValue struct {
 	value
 	str string

@@ -978,12 +978,14 @@ func newFieldTextEdit(f *codeplug.Field) *Widget {
 }
 
 var newFieldWidget = map[codeplug.ValueType]func(*codeplug.Field) *Widget{
+	codeplug.VtAscii:           newFieldLineEdit,
 	codeplug.VtCallID:          newFieldLineEdit,
 	codeplug.VtCallType:        newFieldCombobox,
 	codeplug.VtCtcssDcs:        newFieldCombobox,
 	codeplug.VtFrequency:       newFieldLineEdit,
 	codeplug.VtIndexedStrings:  newFieldCombobox,
 	codeplug.VtIntroLine:       newFieldLineEdit,
+	codeplug.VtIStrings:        newFieldCombobox,
 	codeplug.VtListIndex:       newFieldCombobox,
 	codeplug.VtMemberListIndex: newFieldCombobox,
 	codeplug.VtName:            newFieldLineEdit,
@@ -994,9 +996,9 @@ var newFieldWidget = map[codeplug.ValueType]func(*codeplug.Field) *Widget{
 	codeplug.VtRadioName:       newFieldLineEdit,
 	codeplug.VtRadioPassword:   newFieldLineEdit,
 	codeplug.VtRhFrequency:     newFieldLineEdit,
-	codeplug.VtIStrings:        newFieldCombobox,
 	codeplug.VtSpan:            newFieldSpinbox,
 	codeplug.VtTextMessage:     newFieldTextEdit,
+	codeplug.VtTimeStamp:       newFieldLineEdit,
 	codeplug.VtUniqueName:      newFieldLineEdit,
 }
 
