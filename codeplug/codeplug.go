@@ -26,7 +26,10 @@
 package codeplug
 
 import (
+	"archive/tar"
 	"bufio"
+	"bytes"
+	"compress/gzip"
 	"crypto/sha256"
 	"fmt"
 	"io"
@@ -52,6 +55,9 @@ const (
 type Codeplug struct {
 	filename      string
 	fileType      FileType
+	rdtSize       int
+	fileSize      int
+	fileOffset    int
 	id            string
 	bytes         []byte
 	hash          [sha256.Size]byte
@@ -66,7 +72,6 @@ type Codeplug struct {
 }
 
 type CodeplugInfo struct {
-	Name        string
 	Type        string
 	Models      []string
 	RdtSize     int
@@ -78,80 +83,74 @@ type CodeplugInfo struct {
 // NewCodeplug returns a Codeplug, given a filename and codeplug type.
 func NewCodeplug(filename string) (*Codeplug, error) {
 	cp := new(Codeplug)
+
+	cp.fileType = FileTypeNone
+	if filename != "." {
+		err := cp.findFileType(filename)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		baseName := "codeplug"
+		i := 1
+		for {
+			filename = baseName + fmt.Sprintf("%d", i) + ".rdt"
+			_, err := os.Stat(filename)
+			if err != nil {
+				break
+			}
+			i++
+		}
+	}
+
 	cp.filename = filename
 	cp.rDesc = make(map[RecordType]*rDesc)
 	cp.changeList = []*Change{&Change{}}
 	cp.changeIndex = 0
 
-	err := cp.findFileType()
-	if err != nil {
-		return nil, err
-	}
-
+	var err error
 	cp.id, err = randomString(64)
 	if err != nil {
 		return nil, err
 	}
 
-	err = cp.Read()
-	if err != nil {
-		return nil, err
+	if cp.fileType == FileTypeRdt {
+		err = cp.read()
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return cp, nil
 }
 
-// Names return the potential codeplug names of the codeplug's file
-func (cp *Codeplug) Names() []string {
-	cp.clearCachedListNames()
-	cp.load()
-
-	infos := make([]*CodeplugInfo, 0)
-	names := make([]string, 0)
-	for _, cpi := range codeplugInfos {
-		if cpi.RdtSize != cp.codeplugInfo.RdtSize {
-			continue
-		}
-		infos = append(infos, cpi)
-		names = append(names, cpi.Name)
-	}
-
-	if len(names) == 1 {
-		return names
-	}
-
-	if cp.fileType != FileTypeRdt {
-		return names
-	}
-
-	fDescs := cp.rDesc[RtRdtHeader].records[0].fDesc
-	label := (*fDescs)[FtRhModel].fields[0].String()
-	for _, cpi := range infos {
-		for _, cModel := range cpi.Models {
-			if label == cModel {
-				return []string{cpi.Name}
-			}
-		}
-	}
-	return []string{label}
-}
-
-func (cp *Codeplug) Type() string {
-	return cp.codeplugInfo.Type
-}
-
-func (cp *Codeplug) Load(name string, ignoreWarning bool) (warning error, err error) {
+func (cp *Codeplug) Load(model string, variant string, filename string, ignoreWarning bool) (warning error, err error) {
 	found := false
 	for _, cpi := range codeplugInfos {
-		if cpi.Name == name {
-			cp.codeplugInfo = cpi
-			found = true
-			break
+		for _, cpiModel := range cpi.Models {
+			if cpiModel == model {
+				cp.codeplugInfo = cpi
+				found = true
+				break
+			}
 		}
 	}
 
 	if !found {
-		return nil, fmt.Errorf("Codeplug type not found: %s", name)
+		return nil, fmt.Errorf("Codeplug type not found: %s", model)
+	}
+
+	if cp.fileType != FileTypeRdt {
+		err := cp.ReadNew(filename)
+		if err != nil {
+			return nil, err
+		}
+		if cp.fileType != FileTypeNone {
+			err = cp.read()
+			if err != nil {
+				return nil, err
+			}
+		}
 	}
 
 	warning = cp.Revert(ignoreWarning)
@@ -164,27 +163,74 @@ func (cp *Codeplug) Load(name string, ignoreWarning bool) (warning error, err er
 	return nil, nil
 }
 
-func AmbiguousCodeplugNames() [][]string {
-	nameMap := make(map[int][]string)
+// Names returns the potential codeplug model, variant and file names
+// for codeplug's file.
+func (cp *Codeplug) ModelsVariantsFiles() (models []string, variants map[string][]string, filenames map[string][]string) {
+	models = make([]string, 0)
+	variants = make(map[string][]string)
+	filenames = make(map[string][]string)
 	for _, cpi := range codeplugInfos {
-		size := cpi.RdtSize
-		if nameMap[size] == nil {
-			nameMap[size] = make([]string, 0)
-		}
-		nameMap[size] = append(nameMap[size], cpi.Name)
-	}
-
-	ambig := make([][]string, 0)
-	for _, names := range nameMap {
-		if len(names) <= 1 {
+		if cpi.RdtSize != cp.rdtSize {
 			continue
 		}
-		ambig = append(ambig, names)
+		cp.codeplugInfo = cpi
+		cp.loadHeader()
+		model := cpi.Models[0]
+		variants[model] = cp.Variants()
+		filenames[model] = cp.NewFilenames()
+		model = cp.Model()
+		for _, cpiModel := range cpi.Models {
+			if cpiModel == model {
+				model := cpi.Models[0]
+				models = []string{model}
+				variants[model] = []string{cp.Variant()}
+				filenames[model] = []string{cp.NewFilename()}
+				return models, variants, filenames
+			}
+		}
+		models = append(models, cpi.Models[0])
 	}
-	return ambig
+	cp.codeplugInfo = nil
+	cp.bytes = nil
+
+	return models, variants, filenames
 }
 
-// Codeplugs return a slice containing all currently open codeplugs.
+func (cp *Codeplug) Model() string {
+	fDescs := cp.rDesc[RecordType("RdtHeader")].records[0].fDesc
+	return (*fDescs)[FieldType("Model")].fields[0].String()
+}
+
+func (cp *Codeplug) Models() []string {
+	models, _, _ := cp.ModelsVariantsFiles()
+	return models
+}
+
+func (cp *Codeplug) Variant() string {
+	fDescs := cp.rDesc[RecordType("RdtHeader")].records[0].fDesc
+	return (*fDescs)[FieldType("Variant")].fields[0].String()
+}
+
+func (cp *Codeplug) Variants() []string {
+	fDescs := cp.rDesc[RecordType("RdtHeader")].records[0].fDesc
+	return *(*fDescs)[FieldType("Variant")].fieldInfo.strings
+}
+
+func (cp *Codeplug) NewFilename() string {
+	fDescs := cp.rDesc[RecordType("RdtHeader")].records[0].fDesc
+	return (*fDescs)[FieldType("NewFilename")].fields[0].String()
+}
+
+func (cp *Codeplug) NewFilenames() []string {
+	fDescs := cp.rDesc[RecordType("RdtHeader")].records[0].fDesc
+	return *(*fDescs)[FieldType("NewFilename")].fieldInfo.strings
+}
+
+func (cp *Codeplug) Type() string {
+	return cp.codeplugInfo.Type
+}
+
+// Codeplugs returns a slice containing all currently open codeplugs.
 func Codeplugs() []*Codeplug {
 	return codeplugs
 }
@@ -202,25 +248,56 @@ func (cp *Codeplug) Free() {
 	}
 }
 
-// Read opens a file and reads its contents into cp.bytes.
-func (cp *Codeplug) Read() error {
+func (cp *Codeplug) ReadNew(filename string) error {
+	gzipped := bytes.NewReader(new_tgz)
+
+	archive, err := gzip.NewReader(gzipped)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	tarfile := tar.NewReader(archive)
+
+	var bytes []byte
+	for {
+		hdr, err := tarfile.Next()
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
+			log.Fatal(err)
+		}
+		if hdr.Name != filename {
+			continue
+		}
+		bytes, err = ioutil.ReadAll(tarfile)
+		if err != nil {
+			log.Fatal(err)
+		}
+		break
+	}
+
+	if len(bytes) == 0 {
+		return fmt.Errorf("file %s not found", filename)
+	}
+
+	cp.bytes = bytes
+
+	return nil
+}
+
+// read opens a file and reads its contents into cp.bytes.
+func (cp *Codeplug) read() error {
 	file, err := os.Open(cp.filename)
 	if err != nil {
 		return err
 	}
 	defer file.Close()
 
-	cpi := cp.codeplugInfo
-
-	fileSize := cpi.RdtSize
-	fileOffset := 0
-	if cp.fileType == FileTypeBin {
-		fileSize = cpi.BinSize
-		fileOffset = cpi.BinOffset
+	if cp.bytes == nil {
+		cp.bytes = make([]byte, cp.fileOffset+cp.fileSize)
 	}
-
-	cpBytes := make([]byte, cpi.RdtSize)
-	bytes := cpBytes[fileOffset : fileOffset+fileSize]
+	bytes := cp.bytes[cp.fileOffset : cp.fileOffset+cp.fileSize]
 
 	bytesRead, err := file.Read(bytes)
 	if err != nil {
@@ -228,13 +305,11 @@ func (cp *Codeplug) Read() error {
 		return err
 	}
 
-	if bytesRead != fileSize {
+	if bytesRead != cp.fileSize {
 		cp.fileType = FileTypeNone
 		err = fmt.Errorf("Failed to read all of %s", cp.filename)
 		return err
 	}
-
-	cp.bytes = cpBytes
 
 	return nil
 }
@@ -370,12 +445,13 @@ func (cp *Codeplug) MaxRecords(rType RecordType) int {
 	return cp.rDesc[rType].max
 }
 
-// RecordTypes returns all of the record types of the codeplug.
+// RecordTypes returns all of the record types of the codeplug except RdtHeader.
+// The RdtHeader record is omitted.
 func (cp *Codeplug) RecordTypes() []RecordType {
 	strs := make([]string, 0, len(cp.rDesc)-1)
 
 	for rType := range cp.rDesc {
-		if rType != RtRdtHeader {
+		if rType != RecordType("RdtHeader") {
 			strs = append(strs, string(rType))
 		}
 	}
@@ -467,8 +543,21 @@ func (cp *Codeplug) ConnectChange(fn func(*Change)) {
 	cp.connectChange = fn
 }
 
+// loadHeader loads the rdt header into the codeplug from its file.
+func (cp *Codeplug) loadHeader() {
+	cp.clearCachedListNames()
+	ri := cp.codeplugInfo.RecordInfos[0]
+	ri.max = 1
+
+	rd := &rDesc{recordInfo: ri}
+	cp.rDesc[ri.rType] = rd
+	rd.codeplug = cp
+	rd.loadRecords()
+}
+
 // load loads all the records into the codeplug from its file.
 func (cp *Codeplug) load() {
+	cp.clearCachedListNames()
 	for _, ri := range cp.codeplugInfo.RecordInfos {
 		if ri.max == 0 {
 			ri.max = 1
@@ -517,11 +606,11 @@ func (cp *Codeplug) valid() error {
 }
 
 // findFileType sets the codeplug type based on file size
-func (cp *Codeplug) findFileType() error {
-	fileInfo, err := os.Stat(cp.filename)
+func (cp *Codeplug) findFileType(filename string) error {
+	fileInfo, err := os.Stat(filename)
 	if err != nil {
 		if os.IsNotExist(err) {
-			err = fmt.Errorf("%s: does not exist", cp.filename)
+			err = fmt.Errorf("%s: does not exist", filename)
 		}
 		cp.fileType = FileTypeNone
 		return err
@@ -531,18 +620,22 @@ func (cp *Codeplug) findFileType() error {
 		switch fileInfo.Size() {
 		case int64(cpi.RdtSize):
 			cp.fileType = FileTypeRdt
-			cp.codeplugInfo = cpi
+			cp.rdtSize = cpi.RdtSize
+			cp.fileSize = cpi.RdtSize
+			cp.fileOffset = 0
 			return nil
 
 		case int64(cpi.BinSize):
 			cp.fileType = FileTypeBin
-			cp.codeplugInfo = cpi
+			cp.rdtSize = cpi.RdtSize
+			cp.fileSize = cpi.BinSize
+			cp.fileOffset = cpi.BinOffset
 			return nil
 		}
 	}
 
 	cp.fileType = FileTypeNone
-	err = fmt.Errorf("%s is not a known rdt or bin file", cp.filename)
+	err = fmt.Errorf("%s is not a known rdt or bin file", filename)
 	return err
 }
 
@@ -591,7 +684,7 @@ func (cp *Codeplug) write(file *os.File) (err error) {
 // codeplug.
 func (cp *Codeplug) frequencyValid(freq float64) error {
 	if cp.lowFrequency == 0 {
-		fDescs := cp.rDesc[RtRdtHeader].records[0].fDesc
+		fDescs := cp.rDesc[RecordType("RdtHeader")].records[0].fDesc
 		s := (*fDescs)[FtRhLowFrequency].fields[0].String()
 		cp.lowFrequency, _ = strconv.ParseFloat(s, 64)
 		s = (*fDescs)[FtRhHighFrequency].fields[0].String()

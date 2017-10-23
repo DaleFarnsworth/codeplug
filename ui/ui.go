@@ -316,6 +316,14 @@ func (box *VBox) Clear() {
 	clear(box.qWidget)
 }
 
+func (box *HBox) SetEnabled(enable bool) {
+	box.qWidget.SetEnabled(enable)
+}
+
+func (box *VBox) SetEnabled(enable bool) {
+	box.qWidget.SetEnabled(enable)
+}
+
 func clear(widget widgets.QWidget) {
 	objs := widget.Children()
 	for _, obj := range objs {
@@ -1070,8 +1078,8 @@ func (a *Action) SetText(s string) {
 	a.qAction.SetText(s)
 }
 
-func (a *Action) SetDisabled(disable bool) {
-	a.qAction.SetDisabled(disable)
+func (a *Action) SetEnabled(enable bool) {
+	a.qAction.SetEnabled(enable)
 }
 
 type RadioButton struct {
@@ -1118,8 +1126,8 @@ func (b *Button) SetText(str string) {
 	b.qButton.SetText(str)
 }
 
-func (b *Button) SetDisabled(disable bool) {
-	b.qButton.SetDisabled(disable)
+func (b *Button) SetEnabled(enable bool) {
+	b.qButton.SetEnabled(enable)
 }
 
 func (w *Window) SetRecordFunc(fn func()) {
@@ -1208,7 +1216,8 @@ func YesNoPopup(title string, msg string) PopupValue {
 	return PopupNo
 }
 
-func RadioPopup(title string, msg string, selected string, options ...string) string {
+func TwoListPopup(title string, msg string, disableModel string, disableVariant string, in1 []string, in2 map[string][]string) (out1 string, out2 string) {
+
 	dialog := widgets.NewQDialog(nil, core.Qt__Dialog)
 	dialogLayout := widgets.NewQVBoxLayout2(dialog)
 
@@ -1217,49 +1226,67 @@ func RadioPopup(title string, msg string, selected string, options ...string) st
 	label := widgets.NewQLabel2(msg, nil, 0)
 	dialogLayout.AddWidget(label, 0, 0)
 
-	var retval string
+	okButton := widgets.NewQPushButton2("Ok", nil)
+	okButton.SetEnabled(false)
 
-	for _, option := range options {
-		button := widgets.NewQRadioButton2(option, nil)
-		if option == selected {
-			button.SetChecked(true)
-			retval = selected
+	cb2 := widgets.NewQComboBox(nil)
+	cb2.ConnectCurrentIndexChanged2(func(str string) {
+		okButton.SetEnabled(str != disableVariant)
+		if str != disableVariant {
+			out2 = str
 		}
-		opt := option
-		button.ConnectClicked(func(checked bool) {
-			if checked {
-				retval = opt
+	})
+	cb2.SetEnabled(false)
+
+	cb1 := widgets.NewQComboBox(nil)
+	cb1.ConnectCurrentIndexChanged2(func(str string) {
+		cb2.Clear()
+		cb2.SetEnabled(str != disableModel)
+		cb2.InsertItems(0, []string{disableVariant})
+
+		if str != disableModel {
+			cb2.InsertItems(1, in2[str])
+
+			if len(in2[str]) == 1 {
+				out2 = in2[str][0]
+				cb2.SetCurrentText(out2)
 			}
-		})
-		dialogLayout.AddWidget(button, 0, 0)
-	}
+			out1 = str
+		}
+	})
+	options := append([]string{disableModel}, in1...)
+	cb1.InsertItems(0, options)
+	cb1.SetCurrentText(disableVariant)
+
+	dialogLayout.AddWidget(cb1, 0, 0)
+	dialogLayout.AddWidget(cb2, 0, 0)
 
 	boxWidget := widgets.NewQWidget(nil, 0)
 	boxLayout := widgets.NewQHBoxLayout2(boxWidget)
 	dialogLayout.AddWidget(boxWidget, 0, 0)
 
-	button := widgets.NewQPushButton2("Cancel", nil)
-	button.ConnectClicked(func(checked bool) {
+	cancelButton := widgets.NewQPushButton2("Cancel", nil)
+	cancelButton.ConnectClicked(func(checked bool) {
 		dialog.Reject()
 	})
-	button.SetSizePolicy2(widgets.QSizePolicy__Fixed,
+	cancelButton.SetSizePolicy2(widgets.QSizePolicy__Fixed,
 		widgets.QSizePolicy__Preferred)
-	boxLayout.AddWidget(button, 0, 0)
+	boxLayout.AddWidget(cancelButton, 0, 0)
 
-	button = widgets.NewQPushButton2("Done", nil)
-	button.ConnectClicked(func(checked bool) {
+	okButton.ConnectClicked(func(checked bool) {
 		dialog.Accept()
 	})
-	button.SetSizePolicy2(widgets.QSizePolicy__Fixed,
+	okButton.SetSizePolicy2(widgets.QSizePolicy__Fixed,
 		widgets.QSizePolicy__Preferred)
-	boxLayout.AddWidget(button, 0, 0)
+	boxLayout.AddWidget(okButton, 0, 0)
 
 	rv := dialog.Exec()
 	if rv == int(widgets.QDialog__Rejected) {
-		retval = ""
+		out1 = ""
+		out2 = ""
 	}
 
-	return retval
+	return out1, out2
 }
 
 func OpenFilename(title string, dir string) string {

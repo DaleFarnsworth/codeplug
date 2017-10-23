@@ -7,19 +7,19 @@
 //
 // dale@farnsworth.org
 
-// This file is part of GenLibTypes.
+// This file is part of GenCodeplugInfo.
 //
-// GenLibTypes is free software: you can redistribute it and/or modify
+// GenCodeplugInfo is free software: you can redistribute it and/or modify
 // it under the terms of version 3 of the GNU General Public License
 // as published by the Free Software Foundation.
 //
-// GenLibTypes is distributed in the hope that it will be useful,
+// GenCodeplugInfo is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with GenLibTypes.  If not, see <http://www.gnu.org/licenses/>.
+// along with GenCodeplugInfo.  If not, see <http://www.gnu.org/licenses/>.
 
 package main
 
@@ -47,9 +47,8 @@ type top struct {
 }
 
 type Codeplug struct {
-	Name        string   `json:"name"`
-	Type        string   `json:"type"`
 	Models      []string `json:"models"`
+	Type        string   `json:"type"`
 	RdtSize     int      `json:"rdtSize"`
 	BinSize     int      `json:"binSize"`
 	BinOffset   int      `json:"binOffset"`
@@ -326,8 +325,8 @@ type InsertData struct {
 
 func main() {
 	log.SetFlags(log.Lshortfile)
-	codeFilename := "genTypes.code"
-	linesFilename := "genTypes.lines"
+	codeFilename := "genCodeplugInfo.code"
+	linesFilename := "genCodeplugInfo.lines"
 
 	filenames := os.Args[1:]
 	if len(filenames) > 0 {
@@ -397,7 +396,7 @@ func main() {
 }
 
 func insertFiles(filename string, insertDatas []InsertData) {
-	tmpFilename := "genTypes-tmp.go"
+	tmpFilename := "genCodeplugInfo-tmp.go"
 
 	tmpFile, err := os.Create(tmpFilename)
 	if err != nil {

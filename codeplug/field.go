@@ -1493,12 +1493,12 @@ func (v *ascii) store(f *Field) {
 type timeStamp string
 
 // String returns the timeStamp's value as a string.
-func (v *timeStamp) String(f *Field) string {
+func (v *timeStamp) getString(f *Field) string {
 	return string(*v)
 }
 
 // SetString sets the timeStamp's value from a string.
-func (v *timeStamp) SetString(f *Field, s string) error {
+func (v *timeStamp) setString(f *Field, s string) error {
 	if len(s) != f.size()*2 {
 		return fmt.Errorf("bad string length")
 	}

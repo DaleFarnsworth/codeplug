@@ -33,7 +33,9 @@ const (
 	RtDigitalContacts       RecordType = "DigitalContacts"
 	RtGeneralSettings       RecordType = "GeneralSettings"
 	RtGroupList             RecordType = "GroupList"
-	RtRdtHeader             RecordType = "RdtHeader"
+	RtRdtHeader_md380       RecordType = "RdtHeader"
+	RtRdtHeader_md390       RecordType = "RdtHeader"
+	RtRdtHeader_md40        RecordType = "RdtHeader"
 	RtScanList              RecordType = "ScanList"
 	RtTextMessage           RecordType = "TextMessage"
 	RtZoneInformation_md380 RecordType = "ZoneInformation"
@@ -128,6 +130,12 @@ const (
 	FtRhHighFrequency           FieldType = "HighFrequency"
 	FtRhLowFrequency            FieldType = "LowFrequency"
 	FtRhModel                   FieldType = "Model"
+	FtRhNewFilename_md380       FieldType = "NewFilename"
+	FtRhNewFilename_md390       FieldType = "NewFilename"
+	FtRhNewFilename_md40        FieldType = "NewFilename"
+	FtRhVariant_md380           FieldType = "Variant"
+	FtRhVariant_md390           FieldType = "Variant"
+	FtRhVariant_md40            FieldType = "Variant"
 	FtSlChannelMember           FieldType = "ChannelMember"
 	FtSlName                    FieldType = "Name"
 	FtSlPriorityChannel1        FieldType = "PriorityChannel1"
@@ -221,22 +229,42 @@ func newValue(vt ValueType) value {
 
 var codeplugInfos = []*CodeplugInfo{
 	&cpMd380,
+	&cpMd390,
 	&cpMd40,
 }
 
 var cpMd380 = CodeplugInfo{
-	Name: "MD380/MD390/DR780",
 	Type: "md380",
 	Models: []string{
 		"MD380",
-		"MD390",
 		"DR780",
+		"D680",
 	},
 	RdtSize:   262709,
 	BinSize:   262144,
 	BinOffset: 549,
 	RecordInfos: []*recordInfo{
-		&riRdtHeader,
+		&riRdtHeader_md380,
+		&riGeneralSettings,
+		&riTextMessage,
+		&riDigitalContacts,
+		&riGroupList,
+		&riZoneInformation_md380,
+		&riScanList,
+		&riChannelInformation,
+	},
+}
+
+var cpMd390 = CodeplugInfo{
+	Type: "md390",
+	Models: []string{
+		"MD390",
+	},
+	RdtSize:   262709,
+	BinSize:   262144,
+	BinOffset: 549,
+	RecordInfos: []*recordInfo{
+		&riRdtHeader_md390,
 		&riGeneralSettings,
 		&riTextMessage,
 		&riDigitalContacts,
@@ -248,16 +276,15 @@ var cpMd380 = CodeplugInfo{
 }
 
 var cpMd40 = CodeplugInfo{
-	Name: "DJ-MD40",
 	Type: "md40",
 	Models: []string{
-		"DJ-MD40",
+		"MD40",
 	},
 	RdtSize:   262709,
 	BinSize:   262144,
 	BinOffset: 549,
 	RecordInfos: []*recordInfo{
-		&riRdtHeader,
+		&riRdtHeader_md40,
 		&riGeneralSettings,
 		&riTextMessage,
 		&riDigitalContacts,
@@ -412,14 +439,46 @@ var riGroupList = recordInfo{
 	},
 }
 
-var riRdtHeader = recordInfo{
-	rType:    RtRdtHeader,
+var riRdtHeader_md380 = recordInfo{
+	rType:    RtRdtHeader_md380,
 	typeName: "Rdt Header",
 	max:      1,
 	offset:   0,
 	size:     549,
 	fieldInfos: []*fieldInfo{
 		&fiRhModel,
+		&fiRhVariant_md380,
+		&fiRhNewFilename_md380,
+		&fiRhLowFrequency,
+		&fiRhHighFrequency,
+	},
+}
+
+var riRdtHeader_md390 = recordInfo{
+	rType:    RtRdtHeader_md390,
+	typeName: "Rdt Header",
+	max:      1,
+	offset:   0,
+	size:     549,
+	fieldInfos: []*fieldInfo{
+		&fiRhModel,
+		&fiRhVariant_md390,
+		&fiRhNewFilename_md390,
+		&fiRhLowFrequency,
+		&fiRhHighFrequency,
+	},
+}
+
+var riRdtHeader_md40 = recordInfo{
+	rType:    RtRdtHeader_md40,
+	typeName: "Rdt Header",
+	max:      1,
+	offset:   0,
+	size:     549,
+	fieldInfos: []*fieldInfo{
+		&fiRhModel,
+		&fiRhVariant_md40,
+		&fiRhNewFilename_md40,
 		&fiRhLowFrequency,
 		&fiRhHighFrequency,
 	},
@@ -1525,6 +1584,96 @@ var fiRhModel = fieldInfo{
 	bitOffset: 2344,
 	bitSize:   64,
 	valueType: VtAscii,
+}
+
+var fiRhNewFilename_md380 = fieldInfo{
+	fType:     FtRhNewFilename_md380,
+	typeName:  "Codeplug Model Filename",
+	max:       1,
+	bitOffset: 2480,
+	bitSize:   8,
+	valueType: VtIStrings,
+	strings: &[]string{
+		"md380_136-174.rdt",
+		"md380_350-400.rdt",
+		"md380_400-480.rdt",
+		"md380_450-520.rdt",
+	},
+}
+
+var fiRhNewFilename_md390 = fieldInfo{
+	fType:     FtRhNewFilename_md390,
+	typeName:  "Codeplug Model Filename",
+	max:       1,
+	bitOffset: 2480,
+	bitSize:   8,
+	valueType: VtIStrings,
+	strings: &[]string{
+		"md390_136-174.rdt",
+		"md390_350-400.rdt",
+		"md390_400-480.rdt",
+		"md390_450-520.rdt",
+	},
+}
+
+var fiRhNewFilename_md40 = fieldInfo{
+	fType:     FtRhNewFilename_md40,
+	typeName:  "Codeplug Model Filename",
+	max:       1,
+	bitOffset: 2480,
+	bitSize:   8,
+	valueType: VtIStrings,
+	strings: &[]string{
+		"md40_400-480.rdt",
+		"md40ht_420-450.rdt",
+		"md40he_430-440.rdt",
+		"md40t_400-480.rdt",
+	},
+}
+
+var fiRhVariant_md380 = fieldInfo{
+	fType:     FtRhVariant_md380,
+	typeName:  "Codeplug Model Name",
+	max:       1,
+	bitOffset: 2480,
+	bitSize:   8,
+	valueType: VtIStrings,
+	strings: &[]string{
+		"136-174 MHz",
+		"350-400 MHz",
+		"400-480 MHz",
+		"450-520 MHz",
+	},
+}
+
+var fiRhVariant_md390 = fieldInfo{
+	fType:     FtRhVariant_md390,
+	typeName:  "Codeplug Model Name",
+	max:       1,
+	bitOffset: 2480,
+	bitSize:   8,
+	valueType: VtIStrings,
+	strings: &[]string{
+		"136-174 MHz",
+		"350-400 MHz",
+		"400-480 MHz",
+		"450-520 MHz",
+	},
+}
+
+var fiRhVariant_md40 = fieldInfo{
+	fType:     FtRhVariant_md40,
+	typeName:  "Codeplug Model Name",
+	max:       1,
+	bitOffset: 2480,
+	bitSize:   8,
+	valueType: VtIStrings,
+	strings: &[]string{
+		"MD40 400-480 MHz",
+		"MD40HT 420-450 MHz",
+		"MD40HE 430-440 MHz",
+		"MD40T 400-480 MHz",
+	},
 }
 
 var fiSlChannelMember = fieldInfo{

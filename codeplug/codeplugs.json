@@ -17,18 +17,17 @@
   ],
   "codeplugs": [
     {
-      "name": "MD380/MD390/DR780",
       "type": "md380",
       "models": [
 	      "MD380",
-	      "MD390",
-	      "DR780"
+	      "DR780",
+	      "D680"
       ],
       "rdtSize": 262709,
       "binSize": 262144,
       "binOffset": 549,
       "recordTypes": [
-        "RdtHeader",
+        "RdtHeader_md380",
         "GeneralSettings",
         "TextMessage",
         "DigitalContacts",
@@ -39,16 +38,34 @@
       ]
     },
     {
-      "name": "DJ-MD40",
-      "type": "md40",
+      "type": "md390",
       "models": [
-	      "DJ-MD40"
+	      "MD390"
       ],
       "rdtSize": 262709,
       "binSize": 262144,
       "binOffset": 549,
       "recordTypes": [
-        "RdtHeader",
+        "RdtHeader_md390",
+        "GeneralSettings",
+        "TextMessage",
+        "DigitalContacts",
+        "GroupList",
+        "ZoneInformation_md380",
+        "ScanList",
+        "ChannelInformation"
+      ]
+    },
+    {
+      "type": "md40",
+      "models": [
+	      "MD40"
+      ],
+      "rdtSize": 262709,
+      "binSize": 262144,
+      "binOffset": 549,
+      "recordTypes": [
+        "RdtHeader_md40",
         "GeneralSettings",
         "TextMessage",
         "DigitalContacts",
@@ -62,11 +79,39 @@
   "records": [
     {
       "typeName": "Rdt Header",
-      "type": "RdtHeader",
+      "type": "RdtHeader_md380",
       "offset": 0,
       "size": 549,
       "fieldTypes": [
         "RhModel",
+        "RhVariant_md380",
+        "RhNewFilename_md380",
+        "RhLowFrequency",
+        "RhHighFrequency"
+      ]
+    },
+    {
+      "typeName": "Rdt Header",
+      "type": "RdtHeader_md390",
+      "offset": 0,
+      "size": 549,
+      "fieldTypes": [
+        "RhModel",
+        "RhVariant_md390",
+        "RhNewFilename_md390",
+        "RhLowFrequency",
+        "RhHighFrequency"
+      ]
+    },
+    {
+      "typeName": "Rdt Header",
+      "type": "RdtHeader_md40",
+      "offset": 0,
+      "size": 549,
+      "fieldTypes": [
+        "RhModel",
+        "RhVariant_md40",
+        "RhNewFilename_md40",
         "RhLowFrequency",
         "RhHighFrequency"
       ]
@@ -294,6 +339,84 @@
       "bitOffset": 2344,
       "bitSize": 64,
       "valueType": "ascii"
+    },
+    {
+      "typeName": "Codeplug Model Name",
+      "type": "RhVariant_md380",
+      "bitOffset": 2480,
+      "bitSize": 8,
+      "valueType": "iStrings",
+      "strings": [
+        "136-174 MHz",
+        "350-400 MHz",
+        "400-480 MHz",
+        "450-520 MHz"
+      ]
+    },
+    {
+      "typeName": "Codeplug Model Filename",
+      "type": "RhNewFilename_md380",
+      "bitOffset": 2480,
+      "bitSize": 8,
+      "valueType": "iStrings",
+      "strings": [
+        "md380_136-174.rdt",
+        "md380_350-400.rdt",
+        "md380_400-480.rdt",
+        "md380_450-520.rdt"
+      ]
+    },
+    {
+      "typeName": "Codeplug Model Name",
+      "type": "RhVariant_md390",
+      "bitOffset": 2480,
+      "bitSize": 8,
+      "valueType": "iStrings",
+      "strings": [
+        "136-174 MHz",
+        "350-400 MHz",
+        "400-480 MHz",
+        "450-520 MHz"
+      ]
+    },
+    {
+      "typeName": "Codeplug Model Filename",
+      "type": "RhNewFilename_md390",
+      "bitOffset": 2480,
+      "bitSize": 8,
+      "valueType": "iStrings",
+      "strings": [
+        "md390_136-174.rdt",
+        "md390_350-400.rdt",
+        "md390_400-480.rdt",
+        "md390_450-520.rdt"
+      ]
+    },
+    {
+      "typeName": "Codeplug Model Name",
+      "type": "RhVariant_md40",
+      "bitOffset": 2480,
+      "bitSize": 8,
+      "valueType": "iStrings",
+      "strings": [
+        "MD40 400-480 MHz",
+        "MD40HT 420-450 MHz",
+        "MD40HE 430-440 MHz",
+        "MD40T 400-480 MHz"
+      ]
+    },
+    {
+      "typeName": "Codeplug Model Filename",
+      "type": "RhNewFilename_md40",
+      "bitOffset": 2480,
+      "bitSize": 8,
+      "valueType": "iStrings",
+      "strings": [
+        "md40_400-480.rdt",
+        "md40ht_420-450.rdt",
+        "md40he_430-440.rdt",
+        "md40t_400-480.rdt"
+      ]
     },
     {
       "typeName": "Low Frequency",

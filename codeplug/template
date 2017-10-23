@@ -41,11 +41,10 @@ var codeplugInfos = []*CodeplugInfo{
 {{- range $c := $.Codeplugs}}
 
 var cp{{call $.Capitalize $c.Type}} = CodeplugInfo{
-	Name: "{{$c.Name}}",
 	Type: "{{$c.Type}}",
 	Models: []string{
-	{{- range $model := $c.Models}}
-		"{{$model}}",
+	{{- range $name := $c.Models}}
+		"{{$name}}",
 	{{- end}}
 	},
 	RdtSize: {{$c.RdtSize}},
