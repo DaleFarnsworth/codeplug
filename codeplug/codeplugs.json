@@ -704,7 +704,7 @@
       "type": "DcCallType",
       "bitOffset": 30,
       "bitSize": 2,
-      "valueType": "iStrings",
+      "valueType": "callType",
       "strings": [
         "",
         "Group",

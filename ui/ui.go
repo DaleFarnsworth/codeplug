@@ -993,6 +993,7 @@ func newFieldTextEdit(f *codeplug.Field) *Widget {
 
 var newFieldWidget = map[codeplug.ValueType]func(*codeplug.Field) *Widget{
 	codeplug.VtCallID:          newFieldLineEdit,
+	codeplug.VtCallType:        newFieldCombobox,
 	codeplug.VtCtcssDcs:        newFieldCombobox,
 	codeplug.VtFrequency:       newFieldLineEdit,
 	codeplug.VtIndexedStrings:  newFieldCombobox,

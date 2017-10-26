@@ -144,6 +144,7 @@ const (
 const (
 	VtAscii           ValueType = "ascii"
 	VtCallID          ValueType = "callID"
+	VtCallType        ValueType = "callType"
 	VtCtcssDcs        ValueType = "ctcssDcs"
 	VtFrequency       ValueType = "frequency"
 	VtIStrings        ValueType = "iStrings"
@@ -171,6 +172,8 @@ func newValue(vt ValueType) value {
 		return new(ascii)
 	case VtCallID:
 		return new(callID)
+	case VtCallType:
+		return new(callType)
 	case VtCtcssDcs:
 		return new(ctcssDcs)
 	case VtFrequency:
@@ -1042,7 +1045,7 @@ var fiDcCallType = fieldInfo{
 	max:       1,
 	bitOffset: 30,
 	bitSize:   2,
-	valueType: VtIStrings,
+	valueType: VtCallType,
 	strings: &[]string{
 		"",
 		"Group",

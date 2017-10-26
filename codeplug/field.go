@@ -216,7 +216,7 @@ func (f *Field) Strings() []string {
 	case VtCtcssDcs:
 		strs = ctcssDcsStrings()
 
-	case VtIStrings:
+	case VtIStrings, VtCallType:
 		strs = *f.strings
 
 	case VtIndexedStrings:
@@ -900,6 +900,38 @@ func (v *introLine) load(f *Field) {
 func (v *introLine) store(f *Field) {
 	ucs2, _ := stringToUcs2Bytes(string(*v), f.size())
 	f.storeBytes(ucs2)
+}
+
+type callType struct {
+	iStrings
+}
+
+func (v *callType) SetString(f *Field, s string) error {
+	if s != "All" {
+		return v.iStrings.SetString(f, s)
+	}
+
+	for _, r := range f.record.records {
+		field := r.Field(f.fType)
+		if field.String() != "All" {
+			continue
+		}
+		return fmt.Errorf("An \"All\" record already exists: %s",
+			r.NameField().String())
+	}
+
+	err := v.iStrings.SetString(f, s)
+	if err != nil {
+		return err
+	}
+
+	callID := f.record.Field(FieldType("CallID"))
+	dprint(callID.FullTypeName(), callID.String())
+	err = f.record.Field(FieldType("CallID")).SetString("16777215")
+	dprint(err)
+	dprint(callID.FullTypeName(), callID.String())
+
+	return nil
 }
 
 // callID is a field value representing a DMR Call ID
