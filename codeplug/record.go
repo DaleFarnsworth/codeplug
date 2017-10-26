@@ -380,6 +380,22 @@ func (rd *rDesc) ListNames() *[]string {
 	return rd.cachedListNames
 }
 
+// MemberListNames returns a slice of possible member list names
+func (rd *rDesc) MemberListNames() *[]string {
+	if rd.rType != RecordType("DigitalContacts") {
+		return rd.ListNames()
+	}
+	names := make([]string, 0, len(rd.records))
+	for _, r := range rd.records {
+		typeField := r.Field(FieldType("CallType"))
+		if typeField.String() == "Group" {
+			names = append(names, r.NameField().String())
+		}
+	}
+
+	return &names
+}
+
 // recordIsDeleted returns true if the record at rIndex is deleted.
 func (rd *rDesc) recordIsDeleted(cp *Codeplug, rIndex int) bool {
 nextDelDesc:

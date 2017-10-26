@@ -524,9 +524,9 @@ func (vBox *VBox) AddFieldMembers(r *codeplug.Record, sortAvailable *bool, nameT
 	}
 
 	listRecordType := r.NewField(memberType).ListRecordType()
+	names := *r.Codeplug().Record(listRecordType).MemberListNames()
 
 	availableMap := make(map[string]bool)
-	names := *r.Codeplug().Record(listRecordType).ListNames()
 	for _, name := range names {
 		availableMap[name] = true
 	}
