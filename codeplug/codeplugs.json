@@ -137,18 +137,8 @@
       "max": 1000,
       "delDescs": [
         {
-          "offset": 0,
-          "size": 3,
-          "value": 255
-        },
-        {
           "offset": 4,
           "size": 2,
-          "value": 0
-        },
-        {
-          "offset": 4,
-          "size": 16,
           "value": 0
         }
       ],

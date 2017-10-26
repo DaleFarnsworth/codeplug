@@ -329,18 +329,8 @@ var riDigitalContacts = recordInfo{
 	size:     36,
 	delDescs: []delDesc{
 		delDesc{
-			offset: 0,
-			size:   3,
-			value:  255,
-		},
-		delDesc{
 			offset: 4,
 			size:   2,
-			value:  0,
-		},
-		delDesc{
-			offset: 4,
-			size:   16,
 			value:  0,
 		},
 	},
