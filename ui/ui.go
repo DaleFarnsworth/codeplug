@@ -886,7 +886,7 @@ func newFieldLineEdit(f *codeplug.Field) *Widget {
 		if err != nil {
 			msg := f.TypeName() + " " + err.Error()
 			qw.DisconnectEditingFinished()
-			WarningPopup("Value error", msg)
+			ErrorPopup("Value error", msg)
 			qw.ConnectEditingFinished(finished)
 		}
 	}
@@ -914,7 +914,7 @@ func newFieldCombobox(f *codeplug.Field) *Widget {
 		err := f.SetString(str)
 		if err != nil {
 			msg := f.TypeName() + " " + err.Error()
-			WarningPopup("Value error", msg)
+			ErrorPopup("Value error", msg)
 		}
 	})
 
@@ -965,7 +965,7 @@ func newFieldSpinbox(f *codeplug.Field) *Widget {
 		err := f.SetString(str)
 		if err != nil {
 			msg := f.TypeName() + " " + err.Error()
-			WarningPopup("Value error", msg)
+			ErrorPopup("Value error", msg)
 		}
 	})
 
@@ -1130,7 +1130,7 @@ func InfoPopup(title string, msg string) {
 	widgets.QMessageBox_Information(nil, title, msg, button, defaultButton)
 }
 
-func WarningPopup(title string, msg string) {
+func WarningPopup(title string, msg string) PopupValue {
 	maxLines := 20
 	lines := strings.SplitN(msg, "\n", maxLines+1)
 	if len(lines) > 1 {
@@ -1139,19 +1139,36 @@ func WarningPopup(title string, msg string) {
 			msg += "...\n"
 		}
 	}
+	buttons := widgets.QMessageBox__Cancel | widgets.QMessageBox__Ignore
+	defButton := widgets.QMessageBox__Cancel
+	rv := widgets.QMessageBox_Warning(nil, title, msg, buttons, defButton)
+	switch rv {
+	case widgets.QMessageBox__Cancel:
+		return PopupCancel
+
+	case widgets.QMessageBox__Ignore:
+		return PopupIgnore
+
+	default:
+		return PopupCancel
+	}
+}
+
+func ErrorPopup(title string, msg string) {
 	button := widgets.QMessageBox__Ok
 	defaultButton := widgets.QMessageBox__Ok
-	widgets.QMessageBox_Warning(nil, title, msg, button, defaultButton)
+	widgets.QMessageBox_Critical(nil, title, msg, button, defaultButton)
 }
 
 type PopupValue int
 
 const (
-	PopupSave PopupValue = iota
+	PopupCancel PopupValue = iota
 	PopupDiscard
-	PopupCancel
-	PopupYes
+	PopupIgnore
 	PopupNo
+	PopupSave
+	PopupYes
 )
 
 func SavePopup(title string, msg string) PopupValue {

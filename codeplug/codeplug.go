@@ -140,7 +140,7 @@ func (cp *Codeplug) Type() string {
 	return cp.codeplugInfo.Type
 }
 
-func (cp *Codeplug) Load(name string) error {
+func (cp *Codeplug) Load(name string, ignoreWarning bool) (warning error, err error) {
 	found := false
 	for _, cpi := range codeplugInfos {
 		if cpi.Name == name {
@@ -151,16 +151,17 @@ func (cp *Codeplug) Load(name string) error {
 	}
 
 	if !found {
-		return fmt.Errorf("Codeplug type not found: %s", name)
+		return nil, fmt.Errorf("Codeplug type not found: %s", name)
 	}
 
-	if err := cp.Revert(); err != nil {
-		return err
+	warning = cp.Revert(ignoreWarning)
+	if warning != nil && !ignoreWarning {
+		return warning, nil
 	}
 
 	codeplugs = append(codeplugs, cp)
 
-	return nil
+	return nil, nil
 }
 
 func AmbiguousCodeplugNames() [][]string {
@@ -241,12 +242,12 @@ func (cp *Codeplug) Read() error {
 // Revert reverts the codeplug to its state after the most recent open or
 // save operation.  An error is returned if the new codeplug state is
 // invalid.
-func (cp *Codeplug) Revert() error {
+func (cp *Codeplug) Revert(ignoreError bool) error {
 	cp.clearCachedListNames()
 
 	cp.load()
 
-	if err := cp.valid(); err != nil {
+	if err := cp.valid(); err != nil && !ignoreError {
 		return err
 	}
 
@@ -261,33 +262,33 @@ func (cp *Codeplug) Revert() error {
 
 // Save stores the state of the Codeplug into its file
 // An error may be returned if the codeplug state is invalid.
-func (cp *Codeplug) Save() error {
-	return cp.SaveAs(cp.filename)
+func (cp *Codeplug) Save(ignoreWarning bool) (warning error, err error) {
+	return cp.SaveAs(cp.filename, ignoreWarning)
 }
 
 // SaveAs saves the state of the Codeplug into a named file.
 // An error will be returned if the codeplug state is invalid.
 // The named file becomes the current file associated with the codeplug.
-func (cp *Codeplug) SaveAs(filename string) error {
-	err := cp.SaveToFile(filename)
-	if err != nil {
-		return err
+func (cp *Codeplug) SaveAs(filename string, ignoreWarning bool) (warning error, err error) {
+	warning, err = cp.SaveToFile(filename, ignoreWarning)
+	if warning != nil || err != nil {
+		return warning, err
 	}
 
 	cp.filename = filename
 	cp.changed = false
 	cp.hash = sha256.Sum256(cp.bytes)
 
-	return nil
+	return nil, nil
 }
 
 // SaveToFile saves the state of the Codeplug into a named file.
 // An error will be returned if the codeplug state is invalid.
 // The state of the codeplug is not changed, so this
 // is useful for use by an autosave function.
-func (cp *Codeplug) SaveToFile(filename string) error {
-	if err := cp.valid(); err != nil {
-		return err
+func (cp *Codeplug) SaveToFile(filename string, ignoreWarning bool) (warning error, err error) {
+	if warning := cp.valid(); warning != nil {
+		return warning, nil
 	}
 
 	cp.store()
@@ -295,19 +296,19 @@ func (cp *Codeplug) SaveToFile(filename string) error {
 	dir, base := filepath.Split(filename)
 	tmpFile, err := ioutil.TempFile(dir, base)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if err = cp.write(tmpFile); err != nil {
 		os.Remove(tmpFile.Name())
-		return err
+		return nil, err
 	}
 
 	if err := os.Rename(tmpFile.Name(), filename); err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return nil, err
 }
 
 // Filename returns the path name of the file associated with the codeplug.
