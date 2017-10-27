@@ -46,8 +46,8 @@ type Field struct {
 
 // A value represents the value a Field Contains.
 type value interface {
-	String(*Field) string
-	SetString(*Field, string) error
+	getString(*Field) string
+	setString(*Field, string) error
 	valid(*Field) error
 	load(*Field)
 	store(*Field)
@@ -131,7 +131,7 @@ func (f Field) String() string {
 	if _, invalid := f.value.(invalidValue); invalid {
 		return invalidValueString
 	}
-	return f.value.String(&f)
+	return f.value.getString(&f)
 }
 
 // SetString set the strings value from the given string.
@@ -141,7 +141,7 @@ func (f *Field) SetString(s string) error {
 		return nil
 	}
 	s = strings.TrimSpace(s)
-	err := f.value.SetString(f, s)
+	err := f.value.setString(f, s)
 	if err != nil {
 		return err
 	}
@@ -520,12 +520,12 @@ var deferredValidFields []*Field
 type frequency float64
 
 // String returns the frequency's value as a string.
-func (v *frequency) String(f *Field) string {
+func (v *frequency) getString(f *Field) string {
 	return frequencyToString(float64(*v))
 }
 
 // SetString sets the frequency's value from a string.
-func (v *frequency) SetString(f *Field, s string) error {
+func (v *frequency) setString(f *Field, s string) error {
 	freq, err := stringToFrequency(s)
 	if err != nil {
 		return err
@@ -561,7 +561,7 @@ func (v *frequency) store(f *Field) {
 type onOff bool
 
 // String returns the onOff's value as a string.
-func (v *onOff) String(f *Field) string {
+func (v *onOff) getString(f *Field) string {
 	s := "Off"
 	if *v {
 		s = "On"
@@ -571,7 +571,7 @@ func (v *onOff) String(f *Field) string {
 }
 
 // SetString sets the onOff's value from a string.
-func (v *onOff) SetString(f *Field, s string) error {
+func (v *onOff) setString(f *Field, s string) error {
 	switch s {
 	case "Off":
 		*v = false
@@ -636,7 +636,7 @@ func (v *offOn) store(f *Field) {
 type iStrings int
 
 // String returns the iStrings' value as a string.
-func (v *iStrings) String(f *Field) string {
+func (v *iStrings) getString(f *Field) string {
 	i := int(*v)
 	strings := *f.strings
 	if i >= len(strings) {
@@ -647,7 +647,7 @@ func (v *iStrings) String(f *Field) string {
 }
 
 // SetString sets the iStrings' value from a string.
-func (v *iStrings) SetString(f *Field, s string) error {
+func (v *iStrings) setString(f *Field, s string) error {
 	fd := f.fDesc
 	strings := *fd.strings
 	for i, str := range strings {
@@ -695,7 +695,7 @@ func (v *iStrings) store(f *Field) {
 type span uint8
 
 // String returns the span's value as a string.
-func (v *span) String(f *Field) string {
+func (v *span) getString(f *Field) string {
 	sp := *f.span
 	i := uint8(*v)
 	if sp.minString != "" && i == sp.min {
@@ -705,7 +705,7 @@ func (v *span) String(f *Field) string {
 }
 
 // SetString sets the span's value from a string.
-func (v *span) SetString(f *Field, s string) error {
+func (v *span) setString(f *Field, s string) error {
 	sp := *f.span
 
 	if s == sp.minString && s != "" {
@@ -768,7 +768,7 @@ func (v *span) store(f *Field) {
 type indexedStrings uint16
 
 // String returns the indexedStrings's value as a string.
-func (v *indexedStrings) String(f *Field) string {
+func (v *indexedStrings) getString(f *Field) string {
 	for _, is := range *(*f.fDesc).indexedStrings {
 		if is.Index == uint16(*v) {
 			return is.String
@@ -778,7 +778,7 @@ func (v *indexedStrings) String(f *Field) string {
 }
 
 // SetString sets the indexedStrings's value from a string.
-func (v *indexedStrings) SetString(f *Field, s string) error {
+func (v *indexedStrings) setString(f *Field, s string) error {
 	fd := f.fDesc
 
 	for _, is := range *fd.indexedStrings {
@@ -824,12 +824,12 @@ func (v *indexedStrings) store(f *Field) {
 type rhFrequency float64
 
 // String returns the rhFrequency's value as a string.
-func (v *rhFrequency) String(f *Field) string {
+func (v *rhFrequency) getString(f *Field) string {
 	return frequencyToString(float64(*v))
 }
 
 // SetString sets the rhFrequency's value from a string.
-func (v *rhFrequency) SetString(f *Field, s string) error {
+func (v *rhFrequency) setString(f *Field, s string) error {
 	freq, err := stringToFrequency(s)
 	if err != nil {
 		return err
@@ -860,12 +860,12 @@ func (v *rhFrequency) store(f *Field) {
 type introLine string
 
 // String returns the introLine's value as a string.
-func (v *introLine) String(f *Field) string {
+func (v *introLine) getString(f *Field) string {
 	return string(*v)
 }
 
 // SetString sets the introLine's value from a string.
-func (v *introLine) SetString(f *Field, s string) error {
+func (v *introLine) setString(f *Field, s string) error {
 	if utf8.RuneCountInString(s) > f.size()/2 {
 		return fmt.Errorf("is too long")
 	}
@@ -906,9 +906,9 @@ type callType struct {
 	iStrings
 }
 
-func (v *callType) SetString(f *Field, s string) error {
+func (v *callType) setString(f *Field, s string) error {
 	if s != "All" {
-		return v.iStrings.SetString(f, s)
+		return v.iStrings.setString(f, s)
 	}
 
 	for _, r := range f.record.records {
@@ -920,7 +920,7 @@ func (v *callType) SetString(f *Field, s string) error {
 			r.NameField().String())
 	}
 
-	err := v.iStrings.SetString(f, s)
+	err := v.iStrings.setString(f, s)
 	if err != nil {
 		return err
 	}
@@ -938,12 +938,12 @@ func (v *callType) SetString(f *Field, s string) error {
 type callID int32
 
 // String returns the callID's value as a string.
-func (v *callID) String(f *Field) string {
+func (v *callID) getString(f *Field) string {
 	return fmt.Sprintf("%d", int(*v))
 }
 
 // SetString sets the callID's value from a string.
-func (v *callID) SetString(f *Field, s string) error {
+func (v *callID) setString(f *Field, s string) error {
 	val, err := strconv.ParseUint(s, 10, 64)
 	if err != nil {
 		return fmt.Errorf("must be a positive integer")
@@ -977,12 +977,12 @@ func (v *callID) store(f *Field) {
 type radioPassword string
 
 // String returns the radioPassword's value as a string.
-func (v *radioPassword) String(f *Field) string {
+func (v *radioPassword) getString(f *Field) string {
 	return string(*v)
 }
 
 // SetString sets the radioPassword's value from a string.
-func (v *radioPassword) SetString(f *Field, s string) error {
+func (v *radioPassword) setString(f *Field, s string) error {
 	length := f.size() * 2
 	if len(s) != length {
 		return fmt.Errorf("password must be %d characters long", length)
@@ -1022,7 +1022,7 @@ func (v *radioPassword) store(f *Field) {
 type pcPassword string
 
 // String returns the pcPassword's value as a string.
-func (v *pcPassword) String(f *Field) string {
+func (v *pcPassword) getString(f *Field) string {
 	if string(*v) == "\xff\xff\xff\xff\xff\xff\xff\xff" {
 		return ""
 	}
@@ -1031,7 +1031,7 @@ func (v *pcPassword) String(f *Field) string {
 }
 
 // SetString sets the pcPassword's value from a string.
-func (v *pcPassword) SetString(f *Field, s string) error {
+func (v *pcPassword) setString(f *Field, s string) error {
 	if s == "" {
 		*v = pcPassword(s)
 		return nil
@@ -1080,12 +1080,12 @@ func (v *pcPassword) store(f *Field) {
 type radioName string
 
 // String returns the radioName's value as a string.
-func (v *radioName) String(f *Field) string {
+func (v *radioName) getString(f *Field) string {
 	return string(*v)
 }
 
 // SetString sets the radioName's value from a string.
-func (v *radioName) SetString(f *Field, s string) error {
+func (v *radioName) setString(f *Field, s string) error {
 	if utf8.RuneCountInString(s) > f.size()/2 {
 		return fmt.Errorf("name too long")
 	}
@@ -1129,12 +1129,12 @@ func (v *radioName) store(f *Field) {
 type textMessage string
 
 // String returns the textMessage's value as a string.
-func (v *textMessage) String(f *Field) string {
+func (v *textMessage) getString(f *Field) string {
 	return string(*v)
 }
 
 // valid returns nil if the textMessage's value is valid.
-func (v *textMessage) SetString(f *Field, s string) error {
+func (v *textMessage) setString(f *Field, s string) error {
 	if utf8.RuneCountInString(s) >= f.size()/2 {
 		return fmt.Errorf("line too long")
 	}
@@ -1176,12 +1176,12 @@ type uniqueName struct {
 type name string
 
 // String returns the name's value as a string.
-func (v *name) String(f *Field) string {
+func (v *name) getString(f *Field) string {
 	return string(*v)
 }
 
 // SetString sets the name's value from a string.
-func (v *name) SetString(f *Field, s string) error {
+func (v *name) setString(f *Field, s string) error {
 	if utf8.RuneCountInString(s) > f.size()/2 {
 		return fmt.Errorf("name too long")
 	}
@@ -1218,7 +1218,7 @@ type privacyNumber struct {
 }
 
 // String returns the privacyNumber's value as a string.
-func (v *privacyNumber) String(f *Field) string {
+func (v *privacyNumber) getString(f *Field) string {
 	ss := f.sibling(FtCiPrivacy).String()
 
 	value := int(v.span)
@@ -1226,21 +1226,21 @@ func (v *privacyNumber) String(f *Field) string {
 		value = 7
 	}
 
-	s := v.span.String(f)
+	s := v.span.getString(f)
 	v.span = span(value)
 
 	return s
 }
 
 // SetString sets the privacyNumber's value from a string.
-func (v *privacyNumber) SetString(f *Field, s string) error {
+func (v *privacyNumber) setString(f *Field, s string) error {
 	ss := f.sibling(FtCiPrivacy).String()
 
 	if ss == "Enhanced" && int(v.span) >= 8 {
 		return fmt.Errorf("must be less than 8 for enhanced privacy")
 	}
 
-	return v.span.SetString(f, s)
+	return v.span.setString(f, s)
 }
 
 // valid returns nil if the privacyNumber's value is valid.
@@ -1263,14 +1263,14 @@ func (v *privacyNumber) valid(f *Field) error {
 type ctcssDcs int
 
 // String returns the ctcssDcs's value as a string.
-func (v *ctcssDcs) String(f *Field) string {
+func (v *ctcssDcs) getString(f *Field) string {
 	s, _ := ctcssDcsCode(int(*v))
 
 	return s
 }
 
 // SetString sets the ctcssDcs's value from a string.
-func (v *ctcssDcs) SetString(f *Field, s string) error {
+func (v *ctcssDcs) setString(f *Field, s string) error {
 	value := ctcssDcsStringToBinary(s)
 	if value >= 0 {
 		*v = ctcssDcs(value)
@@ -1306,8 +1306,8 @@ type memberListIndex struct {
 }
 
 // String returns the memberListIndex's value as a string.
-func (v *memberListIndex) String(f *Field) string {
-	name := v.listIndex.String(f)
+func (v *memberListIndex) getString(f *Field) string {
+	name := v.listIndex.getString(f)
 	if v.listIndex > 0 && int(v.listIndex) <= len(f.fields) {
 		for _, str := range f.memberListNames() {
 			if str == name {
@@ -1324,7 +1324,7 @@ func (v *memberListIndex) String(f *Field) string {
 }
 
 // SetString sets the memberListIndex's value from a string.
-func (v *memberListIndex) SetString(f *Field, s string) error {
+func (v *memberListIndex) setString(f *Field, s string) error {
 	fd := f.fDesc
 
 	if fd.indexedStrings != nil {
@@ -1353,7 +1353,7 @@ func (v *memberListIndex) SetString(f *Field, s string) error {
 type listIndex uint16
 
 // String returns the listIndex's value as a string.
-func (v *listIndex) String(f *Field) string {
+func (v *listIndex) getString(f *Field) string {
 	fd := f.fDesc
 
 	if fd.indexedStrings != nil {
@@ -1374,7 +1374,7 @@ func (v *listIndex) String(f *Field) string {
 }
 
 // SetString sets the listIndex's value from a string.
-func (v *listIndex) SetString(f *Field, s string) error {
+func (v *listIndex) setString(f *Field, s string) error {
 	fd := f.fDesc
 
 	if fd.indexedStrings != nil {
@@ -1424,12 +1424,12 @@ func (v *listIndex) valid(f *Field) error {
 type ascii string
 
 // String returns the ascii's value as a string.
-func (v *ascii) String(f *Field) string {
+func (v *ascii) getString(f *Field) string {
 	return string(*v)
 }
 
 // SetString sets the ascii's value from a string.
-func (v *ascii) SetString(f *Field, s string) error {
+func (v *ascii) setString(f *Field, s string) error {
 	if len(s) > f.size() {
 		return fmt.Errorf("string too long")
 	}

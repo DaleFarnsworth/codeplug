@@ -354,7 +354,7 @@ func (r *Record) makeNameUnique(namesp *[]string) error {
 		newName = strings.TrimSpace(baseName) + "." + string(c)
 		if !stringInSlice(newName, names) {
 			nameField.value = newValue(nameField.ValueType())
-			nameField.value.SetString(nameField, newName)
+			nameField.value.setString(nameField, newName)
 			return nil
 		}
 	}
