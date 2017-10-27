@@ -795,7 +795,7 @@ func setEnabled(w *Widget, f *codeplug.Field) {
 	}
 
 	if enabled && !f.IsValid() {
-		setString(f, f.DefaultValue())
+		f.SetString(f.DefaultValue())
 	}
 
 	qWidget.SetEnabled(enabled)
@@ -852,20 +852,6 @@ func setQCheckBox(cb *widgets.QCheckBox, f *codeplug.Field) {
 	cb.SetCheckState(checkState)
 }
 
-func setString(f *codeplug.Field, str string) error {
-	previousString := f.String()
-	if str == previousString {
-		return nil
-	}
-
-	err := f.SetString(str)
-	if err == nil {
-		change := f.Change(previousString)
-		change.Complete()
-	}
-	return err
-}
-
 func newFieldCheckbox(f *codeplug.Field) *Widget {
 	qw := widgets.NewQCheckBox(nil)
 	w := new(Widget)
@@ -879,7 +865,7 @@ func newFieldCheckbox(f *codeplug.Field) *Widget {
 		if checked {
 			str = "On"
 		}
-		err := setString(f, str)
+		err := f.SetString(str)
 		if err != nil {
 			log.Fatal(err.Error())
 		}
@@ -896,7 +882,7 @@ func newFieldLineEdit(f *codeplug.Field) *Widget {
 
 	var finished func()
 	finished = func() {
-		err := setString(f, qw.Text())
+		err := f.SetString(qw.Text())
 		if err != nil {
 			msg := f.TypeName() + " " + err.Error()
 			qw.DisconnectEditingFinished()
@@ -925,7 +911,7 @@ func newFieldCombobox(f *codeplug.Field) *Widget {
 	qw.SetCurrentText(f.String())
 
 	qw.ConnectActivated2(func(str string) {
-		err := setString(f, str)
+		err := f.SetString(str)
 		if err != nil {
 			msg := f.TypeName() + " " + err.Error()
 			WarningPopup("Value error", msg)
@@ -976,7 +962,7 @@ func newFieldSpinbox(f *codeplug.Field) *Widget {
 	setQSpinBox(qw, f)
 
 	qw.ConnectValueChanged2(func(str string) {
-		err := setString(f, str)
+		err := f.SetString(str)
 		if err != nil {
 			msg := f.TypeName() + " " + err.Error()
 			WarningPopup("Value error", msg)

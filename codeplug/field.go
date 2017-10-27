@@ -134,8 +134,23 @@ func (f Field) String() string {
 	return f.value.getString(&f)
 }
 
-// SetString set the strings value from the given string.
-func (f *Field) SetString(s string) error {
+// setString set the strings value from the given string, recording a change.
+func (f *Field) SetString(str string) error {
+	previousString := f.String()
+	if str == previousString {
+		return nil
+	}
+
+	err := f.setString(str)
+	if err == nil {
+		change := f.Change(previousString)
+		change.Complete()
+	}
+	return err
+}
+
+// setString set the strings value from the given string.
+func (f *Field) setString(s string) error {
 	if s == invalidValueString {
 		f.value = invalidValue{value: f.value}
 		return nil
@@ -524,7 +539,7 @@ func (v *frequency) getString(f *Field) string {
 	return frequencyToString(float64(*v))
 }
 
-// SetString sets the frequency's value from a string.
+// setString sets the frequency's value from a string.
 func (v *frequency) setString(f *Field, s string) error {
 	freq, err := stringToFrequency(s)
 	if err != nil {
@@ -570,7 +585,7 @@ func (v *onOff) getString(f *Field) string {
 	return s
 }
 
-// SetString sets the onOff's value from a string.
+// setString sets the onOff's value from a string.
 func (v *onOff) setString(f *Field, s string) error {
 	switch s {
 	case "Off":
@@ -646,7 +661,7 @@ func (v *iStrings) getString(f *Field) string {
 	return strings[i]
 }
 
-// SetString sets the iStrings' value from a string.
+// setString sets the iStrings' value from a string.
 func (v *iStrings) setString(f *Field, s string) error {
 	fd := f.fDesc
 	strings := *fd.strings
@@ -704,7 +719,7 @@ func (v *span) getString(f *Field) string {
 	return fmt.Sprintf("%d", int(*v)*int(sp.scale))
 }
 
-// SetString sets the span's value from a string.
+// setString sets the span's value from a string.
 func (v *span) setString(f *Field, s string) error {
 	sp := *f.span
 
@@ -777,7 +792,7 @@ func (v *indexedStrings) getString(f *Field) string {
 	return ""
 }
 
-// SetString sets the indexedStrings's value from a string.
+// setString sets the indexedStrings's value from a string.
 func (v *indexedStrings) setString(f *Field, s string) error {
 	fd := f.fDesc
 
@@ -828,7 +843,7 @@ func (v *rhFrequency) getString(f *Field) string {
 	return frequencyToString(float64(*v))
 }
 
-// SetString sets the rhFrequency's value from a string.
+// setString sets the rhFrequency's value from a string.
 func (v *rhFrequency) setString(f *Field, s string) error {
 	freq, err := stringToFrequency(s)
 	if err != nil {
@@ -864,7 +879,7 @@ func (v *introLine) getString(f *Field) string {
 	return string(*v)
 }
 
-// SetString sets the introLine's value from a string.
+// setString sets the introLine's value from a string.
 func (v *introLine) setString(f *Field, s string) error {
 	if utf8.RuneCountInString(s) > f.size()/2 {
 		return fmt.Errorf("is too long")
@@ -925,11 +940,7 @@ func (v *callType) setString(f *Field, s string) error {
 		return err
 	}
 
-	callID := f.record.Field(FieldType("CallID"))
-	dprint(callID.FullTypeName(), callID.String())
-	err = f.record.Field(FieldType("CallID")).SetString("16777215")
-	dprint(err)
-	dprint(callID.FullTypeName(), callID.String())
+	f.record.Field(FieldType("CallID")).SetString("16777215")
 
 	return nil
 }
@@ -942,7 +953,7 @@ func (v *callID) getString(f *Field) string {
 	return fmt.Sprintf("%d", int(*v))
 }
 
-// SetString sets the callID's value from a string.
+// setString sets the callID's value from a string.
 func (v *callID) setString(f *Field, s string) error {
 	val, err := strconv.ParseUint(s, 10, 64)
 	if err != nil {
@@ -981,7 +992,7 @@ func (v *radioPassword) getString(f *Field) string {
 	return string(*v)
 }
 
-// SetString sets the radioPassword's value from a string.
+// setString sets the radioPassword's value from a string.
 func (v *radioPassword) setString(f *Field, s string) error {
 	length := f.size() * 2
 	if len(s) != length {
@@ -1030,7 +1041,7 @@ func (v *pcPassword) getString(f *Field) string {
 	return strings.ToLower(string(*v))
 }
 
-// SetString sets the pcPassword's value from a string.
+// setString sets the pcPassword's value from a string.
 func (v *pcPassword) setString(f *Field, s string) error {
 	if s == "" {
 		*v = pcPassword(s)
@@ -1084,7 +1095,7 @@ func (v *radioName) getString(f *Field) string {
 	return string(*v)
 }
 
-// SetString sets the radioName's value from a string.
+// setString sets the radioName's value from a string.
 func (v *radioName) setString(f *Field, s string) error {
 	if utf8.RuneCountInString(s) > f.size()/2 {
 		return fmt.Errorf("name too long")
@@ -1180,7 +1191,7 @@ func (v *name) getString(f *Field) string {
 	return string(*v)
 }
 
-// SetString sets the name's value from a string.
+// setString sets the name's value from a string.
 func (v *name) setString(f *Field, s string) error {
 	if utf8.RuneCountInString(s) > f.size()/2 {
 		return fmt.Errorf("name too long")
@@ -1232,7 +1243,7 @@ func (v *privacyNumber) getString(f *Field) string {
 	return s
 }
 
-// SetString sets the privacyNumber's value from a string.
+// setString sets the privacyNumber's value from a string.
 func (v *privacyNumber) setString(f *Field, s string) error {
 	ss := f.sibling(FtCiPrivacy).String()
 
@@ -1269,7 +1280,7 @@ func (v *ctcssDcs) getString(f *Field) string {
 	return s
 }
 
-// SetString sets the ctcssDcs's value from a string.
+// setString sets the ctcssDcs's value from a string.
 func (v *ctcssDcs) setString(f *Field, s string) error {
 	value := ctcssDcsStringToBinary(s)
 	if value >= 0 {
@@ -1323,7 +1334,7 @@ func (v *memberListIndex) getString(f *Field) string {
 	return name
 }
 
-// SetString sets the memberListIndex's value from a string.
+// setString sets the memberListIndex's value from a string.
 func (v *memberListIndex) setString(f *Field, s string) error {
 	fd := f.fDesc
 
@@ -1346,7 +1357,7 @@ func (v *memberListIndex) setString(f *Field, s string) error {
 			}
 		}
 	}
-	return fmt.Errorf("memberListIndex.SetString: bad list entry name: %s", s)
+	return fmt.Errorf("memberListIndex.setString: bad list entry name: %s", s)
 }
 
 // listIndex is a field value representing an index into a slice of records
@@ -1373,7 +1384,7 @@ func (v *listIndex) getString(f *Field) string {
 	return names[ind]
 }
 
-// SetString sets the listIndex's value from a string.
+// setString sets the listIndex's value from a string.
 func (v *listIndex) setString(f *Field, s string) error {
 	fd := f.fDesc
 
@@ -1392,7 +1403,7 @@ func (v *listIndex) setString(f *Field, s string) error {
 			return nil
 		}
 	}
-	return fmt.Errorf("listIndex.SetString: bad list entry name", s)
+	return fmt.Errorf("listIndex.setString: bad list entry name", s)
 }
 
 // valid returns nil if the listIndex's value is valid.
@@ -1428,7 +1439,7 @@ func (v *ascii) getString(f *Field) string {
 	return string(*v)
 }
 
-// SetString sets the ascii's value from a string.
+// setString sets the ascii's value from a string.
 func (v *ascii) setString(f *Field, s string) error {
 	if len(s) > f.size() {
 		return fmt.Errorf("string too long")

@@ -462,7 +462,7 @@ func (r *Record) NewFieldWithValue(fType FieldType, index int, str string) (*Fie
 			return f, nil
 		}
 	}
-	err := f.SetString(str)
+	err := f.setString(str)
 	if err != nil {
 		return f, err
 	}
@@ -563,7 +563,7 @@ func updateDeferredFields(records []*Record) (error, *Field) {
 				dValue, deferred := f.value.(deferredValue)
 				if deferred {
 					f.value = dValue.value
-					err := f.SetString(dValue.str)
+					err := f.setString(dValue.str)
 					if err != nil {
 						f.value = dValue
 						return err, f
