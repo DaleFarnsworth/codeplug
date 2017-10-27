@@ -291,7 +291,7 @@
       "typeName": "Codeplug Model",
       "type": "RhModel",
       "bitOffset": 2344,
-      "bitSize": 128,
+      "bitSize": 64,
       "valueType": "ascii"
     },
     {

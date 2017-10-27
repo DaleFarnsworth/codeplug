@@ -1509,7 +1509,7 @@ var fiRhModel = fieldInfo{
 	typeName:  "Codeplug Model",
 	max:       1,
 	bitOffset: 2344,
-	bitSize:   128,
+	bitSize:   64,
 	valueType: VtAscii,
 }
 

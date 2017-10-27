@@ -1467,8 +1467,9 @@ func (v *ascii) load(f *Field) {
 
 // store stores the ascii's value into its bits in cp.bytes.
 func (v *ascii) store(f *Field) {
-	bytes := make([]byte, f.size())
-	copy(bytes, []byte(string(*v)))
+	bytes := bytes.Repeat([]byte{0xff}, f.size())
+	str := string(*v) + "\000"
+	copy(bytes, []byte(str))
 	f.storeBytes(bytes)
 }
 
