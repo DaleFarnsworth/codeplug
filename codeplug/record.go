@@ -29,6 +29,7 @@ import (
 	"fmt"
 	"log"
 	"sort"
+	"strconv"
 	"strings"
 )
 
@@ -330,33 +331,37 @@ func (r *Record) makeNameUnique(namesp *[]string) error {
 	}
 
 	nameField := r.NameField()
-	baseName := nameField.String()
+	name := nameField.String()
 
-	if !stringInSlice(baseName, names) {
+	if !stringInSlice(name, names) {
 		return nil
 	}
 
+	baseName := strings.TrimRight(strings.TrimSpace(name), "0123456789")
+	suffix := strings.TrimPrefix(name, baseName)
+	if suffix == "" {
+		suffix = "2"
+	}
+	n64, err := strconv.ParseInt(suffix, 10, 32)
+	if err != nil {
+		log.Fatal("trailing digits not numeric")
+	}
+	n := int(n64)
+
 	maxNameLen := nameField.bitSize / 16
-	if len(baseName) >= maxNameLen {
-		baseName = baseName[:maxNameLen-2]
-	}
 
-	runes := []rune(baseName)
-	if runes[len(runes)-2] == '.' {
-		runes = runes[:len(runes)-2]
-		baseName = string(runes)
-	}
-
-	var newName string
-	suffixRunes := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-
-	for _, c := range suffixRunes {
-		newName = strings.TrimSpace(baseName) + "." + string(c)
+	for len(baseName) > 0 {
+		suffix := fmt.Sprintf("%d", n)
+		for len(baseName)+len(suffix) > maxNameLen {
+			baseName = baseName[:len(baseName)-1]
+		}
+		newName := strings.TrimSpace(baseName) + fmt.Sprintf("%d", n)
 		if !stringInSlice(newName, names) {
 			nameField.value = newValue(nameField.ValueType())
 			nameField.value.setString(nameField, newName)
 			return nil
 		}
+		n += 1
 	}
 
 	return fmt.Errorf("too many record copies")
