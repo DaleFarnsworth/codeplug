@@ -518,23 +518,23 @@ func (r *Record) RemoveField(f *Field) {
 	(*r.fDesc)[fType].fields = fields
 }
 
-func (r *Record) Copy() *Record {
-	copy := *r
+func (or *Record) Copy() *Record {
+	r := new(Record)
+	r.rDesc = or.rDesc
+	r.rIndex = 0
 
-	fDesc := make(map[FieldType]*fDesc)
-	copy.fDesc = &fDesc
+	rfDesc := make(map[FieldType]*fDesc)
+	for fType, fd := range *or.fDesc {
+		fields := fd.CopyFields()
+		fDesc := fields[0].fDesc
+		fDesc.fields = fields
+		fDesc.record = r
 
-	for fType, fd := range *r.fDesc {
-		fDesc := *fd
-		(*copy.fDesc)[fType] = &fDesc
-
-		fDesc.fields = make([]*Field, len(fd.fields))
-		for i, f := range fd.fields {
-			fDesc.fields[i] = f.Copy()
-		}
+		rfDesc[fType] = fDesc
 	}
+	r.fDesc = &rfDesc
 
-	return &copy
+	return r
 }
 
 func recordNames(records []*Record) []string {

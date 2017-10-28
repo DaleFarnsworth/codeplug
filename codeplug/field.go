@@ -376,9 +376,25 @@ func (f *Field) sibling(fType FieldType) *Field {
 }
 
 // Copy returns a deep copy of the field.
-func (f *Field) Copy() *Field {
-	f, _ = f.record.NewFieldWithValue(f.fType, f.fIndex, f.String())
-	return f
+func (ofd *fDesc) CopyFields() []*Field {
+	fd := new(fDesc)
+
+	fd.fieldInfo = ofd.fieldInfo
+	fd.record = nil
+	fd.fields = nil
+
+	fields := make([]*Field, len(ofd.fields))
+	for i, of := range ofd.fields {
+		f := new(Field)
+
+		f.fDesc = fd
+		f.fIndex = of.fIndex
+		f.value = of.value
+
+		fields[i] = f
+	}
+
+	return fields
 }
 
 func (f *Field) IsEnabled() bool {
