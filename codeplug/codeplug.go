@@ -39,6 +39,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strconv"
+	"strings"
 	"unicode"
 )
 
@@ -93,14 +94,23 @@ func NewCodeplug(filename string) (*Codeplug, error) {
 		}
 	} else {
 		baseName := "codeplug"
-		i := 1
-		for {
-			filename = baseName + fmt.Sprintf("%d", i) + ".rdt"
-			_, err := os.Stat(filename)
+	nextName:
+		for i := 1; ; i++ {
+			filename = fmt.Sprintf("%s%d", baseName, i)
+
+			for _, cp := range codeplugs {
+				if strings.HasPrefix(cp.filename, filename) {
+					continue nextName
+				}
+			}
+
+			matches, err := filepath.Glob(filename + "*")
 			if err != nil {
+				log.Fatal(err.Error())
+			}
+			if len(matches) == 0 {
 				break
 			}
-			i++
 		}
 	}
 
