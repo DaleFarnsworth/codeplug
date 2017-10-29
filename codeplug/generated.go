@@ -31,7 +31,8 @@ package codeplug
 const (
 	RtChannelInformation    RecordType = "ChannelInformation"
 	RtDigitalContacts       RecordType = "DigitalContacts"
-	RtGeneralSettings       RecordType = "GeneralSettings"
+	RtGeneralSettings_md380 RecordType = "GeneralSettings"
+	RtGeneralSettings_md40  RecordType = "GeneralSettings"
 	RtGroupList             RecordType = "GroupList"
 	RtRdtHeader_md380       RecordType = "RdtHeader"
 	RtRdtHeader_md390       RecordType = "RdtHeader"
@@ -246,7 +247,7 @@ var cpMd380 = CodeplugInfo{
 	BinOffset: 549,
 	RecordInfos: []*recordInfo{
 		&riRdtHeader_md380,
-		&riGeneralSettings,
+		&riGeneralSettings_md380,
 		&riTextMessage,
 		&riDigitalContacts,
 		&riGroupList,
@@ -267,7 +268,7 @@ var cpMd390 = CodeplugInfo{
 	BinOffset: 549,
 	RecordInfos: []*recordInfo{
 		&riRdtHeader_md390,
-		&riGeneralSettings,
+		&riGeneralSettings_md380,
 		&riTextMessage,
 		&riDigitalContacts,
 		&riGroupList,
@@ -288,7 +289,7 @@ var cpMd40 = CodeplugInfo{
 	BinOffset: 549,
 	RecordInfos: []*recordInfo{
 		&riRdtHeader_md40,
-		&riGeneralSettings,
+		&riGeneralSettings_md40,
 		&riTextMessage,
 		&riDigitalContacts,
 		&riGroupList,
@@ -379,8 +380,48 @@ var riDigitalContacts = recordInfo{
 	},
 }
 
-var riGeneralSettings = recordInfo{
-	rType:    RtGeneralSettings,
+var riGeneralSettings_md380 = recordInfo{
+	rType:    RtGeneralSettings_md380,
+	typeName: "General Settings",
+	max:      1,
+	offset:   8742,
+	size:     383,
+	fieldInfos: []*fieldInfo{
+		&fiGsTimeStamp,
+		&fiGsIntroScreenLine1,
+		&fiGsIntroScreenLine2,
+		&fiGsMonitorType,
+		&fiGsDisableAllLeds,
+		&fiGsTalkPermitTone,
+		&fiGsPwAndLockEnable,
+		&fiGsChFreeIndicationTone,
+		&fiGsDisableAllTones,
+		&fiGsSaveModeReceive,
+		&fiGsSavePreamble,
+		&fiGsIntroScreen,
+		&fiGsRadioID,
+		&fiGsTxPreambleDuration,
+		&fiGsGroupCallHangTime,
+		&fiGsPrivateCallHangTime,
+		&fiGsVoxSensitivity,
+		&fiGsRxLowBatteryInterval,
+		&fiGsCallAlertToneDuration,
+		&fiGsLoneWorkerResponseTime,
+		&fiGsLoneWorkerReminderTime,
+		&fiGsScanDigitalHangTime,
+		&fiGsScanAnalogHangTime,
+		&fiGsBacklightTime,
+		&fiGsSetKeypadLockTime,
+		&fiGsMode,
+		&fiGsPowerOnPassword,
+		&fiGsRadioProgPw,
+		&fiGsPcProgPw,
+		&fiGsRadioName,
+	},
+}
+
+var riGeneralSettings_md40 = recordInfo{
+	rType:    RtGeneralSettings_md40,
 	typeName: "General Settings",
 	max:      1,
 	offset:   8742,
@@ -413,7 +454,6 @@ var riGeneralSettings = recordInfo{
 		&fiGsLoneWorkerReminderTime,
 		&fiGsScanDigitalHangTime,
 		&fiGsScanAnalogHangTime,
-		&fiGsBacklightTime,
 		&fiGsSetKeypadLockTime,
 		&fiGsMode,
 		&fiGsPowerOnPassword,

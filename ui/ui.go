@@ -747,7 +747,8 @@ func (parent *Form) AddFieldRows(r *codeplug.Record, fTypes ...codeplug.FieldTyp
 func (parent *Form) addFieldRow(r *codeplug.Record, fType codeplug.FieldType) {
 	f := r.Field(fType)
 	if f == nil {
-		log.Printf("Record type %s has no field type %s", r.Type(), fType)
+		// This is not an error because some forms are used for
+		// multiple models. We just ignore non-existent fields.
 		return
 	}
 
