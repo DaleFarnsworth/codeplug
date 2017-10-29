@@ -128,7 +128,7 @@ func (rl *RecordList) AddSelected() error {
 		return fmt.Errorf("no records selected")
 	}
 
-	if len(cp.Records(rType))+len(records) >= cp.MaxRecords(rType) {
+	if len(cp.Records(rType))+len(records) > cp.MaxRecords(rType) {
 		return fmt.Errorf("too many records")
 	}
 
