@@ -49,6 +49,7 @@ type top struct {
 type Codeplug struct {
 	Models      []string `json:"models"`
 	Type        string   `json:"type"`
+	Ext         string   `json:"ext"`
 	RdtSize     int      `json:"rdtSize"`
 	BinSize     int      `json:"binSize"`
 	BinOffset   int      `json:"binOffset"`

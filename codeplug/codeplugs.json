@@ -23,6 +23,7 @@
 	      "DR780",
 	      "D680"
       ],
+      "ext": "rdt",
       "rdtSize": 262709,
       "binSize": 262144,
       "binOffset": 549,
@@ -42,6 +43,7 @@
       "models": [
 	      "MD390"
       ],
+      "ext": "rdt",
       "rdtSize": 262709,
       "binSize": 262144,
       "binOffset": 549,
@@ -61,6 +63,7 @@
       "models": [
 	      "MD40"
       ],
+      "ext": "rdt",
       "rdtSize": 262709,
       "binSize": 262144,
       "binOffset": 549,

@@ -47,6 +47,7 @@ var cp{{call $.Capitalize $c.Type}} = CodeplugInfo{
 		"{{$name}}",
 	{{- end}}
 	},
+	Ext: "{{$c.Ext}}",
 	RdtSize: {{$c.RdtSize}},
 	BinSize: {{$c.BinSize}},
 	BinOffset: {{$c.BinOffset}},

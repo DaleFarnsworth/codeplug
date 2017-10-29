@@ -1289,12 +1289,28 @@ func TwoListPopup(title string, msg string, disableModel string, disableVariant 
 	return out1, out2
 }
 
-func OpenFilename(title string, dir string) string {
-	return widgets.QFileDialog_GetOpenFileName(nil, title, dir, "", "", 0)
+func OpenFilename(title string, dir string, exts []string) string {
+	for i, ext := range exts {
+		exts[i] = "*." + ext
+	}
+	selF := "(" + strings.Join(exts, " ") + ")"
+	filter := "Codeplug files " + selF + ";;All files (*)"
+	return widgets.QFileDialog_GetOpenFileName(nil, title, dir, filter, selF, 0)
 }
 
-func SaveFilename(title string, dir string) string {
-	return widgets.QFileDialog_GetSaveFileName(nil, title, dir, "", "", 0)
+func OpenFilenames(title string, dir string, exts []string) []string {
+	for i, ext := range exts {
+		exts[i] = "*." + ext
+	}
+	selF := "(" + strings.Join(exts, " ") + ")"
+	filter := "Codeplug files " + selF + ";;All files (*)"
+	return widgets.QFileDialog_GetOpenFileNames(nil, title, dir, filter, selF, 0)
+}
+
+func SaveFilename(title string, dir string, extension string) string {
+	selF := "(*." + extension + ")"
+	filter := "Codeplug files " + selF + ";;All files (*)"
+	return widgets.QFileDialog_GetSaveFileName(nil, title, dir, filter, selF, 0)
 }
 
 func ResetWindows(cp *codeplug.Codeplug) {

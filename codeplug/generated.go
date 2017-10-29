@@ -240,6 +240,7 @@ var cpMd380 = CodeplugInfo{
 		"DR780",
 		"D680",
 	},
+	Ext:       "rdt",
 	RdtSize:   262709,
 	BinSize:   262144,
 	BinOffset: 549,
@@ -260,6 +261,7 @@ var cpMd390 = CodeplugInfo{
 	Models: []string{
 		"MD390",
 	},
+	Ext:       "rdt",
 	RdtSize:   262709,
 	BinSize:   262144,
 	BinOffset: 549,
@@ -280,6 +282,7 @@ var cpMd40 = CodeplugInfo{
 	Models: []string{
 		"MD40",
 	},
+	Ext:       "rdt",
 	RdtSize:   262709,
 	BinSize:   262144,
 	BinOffset: 549,

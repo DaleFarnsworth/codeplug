@@ -74,6 +74,7 @@ type Codeplug struct {
 type CodeplugInfo struct {
 	Type        string
 	Models      []string
+	Ext         string
 	RdtSize     int
 	BinSize     int
 	BinOffset   int
@@ -163,21 +164,42 @@ func (cp *Codeplug) Load(model string, variant string, filename string, ignoreWa
 	return nil, nil
 }
 
-// Names returns the potential codeplug model, variant and file names
-// for codeplug's file.
+func (cp *Codeplug) AllExts() []string {
+	extMap := make(map[string]bool)
+	for _, cpi := range codeplugInfos {
+		extMap[cpi.Ext] = true
+	}
+	exts := make([]string, 0, len(extMap))
+	for ext := range extMap {
+		exts = append(exts, ext)
+	}
+
+	return exts
+}
+
+func (cp *Codeplug) Ext() string {
+	return cp.codeplugInfo.Ext
+}
+
+// ModelsVariantsFiles returns the potential codeplug model, variant
+// and file names for codeplug's file.
 func (cp *Codeplug) ModelsVariantsFiles() (models []string, variants map[string][]string, filenames map[string][]string) {
 	models = make([]string, 0)
 	variants = make(map[string][]string)
 	filenames = make(map[string][]string)
+	if len(cp.bytes) == 0 {
+		cp.bytes = make([]byte, codeplugInfos[0].RdtSize)
+	}
 	for _, cpi := range codeplugInfos {
-		if cpi.RdtSize != cp.rdtSize {
-			continue
-		}
 		cp.codeplugInfo = cpi
 		cp.loadHeader()
 		model := cpi.Models[0]
 		variants[model] = cp.Variants()
 		filenames[model] = cp.NewFilenames()
+		if cpi.RdtSize != cp.rdtSize {
+			models = append(models, model)
+			continue
+		}
 		model = cp.Model()
 		for _, cpiModel := range cpi.Models {
 			if cpiModel == model {
