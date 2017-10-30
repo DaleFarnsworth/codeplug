@@ -198,9 +198,17 @@ func (cp *Codeplug) ModelsVariantsFiles() (models []string, variants map[string]
 	models = make([]string, 0)
 	variants = make(map[string][]string)
 	filenames = make(map[string][]string)
+
+	noCodeplug := false
+	if cp == nil {
+		noCodeplug = true
+		cp, _ = NewCodeplug(".")
+	}
+
 	if len(cp.bytes) == 0 {
 		cp.bytes = make([]byte, codeplugInfos[0].RdtSize)
 	}
+
 	for _, cpi := range codeplugInfos {
 		cp.codeplugInfo = cpi
 		cp.loadHeader()
@@ -225,6 +233,10 @@ func (cp *Codeplug) ModelsVariantsFiles() (models []string, variants map[string]
 	}
 	cp.codeplugInfo = nil
 	cp.bytes = nil
+
+	if noCodeplug {
+		cp.Free()
+	}
 
 	return models, variants, filenames
 }
