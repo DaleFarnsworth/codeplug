@@ -170,6 +170,12 @@ func (cp *Codeplug) Load(model string, variant string, filename string, ignoreWa
 		return warning, nil
 	}
 
+	if cp.fileType != FileTypeRdt {
+		// force new files to be marked as changed
+		cp.changed = true
+		cp.hash = sha256.Sum256(nil)
+	}
+
 	codeplugs = append(codeplugs, cp)
 
 	return nil, nil
