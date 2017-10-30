@@ -566,6 +566,14 @@ func (parent *HBox) AddHbox() *HBox {
 	return box
 }
 
+func (parent *VBox) AddWidget(widget *Widget) {
+	parent.layout.AddWidget(widget.qWidget, 0, 0)
+}
+
+func (parent *HBox) AddWidget(widget *Widget) {
+	parent.layout.AddWidget(widget.qWidget, 0, 0)
+}
+
 func (parent *HBox) AddForm() *Form {
 	form := new(Form)
 
@@ -629,20 +637,14 @@ func (parent *HBox) AddVbox() *VBox {
 }
 
 func (parent *HBox) AddButton(text string) *Button {
-	b := new(Button)
-	b.qButton = *widgets.NewQPushButton2(text, nil)
-	b.qButton.SetSizePolicy2(widgets.QSizePolicy__Fixed,
-		widgets.QSizePolicy__Preferred)
+	b := NewButton(text)
 	parent.layout.AddWidget(&b.qButton, 0, 0)
 
 	return b
 }
 
 func (parent *VBox) AddButton(text string) *Button {
-	b := new(Button)
-	b.qButton = *widgets.NewQPushButton2(text, nil)
-	b.qButton.SetSizePolicy2(widgets.QSizePolicy__Fixed,
-		widgets.QSizePolicy__Preferred)
+	b := NewButton(text)
 	parent.layout.AddWidget(&b.qButton, 0, 0)
 
 	return b
@@ -849,7 +851,31 @@ func (w *Widget) update() {
 		qw.(*widgets.QComboBox).SetCurrentText(f.String())
 
 	default:
-		log.Fatal("update(): bad widget type")
+		log.Fatal("update(): unexpected widget type")
+	}
+}
+
+func (w *Widget) SetEnabled(b bool) {
+	qw := w.qWidget
+
+	switch qw.(type) {
+	case *widgets.QComboBox:
+		qw.(*widgets.QComboBox).SetEnabled(b)
+
+	case *widgets.QPushButton:
+		qw.(*widgets.QPushButton).SetEnabled(b)
+
+	case *widgets.QCheckBox:
+		qw.(*widgets.QCheckBox).SetEnabled(b)
+
+	case *widgets.QSpinBox:
+		qw.(*widgets.QSpinBox).SetEnabled(b)
+
+	case *widgets.QLineEdit:
+		qw.(*widgets.QLineEdit).SetEnabled(b)
+
+	default:
+		log.Fatal("SetEnabled(): unexpected widget type")
 	}
 }
 
@@ -944,7 +970,7 @@ func setQSpinBox(sb *widgets.QSpinBox, f *codeplug.Field) {
 	sb.SetValue(value)
 }
 
-func NewSpinbox(value, min, max int, changedFunc func(int)) *Widget {
+func NewSpinboxWidget(value, min, max int, changedFunc func(int)) *Widget {
 	qw := widgets.NewQSpinBox(nil)
 	widget := new(Widget)
 	widget.qWidget = qw
@@ -954,6 +980,38 @@ func NewSpinbox(value, min, max int, changedFunc func(int)) *Widget {
 	qw.ConnectValueChanged(changedFunc)
 
 	return widget
+}
+
+func NewComboboxWidget(opt string, opts []string, changed func(string)) *Widget {
+	qw := widgets.NewQComboBox(nil)
+	widget := new(Widget)
+	widget.qWidget = qw
+	qw.InsertItems(0, opts)
+	qw.SetCurrentText(opt)
+
+	qw.ConnectCurrentIndexChanged2(changed)
+
+	return widget
+}
+
+func UpdateComboboxWidget(widget *Widget, opt string, opts []string) {
+	qcb := widget.qWidget.(*widgets.QComboBox)
+	qcb.Clear()
+	qcb.InsertItems(0, opts)
+	qcb.SetCurrentText(opt)
+}
+
+func NewButtonWidget(text string, clicked func()) *Widget {
+	w := new(Widget)
+	b := widgets.NewQPushButton2(text, nil)
+	b.SetSizePolicy2(widgets.QSizePolicy__Fixed,
+		widgets.QSizePolicy__Preferred)
+	b.ConnectClicked(func(checked bool) {
+		clicked()
+	})
+	w.qWidget = b
+
+	return w
 }
 
 func newFieldSpinbox(f *codeplug.Field) *Widget {
@@ -1117,6 +1175,15 @@ type Button struct {
 	qButton widgets.QPushButton
 }
 
+func NewButton(text string) *Button {
+	b := new(Button)
+	b.qButton = *widgets.NewQPushButton2(text, nil)
+	b.qButton.SetSizePolicy2(widgets.QSizePolicy__Fixed,
+		widgets.QSizePolicy__Preferred)
+
+	return b
+}
+
 func (b *Button) ConnectClicked(fn func()) {
 	b.qButton.ConnectClicked(func(checked bool) {
 		fn()
@@ -1217,77 +1284,34 @@ func YesNoPopup(title string, msg string) PopupValue {
 	return PopupNo
 }
 
-func TwoListPopup(title string, msg string, disableModel string, disableVariant string, in1 []string, in2 map[string][]string) (out1 string, out2 string) {
+type Dialog struct {
+	*VBox
+	qDialog *widgets.QDialog
+	layout  *widgets.QVBoxLayout
+}
 
-	dialog := widgets.NewQDialog(nil, core.Qt__Dialog)
-	dialogLayout := widgets.NewQVBoxLayout2(dialog)
+func NewDialog(title string) *Dialog {
+	dialog := new(Dialog)
+	dialog.VBox = newVbox()
+	dialog.qDialog = widgets.NewQDialog(nil, core.Qt__Dialog)
+	dialog.layout = widgets.NewQVBoxLayout2(dialog.qDialog)
+	dialog.layout.AddWidget(&dialog.VBox.qWidget, 0, 0)
 
-	dialog.SetWindowTitle(title)
+	dialog.qDialog.SetWindowTitle(title)
 
-	label := widgets.NewQLabel2(msg, nil, 0)
-	dialogLayout.AddWidget(label, 0, 0)
+	return dialog
+}
 
-	okButton := widgets.NewQPushButton2("Ok", nil)
-	okButton.SetEnabled(false)
+func (d *Dialog) Exec() bool {
+	return d.qDialog.Exec() == int(widgets.QDialog__Accepted)
+}
 
-	cb2 := widgets.NewQComboBox(nil)
-	cb2.ConnectCurrentIndexChanged2(func(str string) {
-		okButton.SetEnabled(str != disableVariant)
-		if str != disableVariant {
-			out2 = str
-		}
-	})
-	cb2.SetEnabled(false)
+func (d *Dialog) Accept() {
+	d.qDialog.Accept()
+}
 
-	cb1 := widgets.NewQComboBox(nil)
-	cb1.ConnectCurrentIndexChanged2(func(str string) {
-		cb2.Clear()
-		cb2.SetEnabled(str != disableModel)
-		cb2.InsertItems(0, []string{disableVariant})
-
-		if str != disableModel {
-			cb2.InsertItems(1, in2[str])
-
-			if len(in2[str]) == 1 {
-				out2 = in2[str][0]
-				cb2.SetCurrentText(out2)
-			}
-			out1 = str
-		}
-	})
-	options := append([]string{disableModel}, in1...)
-	cb1.InsertItems(0, options)
-	cb1.SetCurrentText(disableVariant)
-
-	dialogLayout.AddWidget(cb1, 0, 0)
-	dialogLayout.AddWidget(cb2, 0, 0)
-
-	boxWidget := widgets.NewQWidget(nil, 0)
-	boxLayout := widgets.NewQHBoxLayout2(boxWidget)
-	dialogLayout.AddWidget(boxWidget, 0, 0)
-
-	cancelButton := widgets.NewQPushButton2("Cancel", nil)
-	cancelButton.ConnectClicked(func(checked bool) {
-		dialog.Reject()
-	})
-	cancelButton.SetSizePolicy2(widgets.QSizePolicy__Fixed,
-		widgets.QSizePolicy__Preferred)
-	boxLayout.AddWidget(cancelButton, 0, 0)
-
-	okButton.ConnectClicked(func(checked bool) {
-		dialog.Accept()
-	})
-	okButton.SetSizePolicy2(widgets.QSizePolicy__Fixed,
-		widgets.QSizePolicy__Preferred)
-	boxLayout.AddWidget(okButton, 0, 0)
-
-	rv := dialog.Exec()
-	if rv == int(widgets.QDialog__Rejected) {
-		out1 = ""
-		out2 = ""
-	}
-
-	return out1, out2
+func (d *Dialog) Reject() {
+	d.qDialog.Reject()
 }
 
 func OpenFilename(title string, dir string, exts []string) string {
