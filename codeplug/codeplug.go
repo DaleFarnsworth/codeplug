@@ -703,10 +703,6 @@ func (cp *Codeplug) write(file *os.File) (err error) {
 	cpi := cp.codeplugInfo
 	fileSize := cpi.RdtSize
 	fileOffset := 0
-	if cp.fileType == FileTypeBin {
-		fileSize = cpi.BinSize
-		fileOffset = cpi.BinOffset
-	}
 
 	bytes := cp.bytes[fileOffset : fileOffset+fileSize]
 	bytesWritten, err := file.Write(bytes)
