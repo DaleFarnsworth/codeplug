@@ -40,6 +40,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 	"unicode"
 )
 
@@ -398,6 +399,8 @@ func (cp *Codeplug) SaveToFile(filename string, ignoreWarning bool) (warning err
 		return warning, nil
 	}
 
+	cp.setTimeStamp(time.Now())
+
 	cp.store()
 
 	dir, base := filepath.Split(filename)
@@ -416,6 +419,12 @@ func (cp *Codeplug) SaveToFile(filename string, ignoreWarning bool) (warning err
 	}
 
 	return nil, err
+}
+
+func (cp *Codeplug) setTimeStamp(t time.Time) {
+	r := cp.Record(RecordType("GeneralSettings"))
+	f := r.Field(FieldType("TimeStamp"))
+	f.setString(t.Format("20060102150405"))
 }
 
 // Filename returns the path name of the file associated with the codeplug.

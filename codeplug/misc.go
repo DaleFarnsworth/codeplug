@@ -208,7 +208,7 @@ func bcdBytesToString(bytes []byte) string {
 func stringToBcdBytes(s string) []byte {
 	bytes := make([]byte, len(s)/2)
 	for i := range bytes {
-		bytes[i] = byte(((s[i*2] - '0') << 4) + s[i*2+1])
+		bytes[i] = byte(((s[i*2] - '0') << 4) + s[i*2+1] - '0')
 	}
 	return bytes
 }
