@@ -865,10 +865,6 @@ func printRecord(w io.Writer, r *Record, rFmt string, fFmt string) {
 var nameToRt map[string]RecordType
 var nameToFt map[RecordType]map[string]FieldType
 
-var bareQuoteError = fmt.Errorf("bare '\"' not allowed in field value")
-var noRecordNameError = fmt.Errorf("no record name")
-var noFieldNameError = fmt.Errorf("no field name")
-
 type reader struct {
 	*bufio.Reader
 	pos     position
@@ -986,20 +982,22 @@ type position struct {
 	column int
 }
 
-type positionError struct {
+type PositionError struct {
 	error
-	pos position
+	position *position
 }
 
-func (e positionError) Error() string {
-	line := e.pos.line + 1
-	column := e.pos.column + 1
-	str := e.error.Error()
-	return fmt.Sprintf("line %d column %d: %s", line, column, str)
+func (e *PositionError) Line() int {
+	return e.position.line + 1
+}
+
+func (e *PositionError) Column() int {
+	return e.position.column + 1
 }
 
 func (cp *Codeplug) ParseRecords(iRdr io.Reader) ([]*Record, error) {
 	var err error
+	var pos position
 	rdr := NewReader(iRdr)
 	records := []*Record{}
 
@@ -1021,10 +1019,11 @@ func (cp *Codeplug) ParseRecords(iRdr io.Reader) ([]*Record, error) {
 		}
 	}
 
+parseRecord:
 	for {
 		var name string
 		var index int
-		var r *Record
+		pos = rdr.pos
 		name, index, err = parseName(rdr)
 		if err != nil {
 			if err == io.EOF {
@@ -1033,9 +1032,10 @@ func (cp *Codeplug) ParseRecords(iRdr io.Reader) ([]*Record, error) {
 			break
 		}
 		if len(name) == 0 {
-			err = noRecordNameError
+			err = fmt.Errorf("no record name")
 			break
 		}
+		var r *Record
 		r, err = cp.nameToRecord(name, index)
 		if err != nil {
 			break
@@ -1044,31 +1044,34 @@ func (cp *Codeplug) ParseRecords(iRdr io.Reader) ([]*Record, error) {
 			if rdr.pos.column == 0 {
 				break
 			}
+			pos = rdr.pos
 			name, index, err = parseName(rdr)
 			if err != nil {
-				break
+				break parseRecord
 			}
 			if len(name) == 0 {
-				err = noFieldNameError
-				break
+				err = fmt.Errorf("no field name")
+				break parseRecord
 			}
+			pos = rdr.pos
 			fType, ok := nameToFt[r.rType][name]
 			if !ok {
 				err = fmt.Errorf("bad field name: %s", name)
-				return nil, err
+				break parseRecord
 			}
 
 			var str string
-			pos := rdr.pos
+			pos = rdr.pos
 			str, err = parseValue(rdr)
 			if err != nil {
-				break
+				err = fmt.Errorf("bad value: %s: %s: %s", name, str, err.Error())
+				break parseRecord
 			}
 			var f *Field
 			f, err = r.NewFieldWithValue(fType, index, str)
 			if err != nil {
 				err = fmt.Errorf("bad value: %s: %s: %s", f.typeName, str, err.Error())
-				break
+				break parseRecord
 			}
 			dValue, ok := f.value.(deferredValue)
 			if ok {
@@ -1078,29 +1081,34 @@ func (cp *Codeplug) ParseRecords(iRdr io.Reader) ([]*Record, error) {
 			}
 			err = r.addField(f)
 			if err != nil {
-				break
+				break parseRecord
 			}
-		}
-
-		if err != nil {
-			break
 		}
 
 		records = append(records, r)
 	}
 
-	return records, err
+	if err == nil {
+		return records, nil
+	}
+
+	pErr, ok := err.(PositionError)
+	if !ok {
+		pErr = PositionError{
+			position: &pos,
+			error:    err,
+		}
+	}
+	return records, pErr
 }
 
 func parseName(rdr *reader) (string, int, error) {
-	var err error
 	pos := rdr.pos
 	nType := "record"
 	if pos.column != 0 {
 		nType = "field"
 	}
-	badNameError := fmt.Errorf("bad %s name", nType)
-	badIndexError := fmt.Errorf("bad %s index", nType)
+	var r rune
 	index := 0
 
 	name, err := rdr.ReadWhile(func(r rune) bool {
@@ -1109,18 +1117,20 @@ func parseName(rdr *reader) (string, int, error) {
 
 	if err != nil {
 		if err != io.EOF {
-			err = positionError{badNameError, pos}
+			err = fmt.Errorf("bad %s name", nType)
 		}
-		return name, 0, err
+		goto returnError
 	}
 	if len(name) == 0 || !unicode.IsLetter([]rune(name)[0]) {
-		return name, 0, positionError{badNameError, pos}
+		err = fmt.Errorf("bad %s name", nType)
+		goto returnError
 	}
 
 	pos = rdr.pos
-	r, _, err := rdr.ReadRune()
+	r, _, err = rdr.ReadRune()
 	if err != nil {
-		return name, 0, positionError{badNameError, pos}
+		err = fmt.Errorf("bad %s name", nType)
+		goto returnError
 	}
 	switch r {
 	case ':':
@@ -1128,25 +1138,36 @@ func parseName(rdr *reader) (string, int, error) {
 		pos = rdr.pos
 		index, err = rdr.ReadInt()
 		if err != nil {
-			return name, 0, positionError{badIndexError, pos}
+			err = fmt.Errorf("bad %s index", nType)
+			goto returnError
 		}
 		index--
 		pos = rdr.pos
 		r, _, err = rdr.ReadRune()
 		if r != ']' {
-			return name, 0, positionError{badIndexError, pos}
+			err = fmt.Errorf("bad %s index", nType)
+			goto returnError
 		}
 		pos = rdr.pos
 		r, _, err = rdr.ReadRune()
 		if r != ':' {
-			return name, 0, positionError{badNameError, pos}
+			err = fmt.Errorf("bad %s name", nType)
+			goto returnError
 		}
 	default:
-		return name, 0, positionError{badIndexError, pos}
+		err = fmt.Errorf("bad %s index", nType)
+		goto returnError
 	}
 	rdr.ReadWhile(unicode.IsSpace)
 
 	return name, index, nil
+
+returnError:
+	pErr := PositionError{
+		position: &pos,
+		error:    err,
+	}
+	return name, 0, pErr
 }
 
 func parseValue(rdr *reader) (string, error) {
@@ -1154,7 +1175,11 @@ func parseValue(rdr *reader) (string, error) {
 
 	r, _, err := rdr.ReadRune()
 	if err != nil {
-		return "", positionError{err, pos}
+		pErr := PositionError{
+			position: &pos,
+			error:    err,
+		}
+		return "", pErr
 	}
 	termFunc := unicode.IsSpace
 	if r == '"' {
@@ -1167,7 +1192,11 @@ func parseValue(rdr *reader) (string, error) {
 
 	value, err := rdr.ReadEscapedUntil(termFunc)
 	if err != nil {
-		return value, positionError{err, pos}
+		pErr := PositionError{
+			position: &pos,
+			error:    err,
+		}
+		return value, pErr
 	}
 	rdr.ReadRune()
 
@@ -1258,8 +1287,11 @@ func (cp *Codeplug) ImportFrom(filename string) error {
 	if err != nil {
 		cp.load()
 		dValue := f.value.(deferredValue)
-		err = fmt.Errorf("no %s: %s", f.typeName, dValue.str)
-		return positionError{err, dValue.pos}
+		pErr := PositionError{
+			position: &dValue.pos,
+			error:    fmt.Errorf("no %s: %s", f.typeName, dValue.str),
+		}
+		return pErr
 	}
 
 	for _, rd := range cp.rDesc {
