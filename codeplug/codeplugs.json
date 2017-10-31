@@ -126,6 +126,7 @@
       "size": 383,
       "fieldTypes": [
         "GsTimeStamp",
+	"GsCpsVersion",
         "GsIntroScreenLine1",
         "GsIntroScreenLine2",
         "GsMonitorType",
@@ -164,6 +165,7 @@
       "size": 383,
       "fieldTypes": [
         "GsTimeStamp",
+	"GsCpsVersion",
         "GsIntroScreenLine1",
         "GsIntroScreenLine2",
         "GsMonitorType",
@@ -478,6 +480,13 @@
       "bitOffset": 0,
       "bitSize": 56,
       "valueType": "timeStamp"
+    },
+    {
+      "typeName": "CPS Version",
+      "type": "GsCpsVersion",
+      "bitOffset": 56,
+      "bitSize": 32,
+      "valueType": "cpsVersion"
     },
     {
       "typeName": "Intro Screen Line 1",

@@ -98,6 +98,7 @@ const (
 	FtGsBacklightTime           FieldType = "BacklightTime"
 	FtGsCallAlertToneDuration   FieldType = "CallAlertToneDuration"
 	FtGsChFreeIndicationTone    FieldType = "ChFreeIndicationTone"
+	FtGsCpsVersion              FieldType = "CpsVersion"
 	FtGsDisableAllLeds          FieldType = "DisableAllLeds"
 	FtGsDisableAllTones         FieldType = "DisableAllTones"
 	FtGsFreqChannelMode         FieldType = "FreqChannelMode"
@@ -155,6 +156,7 @@ const (
 	VtAscii           ValueType = "ascii"
 	VtCallID          ValueType = "callID"
 	VtCallType        ValueType = "callType"
+	VtCpsVersion      ValueType = "cpsVersion"
 	VtCtcssDcs        ValueType = "ctcssDcs"
 	VtFrequency       ValueType = "frequency"
 	VtIStrings        ValueType = "iStrings"
@@ -185,6 +187,8 @@ func newValue(vt ValueType) value {
 		return new(callID)
 	case VtCallType:
 		return new(callType)
+	case VtCpsVersion:
+		return new(cpsVersion)
 	case VtCtcssDcs:
 		return new(ctcssDcs)
 	case VtFrequency:
@@ -388,6 +392,7 @@ var riGeneralSettings_md380 = recordInfo{
 	size:     383,
 	fieldInfos: []*fieldInfo{
 		&fiGsTimeStamp,
+		&fiGsCpsVersion,
 		&fiGsIntroScreenLine1,
 		&fiGsIntroScreenLine2,
 		&fiGsMonitorType,
@@ -428,6 +433,7 @@ var riGeneralSettings_md40 = recordInfo{
 	size:     383,
 	fieldInfos: []*fieldInfo{
 		&fiGsTimeStamp,
+		&fiGsCpsVersion,
 		&fiGsIntroScreenLine1,
 		&fiGsIntroScreenLine2,
 		&fiGsMonitorType,
@@ -1242,6 +1248,15 @@ var fiGsChFreeIndicationTone = fieldInfo{
 	bitOffset: 1027,
 	bitSize:   1,
 	valueType: VtOnOff,
+}
+
+var fiGsCpsVersion = fieldInfo{
+	fType:     FtGsCpsVersion,
+	typeName:  "CPS Version",
+	max:       1,
+	bitOffset: 56,
+	bitSize:   32,
+	valueType: VtCpsVersion,
 }
 
 var fiGsDisableAllLeds = fieldInfo{

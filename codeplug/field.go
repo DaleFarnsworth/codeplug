@@ -1528,6 +1528,53 @@ func (v *timeStamp) store(f *Field) {
 	f.storeBytes(stringToBcdBytes(string(*v)))
 }
 
+// timeStamp is a field value representing a BCD-encoded time string
+type cpsVersion string
+
+// String returns the cpsVersion's value as a string.
+func (v *cpsVersion) getString(f *Field) string {
+	return string(*v)
+}
+
+// SetString sets the cpsVersion's value from a string.
+func (v *cpsVersion) setString(f *Field, s string) error {
+	if len(s) != f.size() {
+		return fmt.Errorf("bad string length")
+	}
+
+	*v = cpsVersion(s)
+
+	return nil
+}
+
+// valid returns nil if the cpsVersion's value is valid.
+func (v *cpsVersion) valid(f *Field) error {
+	for _, r := range string(*v) {
+		if r < '0' && r > '9' {
+			return fmt.Errorf("cpsVersion is not a decimal value")
+		}
+	}
+	return nil
+}
+
+// load sets the cpsVersion's value from its bits in cp.bytes.
+func (v *cpsVersion) load(f *Field) {
+	s := ""
+	for _, b := range f.bytes() {
+		s += string(int('0') + int(b))
+	}
+	*v = cpsVersion(s)
+}
+
+// store stores the cpsVersion's value into its bits in cp.bytes.
+func (v *cpsVersion) store(f *Field) {
+	bytes := make([]byte, len(*v))
+	for i, r := range *v {
+		bytes[i] = byte(int(r) - int('0'))
+	}
+	f.storeBytes(bytes)
+}
+
 type deferredValue struct {
 	value
 	str string
