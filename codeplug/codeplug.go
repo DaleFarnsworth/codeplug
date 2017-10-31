@@ -746,75 +746,11 @@ func (cp *Codeplug) frequencyValid(freq float64) error {
 		cp.highFrequency, _ = strconv.ParseFloat(s, 64)
 	}
 
-	if cp.lowFrequency == 0 {
-		cp.lowFrequency, cp.highFrequency = cp.inferFrequencyRange()
-	}
-
 	if freq >= cp.lowFrequency && freq <= cp.highFrequency {
 		return nil
 	}
 
-	r := frequencyRanges[len(frequencyRanges)-1]
-	if cp.lowFrequency != r.low || cp.highFrequency != r.high {
-		return fmt.Errorf("frequency out of range %+v", freq)
-	}
-
-	for i := 2; i <= 3; i++ {
-		r := frequencyRanges[i]
-		if freq >= r.low && freq <= r.high {
-			cp.lowFrequency = r.low
-			cp.highFrequency = r.high
-			return nil
-		}
-	}
-
 	return fmt.Errorf("frequency out of range %+v", freq)
-}
-
-// inferFrequencyRange guesses the frequency range of the codeplug
-// based on the current and previous values given.
-func (cp *Codeplug) inferFrequencyRange() (low float64, high float64) {
-	var rang frequencyRange
-
-	for _, record := range cp.rDesc[RtChannelInformation].records {
-		f := (*record.fDesc)[FtCiRxFrequency].fields[0]
-		rxFreq := float64(*f.value.(*frequency))
-		index := -1
-
-		for i := len(frequencyRanges) - 1; i >= 0; i-- {
-			rang = frequencyRanges[i]
-			if rxFreq >= rang.low && rxFreq <= rang.high {
-				index = i
-				break
-			}
-		}
-
-		if index < 0 {
-			continue
-		}
-
-		if index != len(frequencyRanges)-1 {
-			return rang.low, rang.high
-		}
-	}
-
-	return rang.low, rang.high
-}
-
-// frequencyRange delineates a range of frequencies
-type frequencyRange struct {
-	low  float64
-	high float64
-}
-
-// frequencyRanges contains a list of the frequency ranges
-// for the various supported codeplugs.
-var frequencyRanges = []frequencyRange{
-	{136.0, 174.0},
-	{350.0, 400.0},
-	{400.0, 480.0},
-	{450.0, 520.0},
-	{450.0, 480.0}, // could be either of the previous two ranges
 }
 
 // publishChange passes the given change (with any additional generated
