@@ -1067,7 +1067,7 @@ func (cp *Codeplug) ParseRecords(iRdr io.Reader) ([]*Record, error) {
 			var f *Field
 			f, err = r.NewFieldWithValue(fType, index, str)
 			if err != nil {
-				err = fmt.Errorf("no %s: %s", f.typeName, str)
+				err = fmt.Errorf("bad value: %s: %s: %s", f.typeName, str, err.Error())
 				break
 			}
 			dValue, ok := f.value.(deferredValue)

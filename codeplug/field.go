@@ -748,11 +748,13 @@ func (v *span) setString(f *Field, s string) error {
 	if err != nil {
 		return err
 	}
-	value := int(value64) / int(sp.scale)
+	value := int(value64)
 
 	if err := v.validValue(f, value); err != nil {
 		return err
 	}
+
+	value = value / int(sp.scale)
 
 	*v = span(value)
 
@@ -761,23 +763,25 @@ func (v *span) setString(f *Field, s string) error {
 
 // valid returns nil if the span's value is valid.
 func (v *span) valid(f *Field) error {
+	sp := *f.span
 	value := int(*v)
-	return v.validValue(f, value)
+	return v.validValue(f, value*int(sp.scale))
 }
 
 // validValue returns nil if the specified value is valid for a span.
 func (v *span) validValue(f *Field, value int) error {
 	sp := *f.span
 
-	if value == int(sp.min) && sp.minString != "" {
+	if value == int(sp.min)*int(sp.scale) && sp.minString != "" {
 		return nil
 	}
 
-	if value%int(sp.interval) != 0 {
-		return fmt.Errorf("is not a multiple of %d", sp.interval)
+	multiple := int(sp.interval) * int(sp.scale)
+	if value%multiple != 0 {
+		return fmt.Errorf("is not a multiple of %d", multiple)
 	}
 
-	if value < int(sp.min) || value > int(sp.max) {
+	if value < (int(sp.min)*int(sp.scale)) || value > (int(sp.max)*int(sp.scale)) {
 		fmt.Errorf("must be between %d and %d", sp.min, sp.max)
 	}
 
