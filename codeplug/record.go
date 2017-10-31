@@ -122,7 +122,7 @@ func (r *Record) NewField(fType FieldType) *Field {
 // addField adds the given field to the record.
 func (r *Record) addField(f *Field) error {
 	if len(f.fields) >= f.max {
-		return fmt.Errorf("too many fields: ", string(f.fType))
+		return fmt.Errorf("too many fields: %s", string(f.fType))
 	}
 
 	fd := (*r.fDesc)[f.fType]
