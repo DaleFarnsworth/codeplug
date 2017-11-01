@@ -1451,6 +1451,16 @@ func (v *listIndex) valid(f *Field) error {
 	return fmt.Errorf("index out of range")
 }
 
+// load sets the listIndex's value from its bits in cp.bytes.
+func (v *listIndex) load(f *Field) {
+	*v = listIndex(bytesToInt(f.bytes()))
+}
+
+// store stores the listIndex's value into its bits in cp.bytes.
+func (v *listIndex) store(f *Field) {
+	f.storeBytes(intToBytes(int(*v), f.size()))
+}
+
 // ascii is a field value representing a ASCII string.
 type ascii string
 
@@ -1587,16 +1597,6 @@ type deferredValue struct {
 
 type invalidValue struct {
 	value
-}
-
-// load sets the listIndex's value from its bits in cp.bytes.
-func (v *listIndex) load(f *Field) {
-	*v = listIndex(bytesToInt(f.bytes()))
-}
-
-// store stores the listIndex's value into its bits in cp.bytes.
-func (v *listIndex) store(f *Field) {
-	f.storeBytes(intToBytes(int(*v), f.size()))
 }
 
 var cachedCtcssDcsStrings []string
