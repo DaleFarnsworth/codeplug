@@ -451,13 +451,7 @@ func (cp *Codeplug) CurrentHash() [sha256.Size]byte {
 		return cp.hash
 	}
 
-	cpi := cp.codeplugInfo
-	fileSize := cpi.RdtSize
-	if cp.fileType == FileTypeBin {
-		fileSize = cpi.BinSize
-	}
-
-	bytes := make([]byte, fileSize)
+	bytes := make([]byte, len(cp.bytes))
 	copy(bytes, cp.bytes)
 	saveBytes := cp.bytes
 	cp.bytes = bytes
