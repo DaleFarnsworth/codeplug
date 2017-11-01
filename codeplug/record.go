@@ -531,7 +531,11 @@ func (or *Record) Copy() *Record {
 	rfDesc := make(map[FieldType]*fDesc)
 	for fType, fd := range *or.fDesc {
 		fields := fd.CopyFields()
-		fDesc := fields[0].fDesc
+		fDesc := new(fDesc)
+		fDesc.fieldInfo = fd.fieldInfo
+		if len(fields) > 0 {
+			fDesc = fields[0].fDesc
+		}
 		fDesc.fields = fields
 		fDesc.record = r
 
