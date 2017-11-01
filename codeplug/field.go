@@ -464,6 +464,7 @@ func (fd *fDesc) deleteField(r *Record, fIndex int) {
 	for i := range bytes {
 		bytes[i] = 0
 	}
+	fd.storeBytes(bytes, r, fIndex)
 }
 
 func (fd *fDesc) fieldOffset(r *Record, fIndex int) int {
