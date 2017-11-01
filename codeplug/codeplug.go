@@ -1110,9 +1110,11 @@ func parseName(rdr *reader) (string, int, error) {
 	})
 
 	if err != nil {
-		if err != io.EOF {
-			err = fmt.Errorf("bad %s name", nType)
+		if err == io.EOF {
+			return name, index, err
 		}
+
+		err = fmt.Errorf("bad %s name", nType)
 		goto returnError
 	}
 	if len(name) == 0 || !unicode.IsLetter([]rune(name)[0]) {
