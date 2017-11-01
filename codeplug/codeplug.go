@@ -478,7 +478,17 @@ func (cp *Codeplug) FileType() FileType {
 
 // Records returns all of a codeplug's records of the given RecordType.
 func (cp *Codeplug) Records(rType RecordType) []*Record {
-	return cp.rDesc[rType].records
+	records := cp.rDesc[rType].records
+	if len(records) == 0 {
+		rIndex := 0
+		r := cp.newRecord(rType, rIndex)
+		cp.InsertRecord(r)
+		r.load()
+		r.NameField().setString(string(rType) + "1")
+		records = cp.rDesc[rType].records
+		dprint(records)
+	}
+	return records
 }
 
 // Record returns the first record of a codeplug's given RecordType.
@@ -632,7 +642,7 @@ func (cp *Codeplug) newRecord(rType RecordType, rIndex int) *Record {
 func (cp *Codeplug) valid() error {
 	errStr := ""
 	for _, rType := range cp.RecordTypes() {
-		for _, r := range cp.Records(rType) {
+		for _, r := range cp.rDesc[rType].records {
 			if err := r.valid(); err != nil {
 				errStr += err.Error()
 			}
