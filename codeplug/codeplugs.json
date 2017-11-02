@@ -401,7 +401,7 @@
       "type": "BiNewFilename_md380",
       "bitOffset": 2480,
       "bitSize": 8,
-      "valueType": "iStrings",
+      "valueType": "biFilename",
       "strings": [
         "md380_136-174.rdt",
         "md380_350-400.rdt",
@@ -427,7 +427,7 @@
       "type": "BiNewFilename_md390",
       "bitOffset": 2480,
       "bitSize": 8,
-      "valueType": "iStrings",
+      "valueType": "biFilename",
       "strings": [
         "md390_136-174.rdt",
         "md390_350-400.rdt",
@@ -453,7 +453,7 @@
       "type": "BiNewFilename_md40",
       "bitOffset": 2480,
       "bitSize": 8,
-      "valueType": "iStrings",
+      "valueType": "biFilename",
       "strings": [
         "md40_400-480.rdt",
         "md40ht_420-450.rdt",

@@ -866,13 +866,6 @@ func (v *biFrequency) getString(f *Field) string {
 
 // setString sets the biFrequency's value from a string.
 func (v *biFrequency) setString(f *Field, s string) error {
-	freq, err := stringToFrequency(s)
-	if err != nil {
-		return err
-	}
-
-	*v = biFrequency(freq)
-
 	return nil
 }
 
@@ -1588,6 +1581,14 @@ func (v *cpsVersion) store(f *Field) {
 		bytes[i] = byte(int(r) - int('0'))
 	}
 	f.storeBytes(bytes)
+}
+
+type biFilename struct {
+	iStrings
+}
+
+func (v *biFilename) setString(f *Field, s string) error {
+	return nil
 }
 
 type deferredValue struct {
