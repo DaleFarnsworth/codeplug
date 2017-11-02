@@ -1314,16 +1314,13 @@ func (d *Dialog) Reject() {
 	d.qDialog.Reject()
 }
 
-func OpenFilename(title string, dir string, exts []string) string {
-	for i, ext := range exts {
-		exts[i] = "*." + ext
-	}
-	selF := "(" + strings.Join(exts, " ") + ")"
-	filter := "Codeplug files " + selF + ";;All files (*)"
+func OpenTextFilename(title string, dir string) string {
+	selF := "(*.txt)"
+	filter := "Text files " + selF + ";;All files (*)"
 	return widgets.QFileDialog_GetOpenFileName(nil, title, dir, filter, selF, 0)
 }
 
-func OpenFilenames(title string, dir string, exts []string) []string {
+func OpenCPFilenames(title string, dir string, exts []string) []string {
 	for i, ext := range exts {
 		exts[i] = "*." + ext
 	}
