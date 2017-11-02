@@ -4,7 +4,7 @@ SHELL = /bin/sh
 
 default: generated.go new.tgz
 
-generated.go: $(SRCDIR)/template $(SRCDIR)/codeplugs.json
+generated.go: template codeplugs.json
 	go generate
 
 new.tgz: new/*

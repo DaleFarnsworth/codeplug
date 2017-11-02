@@ -154,6 +154,7 @@ const (
 // The value types a field may contain
 const (
 	VtAscii           ValueType = "ascii"
+	VtBiFilename      ValueType = "biFilename"
 	VtBiFrequency     ValueType = "biFrequency"
 	VtCallID          ValueType = "callID"
 	VtCallType        ValueType = "callType"
@@ -183,6 +184,8 @@ func newValue(vt ValueType) value {
 	switch vt {
 	case VtAscii:
 		return new(ascii)
+	case VtBiFilename:
+		return new(biFilename)
 	case VtBiFrequency:
 		return new(biFrequency)
 	case VtCallID:
@@ -314,6 +317,8 @@ var riBasicInformation_md380 = recordInfo{
 		&fiBiNewFilename_md380,
 		&fiBiLowFrequency,
 		&fiBiHighFrequency,
+		&fiBiTimeStamp,
+		&fiBiCpsVersion,
 	},
 }
 
@@ -329,6 +334,8 @@ var riBasicInformation_md390 = recordInfo{
 		&fiBiNewFilename_md390,
 		&fiBiLowFrequency,
 		&fiBiHighFrequency,
+		&fiBiTimeStamp,
+		&fiBiCpsVersion,
 	},
 }
 
@@ -652,7 +659,7 @@ var fiBiNewFilename_md380 = fieldInfo{
 	max:       1,
 	bitOffset: 2480,
 	bitSize:   8,
-	valueType: VtIStrings,
+	valueType: VtBiFilename,
 	strings: &[]string{
 		"md380_136-174.rdt",
 		"md380_350-400.rdt",
@@ -667,7 +674,7 @@ var fiBiNewFilename_md390 = fieldInfo{
 	max:       1,
 	bitOffset: 2480,
 	bitSize:   8,
-	valueType: VtIStrings,
+	valueType: VtBiFilename,
 	strings: &[]string{
 		"md390_136-174.rdt",
 		"md390_350-400.rdt",
@@ -682,7 +689,7 @@ var fiBiNewFilename_md40 = fieldInfo{
 	max:       1,
 	bitOffset: 2480,
 	bitSize:   8,
-	valueType: VtIStrings,
+	valueType: VtBiFilename,
 	strings: &[]string{
 		"md40_400-480.rdt",
 		"md40ht_420-450.rdt",
