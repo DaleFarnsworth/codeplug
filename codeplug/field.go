@@ -856,38 +856,38 @@ func (v *indexedStrings) store(f *Field) {
 	f.storeBytes([]byte{byte(*v)})
 }
 
-// rhFrequency is a field value representing a frequency in Hertz.
-type rhFrequency float64
+// biFrequency is a field value representing a frequency in Hertz.
+type biFrequency float64
 
-// String returns the rhFrequency's value as a string.
-func (v *rhFrequency) getString(f *Field) string {
+// String returns the biFrequency's value as a string.
+func (v *biFrequency) getString(f *Field) string {
 	return frequencyToString(float64(*v))
 }
 
-// setString sets the rhFrequency's value from a string.
-func (v *rhFrequency) setString(f *Field, s string) error {
+// setString sets the biFrequency's value from a string.
+func (v *biFrequency) setString(f *Field, s string) error {
 	freq, err := stringToFrequency(s)
 	if err != nil {
 		return err
 	}
 
-	*v = rhFrequency(freq)
+	*v = biFrequency(freq)
 
 	return nil
 }
 
-// valid returns nil if the rhFrequency's value is valid.
-func (v *rhFrequency) valid(f *Field) error {
+// valid returns nil if the biFrequency's value is valid.
+func (v *biFrequency) valid(f *Field) error {
 	return nil
 }
 
-// load sets the rhFrequency's value from its bits in cp.bytes.
-func (v *rhFrequency) load(f *Field) {
-	*v = rhFrequency(bcdToBinary(bytesToInt(f.bytes()))) / 10
+// load sets the biFrequency's value from its bits in cp.bytes.
+func (v *biFrequency) load(f *Field) {
+	*v = biFrequency(bcdToBinary(bytesToInt(f.bytes()))) / 10
 }
 
-// store stores the rhFrequency's value into its bits in cp.bytes.
-func (v *rhFrequency) store(f *Field) {
+// store stores the biFrequency's value into its bits in cp.bytes.
+func (v *biFrequency) store(f *Field) {
 	i := binaryToBcd(int(*v) * 10)
 	f.storeBytes(intToBytes(i, f.size()))
 }

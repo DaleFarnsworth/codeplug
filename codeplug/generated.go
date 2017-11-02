@@ -29,22 +29,33 @@ package codeplug
 
 // Record types
 const (
-	RtChannelInformation    RecordType = "ChannelInformation"
-	RtDigitalContacts       RecordType = "DigitalContacts"
-	RtGeneralSettings_md380 RecordType = "GeneralSettings"
-	RtGeneralSettings_md40  RecordType = "GeneralSettings"
-	RtGroupList             RecordType = "GroupList"
-	RtRdtHeader_md380       RecordType = "RdtHeader"
-	RtRdtHeader_md390       RecordType = "RdtHeader"
-	RtRdtHeader_md40        RecordType = "RdtHeader"
-	RtScanList              RecordType = "ScanList"
-	RtTextMessage           RecordType = "TextMessage"
-	RtZoneInformation_md380 RecordType = "ZoneInformation"
-	RtZoneInformation_md40  RecordType = "ZoneInformation"
+	RtBasicInformation_md380 RecordType = "BasicInformation"
+	RtBasicInformation_md390 RecordType = "BasicInformation"
+	RtBasicInformation_md40  RecordType = "BasicInformation"
+	RtChannelInformation     RecordType = "ChannelInformation"
+	RtDigitalContacts        RecordType = "DigitalContacts"
+	RtGeneralSettings_md380  RecordType = "GeneralSettings"
+	RtGeneralSettings_md40   RecordType = "GeneralSettings"
+	RtGroupList              RecordType = "GroupList"
+	RtScanList               RecordType = "ScanList"
+	RtTextMessage            RecordType = "TextMessage"
+	RtZoneInformation_md380  RecordType = "ZoneInformation"
+	RtZoneInformation_md40   RecordType = "ZoneInformation"
 )
 
 // Field types
 const (
+	FtBiCpsVersion              FieldType = "CpsVersion"
+	FtBiHighFrequency           FieldType = "HighFrequency"
+	FtBiLowFrequency            FieldType = "LowFrequency"
+	FtBiModel                   FieldType = "Model"
+	FtBiNewFilename_md380       FieldType = "NewFilename"
+	FtBiNewFilename_md390       FieldType = "NewFilename"
+	FtBiNewFilename_md40        FieldType = "NewFilename"
+	FtBiTimeStamp               FieldType = "TimeStamp"
+	FtBiVariant_md380           FieldType = "Variant"
+	FtBiVariant_md390           FieldType = "Variant"
+	FtBiVariant_md40            FieldType = "Variant"
 	FtCiAdmitCriteria           FieldType = "AdmitCriteria"
 	FtCiAllowTalkaround         FieldType = "AllowTalkaround"
 	FtCiAutoscan                FieldType = "Autoscan"
@@ -127,17 +138,6 @@ const (
 	FtGsTalkPermitTone          FieldType = "TalkPermitTone"
 	FtGsTxPreambleDuration      FieldType = "TxPreambleDuration"
 	FtGsVoxSensitivity          FieldType = "VoxSensitivity"
-	FtRhCpsVersion              FieldType = "CpsVersion"
-	FtRhHighFrequency           FieldType = "HighFrequency"
-	FtRhLowFrequency            FieldType = "LowFrequency"
-	FtRhModel                   FieldType = "Model"
-	FtRhNewFilename_md380       FieldType = "NewFilename"
-	FtRhNewFilename_md390       FieldType = "NewFilename"
-	FtRhNewFilename_md40        FieldType = "NewFilename"
-	FtRhTimeStamp               FieldType = "TimeStamp"
-	FtRhVariant_md380           FieldType = "Variant"
-	FtRhVariant_md390           FieldType = "Variant"
-	FtRhVariant_md40            FieldType = "Variant"
 	FtSlChannelMember           FieldType = "ChannelMember"
 	FtSlName                    FieldType = "Name"
 	FtSlPriorityChannel1        FieldType = "PriorityChannel1"
@@ -154,6 +154,7 @@ const (
 // The value types a field may contain
 const (
 	VtAscii           ValueType = "ascii"
+	VtBiFrequency     ValueType = "biFrequency"
 	VtCallID          ValueType = "callID"
 	VtCallType        ValueType = "callType"
 	VtCpsVersion      ValueType = "cpsVersion"
@@ -171,7 +172,6 @@ const (
 	VtPrivacyNumber   ValueType = "privacyNumber"
 	VtRadioName       ValueType = "radioName"
 	VtRadioPassword   ValueType = "radioPassword"
-	VtRhFrequency     ValueType = "rhFrequency"
 	VtSpan            ValueType = "span"
 	VtTextMessage     ValueType = "textMessage"
 	VtTimeStamp       ValueType = "timeStamp"
@@ -183,6 +183,8 @@ func newValue(vt ValueType) value {
 	switch vt {
 	case VtAscii:
 		return new(ascii)
+	case VtBiFrequency:
+		return new(biFrequency)
 	case VtCallID:
 		return new(callID)
 	case VtCallType:
@@ -217,8 +219,6 @@ func newValue(vt ValueType) value {
 		return new(radioName)
 	case VtRadioPassword:
 		return new(radioPassword)
-	case VtRhFrequency:
-		return new(rhFrequency)
 	case VtSpan:
 		return new(span)
 	case VtTextMessage:
@@ -249,7 +249,7 @@ var cpMd380 = CodeplugInfo{
 	BinSize:   262144,
 	BinOffset: 549,
 	RecordInfos: []*recordInfo{
-		&riRdtHeader_md380,
+		&riBasicInformation_md380,
 		&riGeneralSettings_md380,
 		&riTextMessage,
 		&riDigitalContacts,
@@ -270,7 +270,7 @@ var cpMd390 = CodeplugInfo{
 	BinSize:   262144,
 	BinOffset: 549,
 	RecordInfos: []*recordInfo{
-		&riRdtHeader_md390,
+		&riBasicInformation_md390,
 		&riGeneralSettings_md380,
 		&riTextMessage,
 		&riDigitalContacts,
@@ -291,7 +291,7 @@ var cpMd40 = CodeplugInfo{
 	BinSize:   262144,
 	BinOffset: 549,
 	RecordInfos: []*recordInfo{
-		&riRdtHeader_md40,
+		&riBasicInformation_md40,
 		&riGeneralSettings_md40,
 		&riTextMessage,
 		&riDigitalContacts,
@@ -299,6 +299,53 @@ var cpMd40 = CodeplugInfo{
 		&riZoneInformation_md40,
 		&riScanList,
 		&riChannelInformation,
+	},
+}
+
+var riBasicInformation_md380 = recordInfo{
+	rType:    RtBasicInformation_md380,
+	typeName: "Basic Information",
+	max:      1,
+	offset:   0,
+	size:     549,
+	fieldInfos: []*fieldInfo{
+		&fiBiModel,
+		&fiBiVariant_md380,
+		&fiBiNewFilename_md380,
+		&fiBiLowFrequency,
+		&fiBiHighFrequency,
+	},
+}
+
+var riBasicInformation_md390 = recordInfo{
+	rType:    RtBasicInformation_md390,
+	typeName: "Basic Information",
+	max:      1,
+	offset:   0,
+	size:     549,
+	fieldInfos: []*fieldInfo{
+		&fiBiModel,
+		&fiBiVariant_md390,
+		&fiBiNewFilename_md390,
+		&fiBiLowFrequency,
+		&fiBiHighFrequency,
+	},
+}
+
+var riBasicInformation_md40 = recordInfo{
+	rType:    RtBasicInformation_md40,
+	typeName: "Basic Information",
+	max:      1,
+	offset:   0,
+	size:     8805,
+	fieldInfos: []*fieldInfo{
+		&fiBiModel,
+		&fiBiVariant_md40,
+		&fiBiNewFilename_md40,
+		&fiBiLowFrequency,
+		&fiBiHighFrequency,
+		&fiBiTimeStamp,
+		&fiBiCpsVersion,
 	},
 }
 
@@ -483,53 +530,6 @@ var riGroupList = recordInfo{
 	},
 }
 
-var riRdtHeader_md380 = recordInfo{
-	rType:    RtRdtHeader_md380,
-	typeName: "Rdt Header",
-	max:      1,
-	offset:   0,
-	size:     549,
-	fieldInfos: []*fieldInfo{
-		&fiRhModel,
-		&fiRhVariant_md380,
-		&fiRhNewFilename_md380,
-		&fiRhLowFrequency,
-		&fiRhHighFrequency,
-	},
-}
-
-var riRdtHeader_md390 = recordInfo{
-	rType:    RtRdtHeader_md390,
-	typeName: "Rdt Header",
-	max:      1,
-	offset:   0,
-	size:     549,
-	fieldInfos: []*fieldInfo{
-		&fiRhModel,
-		&fiRhVariant_md390,
-		&fiRhNewFilename_md390,
-		&fiRhLowFrequency,
-		&fiRhHighFrequency,
-	},
-}
-
-var riRdtHeader_md40 = recordInfo{
-	rType:    RtRdtHeader_md40,
-	typeName: "Rdt Header",
-	max:      1,
-	offset:   0,
-	size:     8805,
-	fieldInfos: []*fieldInfo{
-		&fiRhModel,
-		&fiRhVariant_md40,
-		&fiRhNewFilename_md40,
-		&fiRhLowFrequency,
-		&fiRhHighFrequency,
-		&fiRhTimeStamp,
-		&fiRhCpsVersion,
-	},
-}
-
 var riScanList = recordInfo{
 	rType:    RtScanList,
 	typeName: "Scan List",
@@ -607,6 +607,141 @@ var riZoneInformation_md40 = recordInfo{
 	fieldInfos: []*fieldInfo{
 		&fiZiName,
 		&fiZiChannelMember_md40,
+	},
+}
+
+var fiBiCpsVersion = fieldInfo{
+	fType:     FtBiCpsVersion,
+	typeName:  "CPS Version",
+	max:       1,
+	bitOffset: 69992,
+	bitSize:   32,
+	valueType: VtCpsVersion,
+}
+
+var fiBiHighFrequency = fieldInfo{
+	fType:     FtBiHighFrequency,
+	typeName:  "High Frequency",
+	max:       1,
+	bitOffset: 2520,
+	bitSize:   16,
+	valueType: VtBiFrequency,
+}
+
+var fiBiLowFrequency = fieldInfo{
+	fType:     FtBiLowFrequency,
+	typeName:  "Low Frequency",
+	max:       1,
+	bitOffset: 2504,
+	bitSize:   16,
+	valueType: VtBiFrequency,
+}
+
+var fiBiModel = fieldInfo{
+	fType:     FtBiModel,
+	typeName:  "Codeplug Model",
+	max:       1,
+	bitOffset: 2344,
+	bitSize:   64,
+	valueType: VtAscii,
+}
+
+var fiBiNewFilename_md380 = fieldInfo{
+	fType:     FtBiNewFilename_md380,
+	typeName:  "Codeplug Model Filename",
+	max:       1,
+	bitOffset: 2480,
+	bitSize:   8,
+	valueType: VtIStrings,
+	strings: &[]string{
+		"md380_136-174.rdt",
+		"md380_350-400.rdt",
+		"md380_400-480.rdt",
+		"md380_450-520.rdt",
+	},
+}
+
+var fiBiNewFilename_md390 = fieldInfo{
+	fType:     FtBiNewFilename_md390,
+	typeName:  "Codeplug Model Filename",
+	max:       1,
+	bitOffset: 2480,
+	bitSize:   8,
+	valueType: VtIStrings,
+	strings: &[]string{
+		"md390_136-174.rdt",
+		"md390_350-400.rdt",
+		"md390_400-480.rdt",
+		"md390_450-520.rdt",
+	},
+}
+
+var fiBiNewFilename_md40 = fieldInfo{
+	fType:     FtBiNewFilename_md40,
+	typeName:  "Codeplug Model Filename",
+	max:       1,
+	bitOffset: 2480,
+	bitSize:   8,
+	valueType: VtIStrings,
+	strings: &[]string{
+		"md40_400-480.rdt",
+		"md40ht_420-450.rdt",
+		"md40he_430-440.rdt",
+		"md40t_400-480.rdt",
+	},
+}
+
+var fiBiTimeStamp = fieldInfo{
+	fType:     FtBiTimeStamp,
+	typeName:  "Time Stamp",
+	max:       1,
+	bitOffset: 69936,
+	bitSize:   56,
+	valueType: VtTimeStamp,
+}
+
+var fiBiVariant_md380 = fieldInfo{
+	fType:     FtBiVariant_md380,
+	typeName:  "Codeplug Model Name",
+	max:       1,
+	bitOffset: 2480,
+	bitSize:   8,
+	valueType: VtIStrings,
+	strings: &[]string{
+		"136-174 MHz",
+		"350-400 MHz",
+		"400-480 MHz",
+		"450-520 MHz",
+	},
+}
+
+var fiBiVariant_md390 = fieldInfo{
+	fType:     FtBiVariant_md390,
+	typeName:  "Codeplug Model Name",
+	max:       1,
+	bitOffset: 2480,
+	bitSize:   8,
+	valueType: VtIStrings,
+	strings: &[]string{
+		"136-174 MHz",
+		"350-400 MHz",
+		"400-480 MHz",
+		"450-520 MHz",
+	},
+}
+
+var fiBiVariant_md40 = fieldInfo{
+	fType:     FtBiVariant_md40,
+	typeName:  "Codeplug Model Name",
+	max:       1,
+	bitOffset: 2480,
+	bitSize:   8,
+	valueType: VtIStrings,
+	strings: &[]string{
+		"MD40 400-480 MHz",
+		"MD40HT 420-450 MHz",
+		"MD40HE 430-440 MHz",
+		"MD40T 400-480 MHz",
 	},
 }
 
@@ -1593,141 +1728,6 @@ var fiGsVoxSensitivity = fieldInfo{
 	span: &Span{
 		min: 1,
 		max: 10,
-	},
-}
-
-var fiRhCpsVersion = fieldInfo{
-	fType:     FtRhCpsVersion,
-	typeName:  "CPS Version",
-	max:       1,
-	bitOffset: 69992,
-	bitSize:   32,
-	valueType: VtCpsVersion,
-}
-
-var fiRhHighFrequency = fieldInfo{
-	fType:     FtRhHighFrequency,
-	typeName:  "High Frequency",
-	max:       1,
-	bitOffset: 2520,
-	bitSize:   16,
-	valueType: VtRhFrequency,
-}
-
-var fiRhLowFrequency = fieldInfo{
-	fType:     FtRhLowFrequency,
-	typeName:  "Low Frequency",
-	max:       1,
-	bitOffset: 2504,
-	bitSize:   16,
-	valueType: VtRhFrequency,
-}
-
-var fiRhModel = fieldInfo{
-	fType:     FtRhModel,
-	typeName:  "Codeplug Model",
-	max:       1,
-	bitOffset: 2344,
-	bitSize:   64,
-	valueType: VtAscii,
-}
-
-var fiRhNewFilename_md380 = fieldInfo{
-	fType:     FtRhNewFilename_md380,
-	typeName:  "Codeplug Model Filename",
-	max:       1,
-	bitOffset: 2480,
-	bitSize:   8,
-	valueType: VtIStrings,
-	strings: &[]string{
-		"md380_136-174.rdt",
-		"md380_350-400.rdt",
-		"md380_400-480.rdt",
-		"md380_450-520.rdt",
-	},
-}
-
-var fiRhNewFilename_md390 = fieldInfo{
-	fType:     FtRhNewFilename_md390,
-	typeName:  "Codeplug Model Filename",
-	max:       1,
-	bitOffset: 2480,
-	bitSize:   8,
-	valueType: VtIStrings,
-	strings: &[]string{
-		"md390_136-174.rdt",
-		"md390_350-400.rdt",
-		"md390_400-480.rdt",
-		"md390_450-520.rdt",
-	},
-}
-
-var fiRhNewFilename_md40 = fieldInfo{
-	fType:     FtRhNewFilename_md40,
-	typeName:  "Codeplug Model Filename",
-	max:       1,
-	bitOffset: 2480,
-	bitSize:   8,
-	valueType: VtIStrings,
-	strings: &[]string{
-		"md40_400-480.rdt",
-		"md40ht_420-450.rdt",
-		"md40he_430-440.rdt",
-		"md40t_400-480.rdt",
-	},
-}
-
-var fiRhTimeStamp = fieldInfo{
-	fType:     FtRhTimeStamp,
-	typeName:  "Time Stamp",
-	max:       1,
-	bitOffset: 69936,
-	bitSize:   56,
-	valueType: VtTimeStamp,
-}
-
-var fiRhVariant_md380 = fieldInfo{
-	fType:     FtRhVariant_md380,
-	typeName:  "Codeplug Model Name",
-	max:       1,
-	bitOffset: 2480,
-	bitSize:   8,
-	valueType: VtIStrings,
-	strings: &[]string{
-		"136-174 MHz",
-		"350-400 MHz",
-		"400-480 MHz",
-		"450-520 MHz",
-	},
-}
-
-var fiRhVariant_md390 = fieldInfo{
-	fType:     FtRhVariant_md390,
-	typeName:  "Codeplug Model Name",
-	max:       1,
-	bitOffset: 2480,
-	bitSize:   8,
-	valueType: VtIStrings,
-	strings: &[]string{
-		"136-174 MHz",
-		"350-400 MHz",
-		"400-480 MHz",
-		"450-520 MHz",
-	},
-}
-
-var fiRhVariant_md40 = fieldInfo{
-	fType:     FtRhVariant_md40,
-	typeName:  "Codeplug Model Name",
-	max:       1,
-	bitOffset: 2480,
-	bitSize:   8,
-	valueType: VtIStrings,
-	strings: &[]string{
-		"MD40 400-480 MHz",
-		"MD40HT 420-450 MHz",
-		"MD40HE 430-440 MHz",
-		"MD40T 400-480 MHz",
 	},
 }
 

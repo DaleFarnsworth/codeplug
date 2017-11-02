@@ -27,7 +27,7 @@
       "binSize": 262144,
       "binOffset": 549,
       "recordTypes": [
-        "RdtHeader_md380",
+        "BasicInformation_md380",
         "GeneralSettings_md380",
         "TextMessage",
         "DigitalContacts",
@@ -47,7 +47,7 @@
       "binSize": 262144,
       "binOffset": 549,
       "recordTypes": [
-        "RdtHeader_md390",
+        "BasicInformation_md390",
         "GeneralSettings_md380",
         "TextMessage",
         "DigitalContacts",
@@ -67,7 +67,7 @@
       "binSize": 262144,
       "binOffset": 549,
       "recordTypes": [
-        "RdtHeader_md40",
+        "BasicInformation_md40",
         "GeneralSettings_md40",
         "TextMessage",
         "DigitalContacts",
@@ -80,48 +80,48 @@
   ],
   "records": [
     {
-      "typeName": "Rdt Header",
-      "type": "RdtHeader_md380",
+      "typeName": "Basic Information",
+      "type": "BasicInformation_md380",
       "offset": 0,
       "size": 549,
       "fieldTypes": [
-        "RhModel",
-        "RhVariant_md380",
-        "RhNewFilename_md380",
-        "RhLowFrequency",
-        "RhHighFrequency",
-        "RhTimeStamp",
-        "RhCpsVersion"
+        "BiModel",
+        "BiVariant_md380",
+        "BiNewFilename_md380",
+        "BiLowFrequency",
+        "BiHighFrequency",
+        "BiTimeStamp",
+        "BiCpsVersion"
       ]
     },
     {
-      "typeName": "Rdt Header",
-      "type": "RdtHeader_md390",
+      "typeName": "Basic Information",
+      "type": "BasicInformation_md390",
       "offset": 0,
       "size": 549,
       "fieldTypes": [
-        "RhModel",
-        "RhVariant_md390",
-        "RhNewFilename_md390",
-        "RhLowFrequency",
-        "RhHighFrequency",
-        "RhTimeStamp",
-        "RhCpsVersion"
+        "BiModel",
+        "BiVariant_md390",
+        "BiNewFilename_md390",
+        "BiLowFrequency",
+        "BiHighFrequency",
+        "BiTimeStamp",
+        "BiCpsVersion"
       ]
     },
     {
-      "typeName": "Rdt Header",
-      "type": "RdtHeader_md40",
+      "typeName": "Basic Information",
+      "type": "BasicInformation_md40",
       "offset": 0,
       "size": 8805,
       "fieldTypes": [
-        "RhModel",
-        "RhVariant_md40",
-        "RhNewFilename_md40",
-        "RhLowFrequency",
-        "RhHighFrequency",
-        "RhTimeStamp",
-        "RhCpsVersion"
+        "BiModel",
+        "BiVariant_md40",
+        "BiNewFilename_md40",
+        "BiLowFrequency",
+        "BiHighFrequency",
+        "BiTimeStamp",
+        "BiCpsVersion"
       ]
     },
     {
@@ -378,14 +378,14 @@
   "fields": [
     {
       "typeName": "Codeplug Model",
-      "type": "RhModel",
+      "type": "BiModel",
       "bitOffset": 2344,
       "bitSize": 64,
       "valueType": "ascii"
     },
     {
       "typeName": "Codeplug Model Name",
-      "type": "RhVariant_md380",
+      "type": "BiVariant_md380",
       "bitOffset": 2480,
       "bitSize": 8,
       "valueType": "iStrings",
@@ -398,7 +398,7 @@
     },
     {
       "typeName": "Codeplug Model Filename",
-      "type": "RhNewFilename_md380",
+      "type": "BiNewFilename_md380",
       "bitOffset": 2480,
       "bitSize": 8,
       "valueType": "iStrings",
@@ -411,7 +411,7 @@
     },
     {
       "typeName": "Codeplug Model Name",
-      "type": "RhVariant_md390",
+      "type": "BiVariant_md390",
       "bitOffset": 2480,
       "bitSize": 8,
       "valueType": "iStrings",
@@ -424,7 +424,7 @@
     },
     {
       "typeName": "Codeplug Model Filename",
-      "type": "RhNewFilename_md390",
+      "type": "BiNewFilename_md390",
       "bitOffset": 2480,
       "bitSize": 8,
       "valueType": "iStrings",
@@ -437,7 +437,7 @@
     },
     {
       "typeName": "Codeplug Model Name",
-      "type": "RhVariant_md40",
+      "type": "BiVariant_md40",
       "bitOffset": 2480,
       "bitSize": 8,
       "valueType": "iStrings",
@@ -450,7 +450,7 @@
     },
     {
       "typeName": "Codeplug Model Filename",
-      "type": "RhNewFilename_md40",
+      "type": "BiNewFilename_md40",
       "bitOffset": 2480,
       "bitSize": 8,
       "valueType": "iStrings",
@@ -463,28 +463,28 @@
     },
     {
       "typeName": "Low Frequency",
-      "type": "RhLowFrequency",
+      "type": "BiLowFrequency",
       "bitOffset": 2504,
       "bitSize": 16,
-      "valueType": "rhFrequency"
+      "valueType": "biFrequency"
     },
     {
       "typeName": "High Frequency",
-      "type": "RhHighFrequency",
+      "type": "BiHighFrequency",
       "bitOffset": 2520,
       "bitSize": 16,
-      "valueType": "rhFrequency"
+      "valueType": "biFrequency"
     },
     {
       "typeName": "Time Stamp",
-      "type": "RhTimeStamp",
+      "type": "BiTimeStamp",
       "bitOffset": 69936,
       "bitSize": 56,
       "valueType": "timeStamp"
     },
     {
       "typeName": "CPS Version",
-      "type": "RhCpsVersion",
+      "type": "BiCpsVersion",
       "bitOffset": 69992,
       "bitSize": 32,
       "valueType": "cpsVersion"

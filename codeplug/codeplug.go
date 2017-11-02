@@ -242,7 +242,7 @@ func (cp *Codeplug) ModelsVariantsFiles() (models []string, variants map[string]
 }
 
 func (cp *Codeplug) Model() string {
-	fDescs := cp.rDesc[RecordType("RdtHeader")].records[0].fDesc
+	fDescs := cp.rDesc[RecordType("BasicInformation")].records[0].fDesc
 	return (*fDescs)[FieldType("Model")].fields[0].String()
 }
 
@@ -252,22 +252,22 @@ func (cp *Codeplug) Models() []string {
 }
 
 func (cp *Codeplug) Variant() string {
-	fDescs := cp.rDesc[RecordType("RdtHeader")].records[0].fDesc
+	fDescs := cp.rDesc[RecordType("BasicInformation")].records[0].fDesc
 	return (*fDescs)[FieldType("Variant")].fields[0].String()
 }
 
 func (cp *Codeplug) Variants() []string {
-	fDescs := cp.rDesc[RecordType("RdtHeader")].records[0].fDesc
+	fDescs := cp.rDesc[RecordType("BasicInformation")].records[0].fDesc
 	return *(*fDescs)[FieldType("Variant")].fieldInfo.strings
 }
 
 func (cp *Codeplug) NewFilename() string {
-	fDescs := cp.rDesc[RecordType("RdtHeader")].records[0].fDesc
+	fDescs := cp.rDesc[RecordType("BasicInformation")].records[0].fDesc
 	return (*fDescs)[FieldType("NewFilename")].fields[0].String()
 }
 
 func (cp *Codeplug) NewFilenames() []string {
-	fDescs := cp.rDesc[RecordType("RdtHeader")].records[0].fDesc
+	fDescs := cp.rDesc[RecordType("BasicInformation")].records[0].fDesc
 	return *(*fDescs)[FieldType("NewFilename")].fieldInfo.strings
 }
 
@@ -504,15 +504,13 @@ func (cp *Codeplug) MaxRecords(rType RecordType) int {
 	return cp.rDesc[rType].max
 }
 
-// RecordTypes returns all of the record types of the codeplug except RdtHeader.
-// The RdtHeader record is omitted.
+// RecordTypes returns all of the record types of the codeplug except
+// BasicInformation.  The BasicInformation record is omitted.
 func (cp *Codeplug) RecordTypes() []RecordType {
-	strs := make([]string, 0, len(cp.rDesc)-1)
+	strs := make([]string, 0, len(cp.rDesc))
 
 	for rType := range cp.rDesc {
-		if rType != RecordType("RdtHeader") {
-			strs = append(strs, string(rType))
-		}
+		strs = append(strs, string(rType))
 	}
 	sort.Strings(strs)
 
@@ -739,10 +737,10 @@ func (cp *Codeplug) write(file *os.File) (err error) {
 // codeplug.
 func (cp *Codeplug) frequencyValid(freq float64) error {
 	if cp.lowFrequency == 0 {
-		fDescs := cp.rDesc[RecordType("RdtHeader")].records[0].fDesc
-		s := (*fDescs)[FtRhLowFrequency].fields[0].String()
+		fDescs := cp.rDesc[RecordType("BasicInformation")].records[0].fDesc
+		s := (*fDescs)[FtBiLowFrequency].fields[0].String()
 		cp.lowFrequency, _ = strconv.ParseFloat(s, 64)
-		s = (*fDescs)[FtRhHighFrequency].fields[0].String()
+		s = (*fDescs)[FtBiHighFrequency].fields[0].String()
 		cp.highFrequency, _ = strconv.ParseFloat(s, 64)
 	}
 
