@@ -493,9 +493,18 @@ func (cp *Codeplug) Records(rType RecordType) []*Record {
 	return records
 }
 
+func (cp *Codeplug) records(rType RecordType) []*Record {
+	return cp.rDesc[rType].records
+}
+
 // Record returns the first record of a codeplug's given RecordType.
 func (cp *Codeplug) Record(rType RecordType) *Record {
 	return cp.Records(rType)[0]
+}
+
+// fecord returns the first record of a codeplug's given RecordType.
+func (cp *Codeplug) record(rType RecordType) *Record {
+	return cp.records(rType)[0]
 }
 
 // MaxRecords returns a codeplug's maximum number of records of the given
@@ -545,7 +554,7 @@ func (cp *Codeplug) MoveRecord(dIndex int, r *Record) {
 // the codeplug's maximum records of that type would be exceeded.
 func (cp *Codeplug) InsertRecord(r *Record) error {
 	rType := r.rType
-	records := cp.rDesc[r.rType].records
+	records := cp.records(rType)
 	if len(records) >= cp.MaxRecords(rType) {
 		return fmt.Errorf("too many records")
 	}
@@ -563,7 +572,7 @@ func (cp *Codeplug) InsertRecord(r *Record) error {
 	for i, r := range records {
 		r.rIndex = i
 	}
-	cp.rDesc[r.rType].records = records
+	cp.rDesc[rType].records = records
 
 	records[0].cachedListNames = nil
 	return nil
@@ -573,7 +582,7 @@ func (cp *Codeplug) InsertRecord(r *Record) error {
 func (cp *Codeplug) RemoveRecord(r *Record) {
 	rType := r.rType
 	index := -1
-	records := cp.rDesc[rType].records
+	records := cp.records(rType)
 	for i, record := range records {
 		if record == r {
 			index = i
@@ -642,7 +651,7 @@ func (cp *Codeplug) newRecord(rType RecordType, rIndex int) *Record {
 func (cp *Codeplug) valid() error {
 	errStr := ""
 	for _, rType := range cp.RecordTypes() {
-		for _, r := range cp.rDesc[rType].records {
+		for _, r := range cp.records(rType) {
 			if err := r.valid(); err != nil {
 				errStr += err.Error()
 			}
@@ -737,7 +746,7 @@ func (cp *Codeplug) write(file *os.File) (err error) {
 // codeplug.
 func (cp *Codeplug) frequencyValid(freq float64) error {
 	if cp.lowFrequency == 0 {
-		fDescs := cp.rDesc[RecordType("BasicInformation")].records[0].fDesc
+		fDescs := cp.record(RecordType("BasicInformation")).fDesc
 		s := (*fDescs)[FtBiLowFrequency].fields[0].String()
 		cp.lowFrequency, _ = strconv.ParseFloat(s, 64)
 		s = (*fDescs)[FtBiHighFrequency].fields[0].String()
@@ -1285,7 +1294,7 @@ func (cp *Codeplug) ExportTo(filename string) (err error) {
 
 	w := bufio.NewWriter(file)
 	for i, rType := range cp.RecordTypes() {
-		for j, r := range cp.rDesc[rType].records {
+		for j, r := range cp.records(rType) {
 			if i != 0 || j != 0 {
 				fmt.Fprintln(w)
 			}
@@ -1351,7 +1360,7 @@ func (cp *Codeplug) ImportFrom(filename string) error {
 	}
 
 	for _, r := range records {
-		r.rIndex = len(cp.rDesc[r.rType].records)
+		r.rIndex = len(cp.records(r.rType))
 		cp.InsertRecord(r)
 	}
 
