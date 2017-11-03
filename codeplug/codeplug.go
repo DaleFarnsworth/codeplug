@@ -434,7 +434,7 @@ func (cp *Codeplug) SaveToFile(filename string, ignoreWarning bool) (warning err
 }
 
 func (cp *Codeplug) setTimeStamp(t time.Time) {
-	r := cp.Record(RecordType("GeneralSettings"))
+	r := cp.rDesc[RecordType("GeneralSettings")].records[0]
 	f := r.Field(FieldType("TimeStamp"))
 	f.setString(t.Format("20060102150405"))
 }
@@ -484,9 +484,11 @@ func (cp *Codeplug) Records(rType RecordType) []*Record {
 		r := cp.newRecord(rType, rIndex)
 		cp.InsertRecord(r)
 		r.load()
-		r.NameField().setString(string(rType) + "1")
+		nameField := r.NameField()
+		if nameField != nil {
+			nameField.setString(string(rType) + "1")
+		}
 		records = cp.rDesc[rType].records
-		dprint(records)
 	}
 	return records
 }
@@ -1238,7 +1240,7 @@ func (cp *Codeplug) ExportTo(filename string) (err error) {
 
 	w := bufio.NewWriter(file)
 	for i, rType := range cp.RecordTypes() {
-		for j, r := range cp.Records(rType) {
+		for j, r := range cp.rDesc[rType].records {
 			if i != 0 || j != 0 {
 				fmt.Fprintln(w)
 			}
@@ -1266,7 +1268,7 @@ func (cp *Codeplug) ImportFrom(filename string) error {
 	cp.store()
 
 	for _, rType := range cp.RecordTypes() {
-		records := cp.Records(rType)
+		records := cp.rDesc[rType].records
 		for i := len(records) - 1; i >= 0; i-- {
 			cp.RemoveRecord(records[i])
 		}
@@ -1279,7 +1281,7 @@ func (cp *Codeplug) ImportFrom(filename string) error {
 	}
 
 	for _, r := range records {
-		r.rIndex = len(cp.Records(r.rType))
+		r.rIndex = len(cp.rDesc[r.rType].records)
 		cp.InsertRecord(r)
 	}
 
