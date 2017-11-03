@@ -110,6 +110,17 @@ func (r *Record) NewField(fType FieldType) *Field {
 	fd := (*r.fDesc)[fType]
 	if fd == nil {
 		fd = f.fDesc
+		if fd == nil {
+			for _, fi := range r.rDesc.fieldInfos {
+				if fi.fType == fType {
+					fd = &fDesc{fi, r, make([]*Field, 0)}
+					break
+				}
+			}
+			fd.record = r
+			fd.fields = make([]*Field, 0)
+			(*r.fDesc)[fType] = fd
+		}
 		(*r.fDesc)[fType] = fd
 		fd.record = r
 	}
@@ -445,19 +456,6 @@ func (r *Record) nameToField(name string, index int, value string) (*Field, erro
 }
 
 func (r *Record) NewFieldWithValue(fType FieldType, index int, str string) (*Field, error) {
-	fd := (*r.fDesc)[fType]
-	if fd == nil {
-		for _, fi := range r.rDesc.fieldInfos {
-			if fi.fType == fType {
-				fd = &fDesc{fi, r, make([]*Field, 0)}
-				break
-			}
-		}
-		fd.record = r
-		fd.fields = make([]*Field, 0)
-		(*r.fDesc)[fType] = fd
-	}
-
 	f := r.NewField(fType)
 	f.fIndex = index
 	switch f.valueType {
