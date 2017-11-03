@@ -1073,6 +1073,8 @@ func (cp *Codeplug) ParseRecords(iRdr io.Reader) ([]*Record, error) {
 		}
 	}
 
+	rdr.ReadWhile(unicode.IsSpace)
+
 parseRecord:
 	for {
 		var name string
