@@ -1371,7 +1371,7 @@ func (v *memberListIndex) setString(f *Field, s string) error {
 			}
 		}
 	}
-	return fmt.Errorf("memberListIndex.setString: bad list entry name: %s", s)
+	return fmt.Errorf("memberListIndex.setString: bad list entry name")
 }
 
 // listIndex is a field value representing an index into a slice of records
@@ -1417,7 +1417,7 @@ func (v *listIndex) setString(f *Field, s string) error {
 			return nil
 		}
 	}
-	return fmt.Errorf("listIndex.setString: bad list entry name", s)
+	return fmt.Errorf("listIndex.setString: bad list entry name")
 }
 
 // valid returns nil if the listIndex's value is valid.
