@@ -136,7 +136,11 @@ func NewCodeplug(filename string) (*Codeplug, error) {
 	return cp, nil
 }
 
-func (cp *Codeplug) Load(model string, filename string, ignoreWarning bool) (warning error, err error) {
+type Warning struct {
+	error
+}
+
+func (cp *Codeplug) Load(model string, filename string, ignoreWarning bool) error {
 	found := false
 	for _, cpi := range codeplugInfos {
 		for _, cpiModel := range cpi.Models {
@@ -149,30 +153,30 @@ func (cp *Codeplug) Load(model string, filename string, ignoreWarning bool) (war
 	}
 
 	if !found {
-		return nil, fmt.Errorf("Codeplug type not found: %s", model)
+		return fmt.Errorf("Codeplug type not found: %s", model)
 	}
 
 	if cp.fileType != FileTypeRdt {
 		err := cp.ReadNew(filename)
 		if err != nil {
-			return nil, err
+			return err
 		}
 		if cp.fileType != FileTypeNone {
 			err = cp.read()
 			if err != nil {
-				return nil, err
+				return err
 			}
 		}
 	}
 
-	warning = cp.Revert(ignoreWarning)
-	if warning != nil && !ignoreWarning {
-		return warning, nil
+	err := cp.Revert(ignoreWarning)
+	if err != nil && !ignoreWarning {
+		return Warning{err}
 	}
 
 	codeplugs = append(codeplugs, cp)
 
-	return nil, nil
+	return nil
 }
 
 func (cp *Codeplug) AllExts() []string {
@@ -382,33 +386,33 @@ func (cp *Codeplug) Revert(ignoreError bool) error {
 
 // Save stores the state of the Codeplug into its file
 // An error may be returned if the codeplug state is invalid.
-func (cp *Codeplug) Save(ignoreWarning bool) (warning error, err error) {
+func (cp *Codeplug) Save(ignoreWarning bool) error {
 	return cp.SaveAs(cp.filename, ignoreWarning)
 }
 
 // SaveAs saves the state of the Codeplug into a named file.
 // An error will be returned if the codeplug state is invalid.
 // The named file becomes the current file associated with the codeplug.
-func (cp *Codeplug) SaveAs(filename string, ignoreWarning bool) (warning error, err error) {
-	warning, err = cp.SaveToFile(filename, ignoreWarning)
-	if warning != nil || err != nil {
-		return warning, err
+func (cp *Codeplug) SaveAs(filename string, ignoreWarning bool) error {
+	err := cp.SaveToFile(filename, ignoreWarning)
+	if err != nil {
+		return err
 	}
 
 	cp.filename = filename
 	cp.changed = false
 	cp.hash = sha256.Sum256(cp.bytes)
 
-	return nil, nil
+	return nil
 }
 
 // SaveToFile saves the state of the Codeplug into a named file.
 // An error will be returned if the codeplug state is invalid.
 // The state of the codeplug is not changed, so this
 // is useful for use by an autosave function.
-func (cp *Codeplug) SaveToFile(filename string, ignoreWarning bool) (warning error, err error) {
-	if warning := cp.valid(); warning != nil {
-		return warning, nil
+func (cp *Codeplug) SaveToFile(filename string, ignoreWarning bool) error {
+	if err := cp.valid(); err != nil {
+		return Warning{err}
 	}
 
 	cp.setTimeStamp(time.Now())
@@ -418,19 +422,19 @@ func (cp *Codeplug) SaveToFile(filename string, ignoreWarning bool) (warning err
 	dir, base := filepath.Split(filename)
 	tmpFile, err := ioutil.TempFile(dir, base)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	if err = cp.write(tmpFile); err != nil {
 		os.Remove(tmpFile.Name())
-		return nil, err
+		return err
 	}
 
 	if err := os.Rename(tmpFile.Name(), filename); err != nil {
-		return nil, err
+		return err
 	}
 
-	return nil, err
+	return err
 }
 
 func (cp *Codeplug) setTimeStamp(t time.Time) {
@@ -1343,7 +1347,7 @@ func (cp *Codeplug) ImportFrom(filename string) error {
 	}
 	dprint("filename", filename)
 
-	_, err = cp.Load(model, filename, false)
+	err = cp.Load(model, filename, false)
 	if err != nil {
 		return err
 	}
