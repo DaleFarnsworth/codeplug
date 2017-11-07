@@ -381,7 +381,7 @@
       "type": "BiModel",
       "bitOffset": 2344,
       "bitSize": 64,
-      "valueType": "ascii"
+      "valueType": "model"
     },
     {
       "typeName": "Codeplug Model Name",

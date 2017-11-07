@@ -153,7 +153,6 @@ const (
 
 // The value types a field may contain
 const (
-	VtAscii           ValueType = "ascii"
 	VtBiFilename      ValueType = "biFilename"
 	VtBiFrequency     ValueType = "biFrequency"
 	VtCallID          ValueType = "callID"
@@ -166,6 +165,7 @@ const (
 	VtIntroLine       ValueType = "introLine"
 	VtListIndex       ValueType = "listIndex"
 	VtMemberListIndex ValueType = "memberListIndex"
+	VtModel           ValueType = "model"
 	VtName            ValueType = "name"
 	VtOffOn           ValueType = "offOn"
 	VtOnOff           ValueType = "onOff"
@@ -182,8 +182,6 @@ const (
 // newValue returns a new value of the given ValueType
 func newValue(vt ValueType) value {
 	switch vt {
-	case VtAscii:
-		return new(ascii)
 	case VtBiFilename:
 		return new(biFilename)
 	case VtBiFrequency:
@@ -208,6 +206,8 @@ func newValue(vt ValueType) value {
 		return new(listIndex)
 	case VtMemberListIndex:
 		return new(memberListIndex)
+	case VtModel:
+		return new(model)
 	case VtName:
 		return new(name)
 	case VtOffOn:
@@ -650,7 +650,7 @@ var fiBiModel = fieldInfo{
 	max:       1,
 	bitOffset: 2344,
 	bitSize:   64,
-	valueType: VtAscii,
+	valueType: VtModel,
 }
 
 var fiBiNewFilename_md380 = fieldInfo{

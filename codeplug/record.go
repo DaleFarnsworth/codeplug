@@ -563,7 +563,9 @@ func (r *Record) FindFieldByName(fType FieldType, name string) *Field {
 	return nil
 }
 
-func updateDeferredFields(records []*Record) (error, *Field) {
+func updateDeferredFields(records []*Record) error {
+	var warning error
+
 	for _, r := range records {
 		for _, fType := range r.FieldTypes() {
 			for _, f := range r.Fields(fType) {
@@ -572,12 +574,12 @@ func updateDeferredFields(records []*Record) (error, *Field) {
 					f.value = dValue.value
 					err := f.setString(dValue.str)
 					if err != nil {
-						f.value = dValue
-						return err, f
+						warning = appendWarningMsgs(warning, dValue.pos, err)
 					}
 				}
 			}
 		}
 	}
-	return nil, nil
+
+	return warning
 }

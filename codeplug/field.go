@@ -1371,7 +1371,7 @@ func (v *memberListIndex) setString(f *Field, s string) error {
 			}
 		}
 	}
-	return fmt.Errorf("memberListIndex.setString: bad list entry name")
+	return fmt.Errorf("bad record name")
 }
 
 // listIndex is a field value representing an index into a slice of records
@@ -1417,7 +1417,7 @@ func (v *listIndex) setString(f *Field, s string) error {
 			return nil
 		}
 	}
-	return fmt.Errorf("listIndex.setString: bad list entry name")
+	return fmt.Errorf("bad record name")
 }
 
 // valid returns nil if the listIndex's value is valid.
@@ -1453,6 +1453,33 @@ func (v *listIndex) load(f *Field) {
 // store stores the listIndex's value into its bits in cp.bytes.
 func (v *listIndex) store(f *Field) {
 	f.storeBytes(intToBytes(int(*v), f.size()))
+}
+
+// model is a field value representing a codeplug model name
+type model struct {
+	ascii
+}
+
+// String returns the ascii's value as a string.
+func (v *model) getString(f *Field) string {
+	s := v.ascii.getString(f)
+
+	cpi := f.record.codeplug.codeplugInfo
+	if len(cpi.Models) > 1 && s == cpi.Models[1] {
+		s = cpi.Models[0]
+	}
+
+	return s
+}
+
+// setString sets the ascii's value from a string.
+func (v *model) setString(f *Field, s string) error {
+	cpi := f.record.codeplug.codeplugInfo
+	if len(cpi.Models) > 1 && s == cpi.Models[0] {
+		s = cpi.Models[1]
+	}
+
+	return v.ascii.setString(f, s)
 }
 
 // ascii is a field value representing a ASCII string.

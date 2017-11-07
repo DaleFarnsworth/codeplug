@@ -51,11 +51,14 @@ const (
 	FileTypeNone FileType = iota
 	FileTypeRdt
 	FileTypeBin
+	FileTypeNew
+	FileTypeText
 )
 
 // A Codeplug represents a codeplug file.
 type Codeplug struct {
 	filename      string
+	textFilename  string
 	fileType      FileType
 	rdtSize       int
 	fileSize      int
@@ -84,35 +87,56 @@ type CodeplugInfo struct {
 }
 
 // NewCodeplug returns a Codeplug, given a filename and codeplug type.
-func NewCodeplug(filename string) (*Codeplug, error) {
+func NewCodeplug(fType FileType, filename string) (*Codeplug, error) {
 	cp := new(Codeplug)
+	cp.fileType = fType
 
-	cp.fileType = FileTypeNone
-	if filename != "." {
+	switch fType {
+	case FileTypeNone:
 		err := cp.findFileType(filename)
 		if err != nil {
 			return nil, err
 		}
-	} else {
+		if cp.fileType == FileTypeRdt {
+			err = cp.read(filename)
+			if err != nil {
+				cp.fileType = FileTypeNone
+				return nil, err
+			}
+		}
+
+	case FileTypeText:
+		cp.textFilename = filename
+		fallthrough
+
+	case FileTypeNew:
 		baseName := "codeplug"
-	nextName:
 		for i := 1; ; i++ {
 			filename = fmt.Sprintf("%s%d", baseName, i)
 
+			found := false
 			for _, cp := range codeplugs {
 				if strings.HasPrefix(cp.filename, filename) {
-					continue nextName
+					found = true
+					break
 				}
 			}
-
-			matches, err := filepath.Glob(filename + "*")
-			if err != nil {
-				log.Fatal(err.Error())
+			if !found {
+				matches, err := filepath.Glob(filename + "*")
+				if err != nil {
+					log.Fatal(err.Error())
+				}
+				if len(matches) != 0 {
+					found = true
+					break
+				}
 			}
-			if len(matches) == 0 {
+			if !found {
 				break
 			}
 		}
+	default:
+		log.Fatal("unknown file type")
 	}
 
 	cp.filename = filename
@@ -126,13 +150,6 @@ func NewCodeplug(filename string) (*Codeplug, error) {
 		return nil, err
 	}
 
-	if cp.fileType == FileTypeRdt {
-		err = cp.read()
-		if err != nil {
-			return nil, err
-		}
-	}
-
 	return cp, nil
 }
 
@@ -140,38 +157,73 @@ type Warning struct {
 	error
 }
 
-func (cp *Codeplug) Load(model string, filename string, ignoreWarning bool) error {
+func (cp *Codeplug) Load(model string, variant string, ignoreWarning bool) error {
+	notFound := fmt.Errorf("codeplug type not found: %s", model)
+
 	found := false
+findCodeplugInfo:
 	for _, cpi := range codeplugInfos {
 		for _, cpiModel := range cpi.Models {
 			if cpiModel == model {
 				cp.codeplugInfo = cpi
 				found = true
+				break findCodeplugInfo
+			}
+		}
+	}
+	if !found {
+		return notFound
+	}
+
+	switch cp.fileType {
+	case FileTypeNew, FileTypeText:
+		var filename string
+		for i, v := range cp.variants() {
+			if v == variant {
+				filename = cp.newFilenames()[i]
 				break
 			}
 		}
-	}
-
-	if !found {
-		return fmt.Errorf("Codeplug type not found: %s", model)
-	}
-
-	if cp.fileType != FileTypeRdt {
-		err := cp.ReadNew(filename)
+		if filename == "" {
+			return notFound
+		}
+		err := cp.readNew(filename)
 		if err != nil {
 			return err
 		}
-		if cp.fileType != FileTypeNone {
-			err = cp.read()
-			if err != nil {
-				return err
-			}
+
+	case FileTypeRdt, FileTypeBin:
+		err := cp.read(cp.filename)
+		if err != nil {
+			return err
 		}
 	}
 
 	err := cp.Revert(ignoreWarning)
-	if err != nil && !ignoreWarning {
-		return Warning{err}
+	if err != nil {
+		return err
+	}
+
+	switch cp.fileType {
+	case FileTypeText:
+		for _, rType := range cp.RecordTypes() {
+			if cp.MaxRecords(rType) == 1 {
+				continue
+			}
+			records := cp.records(rType)
+			for i := len(records) - 1; i >= 0; i-- {
+				cp.RemoveRecord(records[i])
+			}
+		}
+
+		err := cp.importFrom(cp.textFilename, ignoreWarning)
+		if _, warning := err.(Warning); warning && ignoreWarning {
+			err = nil
+		}
+
+		if err != nil {
+			return err
+		}
 	}
 
 	codeplugs = append(codeplugs, cp)
@@ -196,53 +248,60 @@ func (cp *Codeplug) Ext() string {
 	return cp.codeplugInfo.Ext
 }
 
-// ModelsVariantsFiles returns the potential codeplug model, variant
-// and file names for codeplug's file.
-func (cp *Codeplug) ModelsVariantsFiles() (models []string, variants map[string][]string, filenames map[string][]string) {
+// ModelsVariants returns the potential codeplug model and variant
+// the codeplug's file.
+func (cp *Codeplug) ModelsVariants() (models []string, variants map[string][]string) {
 	models = make([]string, 0)
 	variants = make(map[string][]string)
-	filenames = make(map[string][]string)
+	var model string
+	var variant string
 
-	noCodeplug := false
-	if cp == nil {
-		noCodeplug = true
-		cp, _ = NewCodeplug(".")
-	}
+	switch cp.fileType {
+	case FileTypeRdt:
 
-	if len(cp.bytes) == 0 {
+	case FileTypeText:
+		model, variant = parseModelVariant(cp.textFilename)
+		fallthrough
+	default:
 		cp.bytes = make([]byte, codeplugInfos[0].RdtSize)
 	}
 
 	for _, cpi := range codeplugInfos {
 		cp.codeplugInfo = cpi
 		cp.loadHeader()
-		model := cpi.Models[0]
-		variants[model] = cp.Variants()
-		filenames[model] = cp.NewFilenames()
-		if cpi.RdtSize != cp.rdtSize {
-			models = append(models, model)
-			continue
+		mainModel := cpi.Models[0]
+		variants[mainModel] = cp.variants()
+
+		if cp.fileType == FileTypeRdt {
+			if cpi.RdtSize != cp.rdtSize {
+				models = append(models, model)
+				continue
+			}
+			model = cp.Model()
+			variant = cp.Variant()
 		}
-		model = cp.Model()
+
 		for _, cpiModel := range cpi.Models {
 			if cpiModel == model {
-				model := cpi.Models[0]
-				models = []string{model}
-				variants[model] = []string{cp.Variant()}
-				filenames[model] = []string{cp.NewFilename()}
-				return models, variants, filenames
+				models = []string{mainModel}
+				for _, v := range variants[mainModel] {
+					if v == variant {
+						variants[mainModel] = []string{v}
+					}
+				}
+				return models, variants
 			}
 		}
-		models = append(models, cpi.Models[0])
+		models = append(models, mainModel)
 	}
+
+	if cp.fileType != FileTypeRdt {
+		cp.bytes = nil
+	}
+
 	cp.codeplugInfo = nil
-	cp.bytes = nil
 
-	if noCodeplug {
-		cp.Free()
-	}
-
-	return models, variants, filenames
+	return models, variants
 }
 
 func (cp *Codeplug) Model() string {
@@ -250,29 +309,35 @@ func (cp *Codeplug) Model() string {
 	return (*fDescs)[FieldType("Model")].fields[0].String()
 }
 
-func (cp *Codeplug) Models() []string {
-	models, _, _ := cp.ModelsVariantsFiles()
-	return models
-}
-
 func (cp *Codeplug) Variant() string {
 	fDescs := cp.rDesc[RecordType("BasicInformation")].records[0].fDesc
 	return (*fDescs)[FieldType("Variant")].fields[0].String()
 }
 
-func (cp *Codeplug) Variants() []string {
-	fDescs := cp.rDesc[RecordType("BasicInformation")].records[0].fDesc
-	return *(*fDescs)[FieldType("Variant")].fieldInfo.strings
+func (cp *Codeplug) variants() []string {
+	for _, rInfo := range cp.codeplugInfo.RecordInfos {
+		if rInfo.rType == "BasicInformation" {
+			for _, fInfo := range rInfo.fieldInfos {
+				if fInfo.fType == "Variant" {
+					return *fInfo.strings
+				}
+			}
+		}
+	}
+	return nil
 }
 
-func (cp *Codeplug) NewFilename() string {
-	fDescs := cp.rDesc[RecordType("BasicInformation")].records[0].fDesc
-	return (*fDescs)[FieldType("NewFilename")].fields[0].String()
-}
-
-func (cp *Codeplug) NewFilenames() []string {
-	fDescs := cp.rDesc[RecordType("BasicInformation")].records[0].fDesc
-	return *(*fDescs)[FieldType("NewFilename")].fieldInfo.strings
+func (cp *Codeplug) newFilenames() []string {
+	for _, rInfo := range cp.codeplugInfo.RecordInfos {
+		if rInfo.rType == "BasicInformation" {
+			for _, fInfo := range rInfo.fieldInfos {
+				if fInfo.fType == "NewFilename" {
+					return *fInfo.strings
+				}
+			}
+		}
+	}
+	return nil
 }
 
 func (cp *Codeplug) Type() string {
@@ -297,7 +362,7 @@ func (cp *Codeplug) Free() {
 	}
 }
 
-func (cp *Codeplug) ReadNew(filename string) error {
+func (cp *Codeplug) readNew(filename string) error {
 	gzipped := bytes.NewReader(new_tgz)
 
 	archive, err := gzip.NewReader(gzipped)
@@ -336,8 +401,8 @@ func (cp *Codeplug) ReadNew(filename string) error {
 }
 
 // read opens a file and reads its contents into cp.bytes.
-func (cp *Codeplug) read() error {
-	file, err := os.Open(cp.filename)
+func (cp *Codeplug) read(filename string) error {
+	file, err := os.Open(filename)
 	if err != nil {
 		return err
 	}
@@ -350,13 +415,11 @@ func (cp *Codeplug) read() error {
 
 	bytesRead, err := file.Read(bytes)
 	if err != nil {
-		cp.fileType = FileTypeNone
 		return err
 	}
 
 	if bytesRead != cp.fileSize {
-		cp.fileType = FileTypeNone
-		err = fmt.Errorf("Failed to read all of %s", cp.filename)
+		err = fmt.Errorf("Failed to read all of %s", filename)
 		return err
 	}
 
@@ -366,12 +429,12 @@ func (cp *Codeplug) read() error {
 // Revert reverts the codeplug to its state after the most recent open or
 // save operation.  An error is returned if the new codeplug state is
 // invalid.
-func (cp *Codeplug) Revert(ignoreError bool) error {
+func (cp *Codeplug) Revert(ignoreWarning bool) error {
 	cp.clearCachedListNames()
 
 	cp.load()
 
-	if err := cp.valid(); err != nil && !ignoreError {
+	if err := cp.valid(); err != nil && !ignoreWarning {
 		return err
 	}
 
@@ -669,7 +732,7 @@ func (cp *Codeplug) valid() error {
 	}
 
 	if errStr != "" {
-		return fmt.Errorf("%s", errStr)
+		return Warning{fmt.Errorf("%s", errStr)}
 	}
 
 	return nil
@@ -687,17 +750,16 @@ func (cp *Codeplug) findFileType(filename string) error {
 	}
 
 	for _, cpi := range codeplugInfos {
+		cp.rdtSize = cpi.RdtSize
 		switch fileInfo.Size() {
 		case int64(cpi.RdtSize):
 			cp.fileType = FileTypeRdt
-			cp.rdtSize = cpi.RdtSize
 			cp.fileSize = cpi.RdtSize
 			cp.fileOffset = 0
 			return nil
 
 		case int64(cpi.BinSize):
 			cp.fileType = FileTypeBin
-			cp.rdtSize = cpi.RdtSize
 			cp.fileSize = cpi.BinSize
 			cp.fileOffset = cpi.BinOffset
 			return nil
@@ -705,7 +767,7 @@ func (cp *Codeplug) findFileType(filename string) error {
 	}
 
 	cp.fileType = FileTypeNone
-	err = fmt.Errorf("%s is not a known rdt or bin file", filename)
+	err = fmt.Errorf("%s is not a known codeplug file type", filename)
 	return err
 }
 
@@ -1006,20 +1068,26 @@ func (e *PositionError) Column() int {
 	return e.position.column + 1
 }
 
-func parseModelVariant(iRdr io.Reader) (model string, variant string, err error) {
-	errNotFound := fmt.Errorf("model and/or variant not found")
-	rdr := NewReader(iRdr)
+func parseModelVariant(filename string) (model string, variant string) {
+	file, err := os.Open(filename)
+	if err != nil {
+		return model, variant
+	}
+	defer file.Close()
+
+	rdr := NewReader(file)
 
 	rdr.ReadWhile(unicode.IsSpace)
 
 	if rdr.pos.column != 0 {
-		return model, variant, errNotFound
+		return model, variant
 	}
 
+newRecord:
 	for {
 		rName, _, err := parseName(rdr)
 		if err != nil {
-			return model, variant, errNotFound
+			break
 		}
 		for {
 			if rdr.pos.column == 0 {
@@ -1027,12 +1095,12 @@ func parseModelVariant(iRdr io.Reader) (model string, variant string, err error)
 			}
 			fName, _, err := parseName(rdr)
 			if err != nil {
-				return model, variant, errNotFound
+				break newRecord
 			}
 
 			value, err := parseValue(rdr)
 			if err != nil {
-				return model, variant, errNotFound
+				break newRecord
 			}
 			if rName == "BasicInformation" {
 				switch fName {
@@ -1044,18 +1112,20 @@ func parseModelVariant(iRdr io.Reader) (model string, variant string, err error)
 					continue
 				}
 				if model != "" && variant != "" {
-					return model, variant, nil
+					return model, variant
 				}
 			}
 		}
 	}
 
-	return model, variant, errNotFound
+	return model, variant
 }
 
 func (cp *Codeplug) ParseRecords(iRdr io.Reader) ([]*Record, error) {
+	var warning error
 	var err error
 	var pos position
+
 	rdr := NewReader(iRdr)
 	records := []*Record{}
 
@@ -1130,8 +1200,7 @@ parseRecord:
 			var f *Field
 			f, err = r.NewFieldWithValue(fType, index, str)
 			if err != nil {
-				err = fmt.Errorf("bad value: %s: %s: %s", f.typeName, str, err.Error())
-				break parseRecord
+				warning = appendWarningMsgs(warning, pos, err)
 			}
 			dValue, ok := f.value.(deferredValue)
 			if ok {
@@ -1148,18 +1217,32 @@ parseRecord:
 		records = append(records, r)
 	}
 
-	if err == nil {
+	if err != nil {
+		pErr, ok := err.(PositionError)
+		if !ok {
+			pErr = PositionError{
+				position: &pos,
+				error:    err,
+			}
+		}
+		return records, pErr
+	}
+
+	if warning == nil {
 		return records, nil
 	}
 
-	pErr, ok := err.(PositionError)
-	if !ok {
-		pErr = PositionError{
-			position: &pos,
-			error:    err,
-		}
+	return records, warning
+}
+
+func appendWarningMsgs(oldError error, pos position, newError error) error {
+	var oldMsg string
+	if oldError != nil {
+		oldMsg = oldError.Error()
 	}
-	return records, pErr
+	err := fmt.Errorf("%s%d:%d: %s\n", oldMsg, pos.line+1,
+		pos.column+1, newError.Error())
+	return Warning{err}
 }
 
 func parseName(rdr *reader) (string, int, error) {
@@ -1280,12 +1363,12 @@ func (cp *Codeplug) nameToRecord(name string, index int) (*Record, error) {
 			break
 		}
 	}
-	if !found {
-		name := string(rType)
-		return nil, fmt.Errorf("codeplug has no record: %s", name)
+	if found {
+		return cp.newRecord(rType, index), nil
 	}
 
-	return cp.newRecord(rType, index), nil
+	name = string(rType)
+	return nil, fmt.Errorf("codeplug has no record: %s", name)
 }
 
 func (cp *Codeplug) ExportTo(filename string) (err error) {
@@ -1318,50 +1401,15 @@ func (cp *Codeplug) clearCachedListNames() {
 	}
 }
 
-func (cp *Codeplug) ImportFrom(filename string) error {
+func (cp *Codeplug) importFrom(filename string, ignoreWarning bool) error {
 	file, err := os.Open(filename)
 	if err != nil {
 		return err
 	}
 	defer file.Close()
 
-	model, variant, err := parseModelVariant(file)
-	if err != nil {
-		return err
-	}
-	dprint("model", model, "variant", variant)
-
-	_, variantsMap, filesMap := cp.ModelsVariantsFiles()
-	variants := variantsMap[model]
-	if variants == nil {
-		return fmt.Errorf("bad model: %s", model)
-	}
-	for i, v := range variants {
-		if v == variant {
-			filename = filesMap[model][i]
-			break
-		}
-	}
-	if filename == "" {
-		return fmt.Errorf("bad model variant: %s", variant)
-	}
-	dprint("filename", filename)
-
-	err = cp.Load(model, filename, false)
-	if err != nil {
-		return err
-	}
-
-	for _, rType := range cp.RecordTypes() {
-		records := cp.rDesc[rType].records
-		for i := len(records) - 1; i >= 0; i-- {
-			cp.RemoveRecord(records[i])
-		}
-	}
-
-	file.Seek(0, 0)
 	records, err := cp.ParseRecords(file)
-	if err != nil {
+	if err != nil && !ignoreWarning {
 		return err
 	}
 
@@ -1370,20 +1418,19 @@ func (cp *Codeplug) ImportFrom(filename string) error {
 		cp.InsertRecord(r)
 	}
 
-	err, f := updateDeferredFields(records)
-	if err != nil {
-		dValue := f.value.(deferredValue)
-		pErr := PositionError{
-			position: &dValue.pos,
-			error:    fmt.Errorf("no %s: %s", f.typeName, dValue.str),
-		}
-		return pErr
+	derr := updateDeferredFields(records)
+	if derr != nil {
+		err = Warning{fmt.Errorf("%s%s", err.Error(), derr.Error())}
+	}
+
+	if err != nil && !ignoreWarning {
+		return err
 	}
 
 	for _, rd := range cp.rDesc {
 		if len(rd.records) == 0 {
 			rtName := string(rd.rType)
-			err := fmt.Errorf("no %s records found", rtName)
+			err := Warning{fmt.Errorf("no %s records found", rtName)}
 			return err
 		}
 	}
