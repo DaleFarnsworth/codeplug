@@ -846,6 +846,14 @@ func PrintRecord(w io.Writer, r *Record) {
 	fmt.Fprintf(w, "%s%s:\n", string(rType), ind)
 
 	for _, fType := range r.FieldTypes() {
+		if string(rType) == "BasicInformation" {
+			switch string(fType) {
+			case "CpsVersion", "NewFilename":
+				continue
+			case "LowFrequency", "HighFrequency":
+				continue
+			}
+		}
 		name := string(fType)
 		for _, f := range r.Fields(fType) {
 			value := quoteString(f.String())
