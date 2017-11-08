@@ -344,7 +344,7 @@ var riBasicInformation_md40 = recordInfo{
 	typeName: "Basic Information",
 	max:      1,
 	offset:   0,
-	size:     8805,
+	size:     549,
 	fieldInfos: []*fieldInfo{
 		&fiBiModel,
 		&fiBiVariant_md40,
@@ -480,8 +480,8 @@ var riGeneralSettings_md40 = recordInfo{
 	rType:    RtGeneralSettings_md40,
 	typeName: "General Settings",
 	max:      1,
-	offset:   8742,
-	size:     383,
+	offset:   8805,
+	size:     144,
 	fieldInfos: []*fieldInfo{
 		&fiGsIntroScreenLine1,
 		&fiGsIntroScreenLine2,

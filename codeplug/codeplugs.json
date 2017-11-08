@@ -113,7 +113,7 @@
       "typeName": "Basic Information",
       "type": "BasicInformation_md40",
       "offset": 0,
-      "size": 8805,
+      "size": 549,
       "fieldTypes": [
         "BiModel",
         "BiVariant_md40",
@@ -164,8 +164,8 @@
     {
       "typeName": "General Settings",
       "type": "GeneralSettings_md40",
-      "offset": 8742,
-      "size": 383,
+      "offset": 8805,
+      "size": 144,
       "fieldTypes": [
         "GsIntroScreenLine1",
         "GsIntroScreenLine2",
