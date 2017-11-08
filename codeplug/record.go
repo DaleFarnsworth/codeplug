@@ -117,6 +117,10 @@ func (r *Record) NewField(fType FieldType) *Field {
 					break
 				}
 			}
+			if fd == nil {
+				// bad field type
+				fd = &fDesc{r.rDesc.fieldInfos[0], r, make([]*Field, 0)}
+			}
 			fd.record = r
 			fd.fields = make([]*Field, 0)
 			(*r.fDesc)[fType] = fd

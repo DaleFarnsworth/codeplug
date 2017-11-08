@@ -1194,8 +1194,8 @@ parseRecord:
 			pos = rdr.pos
 			fType, ok := nameToFt[r.rType][name]
 			if !ok {
-				err = fmt.Errorf("bad field name: %s", name)
-				break parseRecord
+				err = fmt.Errorf("bad field name")
+				warning = appendWarningMsgs(warning, pos, err)
 			}
 
 			var str string
@@ -1207,7 +1207,7 @@ parseRecord:
 			}
 			var f *Field
 			f, err = r.NewFieldWithValue(fType, index, str)
-			if err != nil {
+			if err != nil && ok {
 				warning = appendWarningMsgs(warning, pos, err)
 			}
 			dValue, ok := f.value.(deferredValue)
