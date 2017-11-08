@@ -226,9 +226,9 @@
       "max": 1000,
       "delDescs": [
         {
-          "offset": 4,
-          "size": 2,
-          "value": 0
+          "offset": 3,
+          "size": 1,
+          "value": 192
         }
       ],
       "fieldTypes": [
