@@ -503,7 +503,7 @@ func (cp *Codeplug) SaveToFile(filename string, ignoreWarning bool) error {
 func (cp *Codeplug) setTimeStamp(t time.Time) {
 	r := cp.rDesc[RecordType("GeneralSettings")].records[0]
 	f := r.Field(FieldType("TimeStamp"))
-	f.setString(t.Format("20060102150405"))
+	f.setString(t.Format("Monday, 02-Jan-06 15:04:05"))
 }
 
 // Filename returns the path name of the file associated with the codeplug.

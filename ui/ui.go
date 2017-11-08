@@ -798,6 +798,26 @@ func (parent *Form) addFieldRow(r *codeplug.Record, fType codeplug.FieldType) {
 
 }
 
+func (parent *Form) AddReadOnlyFieldRows(r *codeplug.Record, fTypes ...codeplug.FieldType) {
+	for _, fType := range fTypes {
+		parent.addReadOnlyFieldRow(r, fType)
+	}
+}
+
+func (parent *Form) addReadOnlyFieldRow(r *codeplug.Record, fType codeplug.FieldType) {
+	f := r.Field(fType)
+	if f == nil {
+		// This is not an error because some forms are used for
+		// multiple models. We just ignore non-existent fields.
+		return
+	}
+
+	w := newFieldLineEdit(f)
+	w.label = widgets.NewQLabel2(f.TypeName(), nil, 0)
+	w.SetReadOnly(true)
+	parent.layout.AddRow(w.label, w.qWidget)
+}
+
 func setEnabled(w *Widget, f *codeplug.Field) {
 	enabled := f.IsEnabled()
 	qWidget := w.qWidget.QWidget_PTR()
@@ -879,6 +899,55 @@ func (w *Widget) SetEnabled(b bool) {
 	}
 }
 
+func (w *Widget) SetReadOnly(b bool) {
+	qw := w.qWidget
+
+	switch qw.(type) {
+	case *widgets.QSpinBox:
+		qw.(*widgets.QSpinBox).SetReadOnly(b)
+
+	case *widgets.QLineEdit:
+		qw.(*widgets.QLineEdit).SetReadOnly(b)
+
+	default:
+		log.Fatal("SetReadOnly(): unexpected widget type")
+	}
+}
+
+func (w *Widget) Width() int {
+	qw := w.qWidget
+
+	var width int
+
+	switch qw.(type) {
+	case *widgets.QSpinBox:
+		width = qw.(*widgets.QSpinBox).Width()
+
+	case *widgets.QLineEdit:
+		width = qw.(*widgets.QLineEdit).Width()
+
+	default:
+		log.Fatal("SetMinimumWidth(): unexpected widget type")
+	}
+
+	return width
+}
+
+func (w *Widget) SetMinimumWidth(width int) {
+	qw := w.qWidget
+
+	switch qw.(type) {
+	case *widgets.QSpinBox:
+		qw.(*widgets.QSpinBox).SetMinimumWidth(width)
+
+	case *widgets.QLineEdit:
+		qw.(*widgets.QLineEdit).SetMinimumWidth(width)
+
+	default:
+		log.Fatal("SetMinimumWidth(): unexpected widget type")
+	}
+}
+
 func setQCheckBox(cb *widgets.QCheckBox, f *codeplug.Field) {
 	checkState := core.Qt__Unchecked
 	if f.String() == "On" {
@@ -910,10 +979,13 @@ func newFieldCheckbox(f *codeplug.Field) *Widget {
 }
 
 func newFieldLineEdit(f *codeplug.Field) *Widget {
-	qw := widgets.NewQLineEdit2(f.String(), nil)
+	s := f.String()
+	qw := widgets.NewQLineEdit2(s, nil)
 	widget := new(Widget)
 	widget.qWidget = qw
 	widget.field = f
+	metrics := gui.NewQFontMetrics(widgets.QApplication_Font())
+	widget.SetMinimumWidth(metrics.Width(s, -1) + 12)
 
 	var finished func()
 	finished = func() {

@@ -646,7 +646,7 @@ var fiBiLowFrequency = fieldInfo{
 
 var fiBiModel = fieldInfo{
 	fType:     FtBiModel,
-	typeName:  "Codeplug Model",
+	typeName:  "Model Name",
 	max:       1,
 	bitOffset: 2344,
 	bitSize:   64,
@@ -700,7 +700,7 @@ var fiBiNewFilename_md40 = fieldInfo{
 
 var fiBiTimeStamp = fieldInfo{
 	fType:     FtBiTimeStamp,
-	typeName:  "Time Stamp",
+	typeName:  "Last Programmed Date",
 	max:       1,
 	bitOffset: 69936,
 	bitSize:   56,
@@ -709,7 +709,7 @@ var fiBiTimeStamp = fieldInfo{
 
 var fiBiVariant_md380 = fieldInfo{
 	fType:     FtBiVariant_md380,
-	typeName:  "Codeplug Model Name",
+	typeName:  "Frequency Range",
 	max:       1,
 	bitOffset: 2480,
 	bitSize:   8,
@@ -724,7 +724,7 @@ var fiBiVariant_md380 = fieldInfo{
 
 var fiBiVariant_md390 = fieldInfo{
 	fType:     FtBiVariant_md390,
-	typeName:  "Codeplug Model Name",
+	typeName:  "Frequency Range",
 	max:       1,
 	bitOffset: 2480,
 	bitSize:   8,
@@ -739,7 +739,7 @@ var fiBiVariant_md390 = fieldInfo{
 
 var fiBiVariant_md40 = fieldInfo{
 	fType:     FtBiVariant_md40,
-	typeName:  "Codeplug Model Name",
+	typeName:  "Frequency Range",
 	max:       1,
 	bitOffset: 2480,
 	bitSize:   8,

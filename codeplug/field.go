@@ -32,6 +32,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 	"unicode/utf8"
 )
 
@@ -1529,16 +1530,18 @@ type timeStamp string
 
 // String returns the timeStamp's value as a string.
 func (v *timeStamp) getString(f *Field) string {
-	return string(*v)
+	t, _ := time.Parse("20060102150405", string(*v))
+	return t.Format("Monday, 02-Jan-06 15:04:05")
 }
 
 // SetString sets the timeStamp's value from a string.
 func (v *timeStamp) setString(f *Field, s string) error {
-	if len(s) != f.size()*2 {
-		return fmt.Errorf("bad string length")
+	t, err := time.Parse("Monday, 02-Jan-06 15:04:05", s)
+	if err != nil {
+		return err
 	}
 
-	*v = timeStamp(s)
+	*v = timeStamp(t.Format("20060102150405"))
 
 	return nil
 }

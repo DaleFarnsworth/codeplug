@@ -377,14 +377,14 @@
   ],
   "fields": [
     {
-      "typeName": "Codeplug Model",
+      "typeName": "Model Name",
       "type": "BiModel",
       "bitOffset": 2344,
       "bitSize": 64,
       "valueType": "model"
     },
     {
-      "typeName": "Codeplug Model Name",
+      "typeName": "Frequency Range",
       "type": "BiVariant_md380",
       "bitOffset": 2480,
       "bitSize": 8,
@@ -410,7 +410,7 @@
       ]
     },
     {
-      "typeName": "Codeplug Model Name",
+      "typeName": "Frequency Range",
       "type": "BiVariant_md390",
       "bitOffset": 2480,
       "bitSize": 8,
@@ -436,7 +436,7 @@
       ]
     },
     {
-      "typeName": "Codeplug Model Name",
+      "typeName": "Frequency Range",
       "type": "BiVariant_md40",
       "bitOffset": 2480,
       "bitSize": 8,
@@ -476,7 +476,7 @@
       "valueType": "biFrequency"
     },
     {
-      "typeName": "Time Stamp",
+      "typeName": "Last Programmed Date",
       "type": "BiTimeStamp",
       "bitOffset": 69936,
       "bitSize": 56,
