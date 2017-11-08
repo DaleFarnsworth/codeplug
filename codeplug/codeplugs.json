@@ -90,7 +90,7 @@
         "BiNewFilename_md380",
         "BiLowFrequency",
         "BiHighFrequency",
-        "BiTimeStamp",
+        "BiLastProgrammedTime",
         "BiCpsVersion"
       ]
     },
@@ -105,7 +105,7 @@
         "BiNewFilename_md390",
         "BiLowFrequency",
         "BiHighFrequency",
-        "BiTimeStamp",
+        "BiLastProgrammedTime",
         "BiCpsVersion"
       ]
     },
@@ -120,7 +120,7 @@
         "BiNewFilename_md40",
         "BiLowFrequency",
         "BiHighFrequency",
-        "BiTimeStamp",
+        "BiLastProgrammedTime",
         "BiCpsVersion"
       ]
     },
@@ -476,8 +476,8 @@
       "valueType": "biFrequency"
     },
     {
-      "typeName": "Last Programmed Date",
-      "type": "BiTimeStamp",
+      "typeName": "Last Programmed Time",
+      "type": "BiLastProgrammedTime",
       "bitOffset": 69936,
       "bitSize": 56,
       "valueType": "timeStamp"

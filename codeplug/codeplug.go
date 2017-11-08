@@ -478,7 +478,7 @@ func (cp *Codeplug) SaveToFile(filename string, ignoreWarning bool) error {
 		return Warning{err}
 	}
 
-	cp.setTimeStamp(time.Now())
+	cp.setLastProgrammedTime(time.Now())
 
 	cp.store()
 
@@ -500,10 +500,10 @@ func (cp *Codeplug) SaveToFile(filename string, ignoreWarning bool) error {
 	return err
 }
 
-func (cp *Codeplug) setTimeStamp(t time.Time) {
+func (cp *Codeplug) setLastProgrammedTime(t time.Time) {
 	r := cp.rDesc[RecordType("GeneralSettings")].records[0]
-	f := r.Field(FieldType("TimeStamp"))
-	f.setString(t.Format("Monday, 02-Jan-06 15:04:05"))
+	f := r.Field(FieldType("LastProgrammedTime"))
+	f.setString(t.Format("02-Jan-06 15:04:05"))
 }
 
 // Filename returns the path name of the file associated with the codeplug.

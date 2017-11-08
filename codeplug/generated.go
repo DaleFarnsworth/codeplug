@@ -50,12 +50,12 @@ const (
 	FtBiFrequencyRange_md390    FieldType = "FrequencyRange"
 	FtBiFrequencyRange_md40     FieldType = "FrequencyRange"
 	FtBiHighFrequency           FieldType = "HighFrequency"
+	FtBiLastProgrammedTime      FieldType = "LastProgrammedTime"
 	FtBiLowFrequency            FieldType = "LowFrequency"
 	FtBiModel                   FieldType = "Model"
 	FtBiNewFilename_md380       FieldType = "NewFilename"
 	FtBiNewFilename_md390       FieldType = "NewFilename"
 	FtBiNewFilename_md40        FieldType = "NewFilename"
-	FtBiTimeStamp               FieldType = "TimeStamp"
 	FtCiAdmitCriteria           FieldType = "AdmitCriteria"
 	FtCiAllowTalkaround         FieldType = "AllowTalkaround"
 	FtCiAutoscan                FieldType = "Autoscan"
@@ -317,7 +317,7 @@ var riBasicInformation_md380 = recordInfo{
 		&fiBiNewFilename_md380,
 		&fiBiLowFrequency,
 		&fiBiHighFrequency,
-		&fiBiTimeStamp,
+		&fiBiLastProgrammedTime,
 		&fiBiCpsVersion,
 	},
 }
@@ -334,7 +334,7 @@ var riBasicInformation_md390 = recordInfo{
 		&fiBiNewFilename_md390,
 		&fiBiLowFrequency,
 		&fiBiHighFrequency,
-		&fiBiTimeStamp,
+		&fiBiLastProgrammedTime,
 		&fiBiCpsVersion,
 	},
 }
@@ -351,7 +351,7 @@ var riBasicInformation_md40 = recordInfo{
 		&fiBiNewFilename_md40,
 		&fiBiLowFrequency,
 		&fiBiHighFrequency,
-		&fiBiTimeStamp,
+		&fiBiLastProgrammedTime,
 		&fiBiCpsVersion,
 	},
 }
@@ -680,6 +680,15 @@ var fiBiHighFrequency = fieldInfo{
 	valueType: VtBiFrequency,
 }
 
+var fiBiLastProgrammedTime = fieldInfo{
+	fType:     FtBiLastProgrammedTime,
+	typeName:  "Last Programmed Time",
+	max:       1,
+	bitOffset: 69936,
+	bitSize:   56,
+	valueType: VtTimeStamp,
+}
+
 var fiBiLowFrequency = fieldInfo{
 	fType:     FtBiLowFrequency,
 	typeName:  "Low Frequency",
@@ -741,15 +750,6 @@ var fiBiNewFilename_md40 = fieldInfo{
 		"md40he_430-440.rdt",
 		"md40t_400-480.rdt",
 	},
-}
-
-var fiBiTimeStamp = fieldInfo{
-	fType:     FtBiTimeStamp,
-	typeName:  "Last Programmed Date",
-	max:       1,
-	bitOffset: 69936,
-	bitSize:   56,
-	valueType: VtTimeStamp,
 }
 
 var fiCiAdmitCriteria = fieldInfo{
