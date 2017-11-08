@@ -501,8 +501,9 @@ func (cp *Codeplug) SaveToFile(filename string, ignoreWarning bool) error {
 }
 
 func (cp *Codeplug) setLastProgrammedTime(t time.Time) {
-	r := cp.rDesc[RecordType("GeneralSettings")].records[0]
+	r := cp.rDesc[RecordType("BasicInformation")].records[0]
 	f := r.Field(FieldType("LastProgrammedTime"))
+	dprint(f)
 	f.setString(t.Format("02-Jan-06 15:04:05"))
 }
 
