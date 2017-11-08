@@ -60,7 +60,7 @@
     {
       "type": "md40",
       "models": [
-              "MD40"
+	      "DJ-MD40"
       ],
       "ext": "rdt",
       "rdtSize": 262709,

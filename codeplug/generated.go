@@ -287,7 +287,7 @@ var cpMd390 = CodeplugInfo{
 var cpMd40 = CodeplugInfo{
 	Type: "md40",
 	Models: []string{
-		"MD40",
+		"DJ-MD40",
 	},
 	Ext:       "rdt",
 	RdtSize:   262709,
