@@ -46,6 +46,9 @@ const (
 // Field types
 const (
 	FtBiCpsVersion              FieldType = "CpsVersion"
+	FtBiFrequencyRange_md380    FieldType = "FrequencyRange"
+	FtBiFrequencyRange_md390    FieldType = "FrequencyRange"
+	FtBiFrequencyRange_md40     FieldType = "FrequencyRange"
 	FtBiHighFrequency           FieldType = "HighFrequency"
 	FtBiLowFrequency            FieldType = "LowFrequency"
 	FtBiModel                   FieldType = "Model"
@@ -53,9 +56,6 @@ const (
 	FtBiNewFilename_md390       FieldType = "NewFilename"
 	FtBiNewFilename_md40        FieldType = "NewFilename"
 	FtBiTimeStamp               FieldType = "TimeStamp"
-	FtBiVariant_md380           FieldType = "Variant"
-	FtBiVariant_md390           FieldType = "Variant"
-	FtBiVariant_md40            FieldType = "Variant"
 	FtCiAdmitCriteria           FieldType = "AdmitCriteria"
 	FtCiAllowTalkaround         FieldType = "AllowTalkaround"
 	FtCiAutoscan                FieldType = "Autoscan"
@@ -313,7 +313,7 @@ var riBasicInformation_md380 = recordInfo{
 	size:     549,
 	fieldInfos: []*fieldInfo{
 		&fiBiModel,
-		&fiBiVariant_md380,
+		&fiBiFrequencyRange_md380,
 		&fiBiNewFilename_md380,
 		&fiBiLowFrequency,
 		&fiBiHighFrequency,
@@ -330,7 +330,7 @@ var riBasicInformation_md390 = recordInfo{
 	size:     549,
 	fieldInfos: []*fieldInfo{
 		&fiBiModel,
-		&fiBiVariant_md390,
+		&fiBiFrequencyRange_md390,
 		&fiBiNewFilename_md390,
 		&fiBiLowFrequency,
 		&fiBiHighFrequency,
@@ -347,7 +347,7 @@ var riBasicInformation_md40 = recordInfo{
 	size:     549,
 	fieldInfos: []*fieldInfo{
 		&fiBiModel,
-		&fiBiVariant_md40,
+		&fiBiFrequencyRange_md40,
 		&fiBiNewFilename_md40,
 		&fiBiLowFrequency,
 		&fiBiHighFrequency,
@@ -626,6 +626,51 @@ var fiBiCpsVersion = fieldInfo{
 	valueType: VtCpsVersion,
 }
 
+var fiBiFrequencyRange_md380 = fieldInfo{
+	fType:     FtBiFrequencyRange_md380,
+	typeName:  "Frequency Range",
+	max:       1,
+	bitOffset: 2480,
+	bitSize:   8,
+	valueType: VtIStrings,
+	strings: &[]string{
+		"136-174 MHz",
+		"350-400 MHz",
+		"400-480 MHz",
+		"450-520 MHz",
+	},
+}
+
+var fiBiFrequencyRange_md390 = fieldInfo{
+	fType:     FtBiFrequencyRange_md390,
+	typeName:  "Frequency Range",
+	max:       1,
+	bitOffset: 2480,
+	bitSize:   8,
+	valueType: VtIStrings,
+	strings: &[]string{
+		"136-174 MHz",
+		"350-400 MHz",
+		"400-480 MHz",
+		"450-520 MHz",
+	},
+}
+
+var fiBiFrequencyRange_md40 = fieldInfo{
+	fType:     FtBiFrequencyRange_md40,
+	typeName:  "Frequency Range",
+	max:       1,
+	bitOffset: 2480,
+	bitSize:   8,
+	valueType: VtIStrings,
+	strings: &[]string{
+		"MD40 400-480 MHz",
+		"MD40HT 420-450 MHz",
+		"MD40HE 430-440 MHz",
+		"MD40T 400-480 MHz",
+	},
+}
+
 var fiBiHighFrequency = fieldInfo{
 	fType:     FtBiHighFrequency,
 	typeName:  "High Frequency",
@@ -705,51 +750,6 @@ var fiBiTimeStamp = fieldInfo{
 	bitOffset: 69936,
 	bitSize:   56,
 	valueType: VtTimeStamp,
-}
-
-var fiBiVariant_md380 = fieldInfo{
-	fType:     FtBiVariant_md380,
-	typeName:  "Frequency Range",
-	max:       1,
-	bitOffset: 2480,
-	bitSize:   8,
-	valueType: VtIStrings,
-	strings: &[]string{
-		"136-174 MHz",
-		"350-400 MHz",
-		"400-480 MHz",
-		"450-520 MHz",
-	},
-}
-
-var fiBiVariant_md390 = fieldInfo{
-	fType:     FtBiVariant_md390,
-	typeName:  "Frequency Range",
-	max:       1,
-	bitOffset: 2480,
-	bitSize:   8,
-	valueType: VtIStrings,
-	strings: &[]string{
-		"136-174 MHz",
-		"350-400 MHz",
-		"400-480 MHz",
-		"450-520 MHz",
-	},
-}
-
-var fiBiVariant_md40 = fieldInfo{
-	fType:     FtBiVariant_md40,
-	typeName:  "Frequency Range",
-	max:       1,
-	bitOffset: 2480,
-	bitSize:   8,
-	valueType: VtIStrings,
-	strings: &[]string{
-		"MD40 400-480 MHz",
-		"MD40HT 420-450 MHz",
-		"MD40HE 430-440 MHz",
-		"MD40T 400-480 MHz",
-	},
 }
 
 var fiCiAdmitCriteria = fieldInfo{

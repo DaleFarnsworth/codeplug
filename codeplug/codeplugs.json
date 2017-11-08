@@ -86,7 +86,7 @@
       "size": 549,
       "fieldTypes": [
         "BiModel",
-        "BiVariant_md380",
+        "BiFrequencyRange_md380",
         "BiNewFilename_md380",
         "BiLowFrequency",
         "BiHighFrequency",
@@ -101,7 +101,7 @@
       "size": 549,
       "fieldTypes": [
         "BiModel",
-        "BiVariant_md390",
+        "BiFrequencyRange_md390",
         "BiNewFilename_md390",
         "BiLowFrequency",
         "BiHighFrequency",
@@ -116,7 +116,7 @@
       "size": 549,
       "fieldTypes": [
         "BiModel",
-        "BiVariant_md40",
+        "BiFrequencyRange_md40",
         "BiNewFilename_md40",
         "BiLowFrequency",
         "BiHighFrequency",
@@ -385,7 +385,7 @@
     },
     {
       "typeName": "Frequency Range",
-      "type": "BiVariant_md380",
+      "type": "BiFrequencyRange_md380",
       "bitOffset": 2480,
       "bitSize": 8,
       "valueType": "iStrings",
@@ -411,7 +411,7 @@
     },
     {
       "typeName": "Frequency Range",
-      "type": "BiVariant_md390",
+      "type": "BiFrequencyRange_md390",
       "bitOffset": 2480,
       "bitSize": 8,
       "valueType": "iStrings",
@@ -437,7 +437,7 @@
     },
     {
       "typeName": "Frequency Range",
-      "type": "BiVariant_md40",
+      "type": "BiFrequencyRange_md40",
       "bitOffset": 2480,
       "bitSize": 8,
       "valueType": "iStrings",

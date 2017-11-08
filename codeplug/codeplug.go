@@ -157,7 +157,7 @@ type Warning struct {
 	error
 }
 
-func (cp *Codeplug) Load(model string, variant string, ignoreWarning bool) error {
+func (cp *Codeplug) Load(model string, frequencyRange string, ignoreWarning bool) error {
 	notFound := fmt.Errorf("codeplug type not found: %s", model)
 
 	found := false
@@ -178,8 +178,8 @@ findCodeplugInfo:
 	switch cp.fileType {
 	case FileTypeNew, FileTypeText:
 		var filename string
-		for i, v := range cp.variants() {
-			if v == variant {
+		for i, v := range cp.frequencyRanges() {
+			if v == frequencyRange {
 				filename = cp.newFilenames()[i]
 				break
 			}
@@ -248,19 +248,19 @@ func (cp *Codeplug) Ext() string {
 	return cp.codeplugInfo.Ext
 }
 
-// ModelsVariants returns the potential codeplug model and variant
-// the codeplug's file.
-func (cp *Codeplug) ModelsVariants() (models []string, variants map[string][]string) {
+// ModelsFrequencyRanges returns the potential codeplug model and
+// frequencyRange
+func (cp *Codeplug) ModelsFrequencyRanges() (models []string, frequencyRanges map[string][]string) {
 	models = make([]string, 0)
-	variants = make(map[string][]string)
+	frequencyRanges = make(map[string][]string)
 	var model string
-	var variant string
+	var frequencyRange string
 
 	switch cp.fileType {
 	case FileTypeRdt:
 
 	case FileTypeText:
-		model, variant = parseModelVariant(cp.textFilename)
+		model, frequencyRange = parseModelFrequencyRange(cp.textFilename)
 		fallthrough
 	default:
 		cp.bytes = make([]byte, codeplugInfos[0].RdtSize)
@@ -270,7 +270,7 @@ func (cp *Codeplug) ModelsVariants() (models []string, variants map[string][]str
 		cp.codeplugInfo = cpi
 		cp.loadHeader()
 		mainModel := cpi.Models[0]
-		variants[mainModel] = cp.variants()
+		frequencyRanges[mainModel] = cp.frequencyRanges()
 
 		if cp.fileType == FileTypeRdt {
 			if cpi.RdtSize != cp.rdtSize {
@@ -278,18 +278,18 @@ func (cp *Codeplug) ModelsVariants() (models []string, variants map[string][]str
 				continue
 			}
 			model = cp.Model()
-			variant = cp.Variant()
+			frequencyRange = cp.FrequencyRange()
 		}
 
 		for _, cpiModel := range cpi.Models {
 			if cpiModel == model {
 				models = []string{mainModel}
-				for _, v := range variants[mainModel] {
-					if v == variant {
-						variants[mainModel] = []string{v}
+				for _, v := range frequencyRanges[mainModel] {
+					if v == frequencyRange {
+						frequencyRanges[mainModel] = []string{v}
 					}
 				}
-				return models, variants
+				return models, frequencyRanges
 			}
 		}
 		models = append(models, mainModel)
@@ -301,7 +301,7 @@ func (cp *Codeplug) ModelsVariants() (models []string, variants map[string][]str
 
 	cp.codeplugInfo = nil
 
-	return models, variants
+	return models, frequencyRanges
 }
 
 func (cp *Codeplug) Model() string {
@@ -309,16 +309,16 @@ func (cp *Codeplug) Model() string {
 	return (*fDescs)[FieldType("Model")].fields[0].String()
 }
 
-func (cp *Codeplug) Variant() string {
+func (cp *Codeplug) FrequencyRange() string {
 	fDescs := cp.rDesc[RecordType("BasicInformation")].records[0].fDesc
-	return (*fDescs)[FieldType("Variant")].fields[0].String()
+	return (*fDescs)[FieldType("FrequencyRange")].fields[0].String()
 }
 
-func (cp *Codeplug) variants() []string {
+func (cp *Codeplug) frequencyRanges() []string {
 	for _, rInfo := range cp.codeplugInfo.RecordInfos {
 		if rInfo.rType == "BasicInformation" {
 			for _, fInfo := range rInfo.fieldInfos {
-				if fInfo.fType == "Variant" {
+				if fInfo.fType == "FrequencyRange" {
 					return *fInfo.strings
 				}
 			}
@@ -1076,10 +1076,10 @@ func (e *PositionError) Column() int {
 	return e.position.column + 1
 }
 
-func parseModelVariant(filename string) (model string, variant string) {
+func parseModelFrequencyRange(filename string) (model string, frequencyRange string) {
 	file, err := os.Open(filename)
 	if err != nil {
-		return model, variant
+		return model, frequencyRange
 	}
 	defer file.Close()
 
@@ -1088,7 +1088,7 @@ func parseModelVariant(filename string) (model string, variant string) {
 	rdr.ReadWhile(unicode.IsSpace)
 
 	if rdr.pos.column != 0 {
-		return model, variant
+		return model, frequencyRange
 	}
 
 newRecord:
@@ -1114,19 +1114,19 @@ newRecord:
 				switch fName {
 				case "Model":
 					model = value
-				case "Variant":
-					variant = value
+				case "FrequencyRange":
+					frequencyRange = value
 				default:
 					continue
 				}
-				if model != "" && variant != "" {
-					return model, variant
+				if model != "" && frequencyRange != "" {
+					return model, frequencyRange
 				}
 			}
 		}
 	}
 
-	return model, variant
+	return model, frequencyRange
 }
 
 func (cp *Codeplug) ParseRecords(iRdr io.Reader) ([]*Record, error) {
