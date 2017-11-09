@@ -79,6 +79,10 @@ func (app *App) Exec() {
 	app.qApp.Exec()
 }
 
+func (app *App) ProcessEvents() {
+	app.qApp.ProcessEvents(core.QEventLoop__AllEvents)
+}
+
 func (app *App) Quit() {
 	app.qApp.Quit()
 }
@@ -1356,6 +1360,42 @@ func YesNoPopup(title string, msg string) PopupValue {
 	return PopupNo
 }
 
+type ProgressDialog struct {
+	qWidget *widgets.QProgressDialog
+}
+
+func NewProgressDialog(str string) *ProgressDialog {
+	pd := new(ProgressDialog)
+	qpd := widgets.NewQProgressDialog(nil, core.Qt__Dialog)
+	pd.qWidget = qpd
+
+	qpd.SetWindowModality(core.Qt__ApplicationModal)
+	qpd.SetMinimumDuration(0)
+	qpd.SetLabelText(str)
+
+	return pd
+}
+
+func (pd *ProgressDialog) Close() {
+	pd.qWidget.Close()
+}
+
+func (pd *ProgressDialog) SetLabelText(str string) {
+	pd.qWidget.SetLabelText(str)
+}
+
+func (pd *ProgressDialog) SetRange(min int, max int) {
+	pd.qWidget.SetRange(min, max)
+}
+
+func (pd *ProgressDialog) SetValue(value int) {
+	pd.qWidget.SetValue(value)
+}
+
+func (pd *ProgressDialog) WasCanceled() bool {
+	return pd.qWidget.WasCanceled()
+}
+
 type Dialog struct {
 	*VBox
 	qDialog *widgets.QDialog
@@ -1370,6 +1410,7 @@ func NewDialog(title string) *Dialog {
 	dialog.layout.AddWidget(&dialog.VBox.qWidget, 0, 0)
 
 	dialog.qDialog.SetWindowTitle(title)
+	dialog.qDialog.SetWindowModality(core.Qt__ApplicationModal)
 
 	return dialog
 }

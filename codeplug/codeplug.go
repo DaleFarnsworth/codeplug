@@ -42,6 +42,8 @@ import (
 	"strings"
 	"time"
 	"unicode"
+
+	"github.com/dalefarnsworth/codeplug/dfu"
 )
 
 // FileType tells whether the codeplug is an rdt file or a bin file.
@@ -74,6 +76,7 @@ type Codeplug struct {
 	changeList    []*Change
 	changeIndex   int
 	codeplugInfo  *CodeplugInfo
+	loaded        bool
 }
 
 type CodeplugInfo struct {
@@ -229,8 +232,13 @@ findCodeplugInfo:
 	}
 
 	codeplugs = append(codeplugs, cp)
+	cp.loaded = true
 
 	return nil
+}
+
+func (cp *Codeplug) Loaded() bool {
+	return cp.loaded
 }
 
 func (cp *Codeplug) AllExts() []string {
@@ -508,6 +516,12 @@ func (cp *Codeplug) setLastProgrammedTime(t time.Time) {
 	f.setString(t.Format("02-Jan-06 15:04:05"))
 }
 
+func (cp *Codeplug) getLastProgrammedTime() (time.Time, error) {
+	r := cp.rDesc[RecordType("BasicInformation")].records[0]
+	f := r.Field(FieldType("LastProgrammedTime"))
+	return time.Parse("02-Jan-06 15:04:05", f.String())
+}
+
 // Filename returns the path name of the file associated with the codeplug.
 // This is the file named in the most recent Open or SaveAs function.
 func (cp *Codeplug) Filename() string {
@@ -538,6 +552,13 @@ func (cp *Codeplug) Changed() bool {
 	}
 
 	return false
+}
+
+func (cp *Codeplug) SetChanged() {
+	cp.changed = true
+	for i := range cp.hash {
+		cp.hash[i] = 0
+	}
 }
 
 // FileType returns the type of codeplug file (rdt or bin).
@@ -1448,6 +1469,81 @@ func (cp *Codeplug) importFrom(filename string, ignoreWarning bool) error {
 	cp.changeList = []*Change{&Change{}}
 	cp.changeIndex = 0
 	cp.changed = true
+
+	return nil
+}
+
+func RadioExists() error {
+	dfu, err := dfu.NewDFU()
+	if err != nil {
+		return err
+	}
+	dfu.Close()
+
+	return nil
+}
+
+func (cp *Codeplug) ReadRadio(progress func(min, max, val int) bool) error {
+	cpi := cp.codeplugInfo
+	binBytes := cp.bytes[cpi.BinOffset : cpi.BinOffset+cpi.BinSize]
+
+	dfu, err := dfu.NewDFU()
+	if err != nil {
+		return err
+	}
+	defer dfu.Close()
+
+	bytes, err := dfu.ReadCodeplug(func(min, max, val int) bool {
+		return progress(min, max, val)
+	})
+	if err != nil {
+		return err
+	}
+
+	copy(binBytes, bytes)
+
+	ignoreWarning := true
+	cp.Revert(ignoreWarning)
+
+	cp.SetChanged()
+
+	return nil
+}
+
+func (cp *Codeplug) WriteRadio(progress func(min, max, val int) bool) error {
+	if err := cp.valid(); err != nil {
+		return Warning{err}
+	}
+
+	savedTime, err := cp.getLastProgrammedTime()
+	if err != nil {
+		return err
+	}
+	cp.setLastProgrammedTime(time.Now())
+
+	savedBytes := make([]byte, len(cp.bytes))
+	copy(savedBytes, cp.bytes)
+
+	cp.store()
+
+	cpi := cp.codeplugInfo
+	binBytes := cp.bytes[cpi.BinOffset : cpi.BinOffset+cpi.BinSize]
+
+	cp.bytes = savedBytes
+	cp.setLastProgrammedTime(savedTime)
+
+	dfu, err := dfu.NewDFU()
+	if err != nil {
+		return err
+	}
+	defer dfu.Close()
+
+	err = dfu.WriteCodeplug(binBytes, func(min, max, val int) bool {
+		return progress(min, max, val)
+	})
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
