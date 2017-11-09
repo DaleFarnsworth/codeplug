@@ -1196,7 +1196,7 @@ parseRecord:
 			pos = rdr.pos
 			fType, ok := nameToFt[r.rType][name]
 			if !ok {
-				err = fmt.Errorf("bad field name")
+				err = fmt.Errorf("bad field name: '%s'", name)
 				warning = appendWarningMsgs(warning, pos, err)
 			}
 
@@ -1250,7 +1250,7 @@ func appendWarningMsgs(oldError error, pos position, newError error) error {
 	if oldError != nil {
 		oldMsg = oldError.Error()
 	}
-	err := fmt.Errorf("%s%d:%d: %s\n", oldMsg, pos.line+1,
+	err := fmt.Errorf("%sline %d:%d: %s\n", oldMsg, pos.line+1,
 		pos.column+1, newError.Error())
 	return Warning{err}
 }
