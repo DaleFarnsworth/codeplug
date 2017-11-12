@@ -191,13 +191,10 @@ findCodeplugInfo:
 		if err != nil {
 			return err
 		}
-		if cp.fileType != FileTypeBin {
-			break
-		}
+	}
 
-		fallthrough
-
-	case FileTypeRdt:
+	switch cp.fileType {
+	case FileTypeRdt, FileTypeBin:
 		err := cp.read(cp.filename)
 		if err != nil {
 			return err
