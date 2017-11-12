@@ -176,7 +176,7 @@ findCodeplugInfo:
 	}
 
 	switch cp.fileType {
-	case FileTypeNew, FileTypeText:
+	case FileTypeNew, FileTypeText, FileTypeBin:
 		var filename string
 		for i, v := range cp.frequencyRanges() {
 			if v == frequencyRange {
@@ -191,8 +191,13 @@ findCodeplugInfo:
 		if err != nil {
 			return err
 		}
+		if cp.fileType != FileTypeBin {
+			break
+		}
 
-	case FileTypeRdt, FileTypeBin:
+		fallthrough
+
+	case FileTypeRdt:
 		err := cp.read(cp.filename)
 		if err != nil {
 			return err
@@ -503,7 +508,6 @@ func (cp *Codeplug) SaveToFile(filename string, ignoreWarning bool) error {
 func (cp *Codeplug) setLastProgrammedTime(t time.Time) {
 	r := cp.rDesc[RecordType("BasicInformation")].records[0]
 	f := r.Field(FieldType("LastProgrammedTime"))
-	dprint(f)
 	f.setString(t.Format("02-Jan-06 15:04:05"))
 }
 
