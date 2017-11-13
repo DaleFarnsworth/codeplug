@@ -673,7 +673,7 @@ func (v *iStrings) getString(f *Field) string {
 	i := int(*v)
 	strings := *f.strings
 	if i >= len(strings) {
-		panic("bad strings value")
+		return invalidValueString
 	}
 
 	return strings[i]
