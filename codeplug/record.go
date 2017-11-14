@@ -383,8 +383,13 @@ func (r *Record) makeNameUnique(namesp *[]string) error {
 
 // ListNames returns a slice of the names of all records in the rDesc.
 func (rd *rDesc) ListNames() *[]string {
-	if rd.cachedListNames == nil {
-		names := make([]string, len(rd.records))
+	lenCachedListNames := 0
+	if rd.cachedListNames != nil {
+		lenCachedListNames = len(*rd.cachedListNames)
+	}
+	recordsLen := len(rd.records)
+	if lenCachedListNames == 0 && recordsLen > 0 {
+		names := make([]string, recordsLen)
 		for i, r := range rd.records {
 			name := r.Name()
 			if name == "" {

@@ -176,7 +176,11 @@ func (f *Field) setString(s string) error {
 // listNames returns a slice of the names of all the records in the
 // field's record's rDesc.
 func (f *Field) listNames() []string {
-	return *f.record.codeplug.rDesc[f.listRecordType].ListNames()
+	pListNames := f.record.codeplug.rDesc[f.listRecordType].ListNames()
+	if pListNames == nil {
+		return nil
+	}
+	return *pListNames
 }
 
 // memberListNames returns a slice of the names of the field's member records.
@@ -369,7 +373,11 @@ func (f *Field) ListRecordType() RecordType {
 
 // sibling returns the field's sibling field of the given type.
 func (f *Field) sibling(fType FieldType) *Field {
-	fields := (*f.record.fDesc)[fType].fields
+	r := (*f.record.fDesc)[fType]
+	if r == nil {
+		return nil
+	}
+	fields := r.fields
 	if len(fields) == 0 {
 		return nil
 	}
@@ -1238,10 +1246,13 @@ func (v *privacyNumber) getString(f *Field) string {
 
 // setString sets the privacyNumber's value from a string.
 func (v *privacyNumber) setString(f *Field, s string) error {
-	ss := f.sibling(FtCiPrivacy).String()
+	sibling := f.sibling(FtCiPrivacy)
+	if sibling != nil {
+		ss := sibling.String()
 
-	if ss == "Enhanced" && int(v.span) >= 8 {
-		return fmt.Errorf("must be less than 8 for enhanced privacy")
+		if ss == "Enhanced" && int(v.span) >= 8 {
+			return fmt.Errorf("must be less than 8 for enhanced privacy")
+		}
 	}
 
 	return v.span.setString(f, s)
@@ -1350,7 +1361,7 @@ func (v *memberListIndex) setString(f *Field, s string) error {
 			}
 		}
 	}
-	return fmt.Errorf("bad record name")
+	return fmt.Errorf("bad record name '%s'", s)
 }
 
 // listIndex is a field value representing an index into a slice of records
@@ -1396,7 +1407,7 @@ func (v *listIndex) setString(f *Field, s string) error {
 			return nil
 		}
 	}
-	return fmt.Errorf("bad record name")
+	return fmt.Errorf("bad record name '%s'", s)
 }
 
 // valid returns nil if the listIndex's value is valid.

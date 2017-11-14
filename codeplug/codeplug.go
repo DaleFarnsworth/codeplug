@@ -31,6 +31,7 @@ import (
 	"bytes"
 	"compress/gzip"
 	"crypto/sha256"
+	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -55,12 +56,13 @@ const (
 	FileTypeBin
 	FileTypeNew
 	FileTypeText
+	FileTypeJSON
 )
 
 // A Codeplug represents a codeplug file.
 type Codeplug struct {
 	filename       string
-	textFilename   string
+	importFilename string
 	fileType       FileType
 	rdtSize        int
 	fileSize       int
@@ -110,8 +112,8 @@ func NewCodeplug(fType FileType, filename string) (*Codeplug, error) {
 			}
 		}
 
-	case FileTypeText:
-		cp.textFilename = filename
+	case FileTypeText, FileTypeJSON:
+		cp.importFilename = filename
 		fallthrough
 
 	case FileTypeNew:
@@ -181,7 +183,7 @@ findCodeplugInfo:
 	}
 
 	switch cp.fileType {
-	case FileTypeNew, FileTypeText, FileTypeBin:
+	case FileTypeNew, FileTypeText, FileTypeJSON, FileTypeBin:
 		var filename string
 		for i, v := range cp.frequencyRanges() {
 			if v == frequencyRange {
@@ -212,7 +214,7 @@ findCodeplugInfo:
 	}
 
 	switch cp.fileType {
-	case FileTypeText:
+	case FileTypeText, FileTypeJSON:
 		for _, rType := range cp.RecordTypes() {
 			if cp.MaxRecords(rType) == 1 {
 				continue
@@ -223,7 +225,13 @@ findCodeplugInfo:
 			}
 		}
 
-		err := cp.importText(cp.textFilename, ignoreWarning)
+		var err error
+		switch cp.fileType {
+		case FileTypeText:
+			err = cp.importText(cp.importFilename, ignoreWarning)
+		case FileTypeJSON:
+			err = cp.importJSON(cp.importFilename)
+		}
 		if _, warning := err.(Warning); warning && ignoreWarning {
 			err = nil
 		}
@@ -271,7 +279,7 @@ func (cp *Codeplug) ModelsFrequencyRanges() (models []string, frequencyRanges ma
 	switch cp.fileType {
 	case FileTypeRdt:
 
-	case FileTypeText:
+	case FileTypeText, FileTypeJSON:
 		model, frequencyRange = cp.parseModelFrequencyRange()
 		fallthrough
 	default:
@@ -848,7 +856,7 @@ func (cp *Codeplug) frequencyValid(freq float64) error {
 		return nil
 	}
 
-	return fmt.Errorf("frequency out of range %+v", freq)
+	return fmt.Errorf("frequency out of range %v", freq)
 }
 
 // publishChange passes the given change (with any additional generated
@@ -862,6 +870,22 @@ func (cp *Codeplug) publishChange(change *Change) {
 // codeplugs contains the list of open codeplugs.
 var codeplugs []*Codeplug
 
+func filteredField(rType RecordType, fType FieldType) bool {
+	switch rType {
+	case RtTextMessages:
+		return true
+
+	case RtBasicInformation_md380:
+		switch fType {
+		case FtBiCpsVersion, FtBiNewFilename_md380:
+			return true
+		case FtBiLowFrequency, FtBiHighFrequency:
+			return true
+		}
+	}
+	return false
+}
+
 func PrintRecord(w io.Writer, r *Record) {
 	rType := r.Type()
 	ind := ""
@@ -871,14 +895,10 @@ func PrintRecord(w io.Writer, r *Record) {
 	fmt.Fprintf(w, "%s%s:\n", string(rType), ind)
 
 	for _, fType := range r.FieldTypes() {
-		if string(rType) == "BasicInformation" {
-			switch string(fType) {
-			case "CpsVersion", "NewFilename":
-				continue
-			case "LowFrequency", "HighFrequency":
-				continue
-			}
+		if filteredField(rType, fType) {
+			continue
 		}
+
 		name := string(fType)
 		for _, f := range r.Fields(fType) {
 			value := quoteString(f.String())
@@ -1142,13 +1162,22 @@ func (e *PositionError) Column() int {
 }
 
 func (cp *Codeplug) parseModelFrequencyRange() (model string, frequencyRange string) {
-	file, err := os.Open(cp.textFilename)
+	file, err := os.Open(cp.importFilename)
 	if err != nil {
 		return model, frequencyRange
 	}
 	defer file.Close()
 
-	pRecs := cp.parseTextFile(file)
+	var pRecs []*parsedRecord
+
+	switch cp.fileType {
+	case FileTypeText:
+		pRecs = cp.parseTextFile(file)
+
+	case FileTypeJSON:
+		pRecs = cp.parseJSONFile(file)
+	}
+
 	for _, pr := range pRecs {
 		if pr.name != string(RtBasicInformation_md380) {
 			continue
@@ -1377,7 +1406,9 @@ func (cp *Codeplug) parsedFileToRecs(pRecs []*parsedRecord) ([]*Record, error) {
 			dValue, ok := f.value.(deferredValue)
 			if ok {
 				dValue.str = pf.value
-				dValue.pos = *pf.pos
+				if pf.pos != nil {
+					dValue.pos = *pf.pos
+				}
 				f.value = dValue
 			}
 			err = r.addField(f)
@@ -1536,6 +1567,200 @@ func (cp *Codeplug) importText(filename string, ignoreWarning bool) error {
 	cp.changed = true
 
 	return nil
+}
+
+func (cp *Codeplug) ExportJSON(filename string) error {
+	file, err := os.Create(filename)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		err = file.Close()
+		return
+	}()
+
+	recordTypes := cp.RecordTypes()
+	recordMap := make(map[string]interface{})
+	for _, rType := range recordTypes {
+		records := cp.records(rType)
+		recordSlice := make([]map[string]interface{}, len(records))
+		for i, r := range records {
+			fieldTypes := r.FieldTypes()
+			fieldMap := make(map[string]interface{})
+			for _, fType := range fieldTypes {
+				if filteredField(rType, fType) {
+					continue
+				}
+				fields := r.Fields(fType)
+
+				fieldSlice := make([]string, len(fields))
+				for j, f := range fields {
+					fieldSlice[j] = f.String()
+				}
+
+				fTypeString := string(fType)
+				fieldMap[fTypeString] = fieldSlice
+				if r.MaxFields(fType) == 1 {
+					fieldMap[fTypeString] = fieldSlice[0]
+				}
+			}
+			recordSlice[i] = fieldMap
+		}
+		rTypeString := string(rType)
+		recordMap[rTypeString] = recordSlice
+		if cp.MaxRecords(rType) == 1 {
+			recordMap[rTypeString] = recordSlice[0]
+		}
+	}
+
+	writer := bufio.NewWriter(file)
+	encoder := json.NewEncoder(writer)
+	encoder.SetIndent("", "    ")
+	err = encoder.Encode(recordMap)
+	if err != nil {
+		return err
+	}
+	writer.Flush()
+
+	return nil
+}
+
+func (cp *Codeplug) importJSON(filename string) error {
+	file, err := os.Open(filename)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	pRecs := cp.parseJSONFile(file)
+	records, err := cp.parsedFileToRecs(pRecs)
+	if err != nil {
+		return err
+	}
+
+	for _, r := range records {
+		r.rIndex = len(cp.records(r.rType))
+		cp.InsertRecord(r)
+	}
+
+	err = updateDeferredFields(records)
+	if err != nil {
+		return err
+	}
+
+	for _, rd := range cp.rDesc {
+		if len(rd.records) == 0 {
+			return fmt.Errorf("no %s found", rd.rType)
+		}
+	}
+	cp.store()
+	cp.changeList = []*Change{&Change{}}
+	cp.changeIndex = 0
+	cp.changed = true
+
+	return nil
+}
+
+func (cp *Codeplug) parseJSONFile(iRdr io.Reader) []*parsedRecord {
+	errorInvalidJSON := fmt.Errorf("Invalid codeplug JSON file")
+
+	var parRecord parsedRecord
+	parRecords := []*parsedRecord{
+		&parRecord,
+	}
+
+	reader := bufio.NewReader(iRdr)
+	decoder := json.NewDecoder(reader)
+	var i interface{}
+	err := decoder.Decode(&i)
+	if err != nil {
+		parRecord.err = errorInvalidJSON
+		return parRecords
+	}
+	recordMap, ok := i.(map[string]interface{})
+	if !ok {
+		parRecord.err = errorInvalidJSON
+		return parRecords
+	}
+
+	var pRecords []*parsedRecord
+
+	for rName, i := range recordMap {
+		var recordSlice []map[string]interface{}
+
+		switch v := i.(type) {
+		case []interface{}:
+			recordSlice = make([]map[string]interface{}, len(v))
+			for i := range v {
+				record, ok := v[i].(map[string]interface{})
+				if !ok {
+					parRecord.err = errorInvalidJSON
+					return parRecords
+				}
+				recordSlice[i] = record
+			}
+
+		case map[string]interface{}:
+			recordSlice = []map[string]interface{}{v}
+
+		default:
+			parRecord.err = errorInvalidJSON
+			return parRecords
+		}
+
+		for index, fMap := range recordSlice {
+			var pRecord parsedRecord
+			pRecord.index = index
+			pRecord.name = rName
+			pRecord.pFields = cp.parseJSONFields(fMap)
+			pRecords = append(pRecords, &pRecord)
+		}
+	}
+
+	return pRecords
+}
+
+func (cp *Codeplug) parseJSONFields(fMap map[string]interface{}) []*parsedField {
+	errorInvalidJSON := fmt.Errorf("Invalid codeplug JSON file")
+	var parField parsedField
+	parFields := []*parsedField{
+		&parField,
+	}
+
+	var pFields []*parsedField
+	for fName, i := range fMap {
+		var fieldSlice []string
+		switch v := i.(type) {
+		case []interface{}:
+			fieldSlice = make([]string, len(v))
+			for i := range v {
+				field, ok := v[i].(string)
+				if !ok {
+					parField.err = errorInvalidJSON
+					return parFields
+				}
+				fieldSlice[i] = field
+			}
+
+		case string:
+			fieldSlice = []string{v}
+
+		default:
+			parField.err = errorInvalidJSON
+			return parFields
+		}
+
+		for index, str := range fieldSlice {
+			pField := parsedField{
+				name:  fName,
+				index: index,
+				value: str,
+			}
+			pFields = append(pFields, &pField)
+		}
+	}
+
+	return pFields
 }
 
 func (cp *Codeplug) clearCachedListNames() {
