@@ -221,7 +221,7 @@ findCodeplugInfo:
 			}
 		}
 
-		err := cp.importFrom(cp.textFilename, ignoreWarning)
+		err := cp.importText(cp.textFilename, ignoreWarning)
 		if _, warning := err.(Warning); warning && ignoreWarning {
 			err = nil
 		}
@@ -1402,7 +1402,7 @@ func (cp *Codeplug) nameToRecord(name string, index int) (*Record, error) {
 	return nil, fmt.Errorf("codeplug has no record: %s", name)
 }
 
-func (cp *Codeplug) ExportTo(filename string) (err error) {
+func (cp *Codeplug) ExportText(filename string) (err error) {
 	file, err := os.Create(filename)
 	if err != nil {
 		return err
@@ -1432,7 +1432,7 @@ func (cp *Codeplug) clearCachedListNames() {
 	}
 }
 
-func (cp *Codeplug) importFrom(filename string, ignoreWarning bool) error {
+func (cp *Codeplug) importText(filename string, ignoreWarning bool) error {
 	file, err := os.Open(filename)
 	if err != nil {
 		return err
