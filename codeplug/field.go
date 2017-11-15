@@ -933,7 +933,7 @@ func (v *callType) setString(f *Field, s string) error {
 		return err
 	}
 
-	f.record.Field(FieldType("CallID")).SetString("16777215")
+	f.record.Field(FtDcCallID).SetString("16777215")
 
 	return nil
 }

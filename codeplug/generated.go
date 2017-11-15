@@ -32,15 +32,15 @@ const (
 	RtBasicInformation_md380 RecordType = "BasicInformation"
 	RtBasicInformation_md390 RecordType = "BasicInformation"
 	RtBasicInformation_md40  RecordType = "BasicInformation"
-	RtChannelInformation     RecordType = "ChannelInformation"
-	RtDigitalContacts        RecordType = "DigitalContacts"
+	RtChannels               RecordType = "Channels"
+	RtContacts               RecordType = "Contacts"
 	RtGeneralSettings_md380  RecordType = "GeneralSettings"
 	RtGeneralSettings_md40   RecordType = "GeneralSettings"
-	RtGroupList              RecordType = "GroupList"
-	RtScanList               RecordType = "ScanList"
-	RtTextMessage            RecordType = "TextMessage"
-	RtZoneInformation_md380  RecordType = "ZoneInformation"
-	RtZoneInformation_md40   RecordType = "ZoneInformation"
+	RtGroupLists             RecordType = "GroupLists"
+	RtScanLists              RecordType = "ScanLists"
+	RtTextMessages           RecordType = "TextMessages"
+	RtZones_md380            RecordType = "Zones"
+	RtZones_md40             RecordType = "Zones"
 )
 
 // Field types
@@ -138,7 +138,7 @@ const (
 	FtGsTalkPermitTone          FieldType = "TalkPermitTone"
 	FtGsTxPreambleDuration      FieldType = "TxPreambleDuration"
 	FtGsVoxSensitivity          FieldType = "VoxSensitivity"
-	FtSlChannelMember           FieldType = "ChannelMember"
+	FtSlChannelMembers          FieldType = "ChannelMembers"
 	FtSlName                    FieldType = "Name"
 	FtSlPriorityChannel1        FieldType = "PriorityChannel1"
 	FtSlPriorityChannel2        FieldType = "PriorityChannel2"
@@ -146,8 +146,8 @@ const (
 	FtSlSignallingHoldTime      FieldType = "SignallingHoldTime"
 	FtSlTxDesignatedChannel     FieldType = "TxDesignatedChannel"
 	FtTmTextMessage             FieldType = "TextMessage"
-	FtZiChannelMember_md380     FieldType = "ChannelMember"
-	FtZiChannelMember_md40      FieldType = "ChannelMember"
+	FtZiChannelMembers_md380    FieldType = "ChannelMembers"
+	FtZiChannelMembers_md40     FieldType = "ChannelMembers"
 	FtZiName                    FieldType = "Name"
 )
 
@@ -254,12 +254,12 @@ var cpMd380 = CodeplugInfo{
 	RecordInfos: []*recordInfo{
 		&riBasicInformation_md380,
 		&riGeneralSettings_md380,
-		&riTextMessage,
-		&riDigitalContacts,
-		&riGroupList,
-		&riZoneInformation_md380,
-		&riScanList,
-		&riChannelInformation,
+		&riTextMessages,
+		&riContacts,
+		&riGroupLists,
+		&riZones_md380,
+		&riScanLists,
+		&riChannels,
 	},
 }
 
@@ -275,12 +275,12 @@ var cpMd390 = CodeplugInfo{
 	RecordInfos: []*recordInfo{
 		&riBasicInformation_md390,
 		&riGeneralSettings_md380,
-		&riTextMessage,
-		&riDigitalContacts,
-		&riGroupList,
-		&riZoneInformation_md380,
-		&riScanList,
-		&riChannelInformation,
+		&riTextMessages,
+		&riContacts,
+		&riGroupLists,
+		&riZones_md380,
+		&riScanLists,
+		&riChannels,
 	},
 }
 
@@ -296,12 +296,12 @@ var cpMd40 = CodeplugInfo{
 	RecordInfos: []*recordInfo{
 		&riBasicInformation_md40,
 		&riGeneralSettings_md40,
-		&riTextMessage,
-		&riDigitalContacts,
-		&riGroupList,
-		&riZoneInformation_md40,
-		&riScanList,
-		&riChannelInformation,
+		&riTextMessages,
+		&riContacts,
+		&riGroupLists,
+		&riZones_md40,
+		&riScanLists,
+		&riChannels,
 	},
 }
 
@@ -356,9 +356,9 @@ var riBasicInformation_md40 = recordInfo{
 	},
 }
 
-var riChannelInformation = recordInfo{
-	rType:    RtChannelInformation,
-	typeName: "Channel Information",
+var riChannels = recordInfo{
+	rType:    RtChannels,
+	typeName: "Channels",
 	max:      1000,
 	offset:   127013,
 	size:     64,
@@ -416,8 +416,8 @@ var riChannelInformation = recordInfo{
 	},
 }
 
-var riDigitalContacts = recordInfo{
-	rType:    RtDigitalContacts,
+var riContacts = recordInfo{
+	rType:    RtContacts,
 	typeName: "Digital Contacts",
 	max:      1000,
 	offset:   24997,
@@ -518,9 +518,9 @@ var riGeneralSettings_md40 = recordInfo{
 	},
 }
 
-var riGroupList = recordInfo{
-	rType:    RtGroupList,
-	typeName: "Digital Rx Group List",
+var riGroupLists = recordInfo{
+	rType:    RtGroupLists,
+	typeName: "GroupLists",
 	max:      250,
 	offset:   60997,
 	size:     96,
@@ -537,9 +537,9 @@ var riGroupList = recordInfo{
 	},
 }
 
-var riScanList = recordInfo{
-	rType:    RtScanList,
-	typeName: "Scan List",
+var riScanLists = recordInfo{
+	rType:    RtScanLists,
+	typeName: "Scan Lists",
 	max:      250,
 	offset:   100997,
 	size:     104,
@@ -557,13 +557,13 @@ var riScanList = recordInfo{
 		&fiSlTxDesignatedChannel,
 		&fiSlSignallingHoldTime,
 		&fiSlPrioritySampleTime,
-		&fiSlChannelMember,
+		&fiSlChannelMembers,
 	},
 }
 
-var riTextMessage = recordInfo{
-	rType:    RtTextMessage,
-	typeName: "Text Message",
+var riTextMessages = recordInfo{
+	rType:    RtTextMessages,
+	typeName: "Text Messages",
 	max:      50,
 	offset:   9125,
 	size:     288,
@@ -579,9 +579,9 @@ var riTextMessage = recordInfo{
 	},
 }
 
-var riZoneInformation_md380 = recordInfo{
-	rType:    RtZoneInformation_md380,
-	typeName: "Zone Information",
+var riZones_md380 = recordInfo{
+	rType:    RtZones_md380,
+	typeName: "Zones",
 	max:      250,
 	offset:   84997,
 	size:     64,
@@ -594,13 +594,13 @@ var riZoneInformation_md380 = recordInfo{
 	},
 	fieldInfos: []*fieldInfo{
 		&fiZiName,
-		&fiZiChannelMember_md380,
+		&fiZiChannelMembers_md380,
 	},
 }
 
-var riZoneInformation_md40 = recordInfo{
-	rType:    RtZoneInformation_md40,
-	typeName: "Zone Information",
+var riZones_md40 = recordInfo{
+	rType:    RtZones_md40,
+	typeName: "Zones",
 	max:      250,
 	offset:   84997,
 	size:     64,
@@ -613,7 +613,7 @@ var riZoneInformation_md40 = recordInfo{
 	},
 	fieldInfos: []*fieldInfo{
 		&fiZiName,
-		&fiZiChannelMember_md40,
+		&fiZiChannelMembers_md40,
 	},
 }
 
@@ -857,7 +857,7 @@ var fiCiContactName = fieldInfo{
 	indexedStrings: &[]IndexedString{
 		IndexedString{0, "None"},
 	},
-	listRecordType: RtDigitalContacts,
+	listRecordType: RtContacts,
 	enabler:        FtCiChannelMode,
 }
 
@@ -1005,7 +1005,7 @@ var fiCiGroupList = fieldInfo{
 	indexedStrings: &[]IndexedString{
 		IndexedString{0, "None"},
 	},
-	listRecordType: RtGroupList,
+	listRecordType: RtGroupLists,
 	enabler:        FtCiChannelMode,
 }
 
@@ -1174,7 +1174,7 @@ var fiCiScanList = fieldInfo{
 	indexedStrings: &[]IndexedString{
 		IndexedString{0, "None"},
 	},
-	listRecordType: RtScanList,
+	listRecordType: RtScanLists,
 }
 
 var fiCiSquelch = fieldInfo{
@@ -1322,7 +1322,7 @@ var fiGlContactMember = fieldInfo{
 	bitOffset:      256,
 	bitSize:        16,
 	valueType:      VtListIndex,
-	listRecordType: RtDigitalContacts,
+	listRecordType: RtContacts,
 }
 
 var fiGlName = fieldInfo{
@@ -1738,14 +1738,14 @@ var fiGsVoxSensitivity = fieldInfo{
 	},
 }
 
-var fiSlChannelMember = fieldInfo{
-	fType:          FtSlChannelMember,
-	typeName:       "Channel Member",
+var fiSlChannelMembers = fieldInfo{
+	fType:          FtSlChannelMembers,
+	typeName:       "Channel Members",
 	max:            31,
 	bitOffset:      336,
 	bitSize:        16,
 	valueType:      VtListIndex,
-	listRecordType: RtChannelInformation,
+	listRecordType: RtChannels,
 }
 
 var fiSlName = fieldInfo{
@@ -1768,7 +1768,7 @@ var fiSlPriorityChannel1 = fieldInfo{
 		IndexedString{0, "Selected"},
 		IndexedString{65535, "None"},
 	},
-	listRecordType: RtChannelInformation,
+	listRecordType: RtChannels,
 	enablingValue:  "None",
 }
 
@@ -1784,7 +1784,7 @@ var fiSlPriorityChannel2 = fieldInfo{
 		IndexedString{0, "Selected"},
 		IndexedString{65535, "None"},
 	},
-	listRecordType: RtChannelInformation,
+	listRecordType: RtChannels,
 	disabler:       FtSlPriorityChannel1,
 }
 
@@ -1827,7 +1827,7 @@ var fiSlTxDesignatedChannel = fieldInfo{
 		IndexedString{0, "Selected"},
 		IndexedString{65535, "Last Active Channel"},
 	},
-	listRecordType: RtChannelInformation,
+	listRecordType: RtChannels,
 }
 
 var fiTmTextMessage = fieldInfo{
@@ -1839,24 +1839,24 @@ var fiTmTextMessage = fieldInfo{
 	valueType: VtTextMessage,
 }
 
-var fiZiChannelMember_md380 = fieldInfo{
-	fType:          FtZiChannelMember_md380,
-	typeName:       "Channel Member",
+var fiZiChannelMembers_md380 = fieldInfo{
+	fType:          FtZiChannelMembers_md380,
+	typeName:       "Channel Members",
 	max:            16,
 	bitOffset:      256,
 	bitSize:        16,
 	valueType:      VtListIndex,
-	listRecordType: RtChannelInformation,
+	listRecordType: RtChannels,
 }
 
-var fiZiChannelMember_md40 = fieldInfo{
-	fType:          FtZiChannelMember_md40,
-	typeName:       "Channel Member",
+var fiZiChannelMembers_md40 = fieldInfo{
+	fType:          FtZiChannelMembers_md40,
+	typeName:       "Channel Members",
 	max:            64,
 	bitOffset:      256,
 	bitSize:        16,
 	valueType:      VtListIndex,
-	listRecordType: RtChannelInformation,
+	listRecordType: RtChannels,
 	extOffset:      201253,
 	extSize:        224,
 	extIndex:       16,

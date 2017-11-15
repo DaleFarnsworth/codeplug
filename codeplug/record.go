@@ -401,12 +401,12 @@ func (rd *rDesc) ListNames() *[]string {
 
 // MemberListNames returns a slice of possible member list names
 func (rd *rDesc) MemberListNames() *[]string {
-	if rd.rType != RecordType("DigitalContacts") {
+	if rd.rType != RtContacts {
 		return rd.ListNames()
 	}
 	names := make([]string, 0, len(rd.records))
 	for _, r := range rd.records {
-		typeField := r.Field(FieldType("CallType"))
+		typeField := r.Field(FtDcCallType)
 		if typeField.String() == "Group" {
 			names = append(names, r.NameField().String())
 		}

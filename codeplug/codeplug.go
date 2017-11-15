@@ -315,20 +315,20 @@ func (cp *Codeplug) ModelsFrequencyRanges() (models []string, frequencyRanges ma
 }
 
 func (cp *Codeplug) Model() string {
-	fDescs := cp.rDesc[RecordType("BasicInformation")].records[0].fDesc
-	return (*fDescs)[FieldType("Model")].fields[0].String()
+	fDescs := cp.rDesc[RtBasicInformation_md380].records[0].fDesc
+	return (*fDescs)[FtBiModel].fields[0].String()
 }
 
 func (cp *Codeplug) FrequencyRange() string {
-	fDescs := cp.rDesc[RecordType("BasicInformation")].records[0].fDesc
-	return (*fDescs)[FieldType("FrequencyRange")].fields[0].String()
+	fDescs := cp.rDesc[RtBasicInformation_md380].records[0].fDesc
+	return (*fDescs)[FtBiFrequencyRange_md380].fields[0].String()
 }
 
 func (cp *Codeplug) frequencyRanges() []string {
 	for _, rInfo := range cp.codeplugInfo.RecordInfos {
-		if rInfo.rType == "BasicInformation" {
+		if rInfo.rType == RtBasicInformation_md380 {
 			for _, fInfo := range rInfo.fieldInfos {
-				if fInfo.fType == "FrequencyRange" {
+				if fInfo.fType == FtBiFrequencyRange_md380 {
 					return *fInfo.strings
 				}
 			}
@@ -339,9 +339,9 @@ func (cp *Codeplug) frequencyRanges() []string {
 
 func (cp *Codeplug) newFilenames() []string {
 	for _, rInfo := range cp.codeplugInfo.RecordInfos {
-		if rInfo.rType == "BasicInformation" {
+		if rInfo.rType == RtBasicInformation_md380 {
 			for _, fInfo := range rInfo.fieldInfos {
-				if fInfo.fType == "NewFilename" {
+				if fInfo.fType == FtBiNewFilename_md380 {
 					return *fInfo.strings
 				}
 			}
@@ -511,14 +511,14 @@ func (cp *Codeplug) SaveToFile(filename string, ignoreWarning bool) error {
 }
 
 func (cp *Codeplug) setLastProgrammedTime(t time.Time) {
-	r := cp.rDesc[RecordType("BasicInformation")].records[0]
-	f := r.Field(FieldType("LastProgrammedTime"))
+	r := cp.rDesc[RtBasicInformation_md380].records[0]
+	f := r.Field(FtBiLastProgrammedTime)
 	f.setString(t.Format("02-Jan-06 15:04:05"))
 }
 
 func (cp *Codeplug) getLastProgrammedTime() (time.Time, error) {
-	r := cp.rDesc[RecordType("BasicInformation")].records[0]
-	f := r.Field(FieldType("LastProgrammedTime"))
+	r := cp.rDesc[RtBasicInformation_md380].records[0]
+	f := r.Field(FtBiLastProgrammedTime)
 	return time.Parse("02-Jan-06 15:04:05", f.String())
 }
 
@@ -835,7 +835,7 @@ func (cp *Codeplug) write(file *os.File) (err error) {
 // codeplug.
 func (cp *Codeplug) frequencyValid(freq float64) error {
 	if cp.lowFrequency == 0 {
-		fDescs := cp.record(RecordType("BasicInformation")).fDesc
+		fDescs := cp.record(RtBasicInformation_md380).fDesc
 		s := (*fDescs)[FtBiLowFrequency].fields[0].String()
 		cp.lowFrequency, _ = strconv.ParseFloat(s, 64)
 		s = (*fDescs)[FtBiHighFrequency].fields[0].String()

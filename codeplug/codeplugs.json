@@ -29,12 +29,12 @@
       "recordTypes": [
         "BasicInformation_md380",
         "GeneralSettings_md380",
-        "TextMessage",
-        "DigitalContacts",
-        "GroupList",
-        "ZoneInformation_md380",
-        "ScanList",
-        "ChannelInformation"
+        "TextMessages",
+        "Contacts",
+        "GroupLists",
+        "Zones_md380",
+        "ScanLists",
+        "Channels"
       ]
     },
     {
@@ -49,12 +49,12 @@
       "recordTypes": [
         "BasicInformation_md390",
         "GeneralSettings_md380",
-        "TextMessage",
-        "DigitalContacts",
-        "GroupList",
-        "ZoneInformation_md380",
-        "ScanList",
-        "ChannelInformation"
+        "TextMessages",
+        "Contacts",
+        "GroupLists",
+        "Zones_md380",
+        "ScanLists",
+        "Channels"
       ]
     },
     {
@@ -69,12 +69,12 @@
       "recordTypes": [
         "BasicInformation_md40",
         "GeneralSettings_md40",
-        "TextMessage",
-        "DigitalContacts",
-        "GroupList",
-        "ZoneInformation_md40",
-        "ScanList",
-        "ChannelInformation"
+        "TextMessages",
+        "Contacts",
+        "GroupLists",
+        "Zones_md40",
+        "ScanLists",
+        "Channels"
       ]
     }
   ],
@@ -202,8 +202,8 @@
       ]
     },
     {
-      "typeName": "Text Message",
-      "type": "TextMessage",
+      "typeName": "Text Messages",
+      "type": "TextMessages",
       "offset": 9125,
       "size": 288,
       "max": 50,
@@ -220,7 +220,7 @@
     },
     {
       "typeName": "Digital Contacts",
-      "type": "DigitalContacts",
+      "type": "Contacts",
       "offset": 24997,
       "size": 36,
       "max": 1000,
@@ -239,8 +239,8 @@
       ]
     },
     {
-      "typeName": "Digital Rx Group List",
-      "type": "GroupList",
+      "typeName": "GroupLists",
+      "type": "GroupLists",
       "offset": 60997,
       "size": 96,
       "max": 250,
@@ -257,8 +257,8 @@
       ]
     },
     {
-      "typeName": "Zone Information",
-      "type": "ZoneInformation_md380",
+      "typeName": "Zones",
+      "type": "Zones_md380",
       "offset": 84997,
       "size": 64,
       "max": 250,
@@ -271,12 +271,12 @@
       ],
       "fieldTypes": [
         "ZiName",
-        "ZiChannelMember_md380"
+        "ZiChannelMembers_md380"
       ]
     },
     {
-      "typeName": "Zone Information",
-      "type": "ZoneInformation_md40",
+      "typeName": "Zones",
+      "type": "Zones_md40",
       "offset": 84997,
       "size": 64,
       "max": 250,
@@ -289,12 +289,12 @@
       ],
       "fieldTypes": [
         "ZiName",
-        "ZiChannelMember_md40"
+        "ZiChannelMembers_md40"
       ]
     },
     {
-      "typeName": "Scan List",
-      "type": "ScanList",
+      "typeName": "Scan Lists",
+      "type": "ScanLists",
       "offset": 100997,
       "size": 104,
       "max": 250,
@@ -312,12 +312,12 @@
         "SlTxDesignatedChannel",
         "SlSignallingHoldTime",
         "SlPrioritySampleTime",
-        "SlChannelMember"
+        "SlChannelMembers"
       ]
     },
     {
-      "typeName": "Channel Information",
-      "type": "ChannelInformation",
+      "typeName": "Channels",
+      "type": "Channels",
       "offset": 127013,
       "size": 64,
       "max": 1000,
@@ -914,7 +914,7 @@
       "bitSize": 16,
       "max": 32,
       "valueType": "listIndex",
-      "listType": "DigitalContacts"
+      "listType": "Contacts"
     },
     {
       "typeName": "Zone Name",
@@ -924,22 +924,22 @@
       "valueType": "uniqueName"
     },
     {
-      "typeName": "Channel Member",
-      "type": "ZiChannelMember_md380",
+      "typeName": "Channel Members",
+      "type": "ZiChannelMembers_md380",
       "bitOffset": 256,
       "bitSize": 16,
       "max": 16,
       "valueType": "listIndex",
-      "listType": "ChannelInformation"
+      "listType": "Channels"
     },
     {
-      "typeName": "Channel Member",
-      "type": "ZiChannelMember_md40",
+      "typeName": "Channel Members",
+      "type": "ZiChannelMembers_md40",
       "bitOffset": 256,
       "bitSize": 16,
       "max": 64,
       "valueType": "listIndex",
-      "listType": "ChannelInformation",
+      "listType": "Channels",
       "extOffset": 201253,
       "extSize": 224,
       "extIndex": 16
@@ -957,7 +957,7 @@
       "bitOffset": 256,
       "bitSize": 16,
       "valueType": "memberListIndex",
-      "listType": "ChannelInformation",
+      "listType": "Channels",
       "indexedStrings": [
         {
           "index": 0,
@@ -982,7 +982,7 @@
       "bitSize": 16,
       "valueType": "memberListIndex",
       "defaultValue": "None",
-      "listType": "ChannelInformation",
+      "listType": "Channels",
       "indexedStrings": [
         {
           "index": 0,
@@ -1000,7 +1000,7 @@
       "bitOffset": 288,
       "bitSize": 16,
       "valueType": "listIndex",
-      "listType": "ChannelInformation",
+      "listType": "Channels",
       "indexedStrings": [
         {
           "index": 0,
@@ -1037,13 +1037,13 @@
       }
     },
     {
-      "typeName": "Channel Member",
-      "type": "SlChannelMember",
+      "typeName": "Channel Members",
+      "type": "SlChannelMembers",
       "bitOffset": 336,
       "bitSize": 16,
       "max": 31,
       "valueType": "listIndex",
-      "listType": "ChannelInformation"
+      "listType": "Channels"
     },
     {
       "typeName": "Lone Worker",
@@ -1298,7 +1298,7 @@
       "bitSize": 16,
       "valueType": "listIndex",
       "defaultValue": "None",
-      "listType": "DigitalContacts",
+      "listType": "Contacts",
       "indexedStrings": [
         {
           "index": 0,
@@ -1337,7 +1337,7 @@
       "bitOffset": 88,
       "bitSize": 8,
       "valueType": "listIndex",
-      "listType": "ScanList",
+      "listType": "ScanLists",
       "indexedStrings": [
         {
           "index": 0,
@@ -1352,7 +1352,7 @@
       "bitSize": 8,
       "valueType": "listIndex",
       "defaultValue": "None",
-      "listType": "GroupList",
+      "listType": "GroupLists",
       "indexedStrings": [
         {
           "index": 0,
