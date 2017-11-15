@@ -123,12 +123,13 @@ func (rl *RecordList) AddSelected() error {
 	rType := w.recordType
 	cp := w.mainWindow.codeplug
 
+	allRecords := cp.Records(rType)
 	records := rl.SelectedRecords()
 	if len(records) == 0 {
-		return fmt.Errorf("no records selected")
+		records = []*codeplug.Record{allRecords[len(allRecords)-1]}
 	}
 
-	if len(cp.Records(rType))+len(records) > cp.MaxRecords(rType) {
+	if len(allRecords)+len(records) > cp.MaxRecords(rType) {
 		return fmt.Errorf("too many records")
 	}
 
