@@ -106,27 +106,26 @@ func (rd *rDesc) loadRecords() {
 
 // newField creates and returns the address of a new field of the given type.
 func (r *Record) NewField(fType FieldType) *Field {
-	f := new(Field)
+	if r.fDesc == nil {
+		m := make(map[FieldType]*fDesc)
+		r.fDesc = &m
+	}
 	fd := (*r.fDesc)[fType]
+	f := new(Field)
 	if fd == nil {
-		fd = f.fDesc
-		if fd == nil {
-			for _, fi := range r.rDesc.fieldInfos {
-				if fi.fType == fType {
-					fd = &fDesc{fi, r, make([]*Field, 0)}
-					break
-				}
+		for _, fi := range r.rDesc.fieldInfos {
+			if fi.fType == fType {
+				fd = &fDesc{fi, r, make([]*Field, 0)}
+				break
 			}
-			if fd == nil {
-				// bad field type
-				fd = &fDesc{r.rDesc.fieldInfos[0], r, make([]*Field, 0)}
-			}
-			fd.record = r
-			fd.fields = make([]*Field, 0)
-			(*r.fDesc)[fType] = fd
 		}
-		(*r.fDesc)[fType] = fd
+		if fd == nil {
+			// bad field type
+			fd = &fDesc{r.rDesc.fieldInfos[0], r, make([]*Field, 0)}
+		}
 		fd.record = r
+		fd.fields = make([]*Field, 0)
+		(*r.fDesc)[fType] = fd
 	}
 	f.fDesc = fd
 	f.value = newValue(fd.valueType)
@@ -530,20 +529,12 @@ func (or *Record) Copy() *Record {
 	r.rDesc = or.rDesc
 	r.rIndex = 0
 
-	rfDesc := make(map[FieldType]*fDesc)
-	for fType, fd := range *or.fDesc {
-		fields := fd.CopyFields()
-		fDesc := new(fDesc)
-		fDesc.fieldInfo = fd.fieldInfo
-		if len(fields) > 0 {
-			fDesc = fields[0].fDesc
+	for _, fType := range or.FieldTypes() {
+		for _, of := range or.Fields(fType) {
+			f, _ := r.NewFieldWithValue(of.fType, of.fIndex, of.String())
+			r.addField(f)
 		}
-		fDesc.fields = fields
-		fDesc.record = r
-
-		rfDesc[fType] = fDesc
 	}
-	r.fDesc = &rfDesc
 
 	return r
 }
