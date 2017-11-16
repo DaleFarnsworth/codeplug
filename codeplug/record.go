@@ -445,8 +445,8 @@ func (rd *rDesc) deleteRecord(cp *Codeplug, rIndex int) {
 
 func (r *Record) nameToField(name string, index int, value string) (*Field, error) {
 	rType := r.rType
-	fType, ok := nameToFt[rType][name]
-	if !ok {
+	fType, err := r.codeplug.nameToFt(rType, name)
+	if err != nil {
 		return nil, fmt.Errorf("bad field name: %s", name)
 	}
 
@@ -569,7 +569,8 @@ func updateDeferredFields(records []*Record) error {
 					f.value = dValue.value
 					err := f.setString(dValue.str)
 					if err != nil {
-						warning = appendWarningMsgs(warning, dValue.pos, err)
+						appendWarningMsgs(&warning,
+							&dValue.pos, err)
 					}
 				}
 			}

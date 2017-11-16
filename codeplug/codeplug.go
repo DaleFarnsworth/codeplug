@@ -59,24 +59,26 @@ const (
 
 // A Codeplug represents a codeplug file.
 type Codeplug struct {
-	filename      string
-	textFilename  string
-	fileType      FileType
-	rdtSize       int
-	fileSize      int
-	fileOffset    int
-	id            string
-	bytes         []byte
-	hash          [sha256.Size]byte
-	rDesc         map[RecordType]*rDesc
-	changed       bool
-	lowFrequency  float64
-	highFrequency float64
-	connectChange func(*Change)
-	changeList    []*Change
-	changeIndex   int
-	codeplugInfo  *CodeplugInfo
-	loaded        bool
+	filename       string
+	textFilename   string
+	fileType       FileType
+	rdtSize        int
+	fileSize       int
+	fileOffset     int
+	id             string
+	bytes          []byte
+	hash           [sha256.Size]byte
+	rDesc          map[RecordType]*rDesc
+	changed        bool
+	lowFrequency   float64
+	highFrequency  float64
+	connectChange  func(*Change)
+	changeList     []*Change
+	changeIndex    int
+	codeplugInfo   *CodeplugInfo
+	loaded         bool
+	cachedNameToRt map[string]RecordType
+	cachedNameToFt map[RecordType]map[string]FieldType
 }
 
 type CodeplugInfo struct {
@@ -270,7 +272,7 @@ func (cp *Codeplug) ModelsFrequencyRanges() (models []string, frequencyRanges ma
 	case FileTypeRdt:
 
 	case FileTypeText:
-		model, frequencyRange = parseModelFrequencyRange(cp.textFilename)
+		model, frequencyRange = cp.parseModelFrequencyRange()
 		fallthrough
 	default:
 		cp.bytes = make([]byte, codeplugInfos[0].RdtSize)
@@ -965,9 +967,49 @@ func printRecord(w io.Writer, r *Record, rFmt string, fFmt string) {
 		}
 	}
 }
+func (cp *Codeplug) nameToRt(rTypeName string) (RecordType, error) {
+	if len(cp.cachedNameToRt) == 0 {
+		cp.cachedNameToRt = make(map[string]RecordType)
+		for _, rType := range cp.RecordTypes() {
+			cp.cachedNameToRt[string(rType)] = rType
+		}
+	}
 
-var nameToRt map[string]RecordType
-var nameToFt map[RecordType]map[string]FieldType
+	var rType RecordType
+	var ok bool
+
+	rType, ok = cp.cachedNameToRt[rTypeName]
+	if !ok {
+		return rType, fmt.Errorf("unknown record type: %s", rTypeName)
+	}
+
+	return rType, nil
+}
+
+func (cp *Codeplug) nameToFt(rType RecordType, fTypeName string) (FieldType, error) {
+	if len(cp.cachedNameToFt) == 0 {
+		cp.cachedNameToFt = make(map[RecordType]map[string]FieldType)
+		for _, rType := range cp.RecordTypes() {
+			m := make(map[string]FieldType)
+			for _, fi := range cp.rDesc[rType].fieldInfos {
+				fType := fi.fType
+				name := string(fType)
+				m[name] = fType
+			}
+			cp.cachedNameToFt[rType] = m
+		}
+	}
+
+	var fType FieldType
+	var ok bool
+
+	fType, ok = cp.cachedNameToFt[rType][fTypeName]
+	if !ok {
+		return "", fmt.Errorf("unknown field type: %s", fTypeName)
+	}
+
+	return fType, nil
+}
 
 type reader struct {
 	*bufio.Reader
@@ -1099,52 +1141,29 @@ func (e *PositionError) Column() int {
 	return e.position.column + 1
 }
 
-func parseModelFrequencyRange(filename string) (model string, frequencyRange string) {
-	file, err := os.Open(filename)
+func (cp *Codeplug) parseModelFrequencyRange() (model string, frequencyRange string) {
+	file, err := os.Open(cp.textFilename)
 	if err != nil {
 		return model, frequencyRange
 	}
 	defer file.Close()
 
-	rdr := NewReader(file)
-
-	rdr.ReadWhile(unicode.IsSpace)
-
-	if rdr.pos.column != 0 {
-		return model, frequencyRange
-	}
-
-newRecord:
-	for {
-		rName, _, err := parseName(rdr)
-		if err != nil {
-			break
+	pRecs := cp.parseTextFile(file)
+	for _, pr := range pRecs {
+		if pr.name != string(RtBasicInformation_md380) {
+			continue
 		}
-		for {
-			if rdr.pos.column == 0 {
-				break
+		for _, pf := range pr.pFields {
+			switch pf.name {
+			case string(FtBiModel):
+				model = pf.value
+			case string(FtBiFrequencyRange_md380):
+				frequencyRange = pf.value
+			default:
+				continue
 			}
-			fName, _, err := parseName(rdr)
-			if err != nil {
-				break newRecord
-			}
-
-			value, err := parseValue(rdr)
-			if err != nil {
-				break newRecord
-			}
-			if rName == "BasicInformation" {
-				switch fName {
-				case "Model":
-					model = value
-				case "FrequencyRange":
-					frequencyRange = value
-				default:
-					continue
-				}
-				if model != "" && frequencyRange != "" {
-					return model, frequencyRange
-				}
+			if model != "" && frequencyRange != "" {
+				return model, frequencyRange
 			}
 		}
 	}
@@ -1152,128 +1171,87 @@ newRecord:
 	return model, frequencyRange
 }
 
-func (cp *Codeplug) ParseRecords(iRdr io.Reader) ([]*Record, error) {
-	var warning error
+type parsedField struct {
+	name  string
+	index int
+	err   error
+	pos   *position
+	value string
+}
+
+type parsedRecord struct {
+	name    string
+	index   int
+	err     error
+	pos     *position
+	pFields []*parsedField
+}
+
+func (cp *Codeplug) parseTextFile(iRdr io.Reader) []*parsedRecord {
+	var index int
 	var err error
-	var pos position
+	var pRecords []*parsedRecord
 
 	rdr := NewReader(iRdr)
-	records := []*Record{}
-
-	if len(nameToRt) == 0 {
-		nameToRt = make(map[string]RecordType)
-		for _, rType := range cp.RecordTypes() {
-			nameToRt[string(rType)] = rType
-		}
-
-		nameToFt = make(map[RecordType]map[string]FieldType)
-		for _, rType := range cp.RecordTypes() {
-			m := make(map[string]FieldType)
-			for _, fi := range cp.rDesc[rType].fieldInfos {
-				fType := fi.fType
-				name := string(fType)
-				m[name] = fType
-			}
-			nameToFt[rType] = m
-		}
-	}
 
 	rdr.ReadWhile(unicode.IsSpace)
 
-parseRecord:
 	for {
-		var name string
-		var index int
-		pos = rdr.pos
-		name, index, err = parseName(rdr)
+		var pRecord parsedRecord
+		pRecords = append(pRecords, &pRecord)
+		pos := rdr.pos
+		pRecord.pos = &pos
+		pRecord.name, index, err = parseName(rdr)
 		if err != nil {
 			if err == io.EOF {
 				err = nil
+				pRecords = pRecords[:len(pRecords)-1]
+				break
 			}
+			pRecord.err = err
 			break
 		}
-		if len(name) == 0 {
-			err = fmt.Errorf("no record name")
+		pRecord.index = index
+		if len(pRecord.name) == 0 {
+			pRecord.err = fmt.Errorf("syntax: no record name")
 			break
 		}
-		var r *Record
-		r, err = cp.nameToRecord(name, index)
-		if err != nil {
-			break
-		}
+		var pFields []*parsedField
 		for {
 			if rdr.pos.column == 0 {
 				break
 			}
-			pos = rdr.pos
-			name, index, err = parseName(rdr)
+
+			var pField parsedField
+			pFields = append(pFields, &pField)
+
+			pos := rdr.pos
+			pField.pos = &pos
+
+			pField.name, index, err = parseName(rdr)
+			pField.index = index
 			if err != nil {
-				break parseRecord
+				pField.err = err
+				break
 			}
-			if len(name) == 0 {
-				err = fmt.Errorf("no field name")
-				break parseRecord
-			}
-			pos = rdr.pos
-			fType, ok := nameToFt[r.rType][name]
-			if !ok {
-				err = fmt.Errorf("bad field name: '%s'", name)
-				warning = appendWarningMsgs(warning, pos, err)
+			if len(pField.name) == 0 {
+				pField.err = fmt.Errorf("syntax: no field name")
+				break
 			}
 
-			var str string
 			pos = rdr.pos
-			str, err = parseValue(rdr)
+			pField.pos = &pos
+
+			pField.value, err = parseValue(rdr)
 			if err != nil {
-				err = fmt.Errorf("bad value: %s: %s: %s", name, str, err.Error())
-				break parseRecord
-			}
-			var f *Field
-			f, err = r.NewFieldWithValue(fType, index, str)
-			if err != nil && ok {
-				warning = appendWarningMsgs(warning, pos, err)
-			}
-			dValue, ok := f.value.(deferredValue)
-			if ok {
-				dValue.str = str
-				dValue.pos = pos
-				f.value = dValue
-			}
-			err = r.addField(f)
-			if err != nil {
-				break parseRecord
+				pField.err = fmt.Errorf("syntax: value: %s: %s: %s", pField.name, pField.value, err.Error())
+				break
 			}
 		}
-
-		records = append(records, r)
+		pRecord.pFields = pFields
 	}
 
-	if err != nil {
-		pErr, ok := err.(PositionError)
-		if !ok {
-			pErr = PositionError{
-				position: &pos,
-				error:    err,
-			}
-		}
-		return records, pErr
-	}
-
-	if warning == nil {
-		return records, nil
-	}
-
-	return records, warning
-}
-
-func appendWarningMsgs(oldError error, pos position, newError error) error {
-	var oldMsg string
-	if oldError != nil {
-		oldMsg = oldError.Error()
-	}
-	err := fmt.Errorf("%sline %d:%d: %s\n", oldMsg, pos.line+1,
-		pos.column+1, newError.Error())
-	return Warning{err}
+	return pRecords
 }
 
 func parseName(rdr *reader) (string, int, error) {
@@ -1346,6 +1324,101 @@ returnError:
 	return name, 0, pErr
 }
 
+func (cp *Codeplug) ParseRecords(rdr io.Reader) ([]*Record, error) {
+	pRecs := cp.parseTextFile(rdr)
+	records, err := cp.parsedFileToRecs(pRecs)
+
+	return records, err
+}
+
+func (cp *Codeplug) parsedFileToRecs(pRecs []*parsedRecord) ([]*Record, error) {
+	var warning error
+	var err error
+	var pos *position
+
+	var records []*Record
+	appendWarning := func(pr *parsedRecord, pf *parsedField, err error) {
+		err = fmt.Errorf("%s.%s %s", pr.name, pf.name, err.Error())
+		appendWarningMsgs(&warning, pf.pos, err)
+	}
+
+	for _, pr := range pRecs {
+		if pr.err != nil {
+			pos = pr.pos
+			err = pr.err
+			goto errReturn
+		}
+
+		var r *Record
+		r, err = cp.rNameToRecord(pr.name, pr.index)
+		if err != nil {
+			pos = pr.pos
+			goto errReturn
+		}
+
+		for _, pf := range pr.pFields {
+			if pf.err != nil {
+				pos = pr.pos
+				err = pf.err
+				goto errReturn
+			}
+
+			fType, err := cp.nameToFt(r.rType, pf.name)
+			if err != nil {
+				appendWarning(pr, pf, err)
+				continue
+			}
+
+			var f *Field
+			f, err = r.NewFieldWithValue(fType, pf.index, pf.value)
+			if err != nil {
+				appendWarning(pr, pf, err)
+			}
+			dValue, ok := f.value.(deferredValue)
+			if ok {
+				dValue.str = pf.value
+				dValue.pos = *pf.pos
+				f.value = dValue
+			}
+			err = r.addField(f)
+			if err != nil {
+				appendWarning(pr, pf, err)
+			}
+		}
+		records = append(records, r)
+	}
+
+	return records, warning
+
+errReturn:
+	if err != nil {
+		pErr, ok := err.(PositionError)
+		if !ok {
+			pErr = PositionError{
+				position: pos,
+				error:    err,
+			}
+		}
+		return records, pErr
+	}
+
+	return records, err
+}
+
+func appendWarningMsgs(pWarning *error, ppos *position, warning error) {
+	var oldMsg string
+	if *pWarning != nil {
+		oldMsg = (*pWarning).Error()
+	}
+	err := fmt.Errorf("%s%s\n", oldMsg, warning.Error())
+	if ppos != nil {
+		pos := *ppos
+		err = fmt.Errorf("%sline %d:%d: %s\n", oldMsg,
+			pos.line+1, pos.column+1, warning.Error())
+	}
+	*pWarning = Warning{err}
+}
+
 func parseValue(rdr *reader) (string, error) {
 	pos := rdr.pos
 
@@ -1381,15 +1454,15 @@ func parseValue(rdr *reader) (string, error) {
 	return value, nil
 }
 
-func (cp *Codeplug) nameToRecord(name string, index int) (*Record, error) {
-	rType, ok := nameToRt[name]
-	if !ok {
-		return nil, fmt.Errorf("unknown record type: %s", name)
+func (cp *Codeplug) rNameToRecord(name string, index int) (*Record, error) {
+	rType, err := cp.nameToRt(name)
+	if err != nil {
+		return nil, err
 	}
 
 	found := false
 	for rt := range cp.rDesc {
-		if rType == rt {
+		if rt == rType {
 			found = true
 			break
 		}
@@ -1398,8 +1471,7 @@ func (cp *Codeplug) nameToRecord(name string, index int) (*Record, error) {
 		return cp.newRecord(rType, index), nil
 	}
 
-	name = string(rType)
-	return nil, fmt.Errorf("codeplug has no record: %s", name)
+	return nil, fmt.Errorf("codeplug has no record: %s", string(rType))
 }
 
 func (cp *Codeplug) ExportText(filename string) (err error) {
@@ -1424,12 +1496,6 @@ func (cp *Codeplug) ExportText(filename string) (err error) {
 	w.Flush()
 
 	return nil
-}
-
-func (cp *Codeplug) clearCachedListNames() {
-	for _, rd := range cp.rDesc {
-		rd.cachedListNames = nil
-	}
 }
 
 func (cp *Codeplug) importText(filename string, ignoreWarning bool) error {
@@ -1460,8 +1526,7 @@ func (cp *Codeplug) importText(filename string, ignoreWarning bool) error {
 
 	for _, rd := range cp.rDesc {
 		if len(rd.records) == 0 {
-			rtName := string(rd.rType)
-			err := Warning{fmt.Errorf("no %s records found", rtName)}
+			err := Warning{fmt.Errorf("no %s found", rd.rType)}
 			return err
 		}
 	}
@@ -1471,6 +1536,12 @@ func (cp *Codeplug) importText(filename string, ignoreWarning bool) error {
 	cp.changed = true
 
 	return nil
+}
+
+func (cp *Codeplug) clearCachedListNames() {
+	for _, rd := range cp.rDesc {
+		rd.cachedListNames = nil
+	}
 }
 
 func RadioExists() error {
