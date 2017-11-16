@@ -1613,7 +1613,7 @@ func (v *biFilename) setString(f *Field, s string) error {
 type deferredValue struct {
 	value
 	str string
-	pos position
+	pos *position
 }
 
 type invalidValue struct {

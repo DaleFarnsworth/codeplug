@@ -45,6 +45,7 @@ import (
 	"unicode"
 
 	"github.com/dalefarnsworth/codeplug/dfu"
+	"github.com/tealeg/xlsx"
 )
 
 // FileType tells whether the codeplug is an rdt file or a bin file.
@@ -57,6 +58,7 @@ const (
 	FileTypeNew
 	FileTypeText
 	FileTypeJSON
+	FileTypeXLSX
 )
 
 // A Codeplug represents a codeplug file.
@@ -112,7 +114,7 @@ func NewCodeplug(fType FileType, filename string) (*Codeplug, error) {
 			}
 		}
 
-	case FileTypeText, FileTypeJSON:
+	case FileTypeText, FileTypeJSON, FileTypeXLSX:
 		cp.importFilename = filename
 		fallthrough
 
@@ -183,7 +185,7 @@ findCodeplugInfo:
 	}
 
 	switch cp.fileType {
-	case FileTypeNew, FileTypeText, FileTypeJSON, FileTypeBin:
+	case FileTypeNew, FileTypeBin, FileTypeText, FileTypeJSON, FileTypeXLSX:
 		var filename string
 		for i, v := range cp.frequencyRanges() {
 			if v == frequencyRange {
@@ -214,7 +216,7 @@ findCodeplugInfo:
 	}
 
 	switch cp.fileType {
-	case FileTypeText, FileTypeJSON:
+	case FileTypeText, FileTypeJSON, FileTypeXLSX:
 		for _, rType := range cp.RecordTypes() {
 			if cp.MaxRecords(rType) == 1 {
 				continue
@@ -231,6 +233,8 @@ findCodeplugInfo:
 			err = cp.importText(cp.importFilename, ignoreWarning)
 		case FileTypeJSON:
 			err = cp.importJSON(cp.importFilename)
+		case FileTypeXLSX:
+			err = cp.importXLSX(cp.importFilename)
 		}
 		if _, warning := err.(Warning); warning && ignoreWarning {
 			err = nil
@@ -279,7 +283,7 @@ func (cp *Codeplug) ModelsFrequencyRanges() (models []string, frequencyRanges ma
 	switch cp.fileType {
 	case FileTypeRdt:
 
-	case FileTypeText, FileTypeJSON:
+	case FileTypeText, FileTypeJSON, FileTypeXLSX:
 		model, frequencyRange = cp.parseModelFrequencyRange()
 		fallthrough
 	default:
@@ -1176,6 +1180,9 @@ func (cp *Codeplug) parseModelFrequencyRange() (model string, frequencyRange str
 
 	case FileTypeJSON:
 		pRecs = cp.parseJSONFile(file)
+
+	case FileTypeXLSX:
+		pRecs = cp.parseXLSXFile(file)
 	}
 
 	for _, pr := range pRecs {
@@ -1367,7 +1374,7 @@ func (cp *Codeplug) parsedFileToRecs(pRecs []*parsedRecord) ([]*Record, error) {
 
 	var records []*Record
 	appendWarning := func(pr *parsedRecord, pf *parsedField, err error) {
-		err = fmt.Errorf("%s.%s %s", pr.name, pf.name, err.Error())
+		err = fmt.Errorf("%s.%s: %s", pr.name, pf.name, err.Error())
 		appendWarningMsgs(&warning, pf.pos, err)
 	}
 
@@ -1407,7 +1414,7 @@ func (cp *Codeplug) parsedFileToRecs(pRecs []*parsedRecord) ([]*Record, error) {
 			if ok {
 				dValue.str = pf.value
 				if pf.pos != nil {
-					dValue.pos = *pf.pos
+					dValue.pos = pf.pos
 				}
 				f.value = dValue
 			}
@@ -1761,6 +1768,147 @@ func (cp *Codeplug) parseJSONFields(fMap map[string]interface{}) []*parsedField 
 	}
 
 	return pFields
+}
+
+func (cp *Codeplug) ExportXLSX(filename string) error {
+	var file *xlsx.File
+	var sheet *xlsx.Sheet
+	var row *xlsx.Row
+	var cell *xlsx.Cell
+	var err error
+
+	file = xlsx.NewFile()
+
+	recordTypes := cp.RecordTypes()
+	for _, rType := range recordTypes {
+		sheet, err = file.AddSheet(string(rType))
+		if err != nil {
+			return err
+		}
+		records := cp.records(rType)
+		headerRow := sheet.AddRow()
+		r := records[0]
+		for _, fType := range r.FieldTypes() {
+			if filterField(rType, fType) {
+				continue
+			}
+
+			for i := 0; i < (*r.fDesc)[fType].max; i++ {
+				cell = headerRow.AddCell()
+				cell.Value = string(fType)
+			}
+		}
+
+		for _, r := range records {
+			row = sheet.AddRow()
+			for _, fType := range r.FieldTypes() {
+				if filteredField(rType, fType) {
+					continue
+				}
+				fields := r.Fields(fType)
+				for _, f := range fields {
+					cell = row.AddCell()
+					cell.Value = f.String()
+				}
+			}
+		}
+	}
+	err = file.Save(filename)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (cp *Codeplug) importXLSX(filename string) error {
+	file, err := os.Open(filename)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	pRecs := cp.parseXLSXFile(file)
+	records, err := cp.parsedFileToRecs(pRecs)
+	if err != nil {
+		return err
+	}
+
+	for _, r := range records {
+		r.rIndex = len(cp.records(r.rType))
+		cp.InsertRecord(r)
+	}
+
+	err = updateDeferredFields(records)
+	if err != nil {
+		return err
+	}
+
+	for _, rd := range cp.rDesc {
+		if len(rd.records) == 0 {
+			return fmt.Errorf("no %s found", rd.rType)
+		}
+	}
+	cp.store()
+	cp.changeList = []*Change{&Change{}}
+	cp.changeIndex = 0
+	cp.changed = true
+
+	return nil
+}
+
+func (cp *Codeplug) parseXLSXFile(iRdr io.Reader) []*parsedRecord {
+	errorInvalidXLSX := fmt.Errorf("Invalid codeplug spreadsheet file")
+
+	var parRecord parsedRecord
+	parRecords := []*parsedRecord{
+		&parRecord,
+	}
+
+	bytes, err := ioutil.ReadAll(iRdr)
+	if err != nil {
+		parRecord.err = errorInvalidXLSX
+		return parRecords
+	}
+
+	file, err := xlsx.OpenBinary(bytes)
+	if err != nil {
+		parRecord.err = errorInvalidXLSX
+		return parRecords
+	}
+
+	var pRecords []*parsedRecord
+
+	for _, sheet := range file.Sheets {
+		rTypeName := sheet.Name
+
+		headerCells := sheet.Rows[0].Cells
+		fTypeNames := make([]string, len(headerCells))
+		for i, cell := range headerCells {
+			fTypeNames[i] = cell.String()
+		}
+		for index, row := range sheet.Rows[1:] {
+			pRecord := parsedRecord{
+				name:  rTypeName,
+				index: index,
+			}
+			var parFields []*parsedField
+			for index, cell := range row.Cells {
+				strs := cell.String()
+				for _, str := range strings.Split(strs, "\n") {
+					parField := parsedField{
+						name:  fTypeNames[index],
+						value: str,
+					}
+					parFields = append(parFields, &parField)
+				}
+				pRecord.pFields = parFields
+			}
+			pRecords = append(pRecords, &pRecord)
+		}
+	}
+
+	return pRecords
 }
 
 func (cp *Codeplug) clearCachedListNames() {
