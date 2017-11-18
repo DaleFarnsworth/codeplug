@@ -1,14 +1,14 @@
 
 // Record types
 const (
-{{- range $r := $.Records}}
+{{- range $r := $.SortedRecords}}
 	Rt{{$r.Type}} RecordType = "{{call $.RecordTypeString $r.Type}}"
 {{- end}}
 )
 
 // Field types
 const (
-{{- range $f := $.Fields}}
+{{- range $f := $.SortedFields}}
 	Ft{{$f.Type}} FieldType = "{{call $.FieldTypeString $f.Type}}"
 {{- end}}
 )
@@ -59,7 +59,7 @@ var cp{{call $.Capitalize $c.Type}} = CodeplugInfo{
 }
 {{- end}}
 
-{{- range $r := $.Records}}
+{{- range $r := $.SortedRecords}}
 
 var ri{{$r.Type}} = recordInfo{
 	rType: Rt{{$r.Type}},
@@ -86,7 +86,7 @@ var ri{{$r.Type}} = recordInfo{
 }
 {{ end}}
 
-{{- range $f := $.Fields}}
+{{- range $f := $.SortedFields}}
 
 var fi{{$f.Type}} = fieldInfo{
 	fType: Ft{{$f.Type}},

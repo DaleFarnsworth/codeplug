@@ -81,6 +81,7 @@ type fieldInfo struct {
 	extOffset      int
 	extSize        int
 	extIndex       int
+	index          int
 }
 
 // A FieldType represents a field's type

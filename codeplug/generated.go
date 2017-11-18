@@ -61,7 +61,6 @@ const (
 	FtCiAutoscan                FieldType = "Autoscan"
 	FtCiBandwidth               FieldType = "Bandwidth"
 	FtCiChannelMode             FieldType = "ChannelMode"
-	FtCiChannelName             FieldType = "ChannelName"
 	FtCiColorCode               FieldType = "ColorCode"
 	FtCiCompressedUdpDataHeader FieldType = "CompressedUdpDataHeader"
 	FtCiContactName             FieldType = "ContactName"
@@ -80,6 +79,7 @@ const (
 	FtCiEmergencyAlarmAck       FieldType = "EmergencyAlarmAck"
 	FtCiGroupList               FieldType = "GroupList"
 	FtCiLoneWorker              FieldType = "LoneWorker"
+	FtCiName                    FieldType = "Name"
 	FtCiPower                   FieldType = "Power"
 	FtCiPrivacy                 FieldType = "Privacy"
 	FtCiPrivacyNumber           FieldType = "PrivacyNumber"
@@ -102,7 +102,7 @@ const (
 	FtDcCallID                  FieldType = "CallID"
 	FtDcCallReceiveTone         FieldType = "CallReceiveTone"
 	FtDcCallType                FieldType = "CallType"
-	FtDcContactName             FieldType = "ContactName"
+	FtDcName                    FieldType = "Name"
 	FtGlContactMember           FieldType = "ContactMember"
 	FtGlName                    FieldType = "Name"
 	FtGsBacklightColor          FieldType = "BacklightColor"
@@ -122,13 +122,13 @@ const (
 	FtGsMode                    FieldType = "Mode"
 	FtGsModeSelect              FieldType = "ModeSelect"
 	FtGsMonitorType             FieldType = "MonitorType"
-	FtGsPcProgPw                FieldType = "PcProgPw"
+	FtGsPcProgPassword          FieldType = "PcProgPassword"
 	FtGsPowerOnPassword         FieldType = "PowerOnPassword"
 	FtGsPrivateCallHangTime     FieldType = "PrivateCallHangTime"
 	FtGsPwAndLockEnable         FieldType = "PwAndLockEnable"
 	FtGsRadioID                 FieldType = "RadioID"
 	FtGsRadioName               FieldType = "RadioName"
-	FtGsRadioProgPw             FieldType = "RadioProgPw"
+	FtGsRadioProgPassword       FieldType = "RadioProgPassword"
 	FtGsRxLowBatteryInterval    FieldType = "RxLowBatteryInterval"
 	FtGsSaveModeReceive         FieldType = "SaveModeReceive"
 	FtGsSavePreamble            FieldType = "SavePreamble"
@@ -370,34 +370,41 @@ var riChannels = recordInfo{
 		},
 	},
 	fieldInfos: []*fieldInfo{
-		&fiCiLoneWorker,
-		&fiCiSquelch,
-		&fiCiAutoscan,
-		&fiCiBandwidth,
+		&fiCiName,
+		&fiCiRxFrequency,
+		&fiCiTxFrequency,
 		&fiCiChannelMode,
+		&fiCiBandwidth,
+		&fiCiScanList,
+		&fiCiSquelch,
+		&fiCiRxRefFrequency,
+		&fiCiTxRefFrequency,
+		&fiCiTot,
+		&fiCiTotRekeyDelay,
+		&fiCiPower,
+		&fiCiAdmitCriteria,
+		&fiCiAutoscan,
+		&fiCiRxOnly,
+		&fiCiLoneWorker,
+		&fiCiVox,
+		&fiCiAllowTalkaround,
+		&fiCiPrivateCallConfirmed,
+		&fiCiEmergencyAlarmAck,
+		&fiCiDataCallConfirmed,
+		&fiCiCompressedUdpDataHeader,
+		&fiCiContactName,
+		&fiCiGroupList,
 		&fiCiColorCode,
 		&fiCiRepeaterSlot,
-		&fiCiRxOnly,
-		&fiCiAllowTalkaround,
-		&fiCiDataCallConfirmed,
-		&fiCiPrivateCallConfirmed,
 		&fiCiPrivacy,
 		&fiCiPrivacyNumber,
 		&fiCiDisplayPTTID,
-		&fiCiCompressedUdpDataHeader,
-		&fiCiEmergencyAlarmAck,
-		&fiCiRxRefFrequency,
-		&fiCiAdmitCriteria,
-		&fiCiPower,
-		&fiCiVox,
+		&fiCiCtcssEncode,
+		&fiCiTxSignallingSystem,
 		&fiCiQtReverse,
 		&fiCiReverseBurst,
-		&fiCiTxRefFrequency,
-		&fiCiContactName,
-		&fiCiTot,
-		&fiCiTotRekeyDelay,
-		&fiCiScanList,
-		&fiCiGroupList,
+		&fiCiCtcssDecode,
+		&fiCiRxSignallingSystem,
 		&fiCiDecode1,
 		&fiCiDecode2,
 		&fiCiDecode3,
@@ -406,13 +413,6 @@ var riChannels = recordInfo{
 		&fiCiDecode6,
 		&fiCiDecode7,
 		&fiCiDecode8,
-		&fiCiRxFrequency,
-		&fiCiTxFrequency,
-		&fiCiCtcssDecode,
-		&fiCiCtcssEncode,
-		&fiCiRxSignallingSystem,
-		&fiCiTxSignallingSystem,
-		&fiCiChannelName,
 	},
 }
 
@@ -430,10 +430,10 @@ var riContacts = recordInfo{
 		},
 	},
 	fieldInfos: []*fieldInfo{
+		&fiDcName,
 		&fiDcCallID,
-		&fiDcCallReceiveTone,
 		&fiDcCallType,
-		&fiDcContactName,
+		&fiDcCallReceiveTone,
 	},
 }
 
@@ -444,35 +444,35 @@ var riGeneralSettings_md380 = recordInfo{
 	offset:   8805,
 	size:     144,
 	fieldInfos: []*fieldInfo{
+		&fiGsRadioName,
+		&fiGsRadioID,
+		&fiGsIntroScreen,
 		&fiGsIntroScreenLine1,
 		&fiGsIntroScreenLine2,
-		&fiGsMonitorType,
-		&fiGsDisableAllLeds,
-		&fiGsTalkPermitTone,
-		&fiGsPwAndLockEnable,
-		&fiGsChFreeIndicationTone,
-		&fiGsDisableAllTones,
-		&fiGsSaveModeReceive,
 		&fiGsSavePreamble,
-		&fiGsIntroScreen,
-		&fiGsRadioID,
-		&fiGsTxPreambleDuration,
-		&fiGsGroupCallHangTime,
-		&fiGsPrivateCallHangTime,
-		&fiGsVoxSensitivity,
-		&fiGsRxLowBatteryInterval,
+		&fiGsSaveModeReceive,
+		&fiGsDisableAllTones,
+		&fiGsChFreeIndicationTone,
+		&fiGsTalkPermitTone,
 		&fiGsCallAlertToneDuration,
-		&fiGsLoneWorkerResponseTime,
-		&fiGsLoneWorkerReminderTime,
 		&fiGsScanDigitalHangTime,
 		&fiGsScanAnalogHangTime,
+		&fiGsLoneWorkerResponseTime,
+		&fiGsLoneWorkerReminderTime,
+		&fiGsPwAndLockEnable,
+		&fiGsPowerOnPassword,
+		&fiGsMonitorType,
+		&fiGsVoxSensitivity,
+		&fiGsTxPreambleDuration,
+		&fiGsRxLowBatteryInterval,
+		&fiGsPcProgPassword,
+		&fiGsRadioProgPassword,
+		&fiGsMode,
 		&fiGsBacklightTime,
 		&fiGsSetKeypadLockTime,
-		&fiGsMode,
-		&fiGsPowerOnPassword,
-		&fiGsRadioProgPw,
-		&fiGsPcProgPw,
-		&fiGsRadioName,
+		&fiGsDisableAllLeds,
+		&fiGsGroupCallHangTime,
+		&fiGsPrivateCallHangTime,
 	},
 }
 
@@ -483,38 +483,38 @@ var riGeneralSettings_md40 = recordInfo{
 	offset:   8805,
 	size:     144,
 	fieldInfos: []*fieldInfo{
+		&fiGsRadioName,
+		&fiGsRadioID,
+		&fiGsIntroScreen,
 		&fiGsIntroScreenLine1,
 		&fiGsIntroScreenLine2,
-		&fiGsMonitorType,
-		&fiGsDisableAllLeds,
-		&fiGsTalkPermitTone,
-		&fiGsPwAndLockEnable,
-		&fiGsChFreeIndicationTone,
-		&fiGsDisableAllTones,
-		&fiGsSaveModeReceive,
 		&fiGsSavePreamble,
-		&fiGsIntroScreen,
-		&fiGsLockUnlock,
-		&fiGsFreqChannelMode,
-		&fiGsModeSelect,
-		&fiGsBacklightColor,
-		&fiGsRadioID,
-		&fiGsTxPreambleDuration,
-		&fiGsGroupCallHangTime,
-		&fiGsPrivateCallHangTime,
-		&fiGsVoxSensitivity,
-		&fiGsRxLowBatteryInterval,
+		&fiGsSaveModeReceive,
+		&fiGsDisableAllTones,
+		&fiGsChFreeIndicationTone,
+		&fiGsTalkPermitTone,
 		&fiGsCallAlertToneDuration,
-		&fiGsLoneWorkerResponseTime,
-		&fiGsLoneWorkerReminderTime,
 		&fiGsScanDigitalHangTime,
 		&fiGsScanAnalogHangTime,
-		&fiGsSetKeypadLockTime,
-		&fiGsMode,
+		&fiGsLoneWorkerResponseTime,
+		&fiGsLoneWorkerReminderTime,
+		&fiGsPwAndLockEnable,
 		&fiGsPowerOnPassword,
-		&fiGsRadioProgPw,
-		&fiGsPcProgPw,
-		&fiGsRadioName,
+		&fiGsMonitorType,
+		&fiGsVoxSensitivity,
+		&fiGsTxPreambleDuration,
+		&fiGsRxLowBatteryInterval,
+		&fiGsPcProgPassword,
+		&fiGsRadioProgPassword,
+		&fiGsMode,
+		&fiGsFreqChannelMode,
+		&fiGsBacklightColor,
+		&fiGsModeSelect,
+		&fiGsLockUnlock,
+		&fiGsSetKeypadLockTime,
+		&fiGsDisableAllLeds,
+		&fiGsGroupCallHangTime,
+		&fiGsPrivateCallHangTime,
 	},
 }
 
@@ -813,15 +813,6 @@ var fiCiChannelMode = fieldInfo{
 	enablingValue: "Digital",
 }
 
-var fiCiChannelName = fieldInfo{
-	fType:     FtCiChannelName,
-	typeName:  "Channel Name",
-	max:       1,
-	bitOffset: 256,
-	bitSize:   256,
-	valueType: VtUniqueName,
-}
-
 var fiCiColorCode = fieldInfo{
 	fType:     FtCiColorCode,
 	typeName:  "Color Code",
@@ -1016,6 +1007,15 @@ var fiCiLoneWorker = fieldInfo{
 	bitOffset: 0,
 	bitSize:   1,
 	valueType: VtOffOn,
+}
+
+var fiCiName = fieldInfo{
+	fType:     FtCiName,
+	typeName:  "Channel Name",
+	max:       1,
+	bitOffset: 256,
+	bitSize:   256,
+	valueType: VtUniqueName,
 }
 
 var fiCiPower = fieldInfo{
@@ -1306,8 +1306,8 @@ var fiDcCallType = fieldInfo{
 	},
 }
 
-var fiDcContactName = fieldInfo{
-	fType:     FtDcContactName,
+var fiDcName = fieldInfo{
+	fType:     FtDcName,
 	typeName:  "Contact Name",
 	max:       1,
 	bitOffset: 32,
@@ -1547,8 +1547,8 @@ var fiGsMonitorType = fieldInfo{
 	},
 }
 
-var fiGsPcProgPw = fieldInfo{
-	fType:     FtGsPcProgPw,
+var fiGsPcProgPassword = fieldInfo{
+	fType:     FtGsPcProgPassword,
 	typeName:  "PC Programming Password",
 	max:       1,
 	bitOffset: 768,
@@ -1610,8 +1610,8 @@ var fiGsRadioName = fieldInfo{
 	valueType: VtRadioName,
 }
 
-var fiGsRadioProgPw = fieldInfo{
-	fType:     FtGsRadioProgPw,
+var fiGsRadioProgPassword = fieldInfo{
+	fType:     FtGsRadioProgPassword,
 	typeName:  "Radio Programming Password",
 	max:       1,
 	bitOffset: 736,

@@ -606,7 +606,7 @@ func (cp *Codeplug) Record(rType RecordType) *Record {
 	return cp.Records(rType)[0]
 }
 
-// fecord returns the first record of a codeplug's given RecordType.
+// record returns the first record of a codeplug's given RecordType.
 func (cp *Codeplug) record(rType RecordType) *Record {
 	return cp.records(rType)[0]
 }
@@ -620,16 +620,19 @@ func (cp *Codeplug) MaxRecords(rType RecordType) int {
 // RecordTypes returns all of the record types of the codeplug except
 // BasicInformation.  The BasicInformation record is omitted.
 func (cp *Codeplug) RecordTypes() []RecordType {
-	strs := make([]string, 0, len(cp.rDesc))
+	indexedStrs := make(map[int]string)
+	indexes := make([]int, 0, len(cp.rDesc))
 
-	for rType := range cp.rDesc {
-		strs = append(strs, string(rType))
+	for rType, rDesc := range cp.rDesc {
+		index := rDesc.recordInfo.index
+		indexes = append(indexes, index)
+		indexedStrs[index] = string(rType)
 	}
-	sort.Strings(strs)
+	sort.Ints(indexes)
 
-	rTypes := make([]RecordType, len(strs))
-	for i, str := range strs {
-		rTypes[i] = RecordType(str)
+	rTypes := make([]RecordType, len(indexes))
+	for i, index := range indexes {
+		rTypes[i] = RecordType(indexedStrs[index])
 	}
 
 	return rTypes
@@ -728,7 +731,8 @@ func (cp *Codeplug) loadHeader() {
 // load loads all the records into the codeplug from its file.
 func (cp *Codeplug) load() {
 	cp.clearCachedListNames()
-	for _, ri := range cp.codeplugInfo.RecordInfos {
+	for i, ri := range cp.codeplugInfo.RecordInfos {
+		ri.index = i
 		if ri.max == 0 {
 			ri.max = 1
 		}
@@ -874,11 +878,16 @@ func (cp *Codeplug) publishChange(change *Change) {
 // codeplugs contains the list of open codeplugs.
 var codeplugs []*Codeplug
 
-func filteredField(rType RecordType, fType FieldType) bool {
+func filterRecord(rType RecordType) bool {
 	switch rType {
 	case RtTextMessages:
 		return true
+	}
+	return false
+}
 
+func filterField(rType RecordType, fType FieldType) bool {
+	switch rType {
 	case RtBasicInformation_md380:
 		switch fType {
 		case FtBiCpsVersion, FtBiNewFilename_md380:
@@ -892,15 +901,23 @@ func filteredField(rType RecordType, fType FieldType) bool {
 
 func PrintRecord(w io.Writer, r *Record) {
 	rType := r.Type()
+	if filterRecord(rType) {
+		return
+	}
+
 	ind := ""
 	if r.max > 1 {
 		ind = fmt.Sprintf("[%d]", r.rIndex+1)
 	}
+
 	fmt.Fprintf(w, "%s%s:\n", string(rType), ind)
 
-	for _, fType := range r.FieldTypes() {
-		if filteredField(rType, fType) {
+	for i, fType := range r.FieldTypes() {
+		if filterField(rType, fType) {
 			continue
+		}
+
+		if i == 0 {
 		}
 
 		name := string(fType)
@@ -1589,13 +1606,17 @@ func (cp *Codeplug) ExportJSON(filename string) error {
 	recordTypes := cp.RecordTypes()
 	recordMap := make(map[string]interface{})
 	for _, rType := range recordTypes {
+		if filterRecord(rType) {
+			continue
+		}
+
 		records := cp.records(rType)
 		recordSlice := make([]map[string]interface{}, len(records))
 		for i, r := range records {
 			fieldTypes := r.FieldTypes()
 			fieldMap := make(map[string]interface{})
 			for _, fType := range fieldTypes {
-				if filteredField(rType, fType) {
+				if filterField(rType, fType) {
 					continue
 				}
 				fields := r.Fields(fType)
@@ -1781,6 +1802,10 @@ func (cp *Codeplug) ExportXLSX(filename string) error {
 
 	recordTypes := cp.RecordTypes()
 	for _, rType := range recordTypes {
+		if filterRecord(rType) {
+			continue
+		}
+
 		sheet, err = file.AddSheet(string(rType))
 		if err != nil {
 			return err
@@ -1802,9 +1827,10 @@ func (cp *Codeplug) ExportXLSX(filename string) error {
 		for _, r := range records {
 			row = sheet.AddRow()
 			for _, fType := range r.FieldTypes() {
-				if filteredField(rType, fType) {
+				if filterField(rType, fType) {
 					continue
 				}
+
 				fields := r.Fields(fType)
 				for _, f := range fields {
 					cell = row.AddCell()

@@ -121,7 +121,9 @@ type ValueTypeMap map[string]int
 type TemplateVars struct {
 	Codeplugs        []*Codeplug
 	Records          []*Record
+	SortedRecords    []*Record
 	Fields           []*Field
+	SortedFields     []*Field
 	ValueTypes       []string
 	Capitalize       func(string) string
 	RecordTypeString func(string) string
@@ -194,19 +196,6 @@ func doEnables(r *Record, fieldMap map[string]*Field) {
 	}
 }
 
-func sortCodeplugs(codeplugs []*Codeplug) {
-	codeplugTypes := make([]string, len(codeplugs))
-	codeplugMap := make(map[string]*Codeplug)
-	for i, cp := range codeplugs {
-		codeplugTypes[i] = cp.Type
-		codeplugMap[cp.Type] = cp
-	}
-	sort.Strings(codeplugTypes)
-	for i, typ := range codeplugTypes {
-		codeplugs[i] = codeplugMap[typ]
-	}
-}
-
 func sortRecords(records []*Record) {
 	recordTypes := make([]string, len(records))
 	recordMap := make(map[string]*Record)
@@ -247,14 +236,13 @@ func readCodeplugJson(filename string) TemplateVars {
 
 	var templateVars TemplateVars
 
-	sortCodeplugs(top.Codeplugs)
 	templateVars.Codeplugs = top.Codeplugs
 
 	fieldMap := make(map[string]*Field)
 	valueTypeMap := make(map[string]int)
 
-	sortFields(top.Fields)
-	for _, f := range top.Fields {
+	sortedFields := make([]*Field, len(top.Fields))
+	for i, f := range top.Fields {
 		if f.Max == 0 {
 			f.Max = 1
 		}
@@ -266,17 +254,23 @@ func readCodeplugJson(filename string) TemplateVars {
 		}
 		fieldMap[f.Type] = f
 		valueTypeMap[f.ValueType]++
+		sortedFields[i] = f
 	}
+	sortFields(sortedFields)
 	templateVars.Fields = top.Fields
+	templateVars.SortedFields = sortedFields
 
-	sortRecords(top.Records)
-	for _, r := range top.Records {
+	sortedRecords := make([]*Record, len(top.Records))
+	for i, r := range top.Records {
 		if r.Max == 0 {
 			r.Max = 1
 		}
 		doEnables(r, fieldMap)
+		sortedRecords[i] = r
 	}
+	sortRecords(sortedRecords)
 	templateVars.Records = top.Records
+	templateVars.SortedRecords = sortedRecords
 
 	valueTypes := make([]string, 0, len(valueTypeMap))
 	for valueType := range valueTypeMap {

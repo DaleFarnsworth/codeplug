@@ -58,6 +58,7 @@ type recordInfo struct {
 	delDescs      []delDesc
 	fieldInfos    []*fieldInfo
 	nameFieldType FieldType
+	index         int
 }
 
 // A RecordType represents a record's type
@@ -153,6 +154,7 @@ func (r *Record) load() {
 
 	for i := range ri.fieldInfos {
 		fi := ri.fieldInfos[i]
+		fi.index = i
 		if fi.max == 0 {
 			fi.max = 1
 		}
@@ -237,16 +239,19 @@ func (r *Record) store() {
 func (r *Record) FieldTypes() []FieldType {
 	fds := *r.fDesc
 
-	strs := make([]string, 0, len(fds))
+	indexedStrs := make(map[int]string)
+	indexes := make([]int, 0, len(fds))
 
-	for fType := range fds {
-		strs = append(strs, string(fType))
+	for fType, fd := range fds {
+		index := fd.fieldInfo.index
+		indexes = append(indexes, index)
+		indexedStrs[index] = string(fType)
 	}
-	sort.Strings(strs)
+	sort.Ints(indexes)
 
-	fTypes := make([]FieldType, len(strs))
-	for i, str := range strs {
-		fTypes[i] = FieldType(str)
+	fTypes := make([]FieldType, len(indexes))
+	for i, index := range indexes {
+		fTypes[i] = FieldType(indexedStrs[index])
 	}
 
 	return fTypes
