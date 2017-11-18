@@ -1556,27 +1556,10 @@ func (cp *Codeplug) importText(filename string, ignoreWarning bool) error {
 		return err
 	}
 
-	for _, r := range records {
-		r.rIndex = len(cp.records(r.rType))
-		cp.InsertRecord(r)
-	}
-
-	err = cp.resolveDeferredValueFields()
-	if err != nil && !ignoreWarning {
-		err = Warning{err}
+	err = cp.storeParsedRecords(records)
+	if err != nil {
 		return err
 	}
-
-	for _, rd := range cp.rDesc {
-		if len(rd.records) == 0 {
-			err := Warning{fmt.Errorf("no %s found", rd.rType)}
-			return err
-		}
-	}
-	cp.store()
-	cp.changeList = []*Change{&Change{}}
-	cp.changeIndex = 0
-	cp.changed = true
 
 	return nil
 }
@@ -1650,25 +1633,10 @@ func (cp *Codeplug) importJSON(filename string) error {
 		return err
 	}
 
-	for _, r := range records {
-		r.rIndex = len(cp.records(r.rType))
-		cp.InsertRecord(r)
-	}
-
-	err = cp.resolveDeferredValueFields()
+	err = cp.storeParsedRecords(records)
 	if err != nil {
 		return err
 	}
-
-	for _, rd := range cp.rDesc {
-		if len(rd.records) == 0 {
-			return fmt.Errorf("no %s found", rd.rType)
-		}
-	}
-	cp.store()
-	cp.changeList = []*Change{&Change{}}
-	cp.changeIndex = 0
-	cp.changed = true
 
 	return nil
 }
@@ -1840,25 +1808,10 @@ func (cp *Codeplug) importXLSX(filename string) error {
 		return err
 	}
 
-	for _, r := range records {
-		r.rIndex = len(cp.records(r.rType))
-		cp.InsertRecord(r)
-	}
-
-	err = cp.resolveDeferredValueFields()
+	err = cp.storeParsedRecords(records)
 	if err != nil {
 		return err
 	}
-
-	for _, rd := range cp.rDesc {
-		if len(rd.records) == 0 {
-			return fmt.Errorf("no %s found", rd.rType)
-		}
-	}
-	cp.store()
-	cp.changeList = []*Change{&Change{}}
-	cp.changeIndex = 0
-	cp.changed = true
 
 	return nil
 }
@@ -1915,6 +1868,30 @@ func (cp *Codeplug) parseXLSXFile(iRdr io.Reader) []*parsedRecord {
 	}
 
 	return pRecords
+}
+
+func (cp *Codeplug) storeParsedRecords(records []*Record) error {
+	for _, r := range records {
+		r.rIndex = len(cp.records(r.rType))
+		cp.InsertRecord(r)
+	}
+
+	err := cp.resolveDeferredValueFields()
+	if err != nil {
+		return err
+	}
+
+	for _, rd := range cp.rDesc {
+		if len(rd.records) == 0 {
+			return fmt.Errorf("no %s found", rd.rType)
+		}
+	}
+	cp.store()
+	cp.changeList = []*Change{&Change{}}
+	cp.changeIndex = 0
+	cp.changed = true
+
+	return nil
 }
 
 func (cp *Codeplug) clearCachedListNames() {
