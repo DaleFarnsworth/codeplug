@@ -318,6 +318,7 @@ func (box *HBox) Clear() {
 
 func (box *VBox) Clear() {
 	clear(box.qWidget)
+	box.layout.Invalidate()
 }
 
 func (box *HBox) SetEnabled(enable bool) {
@@ -642,14 +643,14 @@ func (parent *HBox) AddVbox() *VBox {
 
 func (parent *HBox) AddButton(text string) *Button {
 	b := NewButton(text)
-	parent.layout.AddWidget(&b.qButton, 0, 0)
+	parent.layout.AddWidget(&b.qWidget, 0, 0)
 
 	return b
 }
 
 func (parent *VBox) AddButton(text string) *Button {
 	b := NewButton(text)
-	parent.layout.AddWidget(&b.qButton, 0, 0)
+	parent.layout.AddWidget(&b.qWidget, 0, 0)
 
 	return b
 }
@@ -695,8 +696,8 @@ func (parent *HBox) AddSpace(width int) {
 	h := 0
 	hPolicy := widgets.QSizePolicy__Fixed
 	vPolicy := widgets.QSizePolicy__Fixed
-	filler := widgets.NewQSpacerItem(w, h, hPolicy, vPolicy)
-	parent.layout.AddItem(filler)
+	spacer := widgets.NewQSpacerItem(w, h, hPolicy, vPolicy)
+	parent.layout.AddItem(spacer)
 }
 
 func (parent *VBox) AddSpace(height int) {
@@ -704,8 +705,8 @@ func (parent *VBox) AddSpace(height int) {
 	h := gui.NewQFontMetrics(gui.NewQFont()).AverageCharWidth() * height
 	hPolicy := widgets.QSizePolicy__Fixed
 	vPolicy := widgets.QSizePolicy__Fixed
-	filler := widgets.NewQSpacerItem(w, h, hPolicy, vPolicy)
-	parent.layout.AddItem(filler)
+	spacer := widgets.NewQSpacerItem(w, h, hPolicy, vPolicy)
+	parent.layout.AddItem(spacer)
 }
 
 func (parent *HBox) AddFiller() {
@@ -728,6 +729,30 @@ func (parent *VBox) AddFiller() {
 		filler := widgets.NewQSpacerItem(w, h, hPolicy, vPolicy)
 		parent.layout.AddItem(filler)
 	}
+}
+
+func (box *HBox) SetFixedHeight() {
+	sizePolicy := box.qWidget.SizePolicy()
+	sizePolicy.SetVerticalPolicy(widgets.QSizePolicy__Fixed)
+	box.qWidget.SetSizePolicy(sizePolicy)
+}
+
+func (box *VBox) SetFixedWidth() {
+	sizePolicy := box.qWidget.SizePolicy()
+	sizePolicy.SetHorizontalPolicy(widgets.QSizePolicy__Fixed)
+	box.qWidget.SetSizePolicy(sizePolicy)
+}
+
+func (button *Button) SetFixedHeight() {
+	sizePolicy := button.qWidget.SizePolicy()
+	sizePolicy.SetVerticalPolicy(widgets.QSizePolicy__Fixed)
+	button.qWidget.SetSizePolicy(sizePolicy)
+}
+
+func (button *Button) SetFixedWidth() {
+	sizePolicy := button.qWidget.SizePolicy()
+	sizePolicy.SetHorizontalPolicy(widgets.QSizePolicy__Fixed)
+	button.qWidget.SetSizePolicy(sizePolicy)
 }
 
 func (parent *Form) AddWidget(w *Widget) {
@@ -1218,60 +1243,60 @@ func (a *Action) SetEnabled(enable bool) {
 }
 
 type RadioButton struct {
-	qButton *widgets.QRadioButton
+	qWidget *widgets.QRadioButton
 }
 
 func (parent *HBox) AddRadioButton(option string) *RadioButton {
 	b := new(RadioButton)
-	b.qButton = widgets.NewQRadioButton2(option, nil)
-	parent.layout.AddWidget(b.qButton, 0, 0)
+	b.qWidget = widgets.NewQRadioButton2(option, nil)
+	parent.layout.AddWidget(b.qWidget, 0, 0)
 
 	return b
 }
 
 func (b *RadioButton) ConnectClicked(fn func(checked bool)) {
-	b.qButton.ConnectClicked(func(checked bool) {
+	b.qWidget.ConnectClicked(func(checked bool) {
 		fn(checked)
 	})
 }
 
 func (b *RadioButton) SetChecked(bo bool) {
-	b.qButton.SetChecked(bo)
+	b.qWidget.SetChecked(bo)
 }
 
 func (b *RadioButton) IsChecked() bool {
-	return b.qButton.IsChecked()
+	return b.qWidget.IsChecked()
 }
 
 func (b *RadioButton) Text() string {
-	return b.qButton.Text()
+	return b.qWidget.Text()
 }
 
 type Button struct {
-	qButton widgets.QPushButton
+	qWidget widgets.QPushButton
 }
 
 func NewButton(text string) *Button {
 	b := new(Button)
-	b.qButton = *widgets.NewQPushButton2(text, nil)
-	b.qButton.SetSizePolicy2(widgets.QSizePolicy__Fixed,
+	b.qWidget = *widgets.NewQPushButton2(text, nil)
+	b.qWidget.SetSizePolicy2(widgets.QSizePolicy__Fixed,
 		widgets.QSizePolicy__Preferred)
 
 	return b
 }
 
 func (b *Button) ConnectClicked(fn func()) {
-	b.qButton.ConnectClicked(func(checked bool) {
+	b.qWidget.ConnectClicked(func(checked bool) {
 		fn()
 	})
 }
 
 func (b *Button) SetText(str string) {
-	b.qButton.SetText(str)
+	b.qWidget.SetText(str)
 }
 
 func (b *Button) SetEnabled(enable bool) {
-	b.qButton.SetEnabled(enable)
+	b.qWidget.SetEnabled(enable)
 }
 
 func (w *Window) SetRecordFunc(fn func()) {

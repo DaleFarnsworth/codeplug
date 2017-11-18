@@ -568,7 +568,9 @@ func (vBox *VBox) AddFieldMembers(r *codeplug.Record, sortAvailable *bool, nameT
 	column = groupRow.AddVbox()
 	column.AddFiller()
 	add := column.AddButton("Add >>")
+	add.SetFixedHeight()
 	delete := column.AddButton("<< Delete")
+	delete.SetFixedHeight()
 	column.AddFiller()
 
 	column = groupRow.AddVbox()
