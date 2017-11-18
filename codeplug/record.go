@@ -471,13 +471,11 @@ func (r *Record) nameToField(name string, index int, value string) (*Field, erro
 func (r *Record) NewFieldWithValue(fType FieldType, index int, str string) (*Field, error) {
 	f := r.NewField(fType)
 	f.fIndex = index
-	switch f.valueType {
-	case VtListIndex, VtMemberListIndex:
-		if len(r.codeplug.rDesc[f.listRecordType].records) == 0 {
-			f.value = deferredValue{value: f.value}
-			return f, nil
-		}
+
+	if f.isDeferredValue() {
+		return f, nil
 	}
+
 	err := f.setString(str)
 	if err != nil {
 		return f, err
@@ -566,32 +564,4 @@ func (r *Record) FindFieldByName(fType FieldType, name string) *Field {
 		}
 	}
 	return nil
-}
-
-func updateDeferredFields(records []*Record) error {
-	var warning error
-	appendWarning := func(f *Field, pos *position, err error) {
-		rName := f.record.TypeName()
-		fName := f.TypeName()
-		err = fmt.Errorf("%s.%s: %s", rName, fName, err.Error())
-		appendWarningMsgs(&warning, pos, err)
-	}
-
-	for _, r := range records {
-		for _, fType := range r.FieldTypes() {
-			for _, f := range r.Fields(fType) {
-				dValue, deferred := f.value.(deferredValue)
-				if deferred {
-					f.value = dValue.value
-					pos := dValue.pos
-					err := f.setString(dValue.str)
-					if err != nil {
-						appendWarning(f, pos, err)
-					}
-				}
-			}
-		}
-	}
-
-	return warning
 }

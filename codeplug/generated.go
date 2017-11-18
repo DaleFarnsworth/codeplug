@@ -254,7 +254,6 @@ var cpMd380 = CodeplugInfo{
 	RecordInfos: []*recordInfo{
 		&riBasicInformation_md380,
 		&riGeneralSettings_md380,
-		&riTextMessages,
 		&riContacts,
 		&riGroupLists,
 		&riZones_md380,
@@ -275,7 +274,6 @@ var cpMd390 = CodeplugInfo{
 	RecordInfos: []*recordInfo{
 		&riBasicInformation_md390,
 		&riGeneralSettings_md380,
-		&riTextMessages,
 		&riContacts,
 		&riGroupLists,
 		&riZones_md380,
@@ -296,7 +294,6 @@ var cpMd40 = CodeplugInfo{
 	RecordInfos: []*recordInfo{
 		&riBasicInformation_md40,
 		&riGeneralSettings_md40,
-		&riTextMessages,
 		&riContacts,
 		&riGroupLists,
 		&riZones_md40,

@@ -190,7 +190,10 @@ func (f *Field) memberListNames() []string {
 	fieldInfos := r.fieldInfos
 	fieldInfo := fieldInfos[len(fieldInfos)-1]
 	fDesc := (*r.fDesc)[fieldInfo.fType]
-	fields := fDesc.fields
+	var fields []*Field
+	if fDesc != nil {
+		fields = fDesc.fields
+	}
 	memberNames := make([]string, len(fields))
 	for i, f := range fields {
 		name := f.String()
@@ -530,11 +533,6 @@ func (fi *fieldInfo) offset(fIndex int) int {
 func (fi *fieldInfo) size() (fSize int) {
 	return (fi.bitSize + 7) / 8
 }
-
-// deferredValidFields contains a list fields whose values could not be
-// checked for validity because they have not yet been loaded. They will
-// be checked after all fields are loaded.
-var deferredValidFields []*Field
 
 // frequency is a field value representing a frequency in Hertz.
 type frequency float64
@@ -1263,7 +1261,7 @@ func (v *privacyNumber) setString(f *Field, s string) error {
 func (v *privacyNumber) valid(f *Field) error {
 	sibling := f.sibling(FtCiPrivacy)
 	if sibling == nil {
-		deferredValidFields = append(deferredValidFields, f)
+		f.setDeferredValue()
 		return nil
 	}
 	ss := sibling.String()
@@ -1425,7 +1423,7 @@ func (v *listIndex) valid(f *Field) error {
 
 	listNames := fd.record.codeplug.rDesc[fd.listRecordType].ListNames()
 	if listNames == nil {
-		deferredValidFields = append(deferredValidFields, f)
+		f.setDeferredValue()
 		return nil
 	}
 
@@ -1798,4 +1796,36 @@ func fieldsToStrings(fields []*Field) []string {
 	}
 
 	return strings
+}
+
+func (f *Field) isDeferredValue() bool {
+	switch f.valueType {
+	case VtMemberListIndex:
+		listNames := f.memberListNames()
+		if len(listNames) > 0 && listNames[0] != "" {
+			return false
+		}
+
+	case VtListIndex:
+		listNames := f.listNames()
+		if len(listNames) > 0 {
+			return false
+		}
+
+	default:
+		return false
+	}
+
+	_, deferred := f.value.(deferredValue)
+	if !deferred {
+		f.value = deferredValue{value: f.value}
+	}
+
+	f.setDeferredValue()
+	return true
+}
+
+func (f *Field) setDeferredValue() {
+	cp := f.record.codeplug
+	cp.deferredValueFields = append(cp.deferredValueFields, f)
 }

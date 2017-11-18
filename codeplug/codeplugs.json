@@ -29,7 +29,6 @@
       "recordTypes": [
         "BasicInformation_md380",
         "GeneralSettings_md380",
-        "TextMessages",
         "Contacts",
         "GroupLists",
         "Zones_md380",
@@ -49,7 +48,6 @@
       "recordTypes": [
         "BasicInformation_md390",
         "GeneralSettings_md380",
-        "TextMessages",
         "Contacts",
         "GroupLists",
         "Zones_md380",
@@ -69,7 +67,6 @@
       "recordTypes": [
         "BasicInformation_md40",
         "GeneralSettings_md40",
-        "TextMessages",
         "Contacts",
         "GroupLists",
         "Zones_md40",

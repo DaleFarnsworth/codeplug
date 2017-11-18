@@ -63,26 +63,27 @@ const (
 
 // A Codeplug represents a codeplug file.
 type Codeplug struct {
-	filename       string
-	importFilename string
-	fileType       FileType
-	rdtSize        int
-	fileSize       int
-	fileOffset     int
-	id             string
-	bytes          []byte
-	hash           [sha256.Size]byte
-	rDesc          map[RecordType]*rDesc
-	changed        bool
-	lowFrequency   float64
-	highFrequency  float64
-	connectChange  func(*Change)
-	changeList     []*Change
-	changeIndex    int
-	codeplugInfo   *CodeplugInfo
-	loaded         bool
-	cachedNameToRt map[string]RecordType
-	cachedNameToFt map[RecordType]map[string]FieldType
+	filename            string
+	importFilename      string
+	fileType            FileType
+	rdtSize             int
+	fileSize            int
+	fileOffset          int
+	id                  string
+	bytes               []byte
+	hash                [sha256.Size]byte
+	rDesc               map[RecordType]*rDesc
+	changed             bool
+	lowFrequency        float64
+	highFrequency       float64
+	connectChange       func(*Change)
+	changeList          []*Change
+	changeIndex         int
+	codeplugInfo        *CodeplugInfo
+	loaded              bool
+	cachedNameToRt      map[string]RecordType
+	cachedNameToFt      map[RecordType]map[string]FieldType
+	deferredValueFields []*Field
 }
 
 type CodeplugInfo struct {
@@ -766,11 +767,12 @@ func (cp *Codeplug) valid() error {
 		}
 	}
 
-	for _, f := range deferredValidFields {
+	for _, f := range cp.deferredValueFields {
 		if err := f.valid(); err != nil {
 			errStr += fmt.Sprintf("%s %s\n", f.FullTypeName(), err.Error())
 		}
 	}
+	cp.deferredValueFields = nil
 
 	if errStr != "" {
 		return Warning{fmt.Errorf("%s", errStr)}
@@ -878,14 +880,6 @@ func (cp *Codeplug) publishChange(change *Change) {
 // codeplugs contains the list of open codeplugs.
 var codeplugs []*Codeplug
 
-func filterRecord(rType RecordType) bool {
-	switch rType {
-	case RtTextMessages:
-		return true
-	}
-	return false
-}
-
 func filterField(rType RecordType, fType FieldType) bool {
 	switch rType {
 	case RtBasicInformation_md380:
@@ -901,9 +895,6 @@ func filterField(rType RecordType, fType FieldType) bool {
 
 func PrintRecord(w io.Writer, r *Record) {
 	rType := r.Type()
-	if filterRecord(rType) {
-		return
-	}
 
 	ind := ""
 	if r.max > 1 {
@@ -1570,12 +1561,9 @@ func (cp *Codeplug) importText(filename string, ignoreWarning bool) error {
 		cp.InsertRecord(r)
 	}
 
-	derr := updateDeferredFields(records)
-	if derr != nil {
-		err = Warning{fmt.Errorf("%s%s", err.Error(), derr.Error())}
-	}
-
+	err = cp.resolveDeferredValueFields()
 	if err != nil && !ignoreWarning {
+		err = Warning{err}
 		return err
 	}
 
@@ -1606,10 +1594,6 @@ func (cp *Codeplug) ExportJSON(filename string) error {
 	recordTypes := cp.RecordTypes()
 	recordMap := make(map[string]interface{})
 	for _, rType := range recordTypes {
-		if filterRecord(rType) {
-			continue
-		}
-
 		records := cp.records(rType)
 		recordSlice := make([]map[string]interface{}, len(records))
 		for i, r := range records {
@@ -1671,7 +1655,7 @@ func (cp *Codeplug) importJSON(filename string) error {
 		cp.InsertRecord(r)
 	}
 
-	err = updateDeferredFields(records)
+	err = cp.resolveDeferredValueFields()
 	if err != nil {
 		return err
 	}
@@ -1802,10 +1786,6 @@ func (cp *Codeplug) ExportXLSX(filename string) error {
 
 	recordTypes := cp.RecordTypes()
 	for _, rType := range recordTypes {
-		if filterRecord(rType) {
-			continue
-		}
-
 		sheet, err = file.AddSheet(string(rType))
 		if err != nil {
 			return err
@@ -1865,7 +1845,7 @@ func (cp *Codeplug) importXLSX(filename string) error {
 		cp.InsertRecord(r)
 	}
 
-	err = updateDeferredFields(records)
+	err = cp.resolveDeferredValueFields()
 	if err != nil {
 		return err
 	}
@@ -1941,6 +1921,40 @@ func (cp *Codeplug) clearCachedListNames() {
 	for _, rd := range cp.rDesc {
 		rd.cachedListNames = nil
 	}
+}
+
+func (cp *Codeplug) resolveDeferredValueFields() error {
+	var warning error
+	appendWarning := func(f *Field, pos *position, err error) {
+		rName := f.record.TypeName()
+		fName := f.TypeName()
+		err = fmt.Errorf("%s.%s: %s", rName, fName, err.Error())
+		appendWarningMsgs(&warning, pos, err)
+	}
+
+	for len(cp.deferredValueFields) > 0 {
+		deferredValueFields := cp.deferredValueFields
+		cp.deferredValueFields = nil
+		for _, f := range deferredValueFields {
+			if f.isDeferredValue() {
+				continue
+			}
+
+			dValue, deferred := f.value.(deferredValue)
+			if !deferred {
+				log.Fatal("not deferred", f.FullTypeName())
+			}
+
+			f.value = dValue.value
+			pos := dValue.pos
+			err := f.setString(dValue.str)
+			if err != nil {
+				appendWarning(f, pos, err)
+			}
+		}
+	}
+
+	return warning
 }
 
 func RadioExists() error {
