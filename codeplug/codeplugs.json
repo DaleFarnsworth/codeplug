@@ -216,7 +216,7 @@
       ]
     },
     {
-      "typeName": "Digital Contacts",
+      "typeName": "Contacts",
       "type": "Contacts",
       "offset": 24997,
       "size": 36,
@@ -236,7 +236,7 @@
       ]
     },
     {
-      "typeName": "GroupLists",
+      "typeName": "Group Lists",
       "type": "GroupLists",
       "offset": 60997,
       "size": 96,
