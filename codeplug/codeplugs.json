@@ -250,7 +250,7 @@
       ],
       "fieldTypes": [
         "GlName",
-        "GlContactMember"
+        "GlContact"
       ]
     },
     {
@@ -268,7 +268,7 @@
       ],
       "fieldTypes": [
         "ZiName",
-        "ZiChannelMembers_md380"
+        "ZiChannel_md380"
       ]
     },
     {
@@ -286,7 +286,7 @@
       ],
       "fieldTypes": [
         "ZiName",
-        "ZiChannelMembers_md40"
+        "ZiChannel_md40"
       ]
     },
     {
@@ -309,7 +309,7 @@
         "SlTxDesignatedChannel",
         "SlSignallingHoldTime",
         "SlPrioritySampleTime",
-        "SlChannelMembers"
+        "SlChannel"
       ]
     },
     {
@@ -905,8 +905,8 @@
       "valueType": "uniqueName"
     },
     {
-      "typeName": "Contact Member",
-      "type": "GlContactMember",
+      "typeName": "Contacts",
+      "type": "GlContact",
       "bitOffset": 256,
       "bitSize": 16,
       "max": 32,
@@ -921,8 +921,8 @@
       "valueType": "uniqueName"
     },
     {
-      "typeName": "Channel Members",
-      "type": "ZiChannelMembers_md380",
+      "typeName": "Channels",
+      "type": "ZiChannel_md380",
       "bitOffset": 256,
       "bitSize": 16,
       "max": 16,
@@ -930,8 +930,8 @@
       "listType": "Channels"
     },
     {
-      "typeName": "Channel Members",
-      "type": "ZiChannelMembers_md40",
+      "typeName": "Channels",
+      "type": "ZiChannel_md40",
       "bitOffset": 256,
       "bitSize": 16,
       "max": 64,
@@ -1034,8 +1034,8 @@
       }
     },
     {
-      "typeName": "Channel Members",
-      "type": "SlChannelMembers",
+      "typeName": "Channels",
+      "type": "SlChannel",
       "bitOffset": 336,
       "bitSize": 16,
       "max": 31,
