@@ -415,7 +415,7 @@ var riChannels = recordInfo{
 
 var riContacts = recordInfo{
 	rType:    RtContacts,
-	typeName: "Digital Contacts",
+	typeName: "Contacts",
 	max:      1000,
 	offset:   24997,
 	size:     36,
@@ -517,7 +517,7 @@ var riGeneralSettings_md40 = recordInfo{
 
 var riGroupLists = recordInfo{
 	rType:    RtGroupLists,
-	typeName: "GroupLists",
+	typeName: "Group Lists",
 	max:      250,
 	offset:   60997,
 	size:     96,
