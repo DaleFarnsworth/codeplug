@@ -1610,7 +1610,7 @@ func (cp *Codeplug) ExportJSON(filename string) error {
 
 	writer := bufio.NewWriter(file)
 	encoder := json.NewEncoder(writer)
-	encoder.SetIndent("", "    ")
+	encoder.SetIndent("", "\t")
 	err = encoder.Encode(recordMap)
 	if err != nil {
 		return err
