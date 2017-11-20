@@ -214,7 +214,7 @@ func (f *Field) Span() Span {
 func (f *Field) Strings() []string {
 	var strs []string
 	switch f.valueType {
-	case VtListIndex:
+	case VtListIndex, VtGpsListIndex:
 		strs = []string{}
 		if f.indexedStrings != nil {
 			strs = append(strs, (*f.indexedStrings)[0].String)
@@ -253,7 +253,7 @@ func (f *Field) Strings() []string {
 		}
 
 	default:
-		log.Fatal("unexpected f.valueType in f.Strings()")
+		log.Fatalf("f.Strings: unexpected f.valueType: %s", f.valueType)
 	}
 
 	return strs
@@ -368,6 +368,11 @@ func (f *Field) TypeName() string {
 // ValueType returns the field's value's type.
 func (f *Field) ValueType() ValueType {
 	return f.valueType
+}
+
+// MaxFields returns the maximum number of fields of the fields type
+func (f *Field) MaxFields() int {
+	return f.fDesc.fieldInfo.max
 }
 
 // ListRecordType returns the field's list's record type.
@@ -1363,6 +1368,18 @@ func (v *memberListIndex) setString(f *Field, s string) error {
 	return fmt.Errorf("bad record name '%s'", s)
 }
 
+type gpsListIndex struct {
+	listIndex
+}
+
+func (v *gpsListIndex) valid(f *Field) error {
+	if (*v).listIndex == 0xffff {
+		return nil
+	}
+
+	return v.listIndex.valid(f)
+}
+
 // listIndex is a field value representing an index into a slice of records
 type listIndex uint16
 
@@ -1431,7 +1448,7 @@ func (v *listIndex) valid(f *Field) error {
 		return nil
 	}
 
-	return fmt.Errorf("index out of range")
+	return fmt.Errorf("index out of range: %d", *v)
 }
 
 // load sets the listIndex's value from its bits in cp.bytes.
@@ -1806,7 +1823,7 @@ func (f *Field) isDeferredValue() bool {
 			return false
 		}
 
-	case VtListIndex:
+	case VtListIndex, VtGpsListIndex:
 		listNames := f.listNames()
 		if len(listNames) > 0 {
 			return false

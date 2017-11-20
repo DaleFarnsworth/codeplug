@@ -67,6 +67,9 @@ var ri{{$r.Type}} = recordInfo{
 	max: {{$r.Max}},
 	offset: {{$r.Offset}},
 	size: {{$r.Size}},
+{{- if $r.NamePrefix}}
+	namePrefix: "{{$r.NamePrefix}}",
+{{- end}}
 {{- if $r.DelDescs}}
 	delDescs: []delDesc{
 	{{- range $d := $r.DelDescs}}

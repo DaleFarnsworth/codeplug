@@ -32,8 +32,9 @@
         "Contacts",
         "GroupLists",
         "Zones_md380",
-        "ScanLists",
-        "Channels"
+        "ScanLists_md380",
+        "Channels_md380",
+	"GPSSystems"
       ]
     },
     {
@@ -51,8 +52,9 @@
         "Contacts",
         "GroupLists",
         "Zones_md380",
-        "ScanLists",
-        "Channels"
+        "ScanLists_md380",
+        "Channels_md380",
+	"GPSSystems"
       ]
     },
     {
@@ -70,8 +72,8 @@
         "Contacts",
         "GroupLists",
         "Zones_md40",
-        "ScanLists",
-        "Channels"
+        "ScanLists_md40",
+        "Channels_md40"
       ]
     }
   ],
@@ -291,7 +293,7 @@
     },
     {
       "typeName": "Scan Lists",
-      "type": "ScanLists",
+      "type": "ScanLists_md380",
       "offset": 100997,
       "size": 104,
       "max": 250,
@@ -304,17 +306,40 @@
       ],
       "fieldTypes": [
         "SlName",
-        "SlPriorityChannel1",
-        "SlPriorityChannel2",
-        "SlTxDesignatedChannel",
+        "SlPriorityChannel1_md380",
+        "SlPriorityChannel2_md380",
+        "SlTxDesignatedChannel_md380",
         "SlSignallingHoldTime",
         "SlPrioritySampleTime",
-        "SlChannel"
+        "SlChannel_md380"
+      ]
+    },
+    {
+      "typeName": "Scan Lists",
+      "type": "ScanLists_md40",
+      "offset": 100997,
+      "size": 104,
+      "max": 250,
+      "delDescs": [
+        {
+          "offset": 0,
+          "size": 1,
+          "value": 0
+        }
+      ],
+      "fieldTypes": [
+        "SlName",
+        "SlPriorityChannel1_md40",
+        "SlPriorityChannel2_md40",
+        "SlTxDesignatedChannel_md40",
+        "SlSignallingHoldTime",
+        "SlPrioritySampleTime",
+        "SlChannel_md40"
       ]
     },
     {
       "typeName": "Channels",
-      "type": "Channels",
+      "type": "Channels_md380",
       "offset": 127013,
       "size": 64,
       "max": 1000,
@@ -331,7 +356,69 @@
         "CiTxFrequency",
         "CiChannelMode",
         "CiBandwidth",
-        "CiScanList",
+        "CiScanList_md380",
+        "CiSquelch",
+        "CiRxRefFrequency",
+        "CiTxRefFrequency",
+        "CiTot",
+        "CiTotRekeyDelay",
+        "CiPower",
+        "CiAdmitCriteria",
+        "CiAutoscan",
+        "CiRxOnly",
+        "CiLoneWorker",
+        "CiVox",
+        "CiAllowTalkaround",
+        "CiPrivateCallConfirmed",
+        "CiEmergencyAlarmAck",
+        "CiDataCallConfirmed",
+        "CiCompressedUdpDataHeader",
+        "CiContactName",
+        "CiGroupList",
+        "CiColorCode",
+        "CiRepeaterSlot",
+        "CiPrivacy",
+        "CiPrivacyNumber",
+        "CiDisplayPTTID",
+        "CiCtcssEncode",
+        "CiTxSignallingSystem",
+        "CiQtReverse",
+        "CiReverseBurst",
+        "CiCtcssDecode",
+        "CiRxSignallingSystem",
+        "CiDecode1",
+        "CiDecode2",
+        "CiDecode3",
+        "CiDecode4",
+        "CiDecode5",
+        "CiDecode6",
+        "CiDecode7",
+        "CiDecode8",
+	"CiReceiveGPSInfo",
+	"CiSendGPSInfo",
+	"CiGPSSystem"
+      ]
+    },
+    {
+      "typeName": "Channels",
+      "type": "Channels_md40",
+      "offset": 127013,
+      "size": 64,
+      "max": 1000,
+      "delDescs": [
+        {
+          "offset": 16,
+          "size": 1,
+          "value": 255
+        }
+      ],
+      "fieldTypes": [
+        "CiName",
+        "CiRxFrequency",
+        "CiTxFrequency",
+        "CiChannelMode",
+        "CiBandwidth",
+        "CiScanList_md40",
         "CiSquelch",
         "CiRxRefFrequency",
         "CiTxRefFrequency",
@@ -369,6 +456,19 @@
         "CiDecode6",
         "CiDecode7",
         "CiDecode8"
+      ]
+    },
+    {
+      "typeName": "GPS Systems",
+      "type": "GPSSystems",
+      "offset": 257637,
+      "size": 16,
+      "max": 16,
+      "namePrefix": "GPS ",
+      "fieldTypes": [
+        "GpGPSRevertChannel",
+        "GpGPSDefaultReportInterval",
+        "GpDestinationID"
       ]
     }
   ],
@@ -716,7 +816,6 @@
         "min": 0,
         "max": 240,
         "scale": 5,
-        "interval": 1,
         "minString": "Continue"
       }
     },
@@ -927,7 +1026,7 @@
       "bitSize": 16,
       "max": 16,
       "valueType": "listIndex",
-      "listType": "Channels"
+      "listType": "Channels_md380"
     },
     {
       "typeName": "Channels",
@@ -936,7 +1035,7 @@
       "bitSize": 16,
       "max": 64,
       "valueType": "listIndex",
-      "listType": "Channels",
+      "listType": "Channels_md40",
       "extOffset": 201253,
       "extSize": 224,
       "extIndex": 16
@@ -950,11 +1049,11 @@
     },
     {
       "typeName": "Priority Channel 1",
-      "type": "SlPriorityChannel1",
+      "type": "SlPriorityChannel1_md380",
       "bitOffset": 256,
       "bitSize": 16,
       "valueType": "memberListIndex",
-      "listType": "Channels",
+      "listType": "Channels_md380",
       "indexedStrings": [
         {
           "index": 0,
@@ -968,18 +1067,61 @@
       "enabling": {
         "value": "None",
         "disables": [
-          "SlPriorityChannel2"
+          "SlPriorityChannel2_md380"
+        ]
+      }
+    },
+    {
+      "typeName": "Priority Channel 1",
+      "type": "SlPriorityChannel1_md40",
+      "bitOffset": 256,
+      "bitSize": 16,
+      "valueType": "memberListIndex",
+      "listType": "Channels_md40",
+      "indexedStrings": [
+        {
+          "index": 0,
+          "string": "Selected"
+        },
+        {
+          "index": 65535,
+          "string": "None"
+        }
+      ],
+      "enabling": {
+        "value": "None",
+        "disables": [
+          "SlPriorityChannel2_md40"
         ]
       }
     },
     {
       "typeName": "Priority Channel 2",
-      "type": "SlPriorityChannel2",
+      "type": "SlPriorityChannel2_md380",
       "bitOffset": 272,
       "bitSize": 16,
       "valueType": "memberListIndex",
       "defaultValue": "None",
-      "listType": "Channels",
+      "listType": "Channels_md380",
+      "indexedStrings": [
+        {
+          "index": 0,
+          "string": "Selected"
+        },
+        {
+          "index": 65535,
+          "string": "None"
+        }
+      ]
+    },
+    {
+      "typeName": "Priority Channel 2",
+      "type": "SlPriorityChannel2_md40",
+      "bitOffset": 272,
+      "bitSize": 16,
+      "valueType": "memberListIndex",
+      "defaultValue": "None",
+      "listType": "Channels_md40",
       "indexedStrings": [
         {
           "index": 0,
@@ -993,11 +1135,29 @@
     },
     {
       "typeName": "Tx Designated Channel",
-      "type": "SlTxDesignatedChannel",
+      "type": "SlTxDesignatedChannel_md380",
       "bitOffset": 288,
       "bitSize": 16,
       "valueType": "listIndex",
-      "listType": "Channels",
+      "listType": "Channels_md380",
+      "indexedStrings": [
+        {
+          "index": 0,
+          "string": "Selected"
+        },
+        {
+          "index": 65535,
+          "string": "Last Active Channel"
+        }
+      ]
+    },
+    {
+      "typeName": "Tx Designated Channel",
+      "type": "SlTxDesignatedChannel_md40",
+      "bitOffset": 288,
+      "bitSize": 16,
+      "valueType": "listIndex",
+      "listType": "Channels_md40",
       "indexedStrings": [
         {
           "index": 0,
@@ -1035,12 +1195,21 @@
     },
     {
       "typeName": "Channels",
-      "type": "SlChannel",
+      "type": "SlChannel_md380",
       "bitOffset": 336,
       "bitSize": 16,
       "max": 31,
       "valueType": "listIndex",
-      "listType": "Channels"
+      "listType": "Channels_md380"
+    },
+    {
+      "typeName": "Channels",
+      "type": "SlChannel_md40",
+      "bitOffset": 336,
+      "bitSize": 16,
+      "max": 31,
+      "valueType": "listIndex",
+      "listType": "Channels_md40"
     },
     {
       "typeName": "Lone Worker",
@@ -1313,7 +1482,6 @@
         "min": 0,
         "max": 63,
         "scale": 15,
-        "interval": 1,
         "minString": "Infinite"
       }
     },
@@ -1330,11 +1498,25 @@
     },
     {
       "typeName": "Scan List",
-      "type": "CiScanList",
+      "type": "CiScanList_md380",
       "bitOffset": 88,
       "bitSize": 8,
       "valueType": "listIndex",
-      "listType": "ScanLists",
+      "listType": "ScanLists_md380",
+      "indexedStrings": [
+        {
+          "index": 0,
+          "string": "None"
+        }
+      ]
+    },
+    {
+      "typeName": "Scan List",
+      "type": "CiScanList_md40",
+      "bitOffset": 88,
+      "bitSize": 8,
+      "valueType": "listIndex",
+      "listType": "ScanLists_md40",
       "indexedStrings": [
         {
           "index": 0,
@@ -1356,6 +1538,18 @@
           "string": "None"
         }
       ]
+    },
+    {
+      "typeName": "GPS System",
+      "type": "CiGPSSystem",
+      "bitOffset": 107,
+      "bitSize": 5,
+      "valueType": "span",
+      "span": {
+        "min": 0,
+        "max": 16,
+        "minString": "None"
+      }
     },
     {
       "typeName": "Decode 1",
@@ -1494,11 +1688,67 @@
       ]
     },
     {
+      "typeName": "Receive GPS Info",
+      "type": "CiReceiveGPSInfo",
+      "bitOffset": 254,
+      "bitSize": 1,
+      "valueType": "onOff"
+    },
+    {
+      "typeName": "Send GPS Info",
+      "type": "CiSendGPSInfo",
+      "bitOffset": 255,
+      "bitSize": 1,
+      "valueType": "onOff"
+    },
+    {
       "typeName": "Channel Name",
       "type": "CiName",
       "bitOffset": 256,
       "bitSize": 256,
       "valueType": "uniqueName"
+    },
+    {
+      "typeName": "GPS Revert Channel",
+      "type": "GpGPSRevertChannel",
+      "bitOffset": 0,
+      "bitSize": 16,
+      "valueType": "gpsListIndex",
+      "listType": "Channels_md380",
+      "indexedStrings": [
+        {
+          "index": 0,
+          "string": "Current Channel"
+        }
+      ]
+    },
+    {
+      "typeName": "GPS Default Report Interval (S)",
+      "type": "GpGPSDefaultReportInterval",
+      "bitOffset": 16,
+      "bitSize": 8,
+      "valueType": "span",
+      "span": {
+        "min": 0,
+        "max": 240,
+        "scale": 30,
+        "minString": "Off"
+      }
+    },
+    {
+      "typeName": "Destination ID",
+      "type": "GpDestinationID",
+      "bitOffset": 32,
+      "bitSize": 16,
+      "valueType": "gpsListIndex",
+      "defaultValue": "None",
+      "listType": "Contacts",
+      "indexedStrings": [
+        {
+          "index": 0,
+          "string": "None"
+        }
+      ]
     }
   ]
 }

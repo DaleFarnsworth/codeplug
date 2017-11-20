@@ -59,6 +59,7 @@ type recordInfo struct {
 	fieldInfos    []*fieldInfo
 	nameFieldType FieldType
 	index         int
+	namePrefix    string
 }
 
 // A RecordType represents a record's type
@@ -327,6 +328,14 @@ func (r *Record) Name() string {
 	return ""
 }
 
+func (r *Record) NamePrefix() string {
+	return r.rDesc.recordInfo.namePrefix
+}
+
+func (r *Record) MaxRecords() int {
+	return r.rDesc.recordInfo.max
+}
+
 func (r *Record) hasUniqueNames() bool {
 	nameField := r.NameField()
 	if nameField == nil {
@@ -398,7 +407,7 @@ func (rd *rDesc) ListNames() *[]string {
 		for i, r := range rd.records {
 			name := r.Name()
 			if name == "" {
-				return nil
+				name = rd.namePrefix + fmt.Sprintf("%d", i+1)
 			}
 			names[i] = name
 		}

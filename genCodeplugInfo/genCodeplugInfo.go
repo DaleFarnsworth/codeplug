@@ -64,6 +64,7 @@ type Record struct {
 	Max        int       `json:"max"`
 	DelDescs   []DelDesc `json:"delDescs"`
 	FieldTypes []string  `json:"fieldTypes"`
+	NamePrefix string    `json:"namePrefix"`
 }
 
 type DelDesc struct {

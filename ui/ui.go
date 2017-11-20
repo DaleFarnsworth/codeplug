@@ -390,7 +390,7 @@ func (mw *MainWindow) NewWindow() *Window {
 	return w
 }
 
-func (mw *MainWindow) NewRecordWindow(rType codeplug.RecordType) *Window {
+func (mw *MainWindow) NewRecordWindow(rType codeplug.RecordType, writable bool) *Window {
 	w := new(Window)
 	mw.recordWindows[rType] = w
 	w.qWidget = *widgets.NewQWidget(&mw.qMainWindow, core.Qt__Window)
@@ -401,7 +401,7 @@ func (mw *MainWindow) NewRecordWindow(rType codeplug.RecordType) *Window {
 	w.subscriptions = make(map[codeplug.FieldType][]codeplug.FieldType)
 	w.widgets = make(map[codeplug.FieldType]*Widget)
 
-	w.initRecordModel()
+	w.initRecordModel(writable)
 
 	w.qWidget.ConnectCloseEvent(func(event *gui.QCloseEvent) {
 		if w.connectClose != nil {
@@ -783,7 +783,11 @@ func (parent *Form) addFieldRow(r *codeplug.Record, fType codeplug.FieldType) {
 		return
 	}
 
-	w := newFieldWidget[f.ValueType()](f)
+	newFieldWidgetFunc := newFieldWidget[f.ValueType()]
+	if newFieldWidgetFunc == nil {
+		log.Fatalf("No %s entry in newFieldWidget slice", f.ValueType())
+	}
+	w := newFieldWidgetFunc(f)
 	w.label = widgets.NewQLabel2(f.TypeName(), nil, 0)
 	parent.layout.AddRow(w.label, w.qWidget)
 
@@ -1083,6 +1087,16 @@ func NewSpinboxWidget(value, min, max int, changedFunc func(int)) *Widget {
 	return widget
 }
 
+func NewCheckboxWidget(checked bool, clickedFunc func(bool)) *Widget {
+	qw := widgets.NewQCheckBox(nil)
+	widget := new(Widget)
+	widget.qWidget = qw
+	qw.SetChecked(checked)
+	qw.ConnectClicked(clickedFunc)
+
+	return widget
+}
+
 func NewComboboxWidget(opt string, opts []string, changed func(string)) *Widget {
 	qw := widgets.NewQComboBox(nil)
 	widget := new(Widget)
@@ -1155,6 +1169,7 @@ var newFieldWidget = map[codeplug.ValueType]func(*codeplug.Field) *Widget{
 	codeplug.VtIntroLine:       newFieldLineEdit,
 	codeplug.VtIStrings:        newFieldCombobox,
 	codeplug.VtListIndex:       newFieldCombobox,
+	codeplug.VtGpsListIndex:    newFieldCombobox,
 	codeplug.VtMemberListIndex: newFieldCombobox,
 	codeplug.VtModel:           newFieldLineEdit,
 	codeplug.VtName:            newFieldLineEdit,
@@ -1301,6 +1316,10 @@ func (b *Button) SetEnabled(enable bool) {
 
 func (w *Window) SetRecordFunc(fn func()) {
 	w.recordFunc = fn
+}
+
+func (w *Window) RecordFunc() func() {
+	return w.recordFunc
 }
 
 func InfoPopup(title string, msg string) {

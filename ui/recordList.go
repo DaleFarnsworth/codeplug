@@ -220,11 +220,12 @@ func (w *Window) dataRecords(data *core.QMimeData) ([]*codeplug.Record, string, 
 	return records, id, nil
 }
 
-func (w *Window) initRecordModel() {
+func (w *Window) initRecordModel(writable bool) {
 	record := w.record()
-	if record.NameField() == nil {
+	if record.MaxRecords() == 1 {
 		return
 	}
+
 	model := core.NewQAbstractListModel(nil)
 	w.recordModel = model
 
@@ -243,6 +244,10 @@ func (w *Window) initRecordModel() {
 
 		return core.NewQVariant()
 	})
+
+	if !writable {
+		return
+	}
 
 	model.ConnectMoveRows(func(sParent *core.QModelIndex, sRow int, count int, dParent *core.QModelIndex, dRow int) bool {
 		if count != 1 {

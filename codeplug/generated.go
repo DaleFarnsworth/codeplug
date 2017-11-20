@@ -32,12 +32,15 @@ const (
 	RtBasicInformation_md380 RecordType = "BasicInformation"
 	RtBasicInformation_md390 RecordType = "BasicInformation"
 	RtBasicInformation_md40  RecordType = "BasicInformation"
-	RtChannels               RecordType = "Channels"
+	RtChannels_md380         RecordType = "Channels"
+	RtChannels_md40          RecordType = "Channels"
 	RtContacts               RecordType = "Contacts"
+	RtGPSSystems             RecordType = "GPSSystems"
 	RtGeneralSettings_md380  RecordType = "GeneralSettings"
 	RtGeneralSettings_md40   RecordType = "GeneralSettings"
 	RtGroupLists             RecordType = "GroupLists"
-	RtScanLists              RecordType = "ScanLists"
+	RtScanLists_md380        RecordType = "ScanLists"
+	RtScanLists_md40         RecordType = "ScanLists"
 	RtTextMessages           RecordType = "TextMessages"
 	RtZones_md380            RecordType = "Zones"
 	RtZones_md40             RecordType = "Zones"
@@ -45,110 +48,121 @@ const (
 
 // Field types
 const (
-	FtBiCpsVersion              FieldType = "CpsVersion"
-	FtBiFrequencyRange_md380    FieldType = "FrequencyRange"
-	FtBiFrequencyRange_md390    FieldType = "FrequencyRange"
-	FtBiFrequencyRange_md40     FieldType = "FrequencyRange"
-	FtBiHighFrequency           FieldType = "HighFrequency"
-	FtBiLastProgrammedTime      FieldType = "LastProgrammedTime"
-	FtBiLowFrequency            FieldType = "LowFrequency"
-	FtBiModel                   FieldType = "Model"
-	FtBiNewFilename_md380       FieldType = "NewFilename"
-	FtBiNewFilename_md390       FieldType = "NewFilename"
-	FtBiNewFilename_md40        FieldType = "NewFilename"
-	FtCiAdmitCriteria           FieldType = "AdmitCriteria"
-	FtCiAllowTalkaround         FieldType = "AllowTalkaround"
-	FtCiAutoscan                FieldType = "Autoscan"
-	FtCiBandwidth               FieldType = "Bandwidth"
-	FtCiChannelMode             FieldType = "ChannelMode"
-	FtCiColorCode               FieldType = "ColorCode"
-	FtCiCompressedUdpDataHeader FieldType = "CompressedUdpDataHeader"
-	FtCiContactName             FieldType = "ContactName"
-	FtCiCtcssDecode             FieldType = "CtcssDecode"
-	FtCiCtcssEncode             FieldType = "CtcssEncode"
-	FtCiDataCallConfirmed       FieldType = "DataCallConfirmed"
-	FtCiDecode1                 FieldType = "Decode1"
-	FtCiDecode2                 FieldType = "Decode2"
-	FtCiDecode3                 FieldType = "Decode3"
-	FtCiDecode4                 FieldType = "Decode4"
-	FtCiDecode5                 FieldType = "Decode5"
-	FtCiDecode6                 FieldType = "Decode6"
-	FtCiDecode7                 FieldType = "Decode7"
-	FtCiDecode8                 FieldType = "Decode8"
-	FtCiDisplayPTTID            FieldType = "DisplayPTTID"
-	FtCiEmergencyAlarmAck       FieldType = "EmergencyAlarmAck"
-	FtCiGroupList               FieldType = "GroupList"
-	FtCiLoneWorker              FieldType = "LoneWorker"
-	FtCiName                    FieldType = "Name"
-	FtCiPower                   FieldType = "Power"
-	FtCiPrivacy                 FieldType = "Privacy"
-	FtCiPrivacyNumber           FieldType = "PrivacyNumber"
-	FtCiPrivateCallConfirmed    FieldType = "PrivateCallConfirmed"
-	FtCiQtReverse               FieldType = "QtReverse"
-	FtCiRepeaterSlot            FieldType = "RepeaterSlot"
-	FtCiReverseBurst            FieldType = "ReverseBurst"
-	FtCiRxFrequency             FieldType = "RxFrequency"
-	FtCiRxOnly                  FieldType = "RxOnly"
-	FtCiRxRefFrequency          FieldType = "RxRefFrequency"
-	FtCiRxSignallingSystem      FieldType = "RxSignallingSystem"
-	FtCiScanList                FieldType = "ScanList"
-	FtCiSquelch                 FieldType = "Squelch"
-	FtCiTot                     FieldType = "Tot"
-	FtCiTotRekeyDelay           FieldType = "TotRekeyDelay"
-	FtCiTxFrequency             FieldType = "TxFrequency"
-	FtCiTxRefFrequency          FieldType = "TxRefFrequency"
-	FtCiTxSignallingSystem      FieldType = "TxSignallingSystem"
-	FtCiVox                     FieldType = "Vox"
-	FtDcCallID                  FieldType = "CallID"
-	FtDcCallReceiveTone         FieldType = "CallReceiveTone"
-	FtDcCallType                FieldType = "CallType"
-	FtDcName                    FieldType = "Name"
-	FtGlContact                 FieldType = "Contact"
-	FtGlName                    FieldType = "Name"
-	FtGsBacklightColor          FieldType = "BacklightColor"
-	FtGsBacklightTime           FieldType = "BacklightTime"
-	FtGsCallAlertToneDuration   FieldType = "CallAlertToneDuration"
-	FtGsChFreeIndicationTone    FieldType = "ChFreeIndicationTone"
-	FtGsDisableAllLeds          FieldType = "DisableAllLeds"
-	FtGsDisableAllTones         FieldType = "DisableAllTones"
-	FtGsFreqChannelMode         FieldType = "FreqChannelMode"
-	FtGsGroupCallHangTime       FieldType = "GroupCallHangTime"
-	FtGsIntroScreen             FieldType = "IntroScreen"
-	FtGsIntroScreenLine1        FieldType = "IntroScreenLine1"
-	FtGsIntroScreenLine2        FieldType = "IntroScreenLine2"
-	FtGsLockUnlock              FieldType = "LockUnlock"
-	FtGsLoneWorkerReminderTime  FieldType = "LoneWorkerReminderTime"
-	FtGsLoneWorkerResponseTime  FieldType = "LoneWorkerResponseTime"
-	FtGsMode                    FieldType = "Mode"
-	FtGsModeSelect              FieldType = "ModeSelect"
-	FtGsMonitorType             FieldType = "MonitorType"
-	FtGsPcProgPassword          FieldType = "PcProgPassword"
-	FtGsPowerOnPassword         FieldType = "PowerOnPassword"
-	FtGsPrivateCallHangTime     FieldType = "PrivateCallHangTime"
-	FtGsPwAndLockEnable         FieldType = "PwAndLockEnable"
-	FtGsRadioID                 FieldType = "RadioID"
-	FtGsRadioName               FieldType = "RadioName"
-	FtGsRadioProgPassword       FieldType = "RadioProgPassword"
-	FtGsRxLowBatteryInterval    FieldType = "RxLowBatteryInterval"
-	FtGsSaveModeReceive         FieldType = "SaveModeReceive"
-	FtGsSavePreamble            FieldType = "SavePreamble"
-	FtGsScanAnalogHangTime      FieldType = "ScanAnalogHangTime"
-	FtGsScanDigitalHangTime     FieldType = "ScanDigitalHangTime"
-	FtGsSetKeypadLockTime       FieldType = "SetKeypadLockTime"
-	FtGsTalkPermitTone          FieldType = "TalkPermitTone"
-	FtGsTxPreambleDuration      FieldType = "TxPreambleDuration"
-	FtGsVoxSensitivity          FieldType = "VoxSensitivity"
-	FtSlChannel                 FieldType = "Channel"
-	FtSlName                    FieldType = "Name"
-	FtSlPriorityChannel1        FieldType = "PriorityChannel1"
-	FtSlPriorityChannel2        FieldType = "PriorityChannel2"
-	FtSlPrioritySampleTime      FieldType = "PrioritySampleTime"
-	FtSlSignallingHoldTime      FieldType = "SignallingHoldTime"
-	FtSlTxDesignatedChannel     FieldType = "TxDesignatedChannel"
-	FtTmTextMessage             FieldType = "TextMessage"
-	FtZiChannel_md380           FieldType = "Channel"
-	FtZiChannel_md40            FieldType = "Channel"
-	FtZiName                    FieldType = "Name"
+	FtBiCpsVersion                FieldType = "CpsVersion"
+	FtBiFrequencyRange_md380      FieldType = "FrequencyRange"
+	FtBiFrequencyRange_md390      FieldType = "FrequencyRange"
+	FtBiFrequencyRange_md40       FieldType = "FrequencyRange"
+	FtBiHighFrequency             FieldType = "HighFrequency"
+	FtBiLastProgrammedTime        FieldType = "LastProgrammedTime"
+	FtBiLowFrequency              FieldType = "LowFrequency"
+	FtBiModel                     FieldType = "Model"
+	FtBiNewFilename_md380         FieldType = "NewFilename"
+	FtBiNewFilename_md390         FieldType = "NewFilename"
+	FtBiNewFilename_md40          FieldType = "NewFilename"
+	FtCiAdmitCriteria             FieldType = "AdmitCriteria"
+	FtCiAllowTalkaround           FieldType = "AllowTalkaround"
+	FtCiAutoscan                  FieldType = "Autoscan"
+	FtCiBandwidth                 FieldType = "Bandwidth"
+	FtCiChannelMode               FieldType = "ChannelMode"
+	FtCiColorCode                 FieldType = "ColorCode"
+	FtCiCompressedUdpDataHeader   FieldType = "CompressedUdpDataHeader"
+	FtCiContactName               FieldType = "ContactName"
+	FtCiCtcssDecode               FieldType = "CtcssDecode"
+	FtCiCtcssEncode               FieldType = "CtcssEncode"
+	FtCiDataCallConfirmed         FieldType = "DataCallConfirmed"
+	FtCiDecode1                   FieldType = "Decode1"
+	FtCiDecode2                   FieldType = "Decode2"
+	FtCiDecode3                   FieldType = "Decode3"
+	FtCiDecode4                   FieldType = "Decode4"
+	FtCiDecode5                   FieldType = "Decode5"
+	FtCiDecode6                   FieldType = "Decode6"
+	FtCiDecode7                   FieldType = "Decode7"
+	FtCiDecode8                   FieldType = "Decode8"
+	FtCiDisplayPTTID              FieldType = "DisplayPTTID"
+	FtCiEmergencyAlarmAck         FieldType = "EmergencyAlarmAck"
+	FtCiGPSSystem                 FieldType = "GPSSystem"
+	FtCiGroupList                 FieldType = "GroupList"
+	FtCiLoneWorker                FieldType = "LoneWorker"
+	FtCiName                      FieldType = "Name"
+	FtCiPower                     FieldType = "Power"
+	FtCiPrivacy                   FieldType = "Privacy"
+	FtCiPrivacyNumber             FieldType = "PrivacyNumber"
+	FtCiPrivateCallConfirmed      FieldType = "PrivateCallConfirmed"
+	FtCiQtReverse                 FieldType = "QtReverse"
+	FtCiReceiveGPSInfo            FieldType = "ReceiveGPSInfo"
+	FtCiRepeaterSlot              FieldType = "RepeaterSlot"
+	FtCiReverseBurst              FieldType = "ReverseBurst"
+	FtCiRxFrequency               FieldType = "RxFrequency"
+	FtCiRxOnly                    FieldType = "RxOnly"
+	FtCiRxRefFrequency            FieldType = "RxRefFrequency"
+	FtCiRxSignallingSystem        FieldType = "RxSignallingSystem"
+	FtCiScanList_md380            FieldType = "ScanList"
+	FtCiScanList_md40             FieldType = "ScanList"
+	FtCiSendGPSInfo               FieldType = "SendGPSInfo"
+	FtCiSquelch                   FieldType = "Squelch"
+	FtCiTot                       FieldType = "Tot"
+	FtCiTotRekeyDelay             FieldType = "TotRekeyDelay"
+	FtCiTxFrequency               FieldType = "TxFrequency"
+	FtCiTxRefFrequency            FieldType = "TxRefFrequency"
+	FtCiTxSignallingSystem        FieldType = "TxSignallingSystem"
+	FtCiVox                       FieldType = "Vox"
+	FtDcCallID                    FieldType = "CallID"
+	FtDcCallReceiveTone           FieldType = "CallReceiveTone"
+	FtDcCallType                  FieldType = "CallType"
+	FtDcName                      FieldType = "Name"
+	FtGlContact                   FieldType = "Contact"
+	FtGlName                      FieldType = "Name"
+	FtGpDestinationID             FieldType = "DestinationID"
+	FtGpGPSDefaultReportInterval  FieldType = "GPSDefaultReportInterval"
+	FtGpGPSRevertChannel          FieldType = "GPSRevertChannel"
+	FtGsBacklightColor            FieldType = "BacklightColor"
+	FtGsBacklightTime             FieldType = "BacklightTime"
+	FtGsCallAlertToneDuration     FieldType = "CallAlertToneDuration"
+	FtGsChFreeIndicationTone      FieldType = "ChFreeIndicationTone"
+	FtGsDisableAllLeds            FieldType = "DisableAllLeds"
+	FtGsDisableAllTones           FieldType = "DisableAllTones"
+	FtGsFreqChannelMode           FieldType = "FreqChannelMode"
+	FtGsGroupCallHangTime         FieldType = "GroupCallHangTime"
+	FtGsIntroScreen               FieldType = "IntroScreen"
+	FtGsIntroScreenLine1          FieldType = "IntroScreenLine1"
+	FtGsIntroScreenLine2          FieldType = "IntroScreenLine2"
+	FtGsLockUnlock                FieldType = "LockUnlock"
+	FtGsLoneWorkerReminderTime    FieldType = "LoneWorkerReminderTime"
+	FtGsLoneWorkerResponseTime    FieldType = "LoneWorkerResponseTime"
+	FtGsMode                      FieldType = "Mode"
+	FtGsModeSelect                FieldType = "ModeSelect"
+	FtGsMonitorType               FieldType = "MonitorType"
+	FtGsPcProgPassword            FieldType = "PcProgPassword"
+	FtGsPowerOnPassword           FieldType = "PowerOnPassword"
+	FtGsPrivateCallHangTime       FieldType = "PrivateCallHangTime"
+	FtGsPwAndLockEnable           FieldType = "PwAndLockEnable"
+	FtGsRadioID                   FieldType = "RadioID"
+	FtGsRadioName                 FieldType = "RadioName"
+	FtGsRadioProgPassword         FieldType = "RadioProgPassword"
+	FtGsRxLowBatteryInterval      FieldType = "RxLowBatteryInterval"
+	FtGsSaveModeReceive           FieldType = "SaveModeReceive"
+	FtGsSavePreamble              FieldType = "SavePreamble"
+	FtGsScanAnalogHangTime        FieldType = "ScanAnalogHangTime"
+	FtGsScanDigitalHangTime       FieldType = "ScanDigitalHangTime"
+	FtGsSetKeypadLockTime         FieldType = "SetKeypadLockTime"
+	FtGsTalkPermitTone            FieldType = "TalkPermitTone"
+	FtGsTxPreambleDuration        FieldType = "TxPreambleDuration"
+	FtGsVoxSensitivity            FieldType = "VoxSensitivity"
+	FtSlChannel_md380             FieldType = "Channel"
+	FtSlChannel_md40              FieldType = "Channel"
+	FtSlName                      FieldType = "Name"
+	FtSlPriorityChannel1_md380    FieldType = "PriorityChannel1"
+	FtSlPriorityChannel1_md40     FieldType = "PriorityChannel1"
+	FtSlPriorityChannel2_md380    FieldType = "PriorityChannel2"
+	FtSlPriorityChannel2_md40     FieldType = "PriorityChannel2"
+	FtSlPrioritySampleTime        FieldType = "PrioritySampleTime"
+	FtSlSignallingHoldTime        FieldType = "SignallingHoldTime"
+	FtSlTxDesignatedChannel_md380 FieldType = "TxDesignatedChannel"
+	FtSlTxDesignatedChannel_md40  FieldType = "TxDesignatedChannel"
+	FtTmTextMessage               FieldType = "TextMessage"
+	FtZiChannel_md380             FieldType = "Channel"
+	FtZiChannel_md40              FieldType = "Channel"
+	FtZiName                      FieldType = "Name"
 )
 
 // The value types a field may contain
@@ -160,6 +174,7 @@ const (
 	VtCpsVersion      ValueType = "cpsVersion"
 	VtCtcssDcs        ValueType = "ctcssDcs"
 	VtFrequency       ValueType = "frequency"
+	VtGpsListIndex    ValueType = "gpsListIndex"
 	VtIStrings        ValueType = "iStrings"
 	VtIndexedStrings  ValueType = "indexedStrings"
 	VtIntroLine       ValueType = "introLine"
@@ -196,6 +211,8 @@ func newValue(vt ValueType) value {
 		return new(ctcssDcs)
 	case VtFrequency:
 		return new(frequency)
+	case VtGpsListIndex:
+		return new(gpsListIndex)
 	case VtIStrings:
 		return new(iStrings)
 	case VtIndexedStrings:
@@ -257,8 +274,9 @@ var cpMd380 = CodeplugInfo{
 		&riContacts,
 		&riGroupLists,
 		&riZones_md380,
-		&riScanLists,
-		&riChannels,
+		&riScanLists_md380,
+		&riChannels_md380,
+		&riGPSSystems,
 	},
 }
 
@@ -277,8 +295,9 @@ var cpMd390 = CodeplugInfo{
 		&riContacts,
 		&riGroupLists,
 		&riZones_md380,
-		&riScanLists,
-		&riChannels,
+		&riScanLists_md380,
+		&riChannels_md380,
+		&riGPSSystems,
 	},
 }
 
@@ -297,8 +316,8 @@ var cpMd40 = CodeplugInfo{
 		&riContacts,
 		&riGroupLists,
 		&riZones_md40,
-		&riScanLists,
-		&riChannels,
+		&riScanLists_md40,
+		&riChannels_md40,
 	},
 }
 
@@ -353,8 +372,8 @@ var riBasicInformation_md40 = recordInfo{
 	},
 }
 
-var riChannels = recordInfo{
-	rType:    RtChannels,
+var riChannels_md380 = recordInfo{
+	rType:    RtChannels_md380,
 	typeName: "Channels",
 	max:      1000,
 	offset:   127013,
@@ -372,7 +391,70 @@ var riChannels = recordInfo{
 		&fiCiTxFrequency,
 		&fiCiChannelMode,
 		&fiCiBandwidth,
-		&fiCiScanList,
+		&fiCiScanList_md380,
+		&fiCiSquelch,
+		&fiCiRxRefFrequency,
+		&fiCiTxRefFrequency,
+		&fiCiTot,
+		&fiCiTotRekeyDelay,
+		&fiCiPower,
+		&fiCiAdmitCriteria,
+		&fiCiAutoscan,
+		&fiCiRxOnly,
+		&fiCiLoneWorker,
+		&fiCiVox,
+		&fiCiAllowTalkaround,
+		&fiCiPrivateCallConfirmed,
+		&fiCiEmergencyAlarmAck,
+		&fiCiDataCallConfirmed,
+		&fiCiCompressedUdpDataHeader,
+		&fiCiContactName,
+		&fiCiGroupList,
+		&fiCiColorCode,
+		&fiCiRepeaterSlot,
+		&fiCiPrivacy,
+		&fiCiPrivacyNumber,
+		&fiCiDisplayPTTID,
+		&fiCiCtcssEncode,
+		&fiCiTxSignallingSystem,
+		&fiCiQtReverse,
+		&fiCiReverseBurst,
+		&fiCiCtcssDecode,
+		&fiCiRxSignallingSystem,
+		&fiCiDecode1,
+		&fiCiDecode2,
+		&fiCiDecode3,
+		&fiCiDecode4,
+		&fiCiDecode5,
+		&fiCiDecode6,
+		&fiCiDecode7,
+		&fiCiDecode8,
+		&fiCiReceiveGPSInfo,
+		&fiCiSendGPSInfo,
+		&fiCiGPSSystem,
+	},
+}
+
+var riChannels_md40 = recordInfo{
+	rType:    RtChannels_md40,
+	typeName: "Channels",
+	max:      1000,
+	offset:   127013,
+	size:     64,
+	delDescs: []delDesc{
+		delDesc{
+			offset: 16,
+			size:   1,
+			value:  255,
+		},
+	},
+	fieldInfos: []*fieldInfo{
+		&fiCiName,
+		&fiCiRxFrequency,
+		&fiCiTxFrequency,
+		&fiCiChannelMode,
+		&fiCiBandwidth,
+		&fiCiScanList_md40,
 		&fiCiSquelch,
 		&fiCiRxRefFrequency,
 		&fiCiTxRefFrequency,
@@ -431,6 +513,20 @@ var riContacts = recordInfo{
 		&fiDcCallID,
 		&fiDcCallType,
 		&fiDcCallReceiveTone,
+	},
+}
+
+var riGPSSystems = recordInfo{
+	rType:      RtGPSSystems,
+	typeName:   "GPS Systems",
+	max:        16,
+	offset:     257637,
+	size:       16,
+	namePrefix: "GPS ",
+	fieldInfos: []*fieldInfo{
+		&fiGpGPSRevertChannel,
+		&fiGpGPSDefaultReportInterval,
+		&fiGpDestinationID,
 	},
 }
 
@@ -534,8 +630,8 @@ var riGroupLists = recordInfo{
 	},
 }
 
-var riScanLists = recordInfo{
-	rType:    RtScanLists,
+var riScanLists_md380 = recordInfo{
+	rType:    RtScanLists_md380,
 	typeName: "Scan Lists",
 	max:      250,
 	offset:   100997,
@@ -549,12 +645,36 @@ var riScanLists = recordInfo{
 	},
 	fieldInfos: []*fieldInfo{
 		&fiSlName,
-		&fiSlPriorityChannel1,
-		&fiSlPriorityChannel2,
-		&fiSlTxDesignatedChannel,
+		&fiSlPriorityChannel1_md380,
+		&fiSlPriorityChannel2_md380,
+		&fiSlTxDesignatedChannel_md380,
 		&fiSlSignallingHoldTime,
 		&fiSlPrioritySampleTime,
-		&fiSlChannel,
+		&fiSlChannel_md380,
+	},
+}
+
+var riScanLists_md40 = recordInfo{
+	rType:    RtScanLists_md40,
+	typeName: "Scan Lists",
+	max:      250,
+	offset:   100997,
+	size:     104,
+	delDescs: []delDesc{
+		delDesc{
+			offset: 0,
+			size:   1,
+			value:  0,
+		},
+	},
+	fieldInfos: []*fieldInfo{
+		&fiSlName,
+		&fiSlPriorityChannel1_md40,
+		&fiSlPriorityChannel2_md40,
+		&fiSlTxDesignatedChannel_md40,
+		&fiSlSignallingHoldTime,
+		&fiSlPrioritySampleTime,
+		&fiSlChannel_md40,
 	},
 }
 
@@ -982,6 +1102,20 @@ var fiCiEmergencyAlarmAck = fieldInfo{
 	enabler:   FtCiChannelMode,
 }
 
+var fiCiGPSSystem = fieldInfo{
+	fType:     FtCiGPSSystem,
+	typeName:  "GPS System",
+	max:       1,
+	bitOffset: 107,
+	bitSize:   5,
+	valueType: VtSpan,
+	span: &Span{
+		min:       0,
+		max:       16,
+		minString: "None",
+	},
+}
+
 var fiCiGroupList = fieldInfo{
 	fType:        FtCiGroupList,
 	typeName:     "Group List",
@@ -1084,6 +1218,15 @@ var fiCiQtReverse = fieldInfo{
 	disabler: FtCiCtcssEncode,
 }
 
+var fiCiReceiveGPSInfo = fieldInfo{
+	fType:     FtCiReceiveGPSInfo,
+	typeName:  "Receive GPS Info",
+	max:       1,
+	bitOffset: 254,
+	bitSize:   1,
+	valueType: VtOnOff,
+}
+
 var fiCiRepeaterSlot = fieldInfo{
 	fType:        FtCiRepeaterSlot,
 	typeName:     "Repeater Slot",
@@ -1161,8 +1304,8 @@ var fiCiRxSignallingSystem = fieldInfo{
 	disabler:      FtCiChannelMode,
 }
 
-var fiCiScanList = fieldInfo{
-	fType:     FtCiScanList,
+var fiCiScanList_md380 = fieldInfo{
+	fType:     FtCiScanList_md380,
 	typeName:  "Scan List",
 	max:       1,
 	bitOffset: 88,
@@ -1171,7 +1314,29 @@ var fiCiScanList = fieldInfo{
 	indexedStrings: &[]IndexedString{
 		IndexedString{0, "None"},
 	},
-	listRecordType: RtScanLists,
+	listRecordType: RtScanLists_md380,
+}
+
+var fiCiScanList_md40 = fieldInfo{
+	fType:     FtCiScanList_md40,
+	typeName:  "Scan List",
+	max:       1,
+	bitOffset: 88,
+	bitSize:   8,
+	valueType: VtListIndex,
+	indexedStrings: &[]IndexedString{
+		IndexedString{0, "None"},
+	},
+	listRecordType: RtScanLists_md40,
+}
+
+var fiCiSendGPSInfo = fieldInfo{
+	fType:     FtCiSendGPSInfo,
+	typeName:  "Send GPS Info",
+	max:       1,
+	bitOffset: 255,
+	bitSize:   1,
+	valueType: VtOnOff,
 }
 
 var fiCiSquelch = fieldInfo{
@@ -1198,7 +1363,6 @@ var fiCiTot = fieldInfo{
 		min:       0,
 		max:       63,
 		scale:     15,
-		interval:  1,
 		minString: "Infinite",
 	},
 }
@@ -1331,6 +1495,48 @@ var fiGlName = fieldInfo{
 	valueType: VtUniqueName,
 }
 
+var fiGpDestinationID = fieldInfo{
+	fType:        FtGpDestinationID,
+	typeName:     "Destination ID",
+	max:          1,
+	bitOffset:    32,
+	bitSize:      16,
+	valueType:    VtGpsListIndex,
+	defaultValue: "None",
+	indexedStrings: &[]IndexedString{
+		IndexedString{0, "None"},
+	},
+	listRecordType: RtContacts,
+}
+
+var fiGpGPSDefaultReportInterval = fieldInfo{
+	fType:     FtGpGPSDefaultReportInterval,
+	typeName:  "GPS Default Report Interval (S)",
+	max:       1,
+	bitOffset: 16,
+	bitSize:   8,
+	valueType: VtSpan,
+	span: &Span{
+		min:       0,
+		max:       240,
+		scale:     30,
+		minString: "Off",
+	},
+}
+
+var fiGpGPSRevertChannel = fieldInfo{
+	fType:     FtGpGPSRevertChannel,
+	typeName:  "GPS Revert Channel",
+	max:       1,
+	bitOffset: 0,
+	bitSize:   16,
+	valueType: VtGpsListIndex,
+	indexedStrings: &[]IndexedString{
+		IndexedString{0, "Current Channel"},
+	},
+	listRecordType: RtChannels_md380,
+}
+
 var fiGsBacklightColor = fieldInfo{
 	fType:     FtGsBacklightColor,
 	typeName:  "Backlight Color",
@@ -1372,7 +1578,6 @@ var fiGsCallAlertToneDuration = fieldInfo{
 		min:       0,
 		max:       240,
 		scale:     5,
-		interval:  1,
 		minString: "Continue",
 	},
 }
@@ -1735,14 +1940,24 @@ var fiGsVoxSensitivity = fieldInfo{
 	},
 }
 
-var fiSlChannel = fieldInfo{
-	fType:          FtSlChannel,
+var fiSlChannel_md380 = fieldInfo{
+	fType:          FtSlChannel_md380,
 	typeName:       "Channels",
 	max:            31,
 	bitOffset:      336,
 	bitSize:        16,
 	valueType:      VtListIndex,
-	listRecordType: RtChannels,
+	listRecordType: RtChannels_md380,
+}
+
+var fiSlChannel_md40 = fieldInfo{
+	fType:          FtSlChannel_md40,
+	typeName:       "Channels",
+	max:            31,
+	bitOffset:      336,
+	bitSize:        16,
+	valueType:      VtListIndex,
+	listRecordType: RtChannels_md40,
 }
 
 var fiSlName = fieldInfo{
@@ -1754,8 +1969,8 @@ var fiSlName = fieldInfo{
 	valueType: VtUniqueName,
 }
 
-var fiSlPriorityChannel1 = fieldInfo{
-	fType:     FtSlPriorityChannel1,
+var fiSlPriorityChannel1_md380 = fieldInfo{
+	fType:     FtSlPriorityChannel1_md380,
 	typeName:  "Priority Channel 1",
 	max:       1,
 	bitOffset: 256,
@@ -1765,12 +1980,27 @@ var fiSlPriorityChannel1 = fieldInfo{
 		IndexedString{0, "Selected"},
 		IndexedString{65535, "None"},
 	},
-	listRecordType: RtChannels,
+	listRecordType: RtChannels_md380,
 	enablingValue:  "None",
 }
 
-var fiSlPriorityChannel2 = fieldInfo{
-	fType:        FtSlPriorityChannel2,
+var fiSlPriorityChannel1_md40 = fieldInfo{
+	fType:     FtSlPriorityChannel1_md40,
+	typeName:  "Priority Channel 1",
+	max:       1,
+	bitOffset: 256,
+	bitSize:   16,
+	valueType: VtMemberListIndex,
+	indexedStrings: &[]IndexedString{
+		IndexedString{0, "Selected"},
+		IndexedString{65535, "None"},
+	},
+	listRecordType: RtChannels_md40,
+	enablingValue:  "None",
+}
+
+var fiSlPriorityChannel2_md380 = fieldInfo{
+	fType:        FtSlPriorityChannel2_md380,
 	typeName:     "Priority Channel 2",
 	max:          1,
 	bitOffset:    272,
@@ -1781,8 +2011,24 @@ var fiSlPriorityChannel2 = fieldInfo{
 		IndexedString{0, "Selected"},
 		IndexedString{65535, "None"},
 	},
-	listRecordType: RtChannels,
-	disabler:       FtSlPriorityChannel1,
+	listRecordType: RtChannels_md380,
+	disabler:       FtSlPriorityChannel1_md380,
+}
+
+var fiSlPriorityChannel2_md40 = fieldInfo{
+	fType:        FtSlPriorityChannel2_md40,
+	typeName:     "Priority Channel 2",
+	max:          1,
+	bitOffset:    272,
+	bitSize:      16,
+	valueType:    VtMemberListIndex,
+	defaultValue: "None",
+	indexedStrings: &[]IndexedString{
+		IndexedString{0, "Selected"},
+		IndexedString{65535, "None"},
+	},
+	listRecordType: RtChannels_md40,
+	disabler:       FtSlPriorityChannel1_md40,
 }
 
 var fiSlPrioritySampleTime = fieldInfo{
@@ -1813,8 +2059,8 @@ var fiSlSignallingHoldTime = fieldInfo{
 	},
 }
 
-var fiSlTxDesignatedChannel = fieldInfo{
-	fType:     FtSlTxDesignatedChannel,
+var fiSlTxDesignatedChannel_md380 = fieldInfo{
+	fType:     FtSlTxDesignatedChannel_md380,
 	typeName:  "Tx Designated Channel",
 	max:       1,
 	bitOffset: 288,
@@ -1824,7 +2070,21 @@ var fiSlTxDesignatedChannel = fieldInfo{
 		IndexedString{0, "Selected"},
 		IndexedString{65535, "Last Active Channel"},
 	},
-	listRecordType: RtChannels,
+	listRecordType: RtChannels_md380,
+}
+
+var fiSlTxDesignatedChannel_md40 = fieldInfo{
+	fType:     FtSlTxDesignatedChannel_md40,
+	typeName:  "Tx Designated Channel",
+	max:       1,
+	bitOffset: 288,
+	bitSize:   16,
+	valueType: VtListIndex,
+	indexedStrings: &[]IndexedString{
+		IndexedString{0, "Selected"},
+		IndexedString{65535, "Last Active Channel"},
+	},
+	listRecordType: RtChannels_md40,
 }
 
 var fiTmTextMessage = fieldInfo{
@@ -1843,7 +2103,7 @@ var fiZiChannel_md380 = fieldInfo{
 	bitOffset:      256,
 	bitSize:        16,
 	valueType:      VtListIndex,
-	listRecordType: RtChannels,
+	listRecordType: RtChannels_md380,
 }
 
 var fiZiChannel_md40 = fieldInfo{
@@ -1853,7 +2113,7 @@ var fiZiChannel_md40 = fieldInfo{
 	bitOffset:      256,
 	bitSize:        16,
 	valueType:      VtListIndex,
-	listRecordType: RtChannels,
+	listRecordType: RtChannels_md40,
 	extOffset:      201253,
 	extSize:        224,
 	extIndex:       16,
