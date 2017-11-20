@@ -80,7 +80,7 @@
       "typeName": "Basic Information",
       "type": "BasicInformation_md380",
       "offset": 0,
-      "size": 549,
+      "size": 8805,
       "fieldTypes": [
         "BiModel",
         "BiFrequencyRange_md380",
@@ -95,7 +95,7 @@
       "typeName": "Basic Information",
       "type": "BasicInformation_md390",
       "offset": 0,
-      "size": 549,
+      "size": 8805,
       "fieldTypes": [
         "BiModel",
         "BiFrequencyRange_md390",
@@ -110,7 +110,7 @@
       "typeName": "Basic Information",
       "type": "BasicInformation_md40",
       "offset": 0,
-      "size": 549,
+      "size": 8805,
       "fieldTypes": [
         "BiModel",
         "BiFrequencyRange_md40",

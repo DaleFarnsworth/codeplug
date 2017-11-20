@@ -307,7 +307,7 @@ var riBasicInformation_md380 = recordInfo{
 	typeName: "Basic Information",
 	max:      1,
 	offset:   0,
-	size:     549,
+	size:     8805,
 	fieldInfos: []*fieldInfo{
 		&fiBiModel,
 		&fiBiFrequencyRange_md380,
@@ -324,7 +324,7 @@ var riBasicInformation_md390 = recordInfo{
 	typeName: "Basic Information",
 	max:      1,
 	offset:   0,
-	size:     549,
+	size:     8805,
 	fieldInfos: []*fieldInfo{
 		&fiBiModel,
 		&fiBiFrequencyRange_md390,
@@ -341,7 +341,7 @@ var riBasicInformation_md40 = recordInfo{
 	typeName: "Basic Information",
 	max:      1,
 	offset:   0,
-	size:     549,
+	size:     8805,
 	fieldInfos: []*fieldInfo{
 		&fiBiModel,
 		&fiBiFrequencyRange_md40,
