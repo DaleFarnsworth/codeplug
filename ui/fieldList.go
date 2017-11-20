@@ -64,7 +64,7 @@ func (fnl *fieldNameList) clearSelection() {
 }
 
 func (fnl *fieldNameList) Width() int {
-	return fnl.qListView.SizeHintForColumn(0) * 6 / 5
+	return fnl.qListView.SizeHintForColumn(0) + 20
 }
 
 func (fnl *fieldNameList) SetWidth(width int) {
@@ -90,8 +90,8 @@ func addMemberList(parent *VBox, fm *FieldMembers, fieldNames []string) *fieldNa
 	view.Viewport().SetAcceptDrops(true)
 	view.SetDragDropMode(widgets.QAbstractItemView__DragDrop)
 	view.SetSelectionMode(widgets.QAbstractItemView__ExtendedSelection)
-	view.SetMinimumWidth(view.SizeHintForColumn(0) * 6 / 5)
-	view.SetMaximumWidth(view.SizeHintForColumn(0) * 6 / 5)
+	view.SetMinimumWidth(view.SizeHintForColumn(0) + 20)
+	view.SetMaximumWidth(view.SizeHintForColumn(0) + 20)
 	view.SetDefaultDropAction(core.Qt__MoveAction)
 	view.SetAcceptDrops(true)
 	view.SetDropIndicatorShown(true)
@@ -121,8 +121,8 @@ func addAvailableList(parent *VBox, fm *FieldMembers, fieldNames []string) *fiel
 	view.Viewport().SetAcceptDrops(true)
 	view.SetDragDropMode(widgets.QAbstractItemView__DragDrop)
 	view.SetSelectionMode(widgets.QAbstractItemView__ExtendedSelection)
-	view.SetMinimumWidth(view.SizeHintForColumn(0) * 6 / 5)
-	view.SetMaximumWidth(view.SizeHintForColumn(0) * 6 / 5)
+	view.SetMinimumWidth(view.SizeHintForColumn(0) + 20)
+	view.SetMaximumWidth(view.SizeHintForColumn(0) + 20)
 	view.SetDefaultDropAction(core.Qt__MoveAction)
 	view.SetAcceptDrops(true)
 	view.SetDropIndicatorShown(true)
