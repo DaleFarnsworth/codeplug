@@ -1519,12 +1519,12 @@ type timeStamp string
 // String returns the timeStamp's value as a string.
 func (v *timeStamp) getString(f *Field) string {
 	t, _ := time.Parse("20060102150405", string(*v))
-	return t.Format("02-Jan-06 15:04:05")
+	return t.Format("02-Jan-2006 15:04:05")
 }
 
 // SetString sets the timeStamp's value from a string.
 func (v *timeStamp) setString(f *Field, s string) error {
-	t, err := time.Parse("02-Jan-06 15:04:05", s)
+	t, err := time.Parse("02-Jan-2006 15:04:05", s)
 	if err != nil {
 		return err
 	}
