@@ -528,13 +528,13 @@ func (cp *Codeplug) SaveToFile(filename string, ignoreWarning bool) error {
 func (cp *Codeplug) setLastProgrammedTime(t time.Time) {
 	r := cp.rDesc[RtBasicInformation_md380].records[0]
 	f := r.Field(FtBiLastProgrammedTime)
-	f.setString(t.Format("02-Jan-06 15:04:05"))
+	f.setString(t.Format("02-Jan-2006 15:04:05"))
 }
 
 func (cp *Codeplug) getLastProgrammedTime() (time.Time, error) {
 	r := cp.rDesc[RtBasicInformation_md380].records[0]
 	f := r.Field(FtBiLastProgrammedTime)
-	return time.Parse("02-Jan-06 15:04:05", f.String())
+	return time.Parse("02-Jan-2006 15:04:05", f.String())
 }
 
 // Filename returns the path name of the file associated with the codeplug.
