@@ -33,7 +33,7 @@ import (
 
 func main() {
 	if len(os.Args) != 3 {
-		fmt.Fprintf(os.Stderr, "Usage %s read | write", os.Args[0])
+		fmt.Fprintf(os.Stderr, "Usage %s read|write|dumpSPIFlash", os.Args[0])
 	}
 	cmd := os.Args[1]
 	filename := os.Args[2]
@@ -107,6 +107,22 @@ func main() {
 		fmt.Println()
 		if err != nil {
 			log.Fatalf("dfu.WriteCodeplug: %s", err.Error())
+		}
+
+	case "dumpSPIFlash":
+		file, err := os.Create(filename)
+		if err != nil {
+			log.Fatalf("os.Create: %s", err.Error())
+		}
+
+		prefix := "Dumping Flash"
+		err := dfu.DumpSPIFlash(file, func(min, max, cur int) bool {
+			fmt.Printf("%s... %3d%%\r", prefix, cur*100/max)
+			return true
+		})
+		fmt.Println()
+		if err != nil {
+			log.Fatalf(err.Error())
 		}
 	}
 }
