@@ -129,14 +129,17 @@ const (
 )
 
 type DFU struct {
-	dev       *gousb.Device
-	iface     *gousb.Interface
-	ifaceDone func()
-	ctx       *gousb.Context
-	tickFunc  func() bool
-	minTick   int
-	maxTick   int
-	curTick   int
+	dev            *gousb.Device
+	iface          *gousb.Interface
+	ifaceDone      func()
+	ctx            *gousb.Context
+	blockSize      int
+	eraseBlockSize int
+	progress       func(min, max, cur int) bool
+	tickFunc       func() bool
+	minTick        int
+	maxTick        int
+	curTick        int
 }
 
 func NewDFU() (*DFU, error) {
@@ -176,6 +179,9 @@ func NewDFU() (*DFU, error) {
 		}
 		return nil, err
 	}
+
+	dfu.blockSize = 1024
+	dfu.eraseBlockSize = 64 * 1024
 
 	return dfu, nil
 }
@@ -229,7 +235,7 @@ func (dfu *DFU) GetTime() (time.Time, error) {
 	var timeBytes []byte
 	location := time.Local
 
-	err := dfu.md380Custom(
+	err := dfu.md380Cmd(
 		0x91, 0x01, // Programming Mode
 		0xa2, 0x08, // Access clock memory
 	)
@@ -237,7 +243,7 @@ func (dfu *DFU) GetTime() (time.Time, error) {
 		goto errRet
 	}
 
-	timeBytes, err = dfu.read(0, 7) // Read the time bytes as BCD
+	timeBytes, err = dfu.readBlock(0, timeBytes) // Read BCD time bytes
 	if err != nil {
 		goto errRet
 	}
@@ -268,12 +274,12 @@ func (dfu *DFU) SetTime(t time.Time) error {
 	bytes[5] = dfu.toBCD(minutes)
 	bytes[6] = dfu.toBCD(seconds)
 
-	err := dfu.md380Custom(0x91, 0x02)
+	err := dfu.md380Cmd(0x91, 0x02)
 	if err != nil {
 		return err
 	}
 
-	err = dfu.write(0, bytes)
+	err = dfu.writeBlock(0, bytes)
 	if err != nil {
 		return err
 	}
@@ -335,9 +341,8 @@ errRet:
 
 */
 
-func (dfu *DFU) write(blockNumber int, bytes []byte) error {
-	bn := uint16(blockNumber)
-	_, err := dfu.dev.Control(0x21, reqWrite, bn, 0, bytes)
+func (dfu *DFU) writeBlock(blockNumber int, bytes []byte) error {
+	_, err := dfu.dev.Control(0x21, reqWrite, uint16(blockNumber), 0, bytes)
 	if err != nil {
 		return fmt.Errorf("write error: %s", err.Error())
 	}
@@ -345,7 +350,7 @@ func (dfu *DFU) write(blockNumber int, bytes []byte) error {
 	return nil
 }
 
-func (dfu *DFU) setAddress(address uint32) error {
+func (dfu *DFU) setAddress(address int) error {
 	var state state
 
 	a := byte(address)
@@ -384,12 +389,15 @@ errRet:
 	return fmt.Errorf("setAddress: %s", err.Error())
 }
 
-func (dfu *DFU) eraseBlocks(addresses ...uint32) error {
-	for _, addr := range addresses {
+func (dfu *DFU) eraseBlocks(address int, size int) error {
+	count := (size + dfu.eraseBlockSize - 1) / dfu.eraseBlockSize
+	addr := uint32(address)
+	for i := 0; i < count; i++ {
 		err := dfu.eraseBlock(addr)
 		if err != nil {
 			return err
 		}
+		addr += uint32(dfu.eraseBlockSize)
 	}
 
 	return nil
@@ -432,17 +440,25 @@ errRet:
 	return fmt.Errorf("EraseBlock: %s", err.Error())
 }
 
-func (dfu *DFU) md380Custom(args ...int) error {
-	for len(args) > 0 {
-		a := args[0]
-		b := args[1]
+type md380Cmd struct {
+	a int
+	b int
+}
 
-		err := dfu.md380Custom1(a, b)
-		if err != nil {
-			return fmt.Errorf("md380Custom: %s", err.Error())
+const CmdSleep = -2
+
+func (dfu *DFU) md380Cmd(commands []md380Cmd) error {
+	for _, cmd := range commands {
+		switch cmd.a {
+		case CmdSleep:
+			dfu.sleepMilliseconds(cmd.b)
+			continue
 		}
 
-		args = args[2:]
+		err := dfu.md380Custom(cmd.a, cmd.b)
+		if err != nil {
+			return fmt.Errorf("md380Cmd: %s", err.Error())
+		}
 	}
 
 	return nil
@@ -456,7 +472,7 @@ func (dfu *DFU) sleepMilliseconds(millis int) {
 	}
 }
 
-func (dfu *DFU) md380Custom1(a int, b int) error {
+func (dfu *DFU) md380Custom(a int, b int) error {
 	bytes := []byte{byte(a), byte(b)}
 
 	_, err := dfu.dev.Control(0x21, reqWrite, 0, 0, bytes)
@@ -488,16 +504,13 @@ func (dfu *DFU) md380Custom1(a int, b int) error {
 	return nil
 }
 
-func (dfu *DFU) read(blockNumber int, length int) ([]byte, error) {
-	bn := uint16(blockNumber)
-	bytes := make([]byte, length)
-
-	_, err := dfu.dev.Control(0xa1, reqRead, bn, 0, bytes)
+func (dfu *DFU) readBlock(blockNumber int, data []byte) error {
+	_, err := dfu.dev.Control(0xa1, reqRead, uint16(blockNumber), 0, data)
 	if err != nil {
-		return nil, fmt.Errorf("read: %s", err.Error())
+		return fmt.Errorf("read: %s", err.Error())
 	}
 
-	return bytes, nil
+	return nil
 }
 
 func (dfu *DFU) getCommand() ([]byte, error) {
@@ -609,12 +622,12 @@ func (dfu *DFU) wait() error {
 	return nil
 }
 
-func (dfu *DFU) ReadCodeplug(progress func(min, max, val int) bool) ([]byte, error) {
+func (dfu *DFU) setTickCounts(min, max, cur int) {
 	dfu.tickFunc = func() bool { return true }
-	if progress != nil {
-		dfu.minTick = 0
-		dfu.maxTick = 62
-		dfu.curTick = 1
+	if dfu.progress != nil {
+		dfu.minTick = min
+		dfu.maxTick = max
+		dfu.curTick = cur
 		dfu.tickFunc = func() bool {
 			dfu.curTick++
 			minMax := dfu.curTick * 50 / 49
@@ -622,128 +635,62 @@ func (dfu *DFU) ReadCodeplug(progress func(min, max, val int) bool) ([]byte, err
 				dfu.maxTick = minMax
 				//fmt.Fprintf(os.Stderr, "maxTick %d\n", dfu.maxTick)
 			}
-			return progress(dfu.minTick, dfu.maxTick, dfu.curTick-1)
+			return dfu.progress(dfu.minTick, dfu.maxTick, dfu.curTick-1)
 		}
+		dfu.progress(dfu.minTick, dfu.maxTick, dfu.curTick)
+	}
+}
+
+func (dfu *DFU) read(address, offset int, data []byte) error {
+	if offset%dfu.blockSize != 0 {
+		return fmt.Errorf("dfu.read: offset is not a multiple of blockSize")
 	}
 
-	var bytes []byte
+	if len(data)%dfu.blockSize != 0 {
+		return fmt.Errorf("dfu.read: data size is not a multiple of blockSize")
+	}
 
-	blockSize := 1024
-	blockNumber := 2
-	blockCount := 256
+	blockNumber := offset / dfu.blockSize
+	blockCount := len(data) / dfu.blockSize
 
-	data := make([]byte, 0, blockSize*blockCount)
-
-	err := dfu.md380Custom(
-		0x91, 0x01, // Programming Mode
-		0xa2, 0x02,
-		0xa2, 0x02,
-		0xa2, 0x03,
-		0xa2, 0x04,
-		0xa2, 0x07,
-	)
+	err := dfu.setAddress(address)
 	if err != nil {
 		goto errRet
 	}
 
-	err = dfu.setAddress(0x00000000)
-	if err != nil {
-		goto errRet
-	}
+	dfu.setTickCounts(0, blockCount, 0)
 
-	if progress != nil {
-		dfu.curTick = dfu.maxTick - 1
-		dfu.tickFunc()
-
-		dfu.minTick = 0
-		dfu.maxTick = blockCount
-		dfu.curTick = 0
-		dfu.tickFunc = func() bool {
-			dfu.curTick++
-			return progress(dfu.minTick, dfu.maxTick, dfu.curTick-1)
-		}
-	}
-
+	offset = 0
 	for i := 0; i < blockCount; i++ {
 		if !dfu.tickFunc() {
-			return nil, nil
+			return nil
 		}
-
-		bytes, err = dfu.read(blockNumber, blockSize)
+		endOffset := offset + dfu.blockSize
+		err = dfu.readBlock(blockNumber, data[offset:endOffset])
 		if err != nil {
 			goto errRet
 		}
 
 		blockNumber++
-		if len(bytes) != blockSize {
-			return nil, fmt.Errorf("bad read size: %d bytes", len(bytes))
-		}
-		data = append(data, bytes...)
+		offset += dfu.blockSize
 	}
 
-	dfu.curTick = dfu.maxTick
-	dfu.tickFunc()
+	if dfu.progress != nil {
+		dfu.curTick = dfu.maxTick
+		dfu.progress(dfu.minTick, dfu.maxTick, dfu.curTick)
+	}
 
-	return data, nil
+	return nil
 
 errRet:
-	return nil, fmt.Errorf("ReadCodeplug: %s", err.Error())
+	return fmt.Errorf("dfu.read: %s", err.Error())
 }
 
-func (dfu *DFU) WriteCodeplug(data []byte, progress func(min, max, val int) bool) error {
-	dfu.tickFunc = func() bool { return true }
-	if progress != nil {
-		dfu.minTick = 0
-		dfu.maxTick = 276
-		dfu.curTick = 1
-		dfu.tickFunc = func() bool {
-			dfu.curTick++
-			minMax := dfu.curTick * 50 / 49
-			if dfu.maxTick < minMax {
-				dfu.maxTick = minMax
-				//fmt.Fprintf(os.Stderr, "maxTick %d\n", dfu.maxTick)
-			}
-			return progress(dfu.minTick, dfu.maxTick, dfu.curTick-1)
-		}
-	}
+func (dfu *DFU) write(address, offset int, data []byte) error {
+	blockNumber := offset / dfu.blockSize
+	blockCount := len(data) / dfu.blockSize
 
-	//var cmd []byte
-	blockSize := 1024
-	blockNumber := 2
-	blockCount := len(data) / blockSize
-
-	if len(data)%blockSize != 0 {
-		return fmt.Errorf("codeplug data size is not a multiple of %d", blockSize)
-	}
-
-	err := dfu.md380Custom(
-		0x91, 0x01, // Programming Mode
-		0x91, 0x01, // Programming Mode
-		0xa2, 0x02,
-	)
-	if err != nil {
-		goto errRet
-	}
-
-	//cmd, err = dfu.getCommand()
-	//if err != nil {
-	//	goto errRet
-	//}
-	//fmt.Fprintf(os.Stderr, "%+v", cmd)
-
-	dfu.sleepMilliseconds(2000)
-
-	err = dfu.md380Custom(
-		0xa2, 0x02,
-		0xa2, 0x03,
-		0xa2, 0x04,
-		0xa2, 0x07,
-	)
-	if err != nil {
-		goto errRet
-	}
-
-	err = dfu.eraseBlocks(0x00000000, 0x00010000, 0x00020000, 0x00030000)
+	err := dfu.eraseBlocks(0x00000000, len(data))
 	if err != nil {
 		goto errRet
 	}
@@ -758,27 +705,15 @@ func (dfu *DFU) WriteCodeplug(data []byte, progress func(min, max, val int) bool
 		goto errRet
 	}
 
-	if progress != nil {
-		dfu.curTick = dfu.maxTick - 1
-		dfu.tickFunc()
+	dfu.setTickCounts(0, blockCount, 0)
 
-		dfu.minTick = 0
-		dfu.maxTick = blockCount
-		dfu.curTick = 0
-		dfu.tickFunc = func() bool {
-			dfu.curTick++
-			return progress(dfu.minTick, dfu.maxTick, dfu.curTick-1)
-		}
-	}
-
+	offset = 0
 	for i := 0; i < blockCount; i++ {
 		if !dfu.tickFunc() {
 			return nil
 		}
-
-		offset := i * blockSize
-		bytes := data[offset : offset+blockSize]
-		err = dfu.write(blockNumber, bytes)
+		endOffset := offset + dfu.blockSize
+		err = dfu.writeBlock(blockNumber, data[offset:endOffset])
 		if err != nil {
 			goto errRet
 		}
@@ -794,13 +729,78 @@ func (dfu *DFU) WriteCodeplug(data []byte, progress func(min, max, val int) bool
 			}
 		}
 		blockNumber++
+		offset += dfu.blockSize
 	}
 
-	dfu.curTick = dfu.maxTick
-	dfu.tickFunc()
+	if dfu.progress != nil {
+		dfu.curTick = dfu.maxTick
+		dfu.progress(dfu.minTick, dfu.maxTick, dfu.curTick)
+	}
 
 	return nil
 
 errRet:
+	return fmt.Errorf("dfu.write: %s", err.Error())
+}
+
+func (dfu *DFU) ReadCodeplug(data []byte, progress func(min, max, val int) bool) error {
+	dfu.progress = progress
+
+	dfu.setTickCounts(0, 62, 1)
+
+	err := dfu.md380Cmd([]md380Cmd{
+		md380Cmd{0x91, 0x01}, // Programming Mode
+		md380Cmd{0xa2, 0x02},
+		md380Cmd{0xa2, 0x02},
+		md380Cmd{0xa2, 0x03},
+		md380Cmd{0xa2, 0x04},
+		md380Cmd{0xa2, 0x07},
+	})
+	if err != nil {
+		goto errRet
+	}
+
+	err = dfu.read(0, 2048, data)
+	if err != nil {
+		goto errRet
+	}
+
+	dfu.progress = nil
+	return nil
+
+errRet:
+	dfu.progress = nil
+	return fmt.Errorf("ReadCodeplug: %s", err.Error())
+}
+
+func (dfu *DFU) WriteCodeplug(data []byte, progress func(min, max, val int) bool) error {
+	dfu.progress = progress
+	dfu.setTickCounts(0, 276, 1)
+
+	if len(data)%dfu.blockSize != 0 {
+		return fmt.Errorf("WriteCodeplug: codeplug data size is not a multiple of %d", dfu.blockSize)
+	}
+
+	err := dfu.md380Cmd([]md380Cmd{
+		md380Cmd{0x91, 0x01}, // Programming Mode
+		md380Cmd{0x91, 0x01}, // Programming Mode
+		md380Cmd{0xa2, 0x02},
+		md380Cmd{CmdSleep, 2000},
+		md380Cmd{0xa2, 0x02},
+		md380Cmd{0xa2, 0x03},
+		md380Cmd{0xa2, 0x04},
+		md380Cmd{0xa2, 0x07},
+	})
+	if err != nil {
+		goto errRet
+	}
+
+	dfu.write(0, 2048, data)
+	dfu.progress = nil
+
+	return nil
+
+errRet:
+	dfu.progress = nil
 	return fmt.Errorf("WriteCodeplug: %s", err.Error())
 }

@@ -1954,7 +1954,8 @@ func (cp *Codeplug) ReadRadio(progress func(min, max, val int) bool) error {
 	}
 	defer dfu.Close()
 
-	bytes, err := dfu.ReadCodeplug(func(min, max, val int) bool {
+	bytes := make([]byte, len(binBytes))
+	err = dfu.ReadCodeplug(bytes, func(min, max, val int) bool {
 		return progress(min, max, val)
 	})
 	if err != nil {
