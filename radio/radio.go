@@ -29,39 +29,38 @@ import (
 	"os"
 
 	"github.com/dalefarnsworth/codeplug/dfu"
+	"github.com/dalefarnsworth/codeplug/userdb"
 )
 
 func main() {
 	if len(os.Args) != 3 {
-		fmt.Fprintf(os.Stderr, "Usage %s read|write|dumpSPIFlash", os.Args[0])
+		log.Fatalf("Usage %s read|write|dumpSPIFlash|dumpUsers|eraseUsers|writeUsers|getUsersFile|getEuroUsersFile filename", os.Args[0])
+		return
 	}
 	cmd := os.Args[1]
 	filename := os.Args[2]
 
-	dfu, err := dfu.NewDFU()
-	if err != nil {
-		log.Fatalf("NewDFU: %s", err.Error())
-	}
-	defer dfu.Close()
-
 	switch cmd {
 	case "read":
+		dfu, err := dfu.NewDFU()
+		if err != nil {
+			log.Fatalf("NewDFU: %s", err.Error())
+		}
+		defer dfu.Close()
+
 		file, err := os.Create(filename)
 		if err != nil {
 			log.Fatalf("os.Create: %s", err.Error())
 		}
 
-		prefix := "Connecting to radio."
-		bytes, err := dfu.ReadCodeplug(func(min, max, cur int) bool {
-			if cur == min {
-				fmt.Printf("%s... %3d%%\n", prefix, 100)
-				prefix = "Reading codeplug from radio."
-			}
+		bytes := make([]byte, 256*1024)
 
-			fmt.Printf("%s... %3d%%\r", prefix, cur*100/max)
-			return true
-		})
-		fmt.Println()
+		prefixes := []string{
+			"Connecting to radio.",
+			"Reading codeplug from radio.",
+		}
+
+		err = dfu.ReadCodeplug(bytes, progressFunc(prefixes))
 		if err != nil {
 			log.Fatalf("dfu.ReadCodeplug: %s", err.Error())
 		}
@@ -75,6 +74,12 @@ func main() {
 		}
 
 	case "write":
+		dfu, err := dfu.NewDFU()
+		if err != nil {
+			log.Fatalf("NewDFU: %s", err.Error())
+		}
+		defer dfu.Close()
+
 		fileInfo, err := os.Stat(filename)
 		if err != nil {
 			log.Fatalf("os.Stat: %s", err.Error())
@@ -95,34 +100,115 @@ func main() {
 			log.Fatalf("Failed to read all of %s", filename)
 		}
 
-		prefix := "Connecting to radio."
-		err = dfu.WriteCodeplug(bytes, func(min, max, cur int) bool {
-			if cur == min {
-				fmt.Printf("%s... %3d%%\n", prefix, 100)
-				prefix = "Writing codeplug to radio."
-			}
-			fmt.Printf("%s... %3d%%\r", prefix, 100)
-			return true
-		})
-		fmt.Println()
+		prefixes := []string{
+			"Preparing to dump flash",
+			"Writing codeplug to radio.",
+		}
+
+		err = dfu.WriteCodeplug(bytes, progressFunc(prefixes))
 		if err != nil {
 			log.Fatalf("dfu.WriteCodeplug: %s", err.Error())
 		}
 
 	case "dumpSPIFlash":
+		dfu, err := dfu.NewDFU()
+		if err != nil {
+			log.Fatalf("NewDFU: %s", err.Error())
+		}
+		defer dfu.Close()
+
 		file, err := os.Create(filename)
 		if err != nil {
 			log.Fatalf("os.Create: %s", err.Error())
 		}
 
-		prefix := "Dumping Flash"
-		err := dfu.DumpSPIFlash(file, func(min, max, cur int) bool {
-			fmt.Printf("%s... %3d%%\r", prefix, cur*100/max)
-			return true
-		})
-		fmt.Println()
+		prefixes := []string{
+			"Preparing to dump flash",
+			"Dumping flash",
+		}
+
+		err = dfu.DumpSPIFlash(file, progressFunc(prefixes))
 		if err != nil {
 			log.Fatalf(err.Error())
 		}
+
+	case "dumpUsers":
+		dfu, err := dfu.NewDFU()
+		if err != nil {
+			log.Fatalf("NewDFU: %s", err.Error())
+		}
+		defer dfu.Close()
+
+		file, err := os.Create(filename)
+		if err != nil {
+			log.Fatalf("os.Create: %s", err.Error())
+		}
+
+		prefixes := []string{
+			"Preparing to dump users",
+			fmt.Sprintf("Dumping users to %s", filename),
+		}
+
+		err = dfu.DumpUsers(file, progressFunc(prefixes))
+		if err != nil {
+			log.Fatalf(err.Error())
+		}
+
+	case "writeUsers":
+		dfu, err := dfu.NewDFU()
+		if err != nil {
+			log.Fatalf("NewDFU: %s", err.Error())
+		}
+		defer dfu.Close()
+
+		prefixes := []string{
+			"Erasing flash memory",
+			"Writing users",
+		}
+
+		err = dfu.WriteUsers(filename, progressFunc(prefixes))
+		fmt.Println()
+		if err != nil {
+			log.Fatalf("writeUsers: %s", err.Error())
+		}
+
+	case "getUsersFile":
+		prefixes := []string{
+			"Retrieving Users file",
+		}
+		err := userdb.WriteMD380ToolsFile(filename, progressFunc(prefixes))
+		if err != nil {
+			log.Fatalf("getUsersFile: %s", err.Error())
+		}
+
+	case "getEuroUsersFile":
+		prefixes := []string{
+			"Retrieving European Users file",
+		}
+		err := userdb.WriteMD380ToolsEuroFile(filename, progressFunc(prefixes))
+		if err != nil {
+			log.Fatalf("getEuroUsersFile: %s", err.Error())
+		}
+	}
+}
+
+func progressFunc(aPrefixes []string) func(cur int) bool {
+	var prefixes []string
+	if aPrefixes != nil {
+		prefixes = aPrefixes
+	}
+	prefixIndex := 0
+	prefix := prefixes[prefixIndex]
+	maxProgress := userdb.MaxProgress
+	return func(cur int) bool {
+		if cur == 0 {
+			if prefixIndex != 0 {
+				fmt.Println()
+			}
+			prefix = prefixes[prefixIndex]
+			prefixIndex++
+		}
+		fmt.Printf("%s... %3d%%\r", prefix, cur*100/maxProgress)
+		return true
 	}
 }
