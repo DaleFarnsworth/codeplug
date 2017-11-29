@@ -210,7 +210,7 @@ func (dfu *DFU) Close() {
 func (dfu *DFU) detach() error {
 	_, err := dfu.dev.Control(0x21, reqDetach, 0, 0, nil)
 	if err != nil {
-		return fmt.Errorf("detach: %s", err.Error())
+		return wrapError("detach", err)
 	}
 
 	return nil
@@ -221,13 +221,10 @@ func (dfu *DFU) detach() error {
 func (dfu *DFU) GetString(index int) (string, error) {
 	str, err := dfu.dev.GetStringDescriptor(index)
 	if err != nil {
-		goto errRet
+		return str, wrapError("GetString", err)
 	}
 
 	return str, nil
-
-errRet:
-	return str, fmt.Errorf("GetStringDescriptor failed: %s", err.Error())
 }
 
 func (dfu *DFU) toDecimal(b byte) int {
@@ -249,12 +246,12 @@ func (dfu *DFU) GetTime() (time.Time, error) {
 		0xa2, 0x08, // Access clock memory
 	)
 	if err != nil {
-		goto errRet
+		return time.Now(), wrapError("GetTime", err)
 	}
 
 	timeBytes, err = dfu.read(0, timeBytes) // Read BCD time bytes
 	if err != nil {
-		goto errRet
+		return time.Now(), wrapError("GetTime", err)
 	}
 
 	year = dfu.toDecimal(timeBytes[0])*100 + dfu.toDecimal(timeBytes[1])
@@ -265,9 +262,6 @@ func (dfu *DFU) GetTime() (time.Time, error) {
 	seconds = dfu.toDecimal(timeBytes[6])
 
 	return time.Date(year, month, day, hours, minutes, seconds, 0, location), nil
-
-errRet:
-	return time.Now(), fmt.Errorf("GetTime: %s", err.Error())
 }
 
 func (dfu *DFU) SetTime(t time.Time) error {
@@ -310,18 +304,15 @@ func (dfu *DFU) md380Reboot() error {
 	rebootCmd := []byte{byte(0x91), byte(0x05)}
 	_, err := dfu.dev.Control(0x21, reqWrite, 0, 0, rebootCmd)
 	if err != nil {
-		goto errRet
+		return wrapError("md380Reboot", err)
 	}
 
 	_, err = dfu.getStatus() // this changes state
 	if err != nil {
-		goto errRet
+		return wrapError("md380Reboot", err)
 	}
 
 	return nil
-
-errRet:
-	return fmt.Errorf("md380Reboot: %s", err.Error())
 }
 
 func (dfu *DFU) waitUntilReady() error {
@@ -330,7 +321,7 @@ func (dfu *DFU) waitUntilReady() error {
 	for {
 		state, err := dfu.getStatus()
 		if err != nil {
-			goto errRet
+			return fmt.Errorf("waitUntilReady %s", err.Error())
 		}
 		if state == dfuIdle {
 			break
@@ -338,14 +329,11 @@ func (dfu *DFU) waitUntilReady() error {
 
 		err = dfu.clearStatus()
 		if err != nil {
-			goto errRet
+			return fmt.Errorf("waitUntilReady %s", err.Error())
 		}
 	}
 
 	return nil
-
-errRet:
-	return fmt.Errorf("waitUntilReady %s", err.Error())
 }
 
 */
@@ -353,15 +341,13 @@ errRet:
 func (dfu *DFU) write(blockNumber int, bytes []byte) error {
 	_, err := dfu.dev.Control(0x21, reqWrite, uint16(blockNumber), 0, bytes)
 	if err != nil {
-		return fmt.Errorf("write error: %s", err.Error())
+		return wrapError("write error", err)
 	}
 
 	return nil
 }
 
 func (dfu *DFU) setAddress(address int) error {
-	var state state
-
 	a := byte(address)
 	b := byte((address >> 8))
 	c := byte((address >> 16))
@@ -370,32 +356,29 @@ func (dfu *DFU) setAddress(address int) error {
 
 	_, err := dfu.dev.Control(0x21, reqWrite, 0, 0, addrCmd)
 	if err != nil {
-		goto errRet
+		return wrapError("setAddress", err)
 	}
 
 	_, err = dfu.getStatus() // this changes state
 	if err != nil {
-		goto errRet
+		return wrapError("setAddress", err)
 	}
 
-	state, err = dfu.getStatus() // this actually gets the state
+	state, err := dfu.getStatus() // this actually gets the state
 	if err != nil {
-		goto errRet
+		return wrapError("setAddress", err)
 	}
 
 	if state != dfuWriteIdle {
-		goto errRet
+		return wrapError("setAddress", err)
 	}
 
 	err = dfu.enterDFUMode()
 	if err != nil {
-		goto errRet
+		return wrapError("setAddress", err)
 	}
 
 	return nil
-
-errRet:
-	return fmt.Errorf("setAddress: %s", err.Error())
 }
 
 func (dfu *DFU) eraseBlocks(address int, size int) error {
@@ -435,8 +418,6 @@ func (dfu *DFU) eraseSPIFlashBlocks(address int, size int) error {
 }
 
 func (dfu *DFU) eraseBlock(address uint32) error {
-	var state state
-
 	a := byte(address)
 	b := byte((address >> 8))
 	c := byte((address >> 16))
@@ -445,30 +426,27 @@ func (dfu *DFU) eraseBlock(address uint32) error {
 
 	_, err := dfu.dev.Control(0x21, reqWrite, 0, 0, addrCmd)
 	if err != nil {
-		goto errRet
+		return wrapError("eraseBlock", err)
 	}
 
 	_, err = dfu.getStatus() // this changes state
 	if err != nil {
-		goto errRet
+		return wrapError("eraseBlock", err)
 	}
-	state, err = dfu.getStatus() // this actually gets the state
+	state, err := dfu.getStatus() // this actually gets the state
 	if err != nil {
-		goto errRet
+		return wrapError("eraseBlock", err)
 	}
 	if state != dfuWriteIdle {
-		goto errRet
+		return errors.New("eraseBlock: state != dfuWriteIdle")
 	}
 
 	err = dfu.enterDFUMode()
 	if err != nil {
-		goto errRet
+		return wrapError("eraseBlock", err)
 	}
 
 	return nil
-
-errRet:
-	return fmt.Errorf("EraseBlock: %s", err.Error())
 }
 
 func (dfu *DFU) eraseSPIFlashBlock(address uint32) error {
@@ -482,25 +460,25 @@ func (dfu *DFU) eraseSPIFlashBlock(address uint32) error {
 
 	_, err := dfu.dev.Control(0x21, reqWrite, 1, 0, addrCmd)
 	if err != nil {
-		goto errRet
+		return wrapError("eraseSPIFlashBlock", err)
 	}
 
 	_, err = dfu.getStatus() // this changes state
 	if err != nil {
-		goto errRet
+		return wrapError("eraseSPIFlashBlock", err)
 	}
 
-	dfu.sleepMilliseconds(400)
+	err = dfu.sleepMilliseconds(400)
+	if err != nil {
+		return err
+	}
 
 	_, err = dfu.getStatus() // this actually gets the state
 	if err != nil {
-		goto errRet
+		return wrapError("eraseSPIFlashBlock", err)
 	}
 
 	return nil
-
-errRet:
-	return fmt.Errorf("eraseSPIFlashBlock: %s", err.Error())
 }
 
 type md380Cmd struct {
@@ -514,24 +492,29 @@ func (dfu *DFU) md380Cmd(commands []md380Cmd) error {
 	for _, cmd := range commands {
 		switch cmd.a {
 		case CmdSleep:
-			dfu.sleepMilliseconds(cmd.b)
+			err := dfu.sleepMilliseconds(cmd.b)
+			if err != nil {
+				return err
+			}
 			continue
 		}
 
 		err := dfu.md380Custom(cmd)
 		if err != nil {
-			return fmt.Errorf("md380Cmd: %s", err.Error())
+			return wrapError("md380Cmd", err)
 		}
 	}
 
 	return nil
 }
 
-func (dfu *DFU) sleepMilliseconds(millis int) {
+func (dfu *DFU) sleepMilliseconds(millis int) error {
 	for i := 0; i < millis; i++ {
 		dfu.progressFunc()
 		time.Sleep(time.Duration(time.Millisecond))
 	}
+
+	return nil
 }
 
 func (dfu *DFU) md380Custom(acmd md380Cmd) error {
@@ -547,7 +530,10 @@ func (dfu *DFU) md380Custom(acmd md380Cmd) error {
 		return err
 	}
 
-	dfu.sleepMilliseconds(100)
+	err = dfu.sleepMilliseconds(100)
+	if err != nil {
+		return err
+	}
 
 	state, err := dfu.getStatus() // this actually gets the state
 	if err != nil {
@@ -569,15 +555,13 @@ func (dfu *DFU) md380Custom(acmd md380Cmd) error {
 func (dfu *DFU) read(blockNumber int, bytes []byte) error {
 	_, err := dfu.dev.Control(0xa1, reqRead, uint16(blockNumber), 0, bytes)
 	if err != nil {
-		return fmt.Errorf("read: %s", err.Error())
+		return wrapError("read", err)
 	}
 
 	return nil
 }
 
 func (dfu *DFU) readSPIFlashTo(address, size int, iWriter io.Writer) error {
-	var err error
-	var n int
 	writer := bufio.NewWriter(iWriter)
 	bytes := make([]byte, dfu.blockSize)
 
@@ -595,14 +579,14 @@ func (dfu *DFU) readSPIFlashTo(address, size int, iWriter io.Writer) error {
 
 		dfu.readSPIFlash(addr, bytes)
 
-		n, err = writer.Write(bytes)
+		n, err := writer.Write(bytes)
 		if err != nil {
-			goto errRet
+			return wrapError("readSPIFlashTo", err)
 		}
 
 		if n != len(bytes) {
 			err = errors.New("short write")
-			goto errRet
+			return wrapError("readSPIFlashTo", err)
 		}
 	}
 
@@ -611,21 +595,15 @@ func (dfu *DFU) readSPIFlashTo(address, size int, iWriter io.Writer) error {
 	dfu.finalProgress()
 
 	return nil
-
-errRet:
-	return fmt.Errorf("readSPIFlashTo: %s", err.Error())
 }
 
 func (dfu *DFU) writeSPIFlashFrom(address, size int, iRdr io.Reader) error {
-	var err error
-	var endAddress int
-
 	rdr := bufio.NewReader(iRdr)
 	buf := make([]byte, dfu.blockSize)
 
 	flashSize, err := dfu.spiFlashSize()
 	if err != nil {
-		goto errRet
+		return wrapError("writeSPIFlashFrom", err)
 	}
 
 	if address+size > flashSize {
@@ -634,22 +612,22 @@ func (dfu *DFU) writeSPIFlashFrom(address, size int, iRdr io.Reader) error {
 
 	err = dfu.eraseSPIFlashBlocks(0x00000000, size)
 	if err != nil {
-		goto errRet
+		return wrapError("writeSPIFlashFrom", err)
 	}
 
 	err = dfu.setAddress(0x00000000)
 	if err != nil {
-		goto errRet
+		return wrapError("writeSPIFlashFrom", err)
 	}
 
 	_, err = dfu.getStatus()
 	if err != nil {
-		goto errRet
+		return wrapError("writeSPIFlashFrom", err)
 	}
 
 	dfu.setMaxProgressCount(size/dfu.blockSize + 1)
 
-	endAddress = address + size
+	endAddress := address + size
 	for addr := address; addr < endAddress; addr += dfu.blockSize {
 		if !dfu.progressFunc() {
 			return nil
@@ -657,7 +635,7 @@ func (dfu *DFU) writeSPIFlashFrom(address, size int, iRdr io.Reader) error {
 
 		n, err := rdr.Read(buf)
 		if err != nil {
-			goto errRet
+			return wrapError("writeSPIFlashFrom", err)
 		}
 
 		if n < len(buf) {
@@ -666,13 +644,13 @@ func (dfu *DFU) writeSPIFlashFrom(address, size int, iRdr io.Reader) error {
 
 		err = dfu.writeSPIFlash(addr, buf)
 		if err != nil {
-			goto errRet
+			return wrapError("writeSPIFlashFrom", err)
 		}
 
 		for {
 			state, err := dfu.getStatus()
 			if err != nil {
-				goto errRet
+				return wrapError("writeSPIFlashFrom", err)
 			}
 
 			if state == dfuWriteIdle {
@@ -684,9 +662,6 @@ func (dfu *DFU) writeSPIFlashFrom(address, size int, iRdr io.Reader) error {
 	dfu.finalProgress()
 
 	return nil
-
-errRet:
-	return fmt.Errorf("write: %s", err.Error())
 }
 
 func (dfu *DFU) DumpUsers(file *os.File, progress func(cur int) bool) error {
@@ -745,28 +720,25 @@ func (dfu *DFU) readSPIFlash(address int, bytes []byte) error {
 	}
 	_, err := dfu.dev.Control(0x21, reqWrite, 1, 0, cmd)
 	if err != nil {
-		goto errRet
+		return wrapError("readSPIFlash", err)
 	}
 
 	_, err = dfu.getStatus() // this changes state
 	if err != nil {
-		goto errRet
+		return wrapError("readSPIFlash", err)
 	}
 
 	_, err = dfu.getStatus() // this actually gets the state
 	if err != nil {
-		goto errRet
+		return wrapError("readSPIFlash", err)
 	}
 
 	err = dfu.read(1, bytes)
 	if err != nil {
-		goto errRet
+		return wrapError("readSPIFlash", err)
 	}
 
 	return nil
-
-errRet:
-	return fmt.Errorf("readSPIFlash: %s", err.Error())
 }
 
 func (dfu *DFU) writeSPIFlash(address int, bytes []byte) error {
@@ -785,23 +757,20 @@ func (dfu *DFU) writeSPIFlash(address int, bytes []byte) error {
 	cmd = append(cmd, bytes...)
 	_, err := dfu.dev.Control(0x21, reqWrite, 1, 0, cmd)
 	if err != nil {
-		goto errRet
+		return wrapError("writeSPIFlash", err)
 	}
 
 	_, err = dfu.getStatus() // this changes state
 	if err != nil {
-		goto errRet
+		return wrapError("writeSPIFlash", err)
 	}
 
 	_, err = dfu.getStatus() // this actually gets the state
 	if err != nil {
-		goto errRet
+		return wrapError("writeSPIFlash", err)
 	}
 
 	return nil
-
-errRet:
-	return fmt.Errorf("writeSPIFlash: %s", err.Error())
 }
 
 func (dfu *DFU) getCommand() ([]byte, error) {
@@ -809,25 +778,22 @@ func (dfu *DFU) getCommand() ([]byte, error) {
 
 	_, err := dfu.dev.Control(0xa1, reqRead, 0, 0, cmd)
 	if err != nil {
-		goto errRet
+		return nil, wrapError("getCommand", err)
 	}
 
 	_, err = dfu.getStatus()
 	if err != nil {
-		goto errRet
+		return nil, wrapError("getCommand", err)
 	}
 
 	return cmd, nil
-
-errRet:
-	return nil, fmt.Errorf("getCommand: %s", err.Error())
 }
 
 func (dfu *DFU) getStatus() (state, error) {
 	bytes := make([]byte, 6)
 	_, err := dfu.dev.Control(0xa1, reqGetStatus, 0, 0, bytes)
 	if err != nil {
-		return 0, fmt.Errorf("getStatus: %s", err.Error())
+		return 0, wrapError("getStatus", err)
 	}
 	state := state(bytes[4])
 
@@ -845,7 +811,7 @@ func (dfu *DFU) getStatus() (state, error) {
 func (dfu *DFU) clearStatus() error {
 	_, err := dfu.dev.Control(0x21, reqClearStatus, 0, 0, nil)
 	if err != nil {
-		return fmt.Errorf("clearStatus: %s", err.Error())
+		return wrapError("clearStatus", err)
 	}
 
 	return nil
@@ -856,7 +822,7 @@ func (dfu *DFU) getState() (state, error) {
 
 	_, err := dfu.dev.Control(0xa1, reqGetState, 0, 0, bytes)
 	if err != nil {
-		return 0, fmt.Errorf("GetStatus: %s", err.Error())
+		return 0, wrapError("GetStatus", err)
 	}
 
 	return state(bytes[0]), nil
@@ -865,15 +831,13 @@ func (dfu *DFU) getState() (state, error) {
 func (dfu *DFU) abort() error {
 	_, err := dfu.dev.Control(0x21, reqAbort, 0, 0, nil)
 	if err != nil {
-		return fmt.Errorf("ClearStatus: %s", err.Error())
+		return wrapError("ClearStatus", err)
 	}
 
 	return nil
 }
 
 func (dfu *DFU) enterDFUMode() error {
-	var err error
-	var stat state
 	actionMap := map[state]func() error{
 		dfuWriteSync:         dfu.abort,
 		dfuWriteIdle:         dfu.abort,
@@ -889,59 +853,58 @@ func (dfu *DFU) enterDFUMode() error {
 	}
 
 	for {
-		stat, err = dfu.getState()
+		stat, err := dfu.getState()
 		if err != nil {
-			goto errRet
+			return wrapError("enterDFUMode", err)
 		}
 		if stat == dfuIdle {
 			break
 		}
 		err = actionMap[stat]()
 		if err != nil {
-			goto errRet
+			return wrapError("enterDFUMode", err)
 		}
 	}
 
 	return nil
-
-errRet:
-	return fmt.Errorf("enterDFUMode %s", err.Error())
 }
 
 func (dfu *DFU) wait() error {
-	dfu.sleepMilliseconds(100)
+	err := dfu.sleepMilliseconds(100)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
 func (dfu *DFU) spiFlashID() (string, error) {
-	var id int
-	var str string
-
 	bytes := make([]byte, 4)
 	blockNumber := 1
 
 	cmd := []byte{0x05} // SPIFLASHGETID
 	_, err := dfu.dev.Control(0x21, reqWrite, 1, 0, cmd)
 	if err != nil {
-		goto errRet
+		return "", wrapError("spiFlashID", err)
 	}
 
 	_, err = dfu.getStatus() // this changes state
 	if err != nil {
-		goto errRet
+		return "", wrapError("spiFlashID", err)
 	}
 
 	_, err = dfu.getStatus() // this actually gets the state
 	if err != nil {
-		goto errRet
+		return "", wrapError("spiFlashID", err)
 	}
 
 	err = dfu.read(blockNumber, bytes)
 	if err != nil {
-		goto errRet
+		return "", wrapError("spiFlashID", err)
 	}
 
-	id = int(bytes[0])<<16 | int(bytes[1])<<8 | int(bytes[2])
+	var str string
+
+	id := int(bytes[0])<<16 | int(bytes[1])<<8 | int(bytes[2])
 	switch id {
 	case 0xef4018, 0x10dc01:
 		str = "W25Q128FV"
@@ -957,13 +920,10 @@ func (dfu *DFU) spiFlashID() (string, error) {
 	}
 
 	if err != nil {
-		goto errRet
+		return "", wrapError("spiFlashID", err)
 	}
 
 	return str, nil
-
-errRet:
-	return "", fmt.Errorf("spiFlashID: %s", err.Error())
 }
 
 func (dfu *DFU) spiFlashSize() (int, error) {
@@ -1016,7 +976,7 @@ func (dfu *DFU) readTo(address, offset int, size int, iWriter io.Writer) error {
 
 	err := dfu.setAddress(address)
 	if err != nil {
-		goto errRet
+		return wrapError("readTo", err)
 	}
 
 	dfu.setMaxProgressCount(blockCount)
@@ -1027,17 +987,17 @@ func (dfu *DFU) readTo(address, offset int, size int, iWriter io.Writer) error {
 		}
 		err = dfu.read(blockNumber, bytes)
 		if err != nil {
-			goto errRet
+			return wrapError("readTo", err)
 		}
 
 		n, err := writer.Write(bytes)
 		if err != nil {
-			goto errRet
+			return wrapError("readTo", err)
 		}
 
 		if n != len(bytes) {
 			err = errors.New("short write")
-			goto errRet
+			return wrapError("readTo", err)
 		}
 
 		blockNumber++
@@ -1046,15 +1006,9 @@ func (dfu *DFU) readTo(address, offset int, size int, iWriter io.Writer) error {
 	dfu.finalProgress()
 
 	return nil
-
-errRet:
-	return fmt.Errorf("readTo: %s", err.Error())
 }
 
 func (dfu *DFU) writeFlashFrom(address, offset int, size int, iRdr io.Reader) error {
-	var paddingSize int
-	var padding []byte
-
 	blockNumber := offset / dfu.blockSize
 	blockCount := (size + dfu.blockSize - 1) / dfu.blockSize
 	size = blockCount * dfu.blockSize
@@ -1064,17 +1018,17 @@ func (dfu *DFU) writeFlashFrom(address, offset int, size int, iRdr io.Reader) er
 
 	err := dfu.eraseBlocks(0x00000000, size)
 	if err != nil {
-		goto errRet
+		return wrapError("writeFlashFrom", err)
 	}
 
 	err = dfu.setAddress(0x00000000)
 	if err != nil {
-		goto errRet
+		return wrapError("writeFlashFrom", err)
 	}
 
 	_, err = dfu.getStatus()
 	if err != nil {
-		goto errRet
+		return wrapError("writeFlashFrom", err)
 	}
 
 	dfu.setMaxProgressCount(blockCount)
@@ -1086,24 +1040,24 @@ func (dfu *DFU) writeFlashFrom(address, offset int, size int, iRdr io.Reader) er
 
 		n, err := rdr.Read(buf)
 		if err != nil {
-			goto errRet
+			return wrapError("writeFlashFrom", err)
 		}
 
-		paddingSize = len(buf) - n
+		paddingSize := len(buf) - n
 		if paddingSize != 0 {
-			padding = bytes.Repeat([]byte{0xff}, paddingSize)
+			padding := bytes.Repeat([]byte{0xff}, paddingSize)
 			copy(buf[n:], padding)
 		}
 
 		err = dfu.write(blockNumber, buf)
 		if err != nil {
-			goto errRet
+			return wrapError("writeFlashFrom", err)
 		}
 
 		for {
 			state, err := dfu.getStatus()
 			if err != nil {
-				goto errRet
+				return wrapError("writeFlashFrom", err)
 			}
 
 			if state == dfuWriteIdle {
@@ -1116,9 +1070,6 @@ func (dfu *DFU) writeFlashFrom(address, offset int, size int, iRdr io.Reader) er
 	dfu.finalProgress()
 
 	return nil
-
-errRet:
-	return fmt.Errorf("write: %s", err.Error())
 }
 
 func (dfu *DFU) finalProgress() {
@@ -1128,8 +1079,7 @@ func (dfu *DFU) finalProgress() {
 	}
 }
 
-func (dfu *DFU) ReadCodeplug(data []byte, progress func(cur int) bool) error {
-	dfu.progressCallback = progress
+func (dfu *DFU) ReadCodeplug(data []byte) error {
 	dfu.setMaxProgressCount(620)
 
 	size := len(data)
@@ -1144,22 +1094,18 @@ func (dfu *DFU) ReadCodeplug(data []byte, progress func(cur int) bool) error {
 		md380Cmd{0xa2, 0x07},
 	})
 	if err != nil {
-		goto errRet
+		return wrapError("ReadCodeplug", err)
 	}
 
 	dfu.finalProgress()
 
 	err = dfu.readTo(0, 2048, size, buffer)
 	if err != nil {
-		goto errRet
+		return wrapError("ReadCodeplug", err)
 	}
 
 	dfu.progressCallback = nil
 	return nil
-
-errRet:
-	dfu.progressCallback = nil
-	return fmt.Errorf("ReadCodeplug: %s", err.Error())
 }
 
 func (dfu *DFU) WriteCodeplug(data []byte, progress func(cur int) bool) error {
@@ -1183,19 +1129,12 @@ func (dfu *DFU) WriteCodeplug(data []byte, progress func(cur int) bool) error {
 		md380Cmd{0xa2, 0x07},
 	})
 	if err != nil {
-		goto errRet
+		return wrapError("WriteCodeplug", err)
 	}
 
 	dfu.finalProgress()
 
-	dfu.writeFlashFrom(0, 2048, len(data), buffer)
-	dfu.progressCallback = nil
-
-	return nil
-
-errRet:
-	dfu.progressCallback = nil
-	return fmt.Errorf("WriteCodeplug: %s", err.Error())
+	return dfu.writeFlashFrom(0, 2048, len(data), buffer)
 }
 
 func (dfu *DFU) WriteUsers(filename string, progress func(cur int) bool) error {
@@ -1212,10 +1151,12 @@ func (dfu *DFU) WriteUsers(filename string, progress func(cur int) bool) error {
 
 	size := int(fileInfo.Size())
 
-	dfu.progressCallback = progress
+	return dfu.writeSPIFlashFrom(0x100000, size, file)
+}
 
-	dfu.writeSPIFlashFrom(0x100000, size, file)
-	dfu.progressCallback = nil
-
-	return nil
+func wrapError(prefix string, err error) error {
+	if err.Error() == "" {
+		return err
+	}
+	return fmt.Errorf("%s: %s", prefix, err.Error())
 }
