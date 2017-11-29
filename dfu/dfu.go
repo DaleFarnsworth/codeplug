@@ -151,7 +151,7 @@ type DFU struct {
 	progressCounter   int
 }
 
-func NewDFU() (*DFU, error) {
+func NewDFU(progressCallback func(progressCounter int) bool) (*DFU, error) {
 	ctx := gousb.NewContext()
 
 	dfu := &DFU{
@@ -206,6 +206,7 @@ func (dfu *DFU) Close() {
 	if dfu.ctx != nil {
 		dfu.ctx.Close()
 	}
+	dfu.progressCallback = nil
 }
 
 func (dfu *DFU) detach() error {
@@ -672,8 +673,7 @@ func (dfu *DFU) writeSPIFlashFrom(address, size int, iRdr io.Reader) error {
 	return nil
 }
 
-func (dfu *DFU) DumpUsers(file *os.File, progress func(cur int) bool) error {
-	dfu.progressCallback = progress
+func (dfu *DFU) DumpUsers(file *os.File) error {
 	dfu.setMaxProgressCount(100)
 
 	size, err := dfu.spiFlashSize()
@@ -686,6 +686,7 @@ func (dfu *DFU) DumpUsers(file *os.File, progress func(cur int) bool) error {
 	address := 0x100000
 	size -= address
 
+	dfu.finalProgress()
 	dfu.setMaxProgressCount(size / (dfu.blockSize + 1))
 
 	err = dfu.readSPIFlashTo(address, size, file)
@@ -697,8 +698,7 @@ func (dfu *DFU) DumpUsers(file *os.File, progress func(cur int) bool) error {
 	return nil
 }
 
-func (dfu *DFU) DumpSPIFlash(file *os.File, progress func(cur int) bool) error {
-	dfu.progressCallback = progress
+func (dfu *DFU) DumpSPIFlash(file *os.File) error {
 	dfu.setMaxProgressCount(100)
 
 	size, err := dfu.spiFlashSize()
@@ -1120,12 +1120,10 @@ func (dfu *DFU) ReadCodeplug(data []byte) error {
 		return wrapError("ReadCodeplug", err)
 	}
 
-	dfu.progressCallback = nil
 	return nil
 }
 
-func (dfu *DFU) WriteCodeplug(data []byte, progress func(cur int) bool) error {
-	dfu.progressCallback = progress
+func (dfu *DFU) WriteCodeplug(data []byte) error {
 	dfu.setMaxProgressCount(2750)
 
 	if len(data)%dfu.blockSize != 0 {
@@ -1153,7 +1151,7 @@ func (dfu *DFU) WriteCodeplug(data []byte, progress func(cur int) bool) error {
 	return dfu.writeFlashFrom(0, 2048, len(data), buffer)
 }
 
-func (dfu *DFU) WriteUsers(filename string, progress func(cur int) bool) error {
+func (dfu *DFU) WriteUsers(filename string) error {
 	fileInfo, err := os.Stat(filename)
 	if err != nil {
 		log.Fatalf("os.Stat: %s", err.Error())
