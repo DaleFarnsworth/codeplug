@@ -1309,6 +1309,7 @@ func parseName(rdr *reader) (string, int, error) {
 	if pos.column != 0 {
 		nType = "field"
 	}
+
 	var r rune
 	index := 0
 
@@ -1316,24 +1317,32 @@ func parseName(rdr *reader) (string, int, error) {
 		return unicode.IsLetter(r) || unicode.IsDigit(r)
 	})
 
+	wrapError := func(err error) (string, int, error) {
+		pErr := PositionError{
+			position: &pos,
+			error:    err,
+		}
+		return name, 0, pErr
+	}
+
 	if err != nil {
 		if err == io.EOF {
 			return name, index, err
 		}
 
 		err = fmt.Errorf("bad %s name", nType)
-		goto returnError
+		return wrapError(err)
 	}
 	if len(name) == 0 || !unicode.IsLetter([]rune(name)[0]) {
 		err = fmt.Errorf("bad %s name", nType)
-		goto returnError
+		return wrapError(err)
 	}
 
 	pos = rdr.pos
 	r, _, err = rdr.ReadRune()
 	if err != nil {
 		err = fmt.Errorf("bad %s name", nType)
-		goto returnError
+		return wrapError(err)
 	}
 	switch r {
 	case ':':
@@ -1342,35 +1351,28 @@ func parseName(rdr *reader) (string, int, error) {
 		index, err = rdr.ReadInt()
 		if err != nil {
 			err = fmt.Errorf("bad %s index", nType)
-			goto returnError
+			return wrapError(err)
 		}
 		index--
 		pos = rdr.pos
 		r, _, err = rdr.ReadRune()
 		if r != ']' {
 			err = fmt.Errorf("bad %s index", nType)
-			goto returnError
+			return wrapError(err)
 		}
 		pos = rdr.pos
 		r, _, err = rdr.ReadRune()
 		if r != ':' {
 			err = fmt.Errorf("bad %s name", nType)
-			goto returnError
+			return wrapError(err)
 		}
 	default:
 		err = fmt.Errorf("bad %s index", nType)
-		goto returnError
+		return wrapError(err)
 	}
 	rdr.ReadWhile(unicode.IsSpace)
 
 	return name, index, nil
-
-returnError:
-	pErr := PositionError{
-		position: &pos,
-		error:    err,
-	}
-	return name, 0, pErr
 }
 
 func (cp *Codeplug) ParseRecords(rdr io.Reader) ([]*Record, error) {
@@ -1391,25 +1393,40 @@ func (cp *Codeplug) parsedFileToRecs(pRecs []*parsedRecord) ([]*Record, error) {
 		appendWarningMsgs(&warning, pf.pos, err)
 	}
 
+	wrapError := func(err error) ([]*Record, error) {
+		if err != nil {
+			pErr, ok := err.(PositionError)
+			if !ok {
+				pErr = PositionError{
+					position: pos,
+					error:    err,
+				}
+			}
+			return records, pErr
+		}
+
+		return records, err
+	}
+
 	for _, pr := range pRecs {
 		if pr.err != nil {
 			pos = pr.pos
 			err = pr.err
-			goto errReturn
+			return wrapError(err)
 		}
 
 		var r *Record
 		r, err = cp.rNameToRecord(pr.name, pr.index)
 		if err != nil {
 			pos = pr.pos
-			goto errReturn
+			return wrapError(err)
 		}
 
 		for _, pf := range pr.pFields {
 			if pf.err != nil {
 				pos = pr.pos
 				err = pf.err
-				goto errReturn
+				return wrapError(err)
 			}
 
 			fType, err := cp.nameToFt(r.rType, pf.name)
@@ -1440,20 +1457,6 @@ func (cp *Codeplug) parsedFileToRecs(pRecs []*parsedRecord) ([]*Record, error) {
 	}
 
 	return records, warning
-
-errReturn:
-	if err != nil {
-		pErr, ok := err.(PositionError)
-		if !ok {
-			pErr = PositionError{
-				position: pos,
-				error:    err,
-			}
-		}
-		return records, pErr
-	}
-
-	return records, err
 }
 
 func appendWarningMsgs(pWarning *error, ppos *position, warning error) {
