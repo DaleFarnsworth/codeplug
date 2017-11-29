@@ -61,6 +61,11 @@ const (
 	FileTypeXLSX
 )
 
+const (
+	MinProgress = dfu.MinProgress
+	MaxProgress = dfu.MaxProgress
+)
+
 // A Codeplug represents a codeplug file.
 type Codeplug struct {
 	filename            string
@@ -1944,7 +1949,7 @@ func RadioExists() error {
 	return nil
 }
 
-func (cp *Codeplug) ReadRadio(progress func(min, max, val int) bool) error {
+func (cp *Codeplug) ReadRadio(progress func(cur int) bool) error {
 	cpi := cp.codeplugInfo
 	binBytes := cp.bytes[cpi.BinOffset : cpi.BinOffset+cpi.BinSize]
 
@@ -1955,8 +1960,8 @@ func (cp *Codeplug) ReadRadio(progress func(min, max, val int) bool) error {
 	defer dfu.Close()
 
 	bytes := make([]byte, len(binBytes))
-	err = dfu.ReadCodeplug(bytes, func(min, max, val int) bool {
-		return progress(min, max, val)
+	err = dfu.ReadCodeplug(bytes, func(cur int) bool {
+		return progress(cur)
 	})
 	if err != nil {
 		return err
@@ -1972,7 +1977,7 @@ func (cp *Codeplug) ReadRadio(progress func(min, max, val int) bool) error {
 	return nil
 }
 
-func (cp *Codeplug) WriteRadio(progress func(min, max, val int) bool) error {
+func (cp *Codeplug) WriteRadio(progress func(cur int) bool) error {
 	if err := cp.valid(); err != nil {
 		return Warning{err}
 	}
@@ -2000,8 +2005,8 @@ func (cp *Codeplug) WriteRadio(progress func(min, max, val int) bool) error {
 	}
 	defer dfu.Close()
 
-	err = dfu.WriteCodeplug(binBytes, func(min, max, val int) bool {
-		return progress(min, max, val)
+	err = dfu.WriteCodeplug(binBytes, func(cur int) bool {
+		return progress(cur)
 	})
 	if err != nil {
 		return err
