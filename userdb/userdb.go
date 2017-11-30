@@ -41,14 +41,16 @@ var fixedUsersURL = "https://raw.githubusercontent.com/travisgoodspeed/md380tool
 var marcUsersURL = "http://www.dmr-marc.net/cgi-bin/trbo-database/datadump.cgi?table=users&format=csv&header=0"
 var reflectorUsersURL = "http://registry.dstar.su/reflector.db"
 
+var timeoutSeconds = 20
+
 var tr = &http.Transport{
-	TLSHandshakeTimeout:   20 * time.Second,
-	ResponseHeaderTimeout: 20 * time.Second,
+	TLSHandshakeTimeout:   time.Duration(timeoutSeconds) * time.Second,
+	ResponseHeaderTimeout: time.Duration(timeoutSeconds) * time.Second,
 }
 
 var client = &http.Client{
 	Transport: tr,
-	Timeout:   20 * time.Second,
+	Timeout:   time.Duration(timeoutSeconds) * time.Second,
 }
 
 type User struct {
@@ -323,8 +325,6 @@ func (db *UsersDB) Users() ([]*User, error) {
 		getUsersFuncs = append(getUsersFuncs, f)
 	}
 
-	db.setMaxProgressCount(len(getUsersFuncs))
-
 	var users []*User
 	resultChan := make(chan result, len(getUsersFuncs))
 
@@ -332,13 +332,28 @@ func (db *UsersDB) Users() ([]*User, error) {
 		go do(f, resultChan)
 	}
 
+	timeout := make(chan bool, 1)
+	go func() {
+		for timeout != nil {
+			time.Sleep(100 * time.Millisecond)
+			timeout <- true
+		}
+	}()
+
+	db.setMaxProgressCount(10 * timeoutSeconds)
+
 	for done := 0; done < len(getUsersFuncs); {
 		select {
 		case r := <-resultChan:
 			users = append(users, r.users...)
 			done++
-			db.progressFunc()
 
+		case <-timeout:
+			err := db.progressFunc()
+			if err != nil {
+				timeout = nil
+				return nil, err
+			}
 		}
 	}
 

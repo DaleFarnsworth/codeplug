@@ -32,10 +32,14 @@ import (
 	"github.com/dalefarnsworth/codeplug/userdb"
 )
 
+func usage() {
+	log.Fatalf("Usage %s read|write|dumpSPIFlash|dumpUsers|writeUsers|getUsersFile|getEuroUsersFile filename", os.Args[0])
+	os.Exit(1)
+}
+
 func main() {
 	if len(os.Args) != 3 {
-		log.Fatalf("Usage %s read|write|dumpSPIFlash|dumpUsers|eraseUsers|writeUsers|getUsersFile|getEuroUsersFile filename", os.Args[0])
-		return
+		usage()
 	}
 	cmd := os.Args[1]
 	filename := os.Args[2]
@@ -177,7 +181,8 @@ func main() {
 			"Retrieving Users file",
 		}
 
-		err := userdb.WriteMD380ToolsFile(filename, progressFunc(prefixes))
+		euro := false
+		err := userdb.WriteMD380ToolsFile(filename, euro, progressFunc(prefixes))
 		if err != nil {
 			log.Fatalf("getUsersFile: %s", err.Error())
 		}
@@ -187,10 +192,13 @@ func main() {
 			"Retrieving European Users file",
 		}
 
-		err := userdb.WriteMD380ToolsEuroFile(filename, progressFunc(prefixes))
+		euro := true
+		err := userdb.WriteMD380ToolsFile(filename, euro, progressFunc(prefixes))
 		if err != nil {
 			log.Fatalf("getEuroUsersFile: %s", err.Error())
 		}
+	default:
+		usage()
 	}
 }
 
