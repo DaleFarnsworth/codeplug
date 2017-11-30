@@ -1943,7 +1943,7 @@ func (cp *Codeplug) resolveDeferredValueFields() error {
 }
 
 func RadioExists() error {
-	dfu, err := dfu.NewDFU()
+	dfu, err := dfu.NewDFU(nil)
 	if err != nil {
 		return err
 	}
@@ -1956,16 +1956,16 @@ func (cp *Codeplug) ReadRadio(progress func(cur int) bool) error {
 	cpi := cp.codeplugInfo
 	binBytes := cp.bytes[cpi.BinOffset : cpi.BinOffset+cpi.BinSize]
 
-	dfu, err := dfu.NewDFU()
+	dfu, err := dfu.NewDFU(func(cur int) bool {
+		return progress(cur)
+	})
 	if err != nil {
 		return err
 	}
 	defer dfu.Close()
 
 	bytes := make([]byte, len(binBytes))
-	err = dfu.ReadCodeplug(bytes, func(cur int) bool {
-		return progress(cur)
-	})
+	err = dfu.ReadCodeplug(bytes)
 	if err != nil {
 		return err
 	}
@@ -2002,15 +2002,15 @@ func (cp *Codeplug) WriteRadio(progress func(cur int) bool) error {
 	cp.bytes = savedBytes
 	cp.setLastProgrammedTime(savedTime)
 
-	dfu, err := dfu.NewDFU()
+	dfu, err := dfu.NewDFU(func(cur int) bool {
+		return progress(cur)
+	})
 	if err != nil {
 		return err
 	}
 	defer dfu.Close()
 
-	err = dfu.WriteCodeplug(binBytes, func(cur int) bool {
-		return progress(cur)
-	})
+	err = dfu.WriteCodeplug(binBytes)
 	if err != nil {
 		return err
 	}
