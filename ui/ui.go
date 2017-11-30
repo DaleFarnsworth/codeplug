@@ -1353,6 +1353,9 @@ func WarningPopup(title string, msg string) PopupValue {
 }
 
 func ErrorPopup(title string, msg string) {
+	if msg == "" {
+		return
+	}
 	button := widgets.QMessageBox__Ok
 	defaultButton := widgets.QMessageBox__Ok
 	widgets.QMessageBox_Critical(nil, title, msg, button, defaultButton)
