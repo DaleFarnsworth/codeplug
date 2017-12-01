@@ -138,6 +138,8 @@ const (
 	MaxProgress = 1000000
 )
 
+const spiEraseSPIFlashBlockDelay = 500 // milliseconds
+
 type DFU struct {
 	dev               *gousb.Device
 	iface             *gousb.Interface
@@ -401,7 +403,7 @@ func (dfu *DFU) eraseSPIFlashBlocks(address int, size int) error {
 	count := (size + dfu.eraseBlockSize - 1) / dfu.eraseBlockSize
 	addr := uint32(address)
 
-	dfu.setMaxProgressCount((count + 1) * 400)
+	dfu.setMaxProgressCount((count + 1) * spiEraseSPIFlashBlockDelay)
 
 	for i := 0; i < count; i++ {
 		err := dfu.progressFunc()
@@ -471,7 +473,7 @@ func (dfu *DFU) eraseSPIFlashBlock(address uint32) error {
 		return wrapError("eraseSPIFlashBlock", err)
 	}
 
-	err = dfu.sleepMilliseconds(400)
+	err = dfu.sleepMilliseconds(spiEraseSPIFlashBlockDelay)
 	if err != nil {
 		return err
 	}
