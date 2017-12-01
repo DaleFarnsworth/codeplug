@@ -33,7 +33,7 @@ import (
 )
 
 func usage() {
-	log.Fatalf("Usage %s read|write|dumpSPIFlash|dumpUsers|writeUsers|getUsersFile|getEuroUsersFile filename", os.Args[0])
+	log.Fatalf("Usage %s readCodeplug|writeCodeplug|dumpSPIFlash|dumpUsers|writeUsers|getUsersFile|getEuroUsersFile filename", os.Args[0])
 	os.Exit(1)
 }
 
@@ -45,9 +45,9 @@ func main() {
 	filename := os.Args[2]
 
 	switch cmd {
-	case "read":
+	case "readCodeplug":
 		prefixes := []string{
-			"Connecting to radio.",
+			"Preparing to read codeplug",
 			"Reading codeplug from radio.",
 		}
 
@@ -77,9 +77,9 @@ func main() {
 			log.Fatalf("write to %s failed", filename)
 		}
 
-	case "write":
+	case "writeCodeplug":
 		prefixes := []string{
-			"Preparing to dump flash",
+			"Preparing to write codeplug",
 			"Writing codeplug to radio.",
 		}
 
@@ -196,6 +196,24 @@ func main() {
 		err := userdb.WriteMD380ToolsFile(filename, euro, progressFunc(prefixes))
 		if err != nil {
 			log.Fatalf("getEuroUsersFile: %s", err.Error())
+		}
+
+	case "writeFirmware":
+		prefixes := []string{
+			"Erasing flash memory",
+			"Writing firmware",
+		}
+
+		dfu, err := dfu.NewDFU(progressFunc(prefixes))
+		if err != nil {
+			log.Fatalf("writeFirmware: NewDFU: %s", err.Error())
+		}
+		defer dfu.Close()
+
+		err = dfu.WriteFirmware(filename)
+		fmt.Println()
+		if err != nil {
+			log.Fatalf("writeFirmware: %s", err.Error())
 		}
 	default:
 		usage()
