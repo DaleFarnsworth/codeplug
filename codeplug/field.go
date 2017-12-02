@@ -1372,6 +1372,14 @@ type gpsListIndex struct {
 	listIndex
 }
 
+func (v *gpsListIndex) setString(f *Field, s string) error {
+	if s == "" {
+		s = f.IndexedStrings()[0].String
+	}
+
+	return v.listIndex.setString(f, s)
+}
+
 func (v *gpsListIndex) valid(f *Field) error {
 	if (*v).listIndex == 0xffff {
 		return nil
