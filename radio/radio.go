@@ -29,31 +29,50 @@ import (
 	"os"
 
 	"github.com/dalefarnsworth/codeplug/dfu"
+	"github.com/dalefarnsworth/codeplug/stdfu"
 	"github.com/dalefarnsworth/codeplug/userdb"
 )
 
 func usage() {
-	log.Fatalf("Usage %s readCodeplug|writeCodeplug|dumpSPIFlash|dumpUsers|writeUsers|getUsersFile|getEuroUsersFile filename", os.Args[0])
+	fmt.Fprintf(os.Stderr, "Usage %s <command> args\n", os.Args[0])
+	fmt.Fprintf(os.Stderr, "commands:\n")
+	fmt.Fprintf(os.Stderr, "\twriteCodeplug <filename>\n")
+	fmt.Fprintf(os.Stderr, "\tdumpSPIFlash <filename>\n")
+	fmt.Fprintf(os.Stderr, "\tdumpUsers <filename>\n")
+	fmt.Fprintf(os.Stderr, "\twriteUsers <filename>\n")
+	fmt.Fprintf(os.Stderr, "\tgetUsersFile <filename>\n")
+	fmt.Fprintf(os.Stderr, "\tgetEuroUsersFile filename\n")
+	fmt.Fprintf(os.Stderr, "\twriteFirmware filename\n")
+	fmt.Fprintf(os.Stderr, "\tstdfu\n")
+	os.Exit(1)
+}
+
+func fatal(s string) {
+	fmt.Fprintln(os.Stderr, s)
 	os.Exit(1)
 }
 
 func main() {
-	if len(os.Args) != 3 {
+	if len(os.Args) < 2 {
 		usage()
 	}
 	cmd := os.Args[1]
-	filename := os.Args[2]
 
 	switch cmd {
 	case "readCodeplug":
+		if len(os.Args) != 3 {
+			usage()
+		}
+		filename := os.Args[2]
+
 		prefixes := []string{
 			"Preparing to read codeplug",
 			"Reading codeplug from radio.",
 		}
 
-		dfu, err := dfu.NewDFU(progressFunc(prefixes))
+		dfu, err := dfu.New(progressFunc(prefixes))
 		if err != nil {
-			log.Fatalf("NewDFU: %s", err.Error())
+			fatal(err.Error())
 		}
 		defer dfu.Close()
 
@@ -78,14 +97,19 @@ func main() {
 		}
 
 	case "writeCodeplug":
+		if len(os.Args) != 3 {
+			usage()
+		}
+		filename := os.Args[2]
+
 		prefixes := []string{
 			"Preparing to write codeplug",
 			"Writing codeplug to radio.",
 		}
 
-		dfu, err := dfu.NewDFU(progressFunc(prefixes))
+		dfu, err := dfu.New(progressFunc(prefixes))
 		if err != nil {
-			log.Fatalf("NewDFU: %s", err.Error())
+			fatal(err.Error())
 		}
 		defer dfu.Close()
 
@@ -115,36 +139,46 @@ func main() {
 		}
 
 	case "dumpSPIFlash":
+		if len(os.Args) != 3 {
+			usage()
+		}
+		filename := os.Args[2]
+
 		prefixes := []string{
 			"Preparing to dump flash",
 			"Dumping flash",
 		}
 
-		dfu, err := dfu.NewDFU(progressFunc(prefixes))
+		dfu, err := dfu.New(progressFunc(prefixes))
 		if err != nil {
-			log.Fatalf("NewDFU: %s", err.Error())
+			fatal(err.Error())
 		}
 		defer dfu.Close()
 
 		file, err := os.Create(filename)
 		if err != nil {
-			log.Fatalf("os.Create: %s", err.Error())
+			fatal(err.Error())
 		}
 
 		err = dfu.DumpSPIFlash(file)
 		if err != nil {
-			log.Fatalf(err.Error())
+			fatal(err.Error())
 		}
 
 	case "dumpUsers":
+		if len(os.Args) != 3 {
+			usage()
+		}
+		filename := os.Args[2]
+
 		prefixes := []string{
 			"Preparing to dump users",
 			fmt.Sprintf("Dumping users to %s", filename),
 		}
 
-		dfu, err := dfu.NewDFU(progressFunc(prefixes))
+		dfu, err := dfu.New(progressFunc(prefixes))
 		if err != nil {
-			log.Fatalf("NewDFU: %s", err.Error())
+			fatal(err.Error())
 		}
 		defer dfu.Close()
 
@@ -159,14 +193,19 @@ func main() {
 		}
 
 	case "writeUsers":
+		if len(os.Args) != 3 {
+			usage()
+		}
+		filename := os.Args[2]
+
 		prefixes := []string{
 			"Erasing flash memory",
 			"Writing users",
 		}
 
-		dfu, err := dfu.NewDFU(progressFunc(prefixes))
+		dfu, err := dfu.New(progressFunc(prefixes))
 		if err != nil {
-			log.Fatalf("NewDFU: %s", err.Error())
+			fatal(err.Error())
 		}
 		defer dfu.Close()
 
@@ -177,6 +216,11 @@ func main() {
 		}
 
 	case "getUsersFile":
+		if len(os.Args) != 3 {
+			usage()
+		}
+		filename := os.Args[2]
+
 		prefixes := []string{
 			"Retrieving Users file",
 		}
@@ -188,6 +232,11 @@ func main() {
 		}
 
 	case "getEuroUsersFile":
+		if len(os.Args) != 3 {
+			usage()
+		}
+		filename := os.Args[2]
+
 		prefixes := []string{
 			"Retrieving European Users file",
 		}
@@ -199,14 +248,19 @@ func main() {
 		}
 
 	case "writeFirmware":
+		if len(os.Args) != 3 {
+			usage()
+		}
+		filename := os.Args[2]
+
 		prefixes := []string{
 			"Erasing flash memory",
 			"Writing firmware",
 		}
 
-		dfu, err := dfu.NewDFU(progressFunc(prefixes))
+		dfu, err := dfu.New(progressFunc(prefixes))
 		if err != nil {
-			log.Fatalf("writeFirmware: NewDFU: %s", err.Error())
+			fatal(err.Error())
 		}
 		defer dfu.Close()
 
@@ -215,6 +269,17 @@ func main() {
 		if err != nil {
 			log.Fatalf("writeFirmware: %s", err.Error())
 		}
+	case "stdfu":
+		if len(os.Args) != 2 {
+			usage()
+		}
+
+		dfu, err := stdfu.New()
+		if err != nil {
+			dprint(err)
+		}
+		dprint(dfu)
+
 	default:
 		usage()
 	}
