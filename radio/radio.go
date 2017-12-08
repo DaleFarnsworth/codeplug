@@ -52,6 +52,12 @@ func fatal(s string) {
 }
 
 func main() {
+	defer func() {
+		if r := recover(); r != nil {
+			logFatal(r)
+		}
+	}()
+
 	if len(os.Args) < 2 {
 		usage()
 	}
