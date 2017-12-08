@@ -27,7 +27,6 @@ package codeplug
 
 import (
 	"fmt"
-	"log"
 )
 
 type ChangeType string
@@ -455,7 +454,7 @@ func (cp *Codeplug) UndoString() string {
 
 	if changeIndex < 0 ||
 		changeIndex >= len(changeList) {
-		log.Fatal("UndoString: bad changeIndex")
+		logFatal("UndoString: bad changeIndex")
 	}
 
 	if changeIndex == 0 || len(changeList) == 1 {
@@ -508,7 +507,7 @@ func (cp *Codeplug) UndoString() string {
 		str = fmt.Sprintf("%s.%sdelete %s", rTypeName, rName, names)
 
 	default:
-		log.Fatal("undoString: unexpected change type:", cType)
+		logFatal("undoString: unexpected change type:", cType)
 	}
 
 	return str
@@ -526,7 +525,7 @@ func (cp *Codeplug) RedoString() string {
 
 	if changeIndex < 0 ||
 		changeIndex >= len(changeList) {
-		log.Fatal("UndoString: bad changeIndex")
+		logFatal("UndoString: bad changeIndex")
 	}
 
 	if changeIndex == len(changeList)-1 {
@@ -579,7 +578,7 @@ func (cp *Codeplug) RedoString() string {
 		str = fmt.Sprintf("%s.%s: delete %s", rTypeName, rName, names)
 
 	default:
-		log.Fatal("undoString: unexpected change type:", cType)
+		logFatal("undoString: unexpected change type:", cType)
 	}
 
 	return str
@@ -594,7 +593,7 @@ func (cp *Codeplug) UndoChange() {
 	}
 
 	if index == 0 || index >= len(changeList) {
-		log.Fatal("Undo: bad changeIndex")
+		logFatal("Undo: bad changeIndex")
 	}
 
 	cp.changeIndex--
@@ -614,7 +613,7 @@ func (cp *Codeplug) undoChange(change *Change) *Change {
 		previousValue := f.String()
 		err := f.setString(change.previousValue())
 		if err != nil {
-			log.Fatal("UndoChange: FieldChange error ", err.Error())
+			logFatal("UndoChange: FieldChange error ", err.Error())
 		}
 
 		*change = *fieldChange(f, previousValue)
@@ -705,7 +704,7 @@ func (cp *Codeplug) undoChange(change *Change) *Change {
 		for i, str := range change.strings {
 			f, err := r.NewFieldWithValue(fType, i, str)
 			if err != nil {
-				log.Fatal("NewField error on ", str)
+				logFatal("NewField error on ", str)
 			}
 			r.addField(f)
 		}
@@ -713,7 +712,7 @@ func (cp *Codeplug) undoChange(change *Change) *Change {
 		c.strings, c.afterStrings = c.afterStrings, c.strings
 
 	default:
-		log.Fatal("Undo: unexpected change type:", cType)
+		logFatal("Undo: unexpected change type:", cType)
 	}
 
 	return change
@@ -728,7 +727,7 @@ func (cp *Codeplug) RedoChange() {
 	}
 
 	if index < 0 {
-		log.Fatal("Redo: bad changeIndex")
+		logFatal("Redo: bad changeIndex")
 	}
 
 	index++
@@ -749,7 +748,7 @@ func (cp *Codeplug) redoChange(change *Change) *Change {
 		previousValue := f.String()
 		err := f.setString(change.previousValue())
 		if err != nil {
-			log.Fatal("RedoChange: FieldChange error ", err.Error())
+			logFatal("RedoChange: FieldChange error ", err.Error())
 		}
 
 		*change = *fieldChange(f, previousValue)
@@ -837,7 +836,7 @@ func (cp *Codeplug) redoChange(change *Change) *Change {
 		c.strings, c.afterStrings = c.afterStrings, c.strings
 
 	default:
-		log.Fatal("Redo: unexpected change type:", cType)
+		logFatal("Redo: unexpected change type:", cType)
 	}
 
 	return change

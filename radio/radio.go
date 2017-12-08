@@ -25,7 +25,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/dalefarnsworth/codeplug/dfu"
@@ -78,22 +77,22 @@ func main() {
 
 		file, err := os.Create(filename)
 		if err != nil {
-			log.Fatalf("os.Create: %s", err.Error())
+			logFatalf("os.Create: %s", err.Error())
 		}
 
 		bytes := make([]byte, 256*1024)
 
 		err = dfu.ReadCodeplug(bytes)
 		if err != nil {
-			log.Fatalf("dfu.ReadCodeplug: %s", err.Error())
+			logFatalf("dfu.ReadCodeplug: %s", err.Error())
 		}
 
 		bytesWritten, err := file.Write(bytes)
 		if err != nil {
-			log.Fatalf("file.Write: %s", err.Error())
+			logFatalf("file.Write: %s", err.Error())
 		}
 		if bytesWritten != len(bytes) {
-			log.Fatalf("write to %s failed", filename)
+			logFatalf("write to %s failed", filename)
 		}
 
 	case "writeCodeplug":
@@ -115,27 +114,27 @@ func main() {
 
 		fileInfo, err := os.Stat(filename)
 		if err != nil {
-			log.Fatalf("os.Stat: %s", err.Error())
+			logFatalf("os.Stat: %s", err.Error())
 		}
 
 		file, err := os.Open(filename)
 		if err != nil {
-			log.Fatalf("os.Open: %s", err.Error())
+			logFatalf("os.Open: %s", err.Error())
 		}
 
 		bytes := make([]byte, fileInfo.Size())
 
 		bytesRead, err := file.Read(bytes)
 		if err != nil {
-			log.Fatalf("file.Read: %s", err.Error())
+			logFatalf("file.Read: %s", err.Error())
 		}
 		if bytesRead != len(bytes) {
-			log.Fatalf("Failed to read all of %s", filename)
+			logFatalf("Failed to read all of %s", filename)
 		}
 
 		err = dfu.WriteCodeplug(bytes)
 		if err != nil {
-			log.Fatalf("dfu.WriteCodeplug: %s", err.Error())
+			logFatalf("dfu.WriteCodeplug: %s", err.Error())
 		}
 
 	case "dumpSPIFlash":
@@ -184,12 +183,12 @@ func main() {
 
 		file, err := os.Create(filename)
 		if err != nil {
-			log.Fatalf("os.Create: %s", err.Error())
+			logFatalf("os.Create: %s", err.Error())
 		}
 
 		err = dfu.DumpUsers(file)
 		if err != nil {
-			log.Fatalf(err.Error())
+			logFatalf(err.Error())
 		}
 
 	case "writeUsers":
@@ -212,7 +211,7 @@ func main() {
 		err = dfu.WriteUsers(filename)
 		fmt.Println()
 		if err != nil {
-			log.Fatalf("writeUsers: %s", err.Error())
+			logFatalf("writeUsers: %s", err.Error())
 		}
 
 	case "getUsersFile":
@@ -228,7 +227,7 @@ func main() {
 		euro := false
 		err := userdb.WriteMD380ToolsFile(filename, euro, progressFunc(prefixes))
 		if err != nil {
-			log.Fatalf("getUsersFile: %s", err.Error())
+			logFatalf("getUsersFile: %s", err.Error())
 		}
 
 	case "getEuroUsersFile":
@@ -244,7 +243,7 @@ func main() {
 		euro := true
 		err := userdb.WriteMD380ToolsFile(filename, euro, progressFunc(prefixes))
 		if err != nil {
-			log.Fatalf("getEuroUsersFile: %s", err.Error())
+			logFatalf("getEuroUsersFile: %s", err.Error())
 		}
 
 	case "writeFirmware":
@@ -267,7 +266,7 @@ func main() {
 		err = dfu.WriteFirmware(filename)
 		fmt.Println()
 		if err != nil {
-			log.Fatalf("writeFirmware: %s", err.Error())
+			logFatalf("writeFirmware: %s", err.Error())
 		}
 	case "stdfu":
 		if len(os.Args) != 2 {

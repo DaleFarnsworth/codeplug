@@ -7,21 +7,21 @@
 //
 // dale@farnsworth.org
 
-// This file is part of Editcp.
+// This file is part of Stdfu.
 //
-// Editcp is free software: you can redistribute it and/or modify
+// Stdfu is free software: you can redistribute it and/or modify
 // it under the terms of version 3 of the GNU General Public License
 // as published by the Free Software Foundation.
 //
-// Editcp is distributed in the hope that it will be useful,
+// Stdfu is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Editcp.  If not, see <http://www.gnu.org/licenses/>.
+// along with Stdfu.  If not, see <http://www.gnu.org/licenses/>.
 
-package main
+package stdfu
 
 import (
 	"fmt"

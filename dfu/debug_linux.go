@@ -7,24 +7,25 @@
 //
 // dale@farnsworth.org
 
-// This file is part of DFU.
+// This file is part of Dfu.
 //
-// DFU is free software: you can redistribute it and/or modify
-// it under the terms of version 3 of the GNU Lesser General Public
-// License as published by the Free Software Foundation.
+// Dfu is free software: you can redistribute it and/or modify
+// it under the terms of version 3 of the GNU General Public License
+// as published by the Free Software Foundation.
 //
-// DFU is distributed in the hope that it will be useful,
+// Dfu is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU Lesser General Public License for more details.
+// GNU General Public License for more details.
 //
-// You should have received a copy of the GNU Lesser General Public License
-// along with DFU.  If not, see <http://www.gnu.org/licenses/>.
+// You should have received a copy of the GNU General Public License
+// along with Dfu.  If not, see <http://www.gnu.org/licenses/>.
 
 package dfu
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -53,4 +54,20 @@ func printStack() {
 	fmt.Fprintln(os.Stderr, "start stack trace")
 	debug.PrintStack()
 	fmt.Fprintln(os.Stderr)
+}
+
+func logFatalf(s string, v ...interface{}) {
+	log.Fatalf(s, v...)
+}
+
+func logFatal(v ...interface{}) {
+	log.Fatal(v...)
+}
+
+func logPrintf(s string, v ...interface{}) {
+	log.Printf(s, v...)
+}
+
+func logPrint(v ...interface{}) {
+	log.Print(v...)
 }

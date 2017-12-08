@@ -28,7 +28,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"log"
 	"math"
 	"sort"
 	"strings"
@@ -290,7 +289,7 @@ func (fnl *fieldNameList) initMemberModel(model *core.QStringListModel, r *codep
 	model.ConnectInsertRows(func(row int, count int, parent *core.QModelIndex) bool {
 		f := fnl.fieldToInsert
 		if count != 1 {
-			log.Fatal("bad insert fields count")
+			logFatal("bad insert fields count")
 		}
 
 		if len(r.Fields(fType)) >= r.MaxFields(fType) {
@@ -305,7 +304,7 @@ func (fnl *fieldNameList) initMemberModel(model *core.QStringListModel, r *codep
 		model.EndInsertRows()
 
 		if err != nil {
-			log.Fatal("ConnectInsertRows: InsertField failed")
+			logFatal("ConnectInsertRows: InsertField failed")
 		}
 
 		fnl.fieldToInsert = nil
@@ -459,7 +458,7 @@ func (fnl *fieldNameList) initFieldNameModel(model *core.QStringListModel, r *co
 
 	model.ConnectMoveRows(func(sParent *core.QModelIndex, sRow int, count int, dParent *core.QModelIndex, dRow int) bool {
 		if count != 1 {
-			log.Fatal("ConnectMoveRows count != 1")
+			logFatal("ConnectMoveRows count != 1")
 		}
 		fType := fnl.fieldMembers.fType
 		allFields := r.Fields(fType)
@@ -520,7 +519,7 @@ func (vBox *VBox) AddFieldMembers(r *codeplug.Record, sortAvailable *bool, nameT
 	fm.fType = memberType
 	fm.id, err = randomString(64)
 	if err != nil {
-		log.Fatal("randomString failure")
+		logFatal("randomString failure")
 	}
 
 	listRecordType := r.NewField(memberType).ListRecordType()

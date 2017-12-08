@@ -28,7 +28,6 @@ import (
 	"bytes"
 	"crypto/rand"
 	"fmt"
-	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -454,7 +453,7 @@ func (mw *MainWindow) NewRecordWindow(rType codeplug.RecordType, writable bool) 
 			updateRecord = true
 
 		default:
-			log.Fatal("Unknown change type", changeType)
+			logFatal("Unknown change type", changeType)
 		}
 
 		if updateRecordList {
@@ -785,7 +784,7 @@ func (parent *Form) addFieldRow(r *codeplug.Record, fType codeplug.FieldType) {
 
 	newFieldWidgetFunc := newFieldWidget[f.ValueType()]
 	if newFieldWidgetFunc == nil {
-		log.Fatalf("No %s entry in newFieldWidget slice", f.ValueType())
+		logFatalf("No %s entry in newFieldWidget slice", f.ValueType())
 	}
 	w := newFieldWidgetFunc(f)
 	w.label = widgets.NewQLabel2(f.TypeName(), nil, 0)
@@ -798,17 +797,17 @@ func (parent *Form) addFieldRow(r *codeplug.Record, fType codeplug.FieldType) {
 
 	w.receive = func(sender *Widget) {
 		if sender.field.Record().Type() != w.field.Record().Type() {
-			log.Fatal("sender record type", sender.field.Record().Type(), "receiver record type", w.field.Record().Type())
+			logFatal("sender record type", sender.field.Record().Type(), "receiver record type", w.field.Record().Type())
 		}
 		if sender.field.Record().Index() != w.field.Record().Index() {
-			log.Fatal("sender record index", sender.field.Record().Index(), "receiver record index", w.field.Record().Index())
+			logFatal("sender record index", sender.field.Record().Index(), "receiver record index", w.field.Record().Index())
 		}
 		if sender.field.Index() != w.field.Index() {
-			log.Fatal("sender field index", sender.field.Index(), "receiver field index", w.field.Index())
+			logFatal("sender field index", sender.field.Index(), "receiver field index", w.field.Index())
 		}
 		switch sender.field.Type() {
 		case "":
-			log.Fatal("receive(): invalid field type")
+			logFatal("receive(): invalid field type")
 
 		case fType:
 			w.update()
@@ -821,7 +820,7 @@ func (parent *Form) addFieldRow(r *codeplug.Record, fType codeplug.FieldType) {
 			setEnabled(w, f)
 
 		default:
-			log.Fatal("receive(): unexpected field type")
+			logFatal("receive(): unexpected field type")
 		}
 	}
 
@@ -904,7 +903,7 @@ func (w *Widget) update() {
 		qw.(*widgets.QComboBox).SetCurrentText(f.String())
 
 	default:
-		log.Fatal("update(): unexpected widget type")
+		logFatal("update(): unexpected widget type")
 	}
 }
 
@@ -928,7 +927,7 @@ func (w *Widget) SetEnabled(b bool) {
 		qw.(*widgets.QLineEdit).SetEnabled(b)
 
 	default:
-		log.Fatal("SetEnabled(): unexpected widget type")
+		logFatal("SetEnabled(): unexpected widget type")
 	}
 }
 
@@ -943,7 +942,7 @@ func (w *Widget) SetReadOnly(b bool) {
 		qw.(*widgets.QLineEdit).SetReadOnly(b)
 
 	default:
-		log.Fatal("SetReadOnly(): unexpected widget type")
+		logFatal("SetReadOnly(): unexpected widget type")
 	}
 }
 
@@ -960,7 +959,7 @@ func (w *Widget) Width() int {
 		width = qw.(*widgets.QLineEdit).Width()
 
 	default:
-		log.Fatal("SetMinimumWidth(): unexpected widget type")
+		logFatal("SetMinimumWidth(): unexpected widget type")
 	}
 
 	return width
@@ -977,7 +976,7 @@ func (w *Widget) SetMinimumWidth(width int) {
 		qw.(*widgets.QLineEdit).SetMinimumWidth(width)
 
 	default:
-		log.Fatal("SetMinimumWidth(): unexpected widget type")
+		logFatal("SetMinimumWidth(): unexpected widget type")
 	}
 }
 
@@ -1004,7 +1003,7 @@ func newFieldCheckbox(f *codeplug.Field) *Widget {
 		}
 		err := f.SetString(str)
 		if err != nil {
-			log.Fatal(err.Error())
+			logFatal(err.Error())
 		}
 	})
 
@@ -1044,7 +1043,7 @@ func newFieldCombobox(f *codeplug.Field) *Widget {
 
 	strings := f.Strings()
 	if len(strings) == 0 {
-		log.Fatal("Combobox has no Strings()")
+		logFatal("Combobox has no Strings()")
 	}
 
 	qw.InsertItems(0, strings)
@@ -1068,7 +1067,7 @@ func setQSpinBox(sb *widgets.QSpinBox, f *codeplug.Field) {
 	if str != span.MinString() {
 		i, err := strconv.ParseUint(str, 10, 32)
 		if err != nil {
-			log.Fatal("bad span string value")
+			logFatal("bad span string value")
 		}
 		value = int(i)
 	}
@@ -1155,7 +1154,7 @@ func newFieldSpinbox(f *codeplug.Field) *Widget {
 }
 
 func newFieldTextEdit(f *codeplug.Field) *Widget {
-	log.Fatal("newTextEdit: not implemented")
+	logFatal("newTextEdit: not implemented")
 	return nil
 }
 

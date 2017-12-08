@@ -27,7 +27,6 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
-	"log"
 	"math"
 	"strings"
 
@@ -251,7 +250,7 @@ func (w *Window) initRecordModel(writable bool) {
 
 	model.ConnectMoveRows(func(sParent *core.QModelIndex, sRow int, count int, dParent *core.QModelIndex, dRow int) bool {
 		if count != 1 {
-			log.Fatal("ConnectMoveRows: count != 1")
+			logFatal("ConnectMoveRows: count != 1")
 		}
 
 		cp := w.mainWindow.codeplug
@@ -269,7 +268,7 @@ func (w *Window) initRecordModel(writable bool) {
 		cp := w.mainWindow.codeplug
 		r := rl.recordToInsert
 		if count != 1 {
-			log.Fatal("bad insert records count")
+			logFatal("bad insert records count")
 		}
 
 		if len(cp.Records(rType)) >= cp.MaxRecords(rType) {
@@ -284,7 +283,7 @@ func (w *Window) initRecordModel(writable bool) {
 		model.EndInsertRows()
 
 		if err != nil {
-			log.Fatal("ConnectInsertRows: InsertRecord failed")
+			logFatal("ConnectInsertRows: InsertRecord failed")
 		}
 
 		rl.recordToInsert = nil

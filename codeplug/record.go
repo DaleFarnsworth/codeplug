@@ -27,7 +27,6 @@ package codeplug
 
 import (
 	"fmt"
-	"log"
 	"sort"
 	"strconv"
 	"strings"
@@ -372,7 +371,7 @@ func (r *Record) makeNameUnique(namesp *[]string) error {
 	}
 	n64, err := strconv.ParseInt(suffix, 10, 32)
 	if err != nil {
-		log.Fatal("trailing digits not numeric")
+		logFatal("trailing digits not numeric")
 	}
 	n := int(n64)
 
@@ -530,7 +529,7 @@ func (r *Record) RemoveField(f *Field) {
 		}
 	}
 	if index < 0 {
-		log.Fatal("RemoveField: bad field")
+		logFatal("RemoveField: bad field")
 	}
 
 	deleteField(&fields, index)

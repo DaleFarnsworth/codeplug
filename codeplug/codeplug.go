@@ -35,7 +35,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
 	"sort"
@@ -139,7 +138,7 @@ func NewCodeplug(fType FileType, filename string) (*Codeplug, error) {
 			if !found {
 				matches, err := filepath.Glob(filename + "*")
 				if err != nil {
-					log.Fatal(err.Error())
+					logFatal(err.Error())
 				}
 				if len(matches) != 0 {
 					found = true
@@ -151,7 +150,7 @@ func NewCodeplug(fType FileType, filename string) (*Codeplug, error) {
 			}
 		}
 	default:
-		log.Fatal("unknown file type")
+		logFatal("unknown file type")
 	}
 
 	cp.filename = filename
@@ -397,7 +396,7 @@ func (cp *Codeplug) readNew(filename string) error {
 
 	archive, err := gzip.NewReader(gzipped)
 	if err != nil {
-		log.Fatal(err)
+		logFatal(err)
 	}
 
 	tarfile := tar.NewReader(archive)
@@ -409,14 +408,14 @@ func (cp *Codeplug) readNew(filename string) error {
 			if err == io.EOF {
 				break
 			}
-			log.Fatal(err)
+			logFatal(err)
 		}
 		if hdr.Name != filename {
 			continue
 		}
 		bytes, err = ioutil.ReadAll(tarfile)
 		if err != nil {
-			log.Fatal(err)
+			logFatal(err)
 		}
 		break
 	}
@@ -703,7 +702,7 @@ func (cp *Codeplug) RemoveRecord(r *Record) {
 		}
 	}
 	if index < 0 || index >= len(records) {
-		log.Fatal("removeRecord: bad record")
+		logFatal("removeRecord: bad record")
 	}
 
 	records[0].cachedListNames = nil
@@ -1927,7 +1926,7 @@ func (cp *Codeplug) resolveDeferredValueFields() error {
 
 			dValue, deferred := f.value.(deferredValue)
 			if !deferred {
-				log.Fatal("not deferred", f.FullTypeName())
+				logFatal("not deferred", f.FullTypeName())
 			}
 
 			f.value = dValue.value

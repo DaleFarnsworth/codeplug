@@ -28,7 +28,6 @@ package codeplug
 import (
 	"bytes"
 	"fmt"
-	"log"
 	"sort"
 	"strconv"
 	"strings"
@@ -253,7 +252,7 @@ func (f *Field) Strings() []string {
 		}
 
 	default:
-		log.Fatalf("f.Strings: unexpected f.valueType: %s", f.valueType)
+		logFatalf("f.Strings: unexpected f.valueType: %s", f.valueType)
 	}
 
 	return strs

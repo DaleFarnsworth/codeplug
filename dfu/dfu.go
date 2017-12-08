@@ -33,7 +33,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"time"
 
@@ -1089,12 +1088,12 @@ func (dfu *Dfu) WriteCodeplug(data []byte) error {
 func (dfu *Dfu) WriteUsers(filename string) error {
 	fileInfo, err := os.Stat(filename)
 	if err != nil {
-		log.Fatalf("os.Stat: %s", err.Error())
+		logFatalf("os.Stat: %s", err.Error())
 	}
 
 	file, err := os.Open(filename)
 	if err != nil {
-		log.Fatalf("WriteUsers: %s", err.Error())
+		logFatalf("WriteUsers: %s", err.Error())
 	}
 	defer file.Close()
 
@@ -1106,7 +1105,7 @@ func (dfu *Dfu) WriteUsers(filename string) error {
 func (dfu *Dfu) WriteFirmware(filename string) error {
 	file, err := os.Open(filename)
 	if err != nil {
-		log.Fatalf("WriteFirmware: %s", err.Error())
+		logFatalf("WriteFirmware: %s", err.Error())
 	}
 	defer file.Close()
 
