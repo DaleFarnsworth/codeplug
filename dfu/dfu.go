@@ -388,7 +388,6 @@ func (dfu *Dfu) enterDfuMode() error {
 	for {
 		state, err := stDfu.GetState()
 		if err != nil {
-			dprint()
 			return wrapError("enterDfuMode", err)
 		}
 		if state == stdfu.DfuIdle {
@@ -396,7 +395,6 @@ func (dfu *Dfu) enterDfuMode() error {
 		}
 		err = actionMap[state]()
 		if err != nil {
-			dprint()
 			return wrapError("enterDfuMode", err)
 		}
 	}

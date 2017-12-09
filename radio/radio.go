@@ -302,9 +302,8 @@ func main() {
 
 		dfu, err := stdfu.New()
 		if err != nil {
-			dprint(err)
+			logFatalf("writeFirmware: %s", err.Error())
 		}
-		dprint(dfu)
 
 	default:
 		usage()

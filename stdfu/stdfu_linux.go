@@ -73,7 +73,6 @@ func New() (*StDfu, error) {
 	iface, ifaceDone, err := dev.DefaultInterface()
 	if err != nil {
 		stDfu.Close()
-		dprint()
 		return nil, fmt.Errorf("%s: DefaultInterface failed: %v", dev, err)
 	}
 	stDfu.iface = iface
