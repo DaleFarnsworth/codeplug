@@ -85,6 +85,13 @@ func main() {
 		if err != nil {
 			logFatalf("os.Create: %s", err.Error())
 		}
+		defer func() {
+			err := file.Close()
+			if err != nil {
+				logFatalf("os.Create: %s", err.Error())
+			}
+			return
+		}()
 
 		bytes := make([]byte, 256*1024)
 
@@ -164,6 +171,13 @@ func main() {
 		if err != nil {
 			fatal(err.Error())
 		}
+		defer func() {
+			err := file.Close()
+			if err != nil {
+				fatal(err.Error())
+			}
+			return
+		}()
 
 		err = dfu.DumpSPIFlash(file)
 		if err != nil {
@@ -191,6 +205,13 @@ func main() {
 		if err != nil {
 			logFatalf("os.Create: %s", err.Error())
 		}
+		defer func() {
+			err := file.Close()
+			if err != nil {
+				logFatalf("os.Create: %s", err.Error())
+			}
+			return
+		}()
 
 		err = dfu.DumpUsers(file)
 		if err != nil {

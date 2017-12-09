@@ -371,11 +371,15 @@ func (db *UsersDB) Users() ([]*User, error) {
 	return users, nil
 }
 
-func (db *UsersDB) writeSizedUsersFile() error {
+func (db *UsersDB) writeSizedUsersFile() (err error) {
 	file, err := os.Create(db.filename)
 	if err != nil {
 		return err
 	}
+	defer func() {
+		err = file.Close()
+		return
+	}()
 
 	users, err := db.Users()
 	if err != nil {
@@ -400,11 +404,15 @@ func (db *UsersDB) writeSizedUsersFile() error {
 	return nil
 }
 
-func (db *UsersDB) writeUsersFile() error {
+func (db *UsersDB) writeUsersFile() (err error) {
 	file, err := os.Create(db.filename)
 	if err != nil {
 		return err
 	}
+	defer func() {
+		err = file.Close()
+		return
+	}()
 
 	fmt.Sprintln("Radio ID,CallSign,Name,NickName,City,State,Country")
 
