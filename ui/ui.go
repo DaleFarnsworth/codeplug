@@ -1096,6 +1096,13 @@ func NewCheckboxWidget(checked bool, clickedFunc func(bool)) *Widget {
 	return widget
 }
 
+func (widget *Widget) SetChecked(checked bool) {
+	checkbox, ok := widget.qWidget.(*widgets.QCheckBox)
+	if ok {
+		checkbox.SetChecked(checked)
+	}
+}
+
 func NewComboboxWidget(opt string, opts []string, changed func(string)) *Widget {
 	qw := widgets.NewQComboBox(nil)
 	widget := new(Widget)
