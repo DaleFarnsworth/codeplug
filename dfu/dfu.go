@@ -142,14 +142,23 @@ func (dfu *Dfu) SetTime(t time.Time) error {
 	return nil
 }
 
+*/
+
 func (dfu *Dfu) md380Reboot() error {
-	rebootCmd := []byte{byte(0x91), byte(0x05)}
-	err := dfu.write(0, rebootCmd)
+	err := dfu.waitUntilReady()
 	if err != nil {
 		return wrapError("md380Reboot", err)
 	}
 
-	_, err = dfu.getStatus() // this changes state
+	stDfu := dfu.stDfu
+
+	rebootCmd := []byte{byte(0x91), byte(0x05)}
+	err = stDfu.Dnload(0, rebootCmd)
+	if err != nil {
+		return wrapError("md380Reboot", err)
+	}
+
+	_, err = stDfu.GetStatus() // this changes state
 	if err != nil {
 		return wrapError("md380Reboot", err)
 	}
@@ -157,10 +166,9 @@ func (dfu *Dfu) md380Reboot() error {
 	return nil
 }
 
-*/
-
 func (dfu *Dfu) waitUntilReady() error {
 	stDfu := dfu.stDfu
+
 	for {
 		dfuStatus, err := stDfu.GetStatus()
 		if err != nil {
@@ -767,13 +775,13 @@ func (dfu *Dfu) setMaxProgressCount(max int) {
 	}
 }
 
-func (dfu *Dfu) readTo(address, offset int, size int, iWriter io.Writer) error {
+func (dfu *Dfu) readFlashTo(address, offset int, size int, iWriter io.Writer) error {
 	if offset%dfu.blockSize != 0 {
-		return fmt.Errorf("readTo: offset is not a multiple of blockSize")
+		return fmt.Errorf("readFlashTo: offset is not a multiple of blockSize")
 	}
 
 	if size%dfu.blockSize != 0 {
-		return fmt.Errorf("readTo: data size is not a multiple of blockSize")
+		return fmt.Errorf("readFlashTo: data size is not a multiple of blockSize")
 	}
 
 	blockNumber := offset / dfu.blockSize
@@ -784,7 +792,7 @@ func (dfu *Dfu) readTo(address, offset int, size int, iWriter io.Writer) error {
 
 	err := dfu.setAddress(address)
 	if err != nil {
-		return wrapError("readTo", err)
+		return wrapError("readFlashTo", err)
 	}
 
 	dfu.setMaxProgressCount(blockCount)
@@ -799,20 +807,25 @@ func (dfu *Dfu) readTo(address, offset int, size int, iWriter io.Writer) error {
 
 		err = stDfu.Upload(blockNumber, bytes)
 		if err != nil {
-			return wrapError("readTo", err)
+			return wrapError("readFlashTo", err)
 		}
 
 		n, err := writer.Write(bytes)
 		if err != nil {
-			return wrapError("readTo", err)
+			return wrapError("readFlashTo", err)
 		}
 
 		if n != len(bytes) {
 			err = errors.New("short write")
-			return wrapError("readTo", err)
+			return wrapError("readFlashTo", err)
 		}
 
 		blockNumber++
+	}
+
+	err = dfu.md380Reboot()
+	if err != nil {
+		return wrapError("readFlashTo", err)
 	}
 
 	dfu.finalProgress()
@@ -880,6 +893,11 @@ func (dfu *Dfu) writeFlashFrom(address, offset int, size int, iRdr io.Reader) er
 			}
 		}
 		blockNumber++
+	}
+
+	err = dfu.md380Reboot()
+	if err != nil {
+		return wrapError("writeFlashFrom", err)
 	}
 
 	dfu.finalProgress()
@@ -1047,7 +1065,7 @@ func (dfu *Dfu) ReadCodeplug(data []byte) error {
 
 	dfu.finalProgress()
 
-	err = dfu.readTo(0, 2048, size, buffer)
+	err = dfu.readFlashTo(0, 2048, size, buffer)
 	if err != nil {
 		return wrapError("ReadCodeplug", err)
 	}
