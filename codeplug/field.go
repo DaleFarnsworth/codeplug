@@ -1780,7 +1780,7 @@ func ctcssDcsStringToBinary(s string) int {
 			return -1
 		}
 
-		v, err := strconv.ParseInt(s, 10, 16)
+		v, err := strconv.ParseInt(s[1:4], 10, 16)
 		value = int(v)
 		if err != nil || !goodDcsCode(value) {
 			return -1
