@@ -42,7 +42,7 @@ type spDeviceInterfaceData struct {
 	cbSize             uint32
 	InterfaceClassGuid UUID
 	Flags              uint32
-	Reserved           uint
+	Reserved           uint32
 }
 
 const (
@@ -294,7 +294,7 @@ func New() (*StDfu, error) {
 	defer syscall.Syscall(setupDiDestroyDeviceInfoList.Addr(), 1, hdev, 0, 0)
 	var did spDeviceInterfaceData
 	did.cbSize = uint32(unsafe.Sizeof(did))
-	r0, r1, err := setupDiEnumDeviceInterfaces.Call(
+	r0, _, err := setupDiEnumDeviceInterfaces.Call(
 		hdev,
 		0,
 		uintptr(unsafe.Pointer(devUUID)),
@@ -305,7 +305,7 @@ func New() (*StDfu, error) {
 		return nil, ErrDevNotFound
 	}
 
-	r0, r1, err = setupDiEnumDeviceInterfaces.Call(
+	r0, _, err = setupDiEnumDeviceInterfaces.Call(
 		hdev,
 		1,
 		uintptr(unsafe.Pointer(devUUID)),
@@ -317,7 +317,7 @@ func New() (*StDfu, error) {
 	}
 
 	var cbRequired uint32
-	r0, r1, err = setupDiGetDeviceInterfaceDetailW.Call(
+	setupDiGetDeviceInterfaceDetailW.Call(
 		hdev,
 		uintptr(unsafe.Pointer(&did)),
 		0,
@@ -326,9 +326,6 @@ func New() (*StDfu, error) {
 		0,
 	)
 
-	if r0 != 0 || r1 != 0x7a {
-		return nil, fmt.Errorf("setupDiGetDeviceInterfaceDetailW %s", err.Error())
-	}
 	// The struct with ANYSIZE_ARRAY of utf16 in it is crazy.
 	// So... let's emulate it with array of uint16 ;-D.
 	// Keep in mind that the first two elements are actually cbSize.
@@ -343,7 +340,7 @@ func New() (*StDfu, error) {
 	devInfoData := make([]uint16, len(didd))
 	copy(devInfoData, didd)
 
-	r0, r1, err = setupDiGetDeviceInterfaceDetailW.Call(
+	r0, _, err = setupDiGetDeviceInterfaceDetailW.Call(
 		hdev,
 		uintptr(unsafe.Pointer(&did)),
 		uintptr(unsafe.Pointer(&didd[0])),
