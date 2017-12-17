@@ -356,7 +356,8 @@ func getUsers() error {
 		"Retrieving Users file",
 	}
 
-	return userdb.WriteMD380ToolsFile(filename, progressFunc(prefixes))
+	db := userdb.New()
+	return db.WriteMD380ToolsFile(filename, progressFunc(prefixes))
 }
 
 func writeFirmware() error {
