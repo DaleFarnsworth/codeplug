@@ -158,10 +158,7 @@ func (dfu *Dfu) md380Reboot() error {
 		return wrapError("md380Reboot", err)
 	}
 
-	_, err = stDfu.GetStatus() // this changes state
-	if err != nil {
-		return wrapError("md380Reboot", err)
-	}
+	_, _ = stDfu.GetStatus() // this changes state
 
 	return nil
 }
