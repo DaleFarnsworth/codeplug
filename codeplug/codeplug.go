@@ -171,7 +171,7 @@ type Warning struct {
 	error
 }
 
-func (cp *Codeplug) Load(model string, frequencyRange string, ignoreWarning bool) error {
+func (cp *Codeplug) Load(model string, frequencyRange string, ignoreWarnings bool) error {
 	notFound := fmt.Errorf("codeplug type not found: %s", model)
 
 	found := false
@@ -215,7 +215,7 @@ findCodeplugInfo:
 		}
 	}
 
-	err := cp.Revert(ignoreWarning)
+	err := cp.Revert(ignoreWarnings)
 	if err != nil {
 		return err
 	}
@@ -235,13 +235,13 @@ findCodeplugInfo:
 		var err error
 		switch cp.fileType {
 		case FileTypeText:
-			err = cp.importText(cp.importFilename, ignoreWarning)
+			err = cp.importText(cp.importFilename, ignoreWarnings)
 		case FileTypeJSON:
 			err = cp.importJSON(cp.importFilename)
 		case FileTypeXLSX:
 			err = cp.importXLSX(cp.importFilename)
 		}
-		if _, warning := err.(Warning); warning && ignoreWarning {
+		if _, warning := err.(Warning); warning && ignoreWarnings {
 			err = nil
 		}
 
@@ -458,12 +458,12 @@ func (cp *Codeplug) read(filename string) error {
 // Revert reverts the codeplug to its state after the most recent open or
 // save operation.  An error is returned if the new codeplug state is
 // invalid.
-func (cp *Codeplug) Revert(ignoreWarning bool) error {
+func (cp *Codeplug) Revert(ignoreWarnings bool) error {
 	cp.clearCachedListNames()
 
 	cp.load()
 
-	if err := cp.valid(); err != nil && !ignoreWarning {
+	if err := cp.valid(); err != nil && !ignoreWarnings {
 		return err
 	}
 
@@ -478,15 +478,15 @@ func (cp *Codeplug) Revert(ignoreWarning bool) error {
 
 // Save stores the state of the Codeplug into its file
 // An error may be returned if the codeplug state is invalid.
-func (cp *Codeplug) Save(ignoreWarning bool) error {
-	return cp.SaveAs(cp.filename, ignoreWarning)
+func (cp *Codeplug) Save(ignoreWarnings bool) error {
+	return cp.SaveAs(cp.filename, ignoreWarnings)
 }
 
 // SaveAs saves the state of the Codeplug into a named file.
 // An error will be returned if the codeplug state is invalid.
 // The named file becomes the current file associated with the codeplug.
-func (cp *Codeplug) SaveAs(filename string, ignoreWarning bool) error {
-	err := cp.SaveToFile(filename, ignoreWarning)
+func (cp *Codeplug) SaveAs(filename string, ignoreWarnings bool) error {
+	err := cp.SaveToFile(filename, ignoreWarnings)
 	if err != nil {
 		return err
 	}
@@ -502,10 +502,10 @@ func (cp *Codeplug) SaveAs(filename string, ignoreWarning bool) error {
 // An error will be returned if the codeplug state is invalid.
 // The state of the codeplug is not changed, so this
 // is useful for use by an autosave function.
-func (cp *Codeplug) SaveToFile(filename string, ignoreWarning bool) error {
+func (cp *Codeplug) SaveToFile(filename string, ignoreWarnings bool) error {
 	if err := cp.valid(); err != nil {
 		_, warning := err.(Warning)
-		if !warning || !ignoreWarning {
+		if !warning || !ignoreWarnings {
 			return err
 		}
 	}
@@ -1554,7 +1554,7 @@ func (cp *Codeplug) ExportText(filename string) (err error) {
 	return nil
 }
 
-func (cp *Codeplug) importText(filename string, ignoreWarning bool) error {
+func (cp *Codeplug) importText(filename string, ignoreWarnings bool) error {
 	file, err := os.Open(filename)
 	if err != nil {
 		return err
@@ -1562,7 +1562,7 @@ func (cp *Codeplug) importText(filename string, ignoreWarning bool) error {
 	defer file.Close()
 
 	records, err := cp.ParseRecords(file)
-	if err != nil && !ignoreWarning {
+	if err != nil && !ignoreWarnings {
 		return err
 	}
 
@@ -1974,8 +1974,8 @@ func (cp *Codeplug) ReadRadio(progress func(cur int) bool) error {
 
 	copy(binBytes, bytes)
 
-	ignoreWarning := true
-	cp.Revert(ignoreWarning)
+	ignoreWarnings := true
+	cp.Revert(ignoreWarnings)
 
 	cp.SetChanged()
 
