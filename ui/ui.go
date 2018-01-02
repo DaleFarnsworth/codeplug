@@ -1049,6 +1049,15 @@ func newFieldCombobox(f *codeplug.Field) *Widget {
 	qw.InsertItems(0, strings)
 	qw.SetCurrentText(f.String())
 
+	if !f.IsValid() {
+		qw.InsertItems(0, []string{" "})
+		qw.SetCurrentText(" ")
+		qw.ConnectFocusInEvent(func(event *gui.QFocusEvent) {
+			qw.RemoveItem(0)
+			qw.DisconnectFocusInEvent()
+		})
+	}
+
 	qw.ConnectActivated2(func(str string) {
 		err := f.SetString(str)
 		if err != nil {
@@ -1066,10 +1075,9 @@ func setQSpinBox(sb *widgets.QSpinBox, f *codeplug.Field) {
 	span := f.Span()
 	if str != span.MinString() {
 		i, err := strconv.ParseUint(str, 10, 32)
-		if err != nil {
-			logFatal("bad span string value")
+		if err == nil {
+			value = int(i)
 		}
-		value = int(i)
 	}
 	sb.SetValue(value)
 }
@@ -1148,6 +1156,16 @@ func newFieldSpinbox(f *codeplug.Field) *Widget {
 	qw.SetSpecialValueText(span.MinString())
 
 	setQSpinBox(qw, f)
+
+	if !f.IsValid() {
+		qw.SetSpecialValueText(" ")
+		qw.SetValue(span.Minimum())
+		qw.ConnectFocusInEvent(func(event *gui.QFocusEvent) {
+			f.SetString(strconv.Itoa(span.Minimum()))
+			qw.SetSpecialValueText(span.MinString())
+			qw.DisconnectFocusInEvent()
+		})
+	}
 
 	qw.ConnectValueChanged2(func(str string) {
 		err := f.SetString(str)
