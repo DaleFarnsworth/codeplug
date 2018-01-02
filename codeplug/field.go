@@ -959,7 +959,10 @@ func (v *callType) setString(f *Field, s string) error {
 		return err
 	}
 
-	f.record.Field(FtDcCallID).SetString("16777215")
+	callIdField := f.record.Field(FtDcCallID)
+	if callIdField != nil {
+		callIdField.SetString("16777215")
+	}
 
 	return nil
 }
@@ -974,6 +977,12 @@ func (v *callID) getString(f *Field) string {
 
 // setString sets the callID's value from a string.
 func (v *callID) setString(f *Field, s string) error {
+	callTypeField := f.record.Field(FtDcCallType)
+	if callTypeField != nil && callTypeField.String() == "All" {
+		if s != "16777215" {
+			return fmt.Errorf("call type All requires call ID 16777215")
+		}
+	}
 	val, err := strconv.ParseUint(s, 10, 64)
 	if err != nil {
 		return fmt.Errorf("must be a positive integer")
