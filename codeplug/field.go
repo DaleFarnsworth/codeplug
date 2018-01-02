@@ -763,17 +763,20 @@ func (v *span) valid(f *Field) error {
 func (v *span) validValue(f *Field, value int) error {
 	sp := *f.span
 
-	if value == int(sp.min)*int(sp.scale) && sp.minString != "" {
+	min := int(sp.min) * int(sp.scale)
+	max := int(sp.max) * int(sp.scale)
+	multiple := int(sp.interval) * int(sp.scale)
+
+	if value == min && sp.minString != "" {
 		return nil
 	}
 
-	multiple := int(sp.interval) * int(sp.scale)
 	if value%multiple != 0 {
-		return fmt.Errorf("is not a multiple of %d", multiple)
+		return fmt.Errorf("must be a multiple of %d", multiple)
 	}
 
-	if value < (int(sp.min)*int(sp.scale)) || value > (int(sp.max)*int(sp.scale)) {
-		fmt.Errorf("must be between %d and %d", sp.min, sp.max)
+	if value < min || value > max {
+		return fmt.Errorf("must be between %d and %d", min, max)
 	}
 
 	return nil
