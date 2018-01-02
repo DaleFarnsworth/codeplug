@@ -1983,10 +1983,6 @@ func (cp *Codeplug) ReadRadio(progress func(cur int) bool) error {
 }
 
 func (cp *Codeplug) WriteRadio(progress func(cur int) bool) error {
-	if err := cp.valid(); err != nil {
-		return Warning{err}
-	}
-
 	savedTime, err := cp.getLastProgrammedTime()
 	if err != nil {
 		return err
