@@ -504,7 +504,10 @@ func (cp *Codeplug) SaveAs(filename string, ignoreWarning bool) error {
 // is useful for use by an autosave function.
 func (cp *Codeplug) SaveToFile(filename string, ignoreWarning bool) error {
 	if err := cp.valid(); err != nil {
-		return Warning{err}
+		_, warning := err.(Warning)
+		if !warning || !ignoreWarning {
+			return err
+		}
 	}
 
 	cp.setLastProgrammedTime(time.Now())
