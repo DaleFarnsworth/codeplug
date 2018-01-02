@@ -502,8 +502,8 @@ func (cp *Codeplug) SaveAs(filename string, ignoreWarnings bool) error {
 // An error will be returned if the codeplug state is invalid.
 // The state of the codeplug is not changed, so this
 // is useful for use by an autosave function.
-func (cp *Codeplug) SaveToFile(filename string, ignoreWarnings bool) error {
-	if err := cp.valid(); err != nil {
+func (cp *Codeplug) SaveToFile(filename string, ignoreWarnings bool) (err error) {
+	if err = cp.valid(); err != nil {
 		_, warning := err.(Warning)
 		if !warning || !ignoreWarnings {
 			return err
@@ -519,6 +519,10 @@ func (cp *Codeplug) SaveToFile(filename string, ignoreWarnings bool) error {
 	if err != nil {
 		return err
 	}
+	defer func() {
+		err = tmpFile.Close()
+		return
+	}()
 
 	if err = cp.write(tmpFile); err != nil {
 		os.Remove(tmpFile.Name())
@@ -835,12 +839,7 @@ func (cp *Codeplug) store() {
 }
 
 // write writes the codeplug's byte slice into the given file.
-func (cp *Codeplug) write(file *os.File) (err error) {
-	defer func() {
-		err = file.Close()
-		return
-	}()
-
+func (cp *Codeplug) write(file *os.File) error {
 	cpi := cp.codeplugInfo
 	fileSize := cpi.RdtSize
 	fileOffset := 0
