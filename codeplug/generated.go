@@ -167,31 +167,32 @@ const (
 
 // The value types a field may contain
 const (
-	VtBiFilename      ValueType = "biFilename"
-	VtBiFrequency     ValueType = "biFrequency"
-	VtCallID          ValueType = "callID"
-	VtCallType        ValueType = "callType"
-	VtCpsVersion      ValueType = "cpsVersion"
-	VtCtcssDcs        ValueType = "ctcssDcs"
-	VtFrequency       ValueType = "frequency"
-	VtGpsListIndex    ValueType = "gpsListIndex"
-	VtIStrings        ValueType = "iStrings"
-	VtIndexedStrings  ValueType = "indexedStrings"
-	VtIntroLine       ValueType = "introLine"
-	VtListIndex       ValueType = "listIndex"
-	VtMemberListIndex ValueType = "memberListIndex"
-	VtModel           ValueType = "model"
-	VtName            ValueType = "name"
-	VtOffOn           ValueType = "offOn"
-	VtOnOff           ValueType = "onOff"
-	VtPcPassword      ValueType = "pcPassword"
-	VtPrivacyNumber   ValueType = "privacyNumber"
-	VtRadioName       ValueType = "radioName"
-	VtRadioPassword   ValueType = "radioPassword"
-	VtSpan            ValueType = "span"
-	VtTextMessage     ValueType = "textMessage"
-	VtTimeStamp       ValueType = "timeStamp"
-	VtUniqueName      ValueType = "uniqueName"
+	VtBiFilename        ValueType = "biFilename"
+	VtBiFrequency       ValueType = "biFrequency"
+	VtCallID            ValueType = "callID"
+	VtCallType          ValueType = "callType"
+	VtCpsVersion        ValueType = "cpsVersion"
+	VtCtcssDcs          ValueType = "ctcssDcs"
+	VtFrequency         ValueType = "frequency"
+	VtGpsListIndex      ValueType = "gpsListIndex"
+	VtGpsReportInterval ValueType = "gpsReportInterval"
+	VtIStrings          ValueType = "iStrings"
+	VtIndexedStrings    ValueType = "indexedStrings"
+	VtIntroLine         ValueType = "introLine"
+	VtListIndex         ValueType = "listIndex"
+	VtMemberListIndex   ValueType = "memberListIndex"
+	VtModel             ValueType = "model"
+	VtName              ValueType = "name"
+	VtOffOn             ValueType = "offOn"
+	VtOnOff             ValueType = "onOff"
+	VtPcPassword        ValueType = "pcPassword"
+	VtPrivacyNumber     ValueType = "privacyNumber"
+	VtRadioName         ValueType = "radioName"
+	VtRadioPassword     ValueType = "radioPassword"
+	VtSpan              ValueType = "span"
+	VtTextMessage       ValueType = "textMessage"
+	VtTimeStamp         ValueType = "timeStamp"
+	VtUniqueName        ValueType = "uniqueName"
 )
 
 // newValue returns a new value of the given ValueType
@@ -213,6 +214,8 @@ func newValue(vt ValueType) value {
 		return new(frequency)
 	case VtGpsListIndex:
 		return new(gpsListIndex)
+	case VtGpsReportInterval:
+		return new(gpsReportInterval)
 	case VtIStrings:
 		return new(iStrings)
 	case VtIndexedStrings:
@@ -1515,7 +1518,7 @@ var fiGpGPSDefaultReportInterval = fieldInfo{
 	max:       1,
 	bitOffset: 16,
 	bitSize:   8,
-	valueType: VtSpan,
+	valueType: VtGpsReportInterval,
 	span: &Span{
 		min:       0,
 		max:       240,

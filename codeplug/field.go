@@ -792,6 +792,18 @@ func (v *span) store(f *Field) {
 	f.storeBytes([]byte{byte(*v)})
 }
 
+type gpsReportInterval struct {
+	span
+}
+
+func (v *gpsReportInterval) valid(f *Field) error {
+	if v.span.valid(f) != nil {
+		(*v).span = span(f.span.min)
+	}
+
+	return nil
+}
+
 // findexedStrings is a field value where specific integer values
 // represent specific strings.
 type indexedStrings uint16

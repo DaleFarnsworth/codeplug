@@ -1727,7 +1727,7 @@
       "type": "GpGPSDefaultReportInterval",
       "bitOffset": 16,
       "bitSize": 8,
-      "valueType": "span",
+      "valueType": "gpsReportInterval",
       "span": {
         "min": 0,
         "max": 240,
