@@ -48,9 +48,9 @@ func usage() {
 	errorf("\treadCodeplug -model <model> -freq <freqRange> <codeplugFilename>\n")
 	errorf("\twriteCodeplug <codeplugFilename>\n")
 	errorf("\twriteFirmware <firmwareFilename>\n")
-	errorf("\tdumpUsers <usersFilename>\n")
+	errorf("\treadUsers <usersFilename>\n")
 	errorf("\twriteUsers <usersFilename>\n")
-	errorf("\tdumpSPIFlash <filename>\n")
+	errorf("\treadSPIFlash <filename>\n")
 	errorf("\tgetUsers <usersFilename>\n")
 	errorf("\tcodeplugToText <codeplugFilename> <textFilename>\n")
 	errorf("\ttextToCodeplug <textFilename> <codeplugFilename>\n")
@@ -224,8 +224,8 @@ func writeCodeplug() error {
 	return cp.WriteRadio(progressFunc(prefixes))
 }
 
-func dumpSPIFlash() (err error) {
-	flags := flag.NewFlagSet("dumpSPIFlash", flag.ExitOnError)
+func readSPIFlash() (err error) {
+	flags := flag.NewFlagSet("readSPIFlash", flag.ExitOnError)
 
 	flags.Usage = func() {
 		errorf("Usage: %s %s <filename>\n", os.Args[0], os.Args[1])
@@ -241,8 +241,8 @@ func dumpSPIFlash() (err error) {
 	filename := args[0]
 
 	prefixes := []string{
-		"Preparing to dump flash",
-		"Dumping flash",
+		"Preparing to read flash",
+		"Reading flash",
 	}
 
 	dfu, err := dfu.New(progressFunc(prefixes))
@@ -262,11 +262,11 @@ func dumpSPIFlash() (err error) {
 		}
 	}()
 
-	return dfu.DumpSPIFlash(file)
+	return dfu.ReadSPIFlash(file)
 }
 
-func dumpUsers() (err error) {
-	flags := flag.NewFlagSet("dumpUsers", flag.ExitOnError)
+func readUsers() (err error) {
+	flags := flag.NewFlagSet("readUsers", flag.ExitOnError)
 
 	flags.Usage = func() {
 		errorf("Usage: %s %s <usersFilename>\n", os.Args[0], os.Args[1])
@@ -282,8 +282,8 @@ func dumpUsers() (err error) {
 	filename := args[0]
 
 	prefixes := []string{
-		"Preparing to dump users",
-		fmt.Sprintf("Dumping users to %s", filename),
+		"Preparing to read users",
+		fmt.Sprintf("Reading users to %s", filename),
 	}
 
 	dfu, err := dfu.New(progressFunc(prefixes))
@@ -303,7 +303,7 @@ func dumpUsers() (err error) {
 		}
 	}()
 
-	return dfu.DumpUsers(file)
+	return dfu.ReadUsers(file)
 }
 
 func writeUsers() error {
@@ -574,8 +574,8 @@ func main() {
 	subCommands := map[string]func() error{
 		"readcodeplug":   readCodeplug,
 		"writecodeplug":  writeCodeplug,
-		"dumpspiflash":   dumpSPIFlash,
-		"dumpusers":      dumpUsers,
+		"readspiflash":   readSPIFlash,
+		"readusers":      readUsers,
 		"writeusers":     writeUsers,
 		"getusers":       getUsers,
 		"writefirmware":  writeFirmware,

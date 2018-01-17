@@ -34,6 +34,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/dalefarnsworth/codeplug/stdfu"
@@ -484,11 +485,6 @@ func (dfu *Dfu) readSPIFlashTo(address, size int, iWriter io.Writer) error {
 
 	writer.Flush()
 
-	err = dfu.md380Reboot()
-	if err != nil {
-		return wrapError("readSPIFlashTo", err)
-	}
-
 	dfu.finalProgress()
 
 	return nil
@@ -568,66 +564,93 @@ func (dfu *Dfu) writeSPIFlashFrom(address, size int, iRdr io.Reader) error {
 		}
 	}
 
+	dfu.finalProgress()
+
+	return nil
+}
+
+func (dfu *Dfu) ReadUsers(file *os.File) error {
+	address := 0x100000
+
+	_, err := dfu.init()
+	if err != nil {
+		return wrapError("ReadUsers", err)
+	}
+
+	progressCallback := dfu.progressCallback
+	dfu.progressCallback = nil
+
+	err = dfu.readSPIFlashTo(address, 1024, file)
+	if err != nil {
+		return wrapError("ReadUsers", err)
+	}
+
+	_, err = file.Seek(0, io.SeekStart)
+	if err != nil {
+		return err
+	}
+
+	reader := bufio.NewReader(file)
+	line, isPrefix, err := reader.ReadLine()
+	if err != nil {
+		return err
+	}
+	if isPrefix {
+		return fmt.Errorf("First line is too long")
+	}
+	u64count, err := strconv.ParseUint(string(line), 10, 32)
+	count := int(u64count) + len(line) + 1
+
+	_, err = file.Seek(0, io.SeekStart)
+	if err != nil {
+		return err
+	}
+
+	dfu.progressCallback = progressCallback
+
+	dfu.setMaxProgressCount(100)
+	dfu.finalProgress()
+
+	err = dfu.readSPIFlashTo(address, count, file)
+	if err != nil {
+		return wrapError("ReadUsers", err)
+	}
+
 	err = dfu.md380Reboot()
 	if err != nil {
-		return wrapError("writeSPIFlashFrom", err)
-	}
-
-	dfu.finalProgress()
-
-	return nil
-}
-
-func (dfu *Dfu) DumpUsers(file *os.File) error {
-	dfu.setMaxProgressCount(100)
-
-	_, err := dfu.init()
-	if err != nil {
-		return wrapError("DumpUsers", err)
-	}
-
-	size, err := dfu.spiFlashSize()
-	if err != nil {
-		return wrapError("DumpUsers", err)
-	}
-	if size < 16*1024*1024 {
-		return fmt.Errorf("DumpUsers: Flash is only %d bytes", size)
-	}
-	address := 0x100000
-	size -= address
-
-	dfu.finalProgress()
-
-	err = dfu.readSPIFlashTo(address, size, file)
-	if err != nil {
-		return wrapError("DumpUsers", err)
+		return wrapError("ReadUsers", err)
 	}
 
 	return nil
 }
 
-func (dfu *Dfu) DumpSPIFlash(file *os.File) error {
+func (dfu *Dfu) ReadSPIFlash(file *os.File) error {
 	dfu.setMaxProgressCount(100)
 
 	_, err := dfu.init()
 	if err != nil {
-		return wrapError("DumpSPIFlash", err)
+		return wrapError("ReadSPIFlash", err)
 	}
 
 	var size int
 	size, err = dfu.spiFlashSize()
 	if err != nil {
-		return wrapError("DumpSPIFlash", err)
+		return wrapError("ReadSPIFlash", err)
 	}
 
 	dfu.setMaxProgressCount(size / dfu.blockSize)
 
 	err = dfu.readSPIFlashTo(0, size, file)
 	if err != nil {
-		return wrapError("DumpSPIFlash", err)
+		return wrapError("ReadSPIFlash", err)
 	}
 
 	dfu.finalProgress()
+
+	err = dfu.md380Reboot()
+	if err != nil {
+		return wrapError("ReadSPIFlash", err)
+	}
 
 	return nil
 }
@@ -865,11 +888,6 @@ func (dfu *Dfu) readFlashTo(address, offset int, size int, iWriter io.Writer) er
 		blockNumber++
 	}
 
-	err = dfu.md380Reboot()
-	if err != nil {
-		return wrapError("readFlashTo", err)
-	}
-
 	dfu.finalProgress()
 
 	return nil
@@ -935,11 +953,6 @@ func (dfu *Dfu) writeFlashFrom(address, offset int, size int, iRdr io.Reader) er
 			}
 		}
 		blockNumber++
-	}
-
-	err = dfu.md380Reboot()
-	if err != nil {
-		return wrapError("writeFlashFrom", err)
 	}
 
 	dfu.finalProgress()
@@ -1155,6 +1168,11 @@ func (dfu *Dfu) ReadCodeplug(data []byte) error {
 		return wrapError("ReadCodeplug", err)
 	}
 
+	err = dfu.md380Reboot()
+	if err != nil {
+		return wrapError("ReadCodeplug", err)
+	}
+
 	return nil
 }
 
@@ -1188,7 +1206,17 @@ func (dfu *Dfu) WriteCodeplug(data []byte) error {
 
 	dfu.finalProgress()
 
-	return dfu.writeFlashFrom(0, 2048, len(data), buffer)
+	err = dfu.writeFlashFrom(0, 2048, len(data), buffer)
+	if err != nil {
+		return wrapError("WriteCodeplug", err)
+	}
+
+	err = dfu.md380Reboot()
+	if err != nil {
+		return wrapError("WriteCodeplug", err)
+	}
+
+	return nil
 }
 
 func (dfu *Dfu) WriteUsers(filename string) error {
@@ -1210,7 +1238,17 @@ func (dfu *Dfu) WriteUsers(filename string) error {
 
 	size := int(fileInfo.Size())
 
-	return dfu.writeSPIFlashFrom(0x100000, size, file)
+	err = dfu.writeSPIFlashFrom(0x100000, size, file)
+	if err != nil {
+		return wrapError("WriteUsers", err)
+	}
+
+	err = dfu.md380Reboot()
+	if err != nil {
+		return wrapError("WriteUsers", err)
+	}
+
+	return nil
 }
 
 func (dfu *Dfu) WriteFirmware(filename string) error {
