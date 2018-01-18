@@ -1853,6 +1853,9 @@ func (f *Field) isDeferredValue() bool {
 		if len(listNames) > 0 && listNames[0] != "" {
 			return false
 		}
+		if f.String() == "None" || f.String() == "Selected" {
+			return false
+		}
 
 	case VtListIndex, VtGpsListIndex:
 		listNames := f.listNames()

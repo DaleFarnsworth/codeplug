@@ -1918,7 +1918,7 @@ func (cp *Codeplug) resolveDeferredValueFields() error {
 		appendWarningMsgs(&warning, pos, err)
 	}
 
-	for len(cp.deferredValueFields) > 0 {
+	for i := 0; len(cp.deferredValueFields) > 0 && i < 10; i++ {
 		deferredValueFields := cp.deferredValueFields
 		cp.deferredValueFields = nil
 		for _, f := range deferredValueFields {
@@ -1938,6 +1938,13 @@ func (cp *Codeplug) resolveDeferredValueFields() error {
 				appendWarning(f, pos, err)
 			}
 		}
+	}
+
+	for _, f := range cp.deferredValueFields {
+		err := fmt.Errorf("unresolved deferredValueField: %s", f.String())
+		dValue, _ := f.value.(deferredValue)
+		pos := dValue.pos
+		appendWarning(f, pos, err)
 	}
 
 	return warning
