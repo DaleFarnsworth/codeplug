@@ -135,7 +135,7 @@ func (f Field) String() string {
 	return f.value.getString(&f)
 }
 
-// setString set the strings value from the given string, recording a change.
+// SetString set the strings value from the given string, recording a change.
 func (f *Field) SetString(str string) error {
 	previousString := f.String()
 	if str == previousString {

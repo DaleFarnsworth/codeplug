@@ -1880,7 +1880,12 @@ func (cp *Codeplug) parseXLSXFile(iRdr io.Reader) []*parsedRecord {
 }
 
 func (cp *Codeplug) storeParsedRecords(records []*Record) error {
+	seenType := make(map[RecordType]bool)
 	for _, r := range records {
+		if !seenType[r.rType] {
+			seenType[r.rType] = true
+			cp.rDesc[r.rType].records = []*Record{}
+		}
 		r.rIndex = len(cp.records(r.rType))
 		cp.InsertRecord(r)
 	}
