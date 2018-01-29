@@ -450,6 +450,13 @@ func (dfu *Dfu) readSPIFlashTo(address, size int, iWriter io.Writer) error {
 
 	dfu.setMaxProgressCount(size/dfu.blockSize + 1)
 
+	err := dfu.md380Cmd([]md380Cmd{
+		md380Cmd{0x91, 0x01}, // Programming Mode
+	})
+	if err != nil {
+		return wrapError("readSPIFlashTo", err)
+	}
+
 	endAddress := address + size
 	for addr := address; addr < endAddress; addr += dfu.blockSize {
 		err := dfu.progressFunc()
@@ -477,6 +484,11 @@ func (dfu *Dfu) readSPIFlashTo(address, size int, iWriter io.Writer) error {
 
 	writer.Flush()
 
+	err = dfu.md380Reboot()
+	if err != nil {
+		return wrapError("readSPIFlashTo", err)
+	}
+
 	dfu.finalProgress()
 
 	return nil
@@ -493,6 +505,13 @@ func (dfu *Dfu) writeSPIFlashFrom(address, size int, iRdr io.Reader) error {
 
 	if address+size > flashSize {
 		return fmt.Errorf("writeSPIFlash: flash too small to write %d bytes at %d", size, address)
+	}
+
+	err = dfu.md380Cmd([]md380Cmd{
+		md380Cmd{0x91, 0x01}, // Programming Mode
+	})
+	if err != nil {
+		return wrapError("writeSPIFlashFrom", err)
 	}
 
 	err = dfu.eraseSPIFlashBlocks(address, size)
@@ -547,6 +566,11 @@ func (dfu *Dfu) writeSPIFlashFrom(address, size int, iRdr io.Reader) error {
 				break
 			}
 		}
+	}
+
+	err = dfu.md380Reboot()
+	if err != nil {
+		return wrapError("writeSPIFlashFrom", err)
 	}
 
 	dfu.finalProgress()
