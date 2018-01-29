@@ -1,4 +1,4 @@
-// Copyright 2017 Dale Farnsworth. All rights reserved.
+// Copyright 2017-2018 Dale Farnsworth. All rights reserved.
 
 // Dale Farnsworth
 // 1007 W Mendoza Ave
@@ -171,6 +171,8 @@ func getLines(url string) ([]string, error) {
 func getMarcUsers() ([]*User, error) {
 	lines, err := getLines(marcUsersURL)
 	if err != nil {
+		errFmt := "error getting MARC users database: %s: %s"
+		err = fmt.Errorf(errFmt, marcUsersURL, err.Error())
 		return nil, err
 	}
 
@@ -192,6 +194,8 @@ func getMarcUsers() ([]*User, error) {
 func getFixedUsers() ([]*User, error) {
 	lines, err := getLines(fixedUsersURL)
 	if err != nil {
+		errFmt := "error getting fixed users: %s: %s"
+		err = fmt.Errorf(errFmt, fixedUsersURL, err.Error())
 		return nil, err
 	}
 
@@ -233,7 +237,9 @@ func getSpecialURLs() ([]string, error) {
 func getSpecialUsers(url string) ([]*User, error) {
 	lines, err := getLines(url)
 	if err != nil {
-		return nil, err
+		errFmt := "error getting special users: %s: %s"
+		err = fmt.Errorf(errFmt, url, err.Error())
+		return nil, nil // Ignore erros on special users
 	}
 
 	users := make([]*User, len(lines))
@@ -252,6 +258,8 @@ func getSpecialUsers(url string) ([]*User, error) {
 func getReflectorUsers() ([]*User, error) {
 	lines, err := getLines(reflectorUsersURL)
 	if err != nil {
+		errFmt := "error getting reflector users: %s: %s"
+		err = fmt.Errorf(errFmt, reflectorUsersURL, err.Error())
 		return nil, err
 	}
 
@@ -345,6 +353,9 @@ func (db *UsersDB) Users() ([]*User, error) {
 	for done := 0; done < len(getUsersFuncs); {
 		select {
 		case r := <-resultChan:
+			if r.err != nil {
+				return nil, r.err
+			}
 			users = append(users, r.users...)
 			done++
 
@@ -377,7 +388,10 @@ func (db *UsersDB) writeSizedUsersFile() (err error) {
 		return err
 	}
 	defer func() {
-		err = file.Close()
+		fErr := file.Close()
+		if err == nil {
+			err = fErr
+		}
 		return
 	}()
 
@@ -410,7 +424,10 @@ func (db *UsersDB) writeUsersFile() (err error) {
 		return err
 	}
 	defer func() {
-		err = file.Close()
+		fErr := file.Close()
+		if err == nil {
+			err = fErr
+		}
 		return
 	}()
 
