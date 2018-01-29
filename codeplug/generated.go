@@ -616,7 +616,7 @@ var riGeneralSettings_md40 = recordInfo{
 
 var riGroupLists = recordInfo{
 	rType:    RtGroupLists,
-	typeName: "Group Lists",
+	typeName: "RX Group Lists",
 	max:      250,
 	offset:   60997,
 	size:     96,
@@ -1121,7 +1121,7 @@ var fiCiGPSSystem = fieldInfo{
 
 var fiCiGroupList = fieldInfo{
 	fType:        FtCiGroupList,
-	typeName:     "Group List",
+	typeName:     "RX Group List",
 	max:          1,
 	bitOffset:    96,
 	bitSize:      8,
@@ -1491,7 +1491,7 @@ var fiGlContact = fieldInfo{
 
 var fiGlName = fieldInfo{
 	fType:     FtGlName,
-	typeName:  "Group List Name",
+	typeName:  "RX Group List Name",
 	max:       1,
 	bitOffset: 0,
 	bitSize:   256,

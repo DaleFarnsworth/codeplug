@@ -238,7 +238,7 @@
       ]
     },
     {
-      "typeName": "Group Lists",
+      "typeName": "RX Group Lists",
       "type": "GroupLists",
       "offset": 60997,
       "size": 96,
@@ -997,7 +997,7 @@
       "valueType": "name"
     },
     {
-      "typeName": "Group List Name",
+      "typeName": "RX Group List Name",
       "type": "GlName",
       "bitOffset": 0,
       "bitSize": 256,
@@ -1525,7 +1525,7 @@
       ]
     },
     {
-      "typeName": "Group List",
+      "typeName": "RX Group List",
       "type": "CiGroupList",
       "bitOffset": 96,
       "bitSize": 8,
