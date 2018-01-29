@@ -520,7 +520,10 @@ func (cp *Codeplug) SaveToFile(filename string, ignoreWarnings bool) (err error)
 		return err
 	}
 	defer func() {
-		err = tmpFile.Close()
+		fErr := tmpFile.Close()
+		if err == nil {
+			err = fErr
+		}
 		return
 	}()
 
@@ -1535,7 +1538,10 @@ func (cp *Codeplug) ExportText(filename string) (err error) {
 		return err
 	}
 	defer func() {
-		err = file.Close()
+		fErr := file.Close()
+		if err == nil {
+			err = fErr
+		}
 		return
 	}()
 
@@ -1579,7 +1585,10 @@ func (cp *Codeplug) ExportJSON(filename string) error {
 		return err
 	}
 	defer func() {
-		err = file.Close()
+		fErr := file.Close()
+		if err == nil {
+			err = fErr
+		}
 		return
 	}()
 

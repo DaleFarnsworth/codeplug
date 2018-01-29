@@ -301,9 +301,9 @@ func writeTypesFile(codeFilename string, filename string) {
 	}
 
 	defer func() {
-		err = codeFile.Close()
-		if err != nil {
-			log.Fatal(err)
+		fErr := codeFile.Close()
+		if err == nil && fErr != nil {
+			log.Fatal(fErr)
 		}
 	}()
 
@@ -344,9 +344,9 @@ func main() {
 	}
 
 	defer func() {
-		err = linesFile.Close()
-		if err != nil {
-			log.Fatal(err)
+		fErr := linesFile.Close()
+		if err == nil && fErr != nil {
+			log.Fatal(fErr)
 		}
 	}()
 
@@ -400,9 +400,9 @@ func insertFiles(filename string, insertDatas []InsertData) {
 	}
 
 	defer func() {
-		err = tmpFile.Close()
-		if err != nil {
-			log.Fatal(err)
+		fErr := tmpFile.Close()
+		if err == nil && fErr != nil {
+			log.Fatal(fErr)
 		}
 	}()
 
