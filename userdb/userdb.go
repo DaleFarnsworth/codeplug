@@ -340,15 +340,7 @@ func (db *UsersDB) Users() ([]*User, error) {
 		go do(f, resultChan)
 	}
 
-	timeout := make(chan bool, 1)
-	go func() {
-		for timeout != nil {
-			time.Sleep(100 * time.Millisecond)
-			timeout <- true
-		}
-	}()
-
-	db.setMaxProgressCount(10 * timeoutSeconds)
+	db.setMaxProgressCount(len(getUsersFuncs))
 
 	for done := 0; done < len(getUsersFuncs); {
 		select {
@@ -359,10 +351,8 @@ func (db *UsersDB) Users() ([]*User, error) {
 			users = append(users, r.users...)
 			done++
 
-		case <-timeout:
 			err := db.progressFunc()
 			if err != nil {
-				timeout = nil
 				return nil, err
 			}
 		}
