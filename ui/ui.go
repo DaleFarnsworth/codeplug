@@ -205,14 +205,14 @@ func NewMainWindow() *MainWindow {
 }
 
 func (parent *MainWindow) AddVbox() *VBox {
-	box := newVbox()
+	box := NewVbox()
 	parent.qMainWindow.SetCentralWidget(&box.qWidget)
 
 	return box
 }
 
 func (parent *MainWindow) AddHbox() *HBox {
-	box := newHbox()
+	box := NewHbox()
 	parent.qMainWindow.SetCentralWidget(&box.qWidget)
 
 	return box
@@ -243,7 +243,7 @@ func MainWindows() []*MainWindow {
 }
 
 func (parent *Window) AddHbox() *HBox {
-	box := newHbox()
+	box := NewHbox()
 
 	parent.layout.AddWidget(&box.qWidget, 0, 0)
 	box.window = parent
@@ -252,7 +252,7 @@ func (parent *Window) AddHbox() *HBox {
 }
 
 func (parent *Window) AddVbox() *VBox {
-	box := newVbox()
+	box := NewVbox()
 
 	parent.layout.AddWidget(&box.qWidget, 0, 0)
 	box.window = parent
@@ -500,7 +500,7 @@ type VBox struct {
 	window  *Window
 }
 
-func newVbox() *VBox {
+func NewVbox() *VBox {
 	box := new(VBox)
 
 	box.qWidget = *widgets.NewQWidget(nil, 0)
@@ -519,7 +519,7 @@ func (parent *VBox) AddGroupbox(label string) *HBox {
 	layout := widgets.NewQHBoxLayout2(qgb)
 	layout.SetContentsMargins(0, 0, 0, 0)
 
-	box := newHbox()
+	box := NewHbox()
 	box.layout.SetContentsMargins(0, 0, 0, 0)
 	layout.AddWidget(&box.qWidget, 0, 0)
 
@@ -538,7 +538,7 @@ func (parent *HBox) AddGroupbox(label string) *HBox {
 	layout := widgets.NewQHBoxLayout2(qgb)
 	layout.SetContentsMargins(0, 0, 0, 0)
 
-	box := newHbox()
+	box := NewHbox()
 	box.layout.SetContentsMargins(0, 0, 0, 0)
 	layout.AddWidget(&box.qWidget, 0, 0)
 
@@ -553,8 +553,10 @@ func (hBox *HBox) Window() *Window {
 }
 
 func (parent *VBox) AddHbox() *HBox {
-	box := newHbox()
+	return parent.AddExistingHbox(NewHbox())
+}
 
+func (parent *VBox) AddExistingHbox(box *HBox) *HBox {
 	parent.layout.AddWidget(&box.qWidget, 0, 0)
 	box.window = parent.window
 
@@ -562,8 +564,10 @@ func (parent *VBox) AddHbox() *HBox {
 }
 
 func (parent *HBox) AddHbox() *HBox {
-	box := newHbox()
+	return parent.AddExistingHbox(NewHbox())
+}
 
+func (parent *HBox) AddExistingHbox(box *HBox) *HBox {
 	parent.layout.AddWidget(&box.qWidget, 0, 0)
 	box.window = parent.window
 
@@ -617,7 +621,7 @@ type HBox struct {
 	window  *Window
 }
 
-func newHbox() *HBox {
+func NewHbox() *HBox {
 	box := new(HBox)
 
 	box.qWidget = *widgets.NewQWidget(nil, 0)
@@ -632,8 +636,21 @@ func (hBox *HBox) SetContentsMargins(left int, right int, top int, bottom int) {
 }
 
 func (parent *HBox) AddVbox() *VBox {
-	box := newVbox()
+	return parent.AddExistingVbox(NewVbox())
+}
 
+func (parent *HBox) AddExistingVbox(box *VBox) *VBox {
+	parent.layout.AddWidget(&box.qWidget, 0, 0)
+	box.window = parent.window
+
+	return box
+}
+
+func (parent *VBox) AddVbox() *VBox {
+	return parent.AddExistingVbox(NewVbox())
+}
+
+func (parent *VBox) AddExistingVbox(box *VBox) *VBox {
 	parent.layout.AddWidget(&box.qWidget, 0, 0)
 	box.window = parent.window
 
@@ -1476,7 +1493,7 @@ type Dialog struct {
 
 func NewDialog(title string) *Dialog {
 	dialog := new(Dialog)
-	dialog.VBox = newVbox()
+	dialog.VBox = NewVbox()
 	dialog.qDialog = widgets.NewQDialog(nil, core.Qt__Dialog)
 	dialog.layout = widgets.NewQVBoxLayout2(dialog.qDialog)
 	dialog.layout.AddWidget(&dialog.VBox.qWidget, 0, 0)
@@ -1497,6 +1514,10 @@ func (d *Dialog) Accept() {
 
 func (d *Dialog) Reject() {
 	d.qDialog.Reject()
+}
+
+func (d *Dialog) Update() {
+	d.qDialog.Update()
 }
 
 func OpenTextFilename(title string, dir string) string {
