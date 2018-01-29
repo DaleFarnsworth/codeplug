@@ -82,6 +82,7 @@ const (
 	FtCiEmergencyAlarmAck         FieldType = "EmergencyAlarmAck"
 	FtCiGPSSystem                 FieldType = "GPSSystem"
 	FtCiGroupList                 FieldType = "GroupList"
+	FtCiInCallCriteria            FieldType = "InCallCriteria"
 	FtCiLoneWorker                FieldType = "LoneWorker"
 	FtCiName                      FieldType = "Name"
 	FtCiPower                     FieldType = "Power"
@@ -435,6 +436,7 @@ var riChannels_md380 = recordInfo{
 		&fiCiReceiveGPSInfo,
 		&fiCiSendGPSInfo,
 		&fiCiGPSSystem,
+		&fiCiInCallCriteria,
 	},
 }
 
@@ -1132,6 +1134,19 @@ var fiCiGroupList = fieldInfo{
 	},
 	listRecordType: RtGroupLists,
 	enabler:        FtCiChannelMode,
+}
+
+var fiCiInCallCriteria = fieldInfo{
+	fType:     FtCiInCallCriteria,
+	typeName:  "In Call Criteria",
+	max:       1,
+	bitOffset: 43,
+	bitSize:   1,
+	valueType: VtIStrings,
+	strings: &[]string{
+		"Always",
+		"Follow Admit Criteria",
+	},
 }
 
 var fiCiLoneWorker = fieldInfo{

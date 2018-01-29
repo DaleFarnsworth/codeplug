@@ -34,7 +34,7 @@
         "Zones_md380",
         "ScanLists_md380",
         "Channels_md380",
-	"GPSSystems"
+        "GPSSystems"
       ]
     },
     {
@@ -54,13 +54,13 @@
         "Zones_md380",
         "ScanLists_md380",
         "Channels_md380",
-	"GPSSystems"
+        "GPSSystems"
       ]
     },
     {
       "type": "md40",
       "models": [
-	      "DJ-MD40"
+              "DJ-MD40"
       ],
       "ext": "rdt",
       "rdtSize": 262709,
@@ -394,9 +394,10 @@
         "CiDecode6",
         "CiDecode7",
         "CiDecode8",
-	"CiReceiveGPSInfo",
-	"CiSendGPSInfo",
-	"CiGPSSystem"
+        "CiReceiveGPSInfo",
+        "CiSendGPSInfo",
+        "CiGPSSystem",
+        "CiInCallCriteria"
       ]
     },
     {
@@ -1455,6 +1456,17 @@
         "Low",
         "Medium",
         "High"
+      ]
+    },
+    {
+      "typeName": "In Call Criteria",
+      "type": "CiInCallCriteria",
+      "bitOffset": 43,
+      "bitSize": 1,
+      "valueType": "iStrings",
+      "strings": [
+        "Always",
+        "Follow Admit Criteria"
       ]
     },
     {
