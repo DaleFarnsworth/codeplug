@@ -1388,7 +1388,7 @@ func (v *memberListIndex) setString(f *Field, s string) error {
 			}
 		}
 	}
-	return fmt.Errorf("bad record name '%s'", s)
+	return fmt.Errorf("bad memberList record name '%s'", s)
 }
 
 type gpsListIndex struct {
@@ -1454,7 +1454,7 @@ func (v *listIndex) setString(f *Field, s string) error {
 			return nil
 		}
 	}
-	return fmt.Errorf("bad record name '%s'", s)
+	return fmt.Errorf("bad list record name '%s'", s)
 }
 
 // valid returns nil if the listIndex's value is valid.
