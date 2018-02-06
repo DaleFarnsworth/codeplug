@@ -1038,7 +1038,7 @@ func newFieldLineEdit(f *codeplug.Field) *Widget {
 
 	var finished func()
 	finished = func() {
-		err := f.SetString(qw.Text())
+		err := f.SetString(strings.TrimSpace(qw.Text()))
 		if err != nil {
 			msg := f.TypeName() + " " + err.Error()
 			qw.DisconnectEditingFinished()
