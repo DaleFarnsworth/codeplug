@@ -1391,6 +1391,35 @@ func (v *memberListIndex) setString(f *Field, s string) error {
 	return fmt.Errorf("bad memberList record name '%s'", s)
 }
 
+// valid returns nil if the listIndex's value is valid.
+func (v *memberListIndex) valid(f *Field) error {
+	fd := f.fDesc
+
+	if fd.indexedStrings != nil {
+		for _, is := range *fd.indexedStrings {
+			if is.Index == uint16(v.listIndex) {
+				return nil
+			}
+		}
+	}
+
+	if f.isDeferredValue("") {
+		return nil
+	}
+
+	for i, name := range f.listNames() {
+		if i == int(v.listIndex)-1 {
+			for _, mName := range f.memberListNames() {
+				if mName == name {
+					return nil
+				}
+			}
+		}
+	}
+
+	return fmt.Errorf("memberListIndex out of range: %d", v.listIndex)
+}
+
 type gpsListIndex struct {
 	listIndex
 }
@@ -1479,7 +1508,7 @@ func (v *listIndex) valid(f *Field) error {
 		return nil
 	}
 
-	return fmt.Errorf("index out of range: %d", *v)
+	return fmt.Errorf("listIndex out of range: %d", *v)
 }
 
 // load sets the listIndex's value from its bits in cp.bytes.
