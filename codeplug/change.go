@@ -473,7 +473,7 @@ func (cp *Codeplug) UndoString() string {
 		fTypeName := f.TypeName()
 		value := f.String()
 		prevVal := change.previousValue()
-		str = fmt.Sprintf("%s.%s: %s: %s -> %s",
+		str = fmt.Sprintf("%s.%s: %s: '%s' -> '%s'",
 			rTypeName, rName, fTypeName, prevVal, value)
 
 	case MoveRecordsChange:
@@ -544,7 +544,7 @@ func (cp *Codeplug) RedoString() string {
 		fName := f.TypeName()
 		value := f.String()
 		prevVal := change.previousValue()
-		str = fmt.Sprintf("%s.%s: %s: %s -> %s",
+		str = fmt.Sprintf("%s.%s: %s: '%s' -> '%s'",
 			rTypeName, rName, fName, value, prevVal)
 
 	case MoveRecordsChange:
