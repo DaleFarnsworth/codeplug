@@ -480,7 +480,7 @@ func (r *Record) NewFieldWithValue(fType FieldType, index int, str string) (*Fie
 	f := r.NewField(fType)
 	f.fIndex = index
 
-	if f.isDeferredValue() {
+	if f.isDeferredValue(str) {
 		return f, nil
 	}
 

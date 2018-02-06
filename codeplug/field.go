@@ -1846,14 +1846,14 @@ func fieldsToStrings(fields []*Field) []string {
 	return strings
 }
 
-func (f *Field) isDeferredValue() bool {
+func (f *Field) isDeferredValue(str string) bool {
 	switch f.valueType {
 	case VtMemberListIndex:
-		listNames := f.memberListNames()
-		if len(listNames) > 0 && listNames[0] != "" {
+		if str == "None" || str == "Selected" {
 			return false
 		}
-		if f.String() == "None" || f.String() == "Selected" {
+		listNames := f.memberListNames()
+		if len(listNames) > 0 && listNames[0] != "" {
 			return false
 		}
 

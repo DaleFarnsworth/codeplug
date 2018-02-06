@@ -1936,13 +1936,13 @@ func (cp *Codeplug) resolveDeferredValueFields() error {
 		deferredValueFields := cp.deferredValueFields
 		cp.deferredValueFields = nil
 		for _, f := range deferredValueFields {
-			if f.isDeferredValue() {
-				continue
-			}
-
 			dValue, deferred := f.value.(deferredValue)
 			if !deferred {
 				logFatal("not deferred", f.FullTypeName())
+			}
+
+			if f.isDeferredValue(dValue.str) {
+				continue
 			}
 
 			f.value = dValue.value
