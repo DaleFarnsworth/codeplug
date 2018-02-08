@@ -1046,13 +1046,13 @@ func (v *radioPassword) load(f *Field) {
 		*v = radioPassword("00000000")
 		return
 	}
-	*v = radioPassword(fmt.Sprintf("%08d", bcdToBinary(intValue)))
+	*v = radioPassword(fmt.Sprintf("%08d", revBcdToBinary(intValue)))
 }
 
 // store stores the radioPassword's value into its bits in cp.bytes.
 func (v *radioPassword) store(f *Field) {
 	val, _ := strconv.ParseUint(string(*v), 10, 32)
-	bytes := intToBytes(binaryToBcd(int(val)), f.size())
+	bytes := intToBytes(binaryToRevBcd(int(val)), f.size())
 	f.storeBytes(bytes)
 }
 
