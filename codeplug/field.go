@@ -1053,6 +1053,9 @@ func (v *radioPassword) load(f *Field) {
 func (v *radioPassword) store(f *Field) {
 	val, _ := strconv.ParseUint(string(*v), 10, 32)
 	bytes := intToBytes(binaryToRevBcd(int(val)), f.size())
+	if val == 0 {
+		bytes = []byte{0xff, 0xff, 0xff, 0xff}
+	}
 	f.storeBytes(bytes)
 }
 
