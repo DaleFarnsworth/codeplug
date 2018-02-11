@@ -519,21 +519,34 @@ func (cp *Codeplug) SaveToFile(filename string, ignoreWarnings bool) (err error)
 	if err != nil {
 		return err
 	}
+	tmpFilename := tmpFile.Name()
+
 	defer func() {
-		fErr := tmpFile.Close()
+		closeErr := tmpFile.Close()
 		if err == nil {
-			err = fErr
+			err = closeErr
 		}
-		return
+
+		if err != nil {
+			os.Remove(tmpFilename)
+			return
+		}
+
+		err = os.Rename(tmpFilename, filename)
 	}()
 
-	if err = cp.write(tmpFile); err != nil {
-		os.Remove(tmpFile.Name())
+	cpi := cp.codeplugInfo
+	fileSize := cpi.RdtSize
+	fileOffset := 0
+
+	bytes := cp.bytes[fileOffset : fileOffset+fileSize]
+	bytesWritten, err := tmpFile.Write(bytes)
+	if err != nil {
 		return err
 	}
 
-	if err := os.Rename(tmpFile.Name(), filename); err != nil {
-		return err
+	if bytesWritten != fileSize {
+		return fmt.Errorf("write to %s failed", cp.filename)
 	}
 
 	return err
@@ -839,25 +852,6 @@ func (cp *Codeplug) store() {
 			}
 		}
 	}
-}
-
-// write writes the codeplug's byte slice into the given file.
-func (cp *Codeplug) write(file *os.File) error {
-	cpi := cp.codeplugInfo
-	fileSize := cpi.RdtSize
-	fileOffset := 0
-
-	bytes := cp.bytes[fileOffset : fileOffset+fileSize]
-	bytesWritten, err := file.Write(bytes)
-	if err != nil {
-		return err
-	}
-
-	if bytesWritten != fileSize {
-		return fmt.Errorf("write to %s failed", cp.filename)
-	}
-
-	return nil
 }
 
 // frequencyValid returns nil if the given frequency is valid for the
