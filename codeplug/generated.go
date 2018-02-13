@@ -39,6 +39,7 @@ const (
 	RtGeneralSettings_md380  RecordType = "GeneralSettings"
 	RtGeneralSettings_md40   RecordType = "GeneralSettings"
 	RtGroupLists             RecordType = "GroupLists"
+	RtMenuItems              RecordType = "MenuItems"
 	RtScanLists_md380        RecordType = "ScanLists"
 	RtScanLists_md40         RecordType = "ScanLists"
 	RtTextMessages           RecordType = "TextMessages"
@@ -149,6 +150,34 @@ const (
 	FtGsTalkPermitTone            FieldType = "TalkPermitTone"
 	FtGsTxPreambleDuration        FieldType = "TxPreambleDuration"
 	FtGsVoxSensitivity            FieldType = "VoxSensitivity"
+	FtMiAnswered                  FieldType = "Answered"
+	FtMiBacklight                 FieldType = "Backlight"
+	FtMiCallAlert                 FieldType = "CallAlert"
+	FtMiDisplayMode               FieldType = "DisplayMode"
+	FtMiEdit                      FieldType = "Edit"
+	FtMiEditList                  FieldType = "EditList"
+	FtMiGps                       FieldType = "Gps"
+	FtMiHangTime                  FieldType = "HangTime"
+	FtMiIntroScreen               FieldType = "IntroScreen"
+	FtMiKeyboardLock              FieldType = "KeyboardLock"
+	FtMiLedIndicator              FieldType = "LedIndicator"
+	FtMiManualDial                FieldType = "ManualDial"
+	FtMiMissed                    FieldType = "Missed"
+	FtMiOutgoingRadio             FieldType = "OutgoingRadio"
+	FtMiPasswordAndLock           FieldType = "PasswordAndLock"
+	FtMiPower                     FieldType = "Power"
+	FtMiProgramKey                FieldType = "ProgramKey"
+	FtMiProgramRadio              FieldType = "ProgramRadio"
+	FtMiRadioCheck                FieldType = "RadioCheck"
+	FtMiRadioDisable              FieldType = "RadioDisable"
+	FtMiRadioEnable               FieldType = "RadioEnable"
+	FtMiRemoteMonitor             FieldType = "RemoteMonitor"
+	FtMiScan                      FieldType = "Scan"
+	FtMiSquelch                   FieldType = "Squelch"
+	FtMiTalkaround                FieldType = "Talkaround"
+	FtMiTextMessage               FieldType = "TextMessage"
+	FtMiToneOrAlert               FieldType = "ToneOrAlert"
+	FtMiVox                       FieldType = "Vox"
 	FtSlChannel_md380             FieldType = "Channel"
 	FtSlChannel_md40              FieldType = "Channel"
 	FtSlName                      FieldType = "Name"
@@ -275,6 +304,7 @@ var cpMd380 = CodeplugInfo{
 	RecordInfos: []*recordInfo{
 		&riBasicInformation_md380,
 		&riGeneralSettings_md380,
+		&riMenuItems,
 		&riContacts,
 		&riGroupLists,
 		&riZones_md380,
@@ -296,6 +326,7 @@ var cpMd390 = CodeplugInfo{
 	RecordInfos: []*recordInfo{
 		&riBasicInformation_md390,
 		&riGeneralSettings_md380,
+		&riMenuItems,
 		&riContacts,
 		&riGroupLists,
 		&riZones_md380,
@@ -317,6 +348,7 @@ var cpMd40 = CodeplugInfo{
 	RecordInfos: []*recordInfo{
 		&riBasicInformation_md40,
 		&riGeneralSettings_md40,
+		&riMenuItems,
 		&riContacts,
 		&riGroupLists,
 		&riZones_md40,
@@ -632,6 +664,44 @@ var riGroupLists = recordInfo{
 	fieldInfos: []*fieldInfo{
 		&fiGlName,
 		&fiGlContact,
+	},
+}
+
+var riMenuItems = recordInfo{
+	rType:    RtMenuItems,
+	typeName: "Menu Items",
+	max:      1,
+	offset:   8981,
+	size:     5,
+	fieldInfos: []*fieldInfo{
+		&fiMiHangTime,
+		&fiMiRadioDisable,
+		&fiMiRadioEnable,
+		&fiMiRemoteMonitor,
+		&fiMiRadioCheck,
+		&fiMiManualDial,
+		&fiMiEdit,
+		&fiMiCallAlert,
+		&fiMiTextMessage,
+		&fiMiToneOrAlert,
+		&fiMiTalkaround,
+		&fiMiOutgoingRadio,
+		&fiMiAnswered,
+		&fiMiMissed,
+		&fiMiEditList,
+		&fiMiScan,
+		&fiMiProgramKey,
+		&fiMiVox,
+		&fiMiSquelch,
+		&fiMiLedIndicator,
+		&fiMiKeyboardLock,
+		&fiMiIntroScreen,
+		&fiMiBacklight,
+		&fiMiPower,
+		&fiMiGps,
+		&fiMiProgramRadio,
+		&fiMiDisplayMode,
+		&fiMiPasswordAndLock,
 	},
 }
 
@@ -1956,6 +2026,263 @@ var fiGsVoxSensitivity = fieldInfo{
 		min: 1,
 		max: 10,
 	},
+}
+
+var fiMiAnswered = fieldInfo{
+	fType:     FtMiAnswered,
+	typeName:  "Answered",
+	max:       1,
+	bitOffset: 19,
+	bitSize:   1,
+	valueType: VtOffOn,
+}
+
+var fiMiBacklight = fieldInfo{
+	fType:     FtMiBacklight,
+	typeName:  "Backlight",
+	max:       1,
+	bitOffset: 30,
+	bitSize:   1,
+	valueType: VtOffOn,
+}
+
+var fiMiCallAlert = fieldInfo{
+	fType:     FtMiCallAlert,
+	typeName:  "Call Alert",
+	max:       1,
+	bitOffset: 14,
+	bitSize:   1,
+	valueType: VtOffOn,
+}
+
+var fiMiDisplayMode = fieldInfo{
+	fType:     FtMiDisplayMode,
+	typeName:  "Display Mode",
+	max:       1,
+	bitOffset: 38,
+	bitSize:   1,
+	valueType: VtOffOn,
+}
+
+var fiMiEdit = fieldInfo{
+	fType:     FtMiEdit,
+	typeName:  "Edit",
+	max:       1,
+	bitOffset: 13,
+	bitSize:   1,
+	valueType: VtOffOn,
+}
+
+var fiMiEditList = fieldInfo{
+	fType:     FtMiEditList,
+	typeName:  "Edit List",
+	max:       1,
+	bitOffset: 21,
+	bitSize:   1,
+	valueType: VtOffOn,
+}
+
+var fiMiGps = fieldInfo{
+	fType:     FtMiGps,
+	typeName:  "GPS",
+	max:       1,
+	bitOffset: 36,
+	bitSize:   1,
+	valueType: VtOnOff,
+}
+
+var fiMiHangTime = fieldInfo{
+	fType:     FtMiHangTime,
+	typeName:  "Hang Time",
+	max:       1,
+	bitOffset: 0,
+	bitSize:   8,
+	valueType: VtSpan,
+	span: &Span{
+		min:       0,
+		max:       30,
+		minString: "Hang",
+	},
+}
+
+var fiMiIntroScreen = fieldInfo{
+	fType:     FtMiIntroScreen,
+	typeName:  "Intro Screen",
+	max:       1,
+	bitOffset: 29,
+	bitSize:   1,
+	valueType: VtOffOn,
+}
+
+var fiMiKeyboardLock = fieldInfo{
+	fType:     FtMiKeyboardLock,
+	typeName:  "Keyboard Lock",
+	max:       1,
+	bitOffset: 28,
+	bitSize:   1,
+	valueType: VtOffOn,
+}
+
+var fiMiLedIndicator = fieldInfo{
+	fType:     FtMiLedIndicator,
+	typeName:  "LED Indicator",
+	max:       1,
+	bitOffset: 27,
+	bitSize:   1,
+	valueType: VtOffOn,
+}
+
+var fiMiManualDial = fieldInfo{
+	fType:     FtMiManualDial,
+	typeName:  "Manual Dial",
+	max:       1,
+	bitOffset: 12,
+	bitSize:   1,
+	valueType: VtOffOn,
+}
+
+var fiMiMissed = fieldInfo{
+	fType:     FtMiMissed,
+	typeName:  "Missed",
+	max:       1,
+	bitOffset: 20,
+	bitSize:   1,
+	valueType: VtOffOn,
+}
+
+var fiMiOutgoingRadio = fieldInfo{
+	fType:     FtMiOutgoingRadio,
+	typeName:  "Outgoing Radio",
+	max:       1,
+	bitOffset: 18,
+	bitSize:   1,
+	valueType: VtOffOn,
+}
+
+var fiMiPasswordAndLock = fieldInfo{
+	fType:     FtMiPasswordAndLock,
+	typeName:  "Password And Lock",
+	max:       1,
+	bitOffset: 39,
+	bitSize:   1,
+	valueType: VtOffOn,
+}
+
+var fiMiPower = fieldInfo{
+	fType:     FtMiPower,
+	typeName:  "Power",
+	max:       1,
+	bitOffset: 31,
+	bitSize:   1,
+	valueType: VtOffOn,
+}
+
+var fiMiProgramKey = fieldInfo{
+	fType:     FtMiProgramKey,
+	typeName:  "Program Key",
+	max:       1,
+	bitOffset: 23,
+	bitSize:   1,
+	valueType: VtOffOn,
+}
+
+var fiMiProgramRadio = fieldInfo{
+	fType:     FtMiProgramRadio,
+	typeName:  "Program Radio",
+	max:       1,
+	bitOffset: 37,
+	bitSize:   1,
+	valueType: VtOnOff,
+}
+
+var fiMiRadioCheck = fieldInfo{
+	fType:     FtMiRadioCheck,
+	typeName:  "Radio Check",
+	max:       1,
+	bitOffset: 11,
+	bitSize:   1,
+	valueType: VtOffOn,
+}
+
+var fiMiRadioDisable = fieldInfo{
+	fType:     FtMiRadioDisable,
+	typeName:  "Radio Disable",
+	max:       1,
+	bitOffset: 8,
+	bitSize:   1,
+	valueType: VtOffOn,
+}
+
+var fiMiRadioEnable = fieldInfo{
+	fType:     FtMiRadioEnable,
+	typeName:  "Radio Enable",
+	max:       1,
+	bitOffset: 9,
+	bitSize:   1,
+	valueType: VtOffOn,
+}
+
+var fiMiRemoteMonitor = fieldInfo{
+	fType:     FtMiRemoteMonitor,
+	typeName:  "Remote Monitor",
+	max:       1,
+	bitOffset: 10,
+	bitSize:   1,
+	valueType: VtOffOn,
+}
+
+var fiMiScan = fieldInfo{
+	fType:     FtMiScan,
+	typeName:  "Scan",
+	max:       1,
+	bitOffset: 22,
+	bitSize:   1,
+	valueType: VtOffOn,
+}
+
+var fiMiSquelch = fieldInfo{
+	fType:     FtMiSquelch,
+	typeName:  "Squelch",
+	max:       1,
+	bitOffset: 26,
+	bitSize:   1,
+	valueType: VtOffOn,
+}
+
+var fiMiTalkaround = fieldInfo{
+	fType:     FtMiTalkaround,
+	typeName:  "Talkaround",
+	max:       1,
+	bitOffset: 17,
+	bitSize:   1,
+	valueType: VtOffOn,
+}
+
+var fiMiTextMessage = fieldInfo{
+	fType:     FtMiTextMessage,
+	typeName:  "Text Messsage",
+	max:       1,
+	bitOffset: 15,
+	bitSize:   1,
+	valueType: VtOffOn,
+}
+
+var fiMiToneOrAlert = fieldInfo{
+	fType:     FtMiToneOrAlert,
+	typeName:  "Tone Or Alert",
+	max:       1,
+	bitOffset: 16,
+	bitSize:   1,
+	valueType: VtOffOn,
+}
+
+var fiMiVox = fieldInfo{
+	fType:     FtMiVox,
+	typeName:  "VOX",
+	max:       1,
+	bitOffset: 24,
+	bitSize:   1,
+	valueType: VtOffOn,
 }
 
 var fiSlChannel_md380 = fieldInfo{

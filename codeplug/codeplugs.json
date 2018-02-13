@@ -29,6 +29,7 @@
       "recordTypes": [
         "BasicInformation_md380",
         "GeneralSettings_md380",
+	"MenuItems",
         "Contacts",
         "GroupLists",
         "Zones_md380",
@@ -49,6 +50,7 @@
       "recordTypes": [
         "BasicInformation_md390",
         "GeneralSettings_md380",
+	"MenuItems",
         "Contacts",
         "GroupLists",
         "Zones_md380",
@@ -69,6 +71,7 @@
       "recordTypes": [
         "BasicInformation_md40",
         "GeneralSettings_md40",
+	"MenuItems",
         "Contacts",
         "GroupLists",
         "Zones_md40",
@@ -198,6 +201,42 @@
         "GsDisableAllLeds",
         "GsGroupCallHangTime",
         "GsPrivateCallHangTime"
+      ]
+    },
+    {
+      "typeName": "Menu Items",
+      "type": "MenuItems",
+      "offset": 8981,
+      "size": 5,
+      "fieldTypes": [
+        "MiHangTime",
+        "MiRadioDisable",
+        "MiRadioEnable",
+        "MiRemoteMonitor",
+        "MiRadioCheck",
+        "MiManualDial",
+        "MiEdit",
+        "MiCallAlert",
+        "MiTextMessage",
+        "MiToneOrAlert",
+        "MiTalkaround",
+        "MiOutgoingRadio",
+        "MiAnswered",
+        "MiMissed",
+        "MiEditList",
+        "MiScan",
+        "MiProgramKey",
+        "MiVox",
+        "MiSquelch",
+        "MiLedIndicator",
+        "MiKeyboardLock",
+        "MiIntroScreen",
+        "MiBacklight",
+        "MiPower",
+        "MiGps",
+        "MiProgramRadio",
+        "MiDisplayMode",
+        "MiPasswordAndLock"
       ]
     },
     {
@@ -951,6 +990,207 @@
       "bitOffset": 896,
       "bitSize": 256,
       "valueType": "radioName"
+    },
+    {
+      "typeName": "Hang Time",
+      "type": "MiHangTime",
+      "bitOffset": 0,
+      "bitSize": 8,
+      "valueType": "span",
+      "span": {
+        "min": 0,
+        "max": 30,
+        "minString": "Hang"
+      }
+    },
+    {
+      "typeName": "Radio Disable",
+      "type": "MiRadioDisable",
+      "bitOffset": 8,
+      "bitSize": 1,
+      "valueType": "offOn"
+    },
+    {
+      "typeName": "Radio Enable",
+      "type": "MiRadioEnable",
+      "bitOffset": 9,
+      "bitSize": 1,
+      "valueType": "offOn"
+    },
+    {
+      "typeName": "Remote Monitor",
+      "type": "MiRemoteMonitor",
+      "bitOffset": 10,
+      "bitSize": 1,
+      "valueType": "offOn"
+    },
+    {
+      "typeName": "Radio Check",
+      "type": "MiRadioCheck",
+      "bitOffset": 11,
+      "bitSize": 1,
+      "valueType": "offOn"
+    },
+    {
+      "typeName": "Manual Dial",
+      "type": "MiManualDial",
+      "bitOffset": 12,
+      "bitSize": 1,
+      "valueType": "offOn"
+    },
+    {
+      "typeName": "Edit",
+      "type": "MiEdit",
+      "bitOffset": 13,
+      "bitSize": 1,
+      "valueType": "offOn"
+    },
+    {
+      "typeName": "Call Alert",
+      "type": "MiCallAlert",
+      "bitOffset": 14,
+      "bitSize": 1,
+      "valueType": "offOn"
+    },
+    {
+      "typeName": "Text Messsage",
+      "type": "MiTextMessage",
+      "bitOffset": 15,
+      "bitSize": 1,
+      "valueType": "offOn"
+    },
+    {
+      "typeName": "Tone Or Alert",
+      "type": "MiToneOrAlert",
+      "bitOffset": 16,
+      "bitSize": 1,
+      "valueType": "offOn"
+    },
+    {
+      "typeName": "Talkaround",
+      "type": "MiTalkaround",
+      "bitOffset": 17,
+      "bitSize": 1,
+      "valueType": "offOn"
+    },
+    {
+      "typeName": "Outgoing Radio",
+      "type": "MiOutgoingRadio",
+      "bitOffset": 18,
+      "bitSize": 1,
+      "valueType": "offOn"
+    },
+    {
+      "typeName": "Answered",
+      "type": "MiAnswered",
+      "bitOffset": 19,
+      "bitSize": 1,
+      "valueType": "offOn"
+    },
+    {
+      "typeName": "Missed",
+      "type": "MiMissed",
+      "bitOffset": 20,
+      "bitSize": 1,
+      "valueType": "offOn"
+    },
+    {
+      "typeName": "Edit List",
+      "type": "MiEditList",
+      "bitOffset": 21,
+      "bitSize": 1,
+      "valueType": "offOn"
+    },
+    {
+      "typeName": "Scan",
+      "type": "MiScan",
+      "bitOffset": 22,
+      "bitSize": 1,
+      "valueType": "offOn"
+    },
+    {
+      "typeName": "Program Key",
+      "type": "MiProgramKey",
+      "bitOffset": 23,
+      "bitSize": 1,
+      "valueType": "offOn"
+    },
+    {
+      "typeName": "VOX",
+      "type": "MiVox",
+      "bitOffset": 24,
+      "bitSize": 1,
+      "valueType": "offOn"
+    },
+    {
+      "typeName": "Squelch",
+      "type": "MiSquelch",
+      "bitOffset": 26,
+      "bitSize": 1,
+      "valueType": "offOn"
+    },
+    {
+      "typeName": "LED Indicator",
+      "type": "MiLedIndicator",
+      "bitOffset": 27,
+      "bitSize": 1,
+      "valueType": "offOn"
+    },
+    {
+      "typeName": "Keyboard Lock",
+      "type": "MiKeyboardLock",
+      "bitOffset": 28,
+      "bitSize": 1,
+      "valueType": "offOn"
+    },
+    {
+      "typeName": "Intro Screen",
+      "type": "MiIntroScreen",
+      "bitOffset": 29,
+      "bitSize": 1,
+      "valueType": "offOn"
+    },
+    {
+      "typeName": "Backlight",
+      "type": "MiBacklight",
+      "bitOffset": 30,
+      "bitSize": 1,
+      "valueType": "offOn"
+    },
+    {
+      "typeName": "Power",
+      "type": "MiPower",
+      "bitOffset": 31,
+      "bitSize": 1,
+      "valueType": "offOn"
+    },
+    {
+      "typeName": "GPS",
+      "type": "MiGps",
+      "bitOffset": 36,
+      "bitSize": 1,
+      "valueType": "onOff"
+    },
+    {
+      "typeName": "Program Radio",
+      "type": "MiProgramRadio",
+      "bitOffset": 37,
+      "bitSize": 1,
+      "valueType": "onOff"
+    },
+    {
+      "typeName": "Display Mode",
+      "type": "MiDisplayMode",
+      "bitOffset": 38,
+      "bitSize": 1,
+      "valueType": "offOn"
+    },
+    {
+      "typeName": "Password And Lock",
+      "type": "MiPasswordAndLock",
+      "bitOffset": 39,
+      "bitSize": 1,
+      "valueType": "offOn"
     },
     {
       "typeName": "Message",
