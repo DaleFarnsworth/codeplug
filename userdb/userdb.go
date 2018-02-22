@@ -245,6 +245,9 @@ func getSpecialUsers(url string) ([]*User, error) {
 	users := make([]*User, len(lines))
 	for i, line := range lines {
 		fields := strings.Split(line, ",")
+		if len(fields) < 7 {
+			continue
+		}
 		users[i] = &User{
 			ID:       fields[0],
 			Callsign: fields[1],
