@@ -296,6 +296,7 @@ func deDupAndSort(users []*User) ([]*User, error) {
 		if u == nil || u.ID == "" {
 			continue
 		}
+		u.ID = strings.TrimPrefix(u.ID, "#")
 		id, err := strconv.ParseUint(u.ID, 10, 24)
 		if err != nil {
 			return nil, err
