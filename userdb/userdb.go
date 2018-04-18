@@ -38,7 +38,7 @@ import (
 
 var specialUsersURL = "http://registry.dstar.su/api/node.php"
 var fixedUsersURL = "https://raw.githubusercontent.com/travisgoodspeed/md380tools/master/db/fixed.csv"
-var marcUsersURL = "https://www.dmr-marc.net/static/users.csv"
+var marcUsersURL = "https://www.dmr-marc.net/static/users_quoted.csv"
 var reflectorUsersURL = "http://registry.dstar.su/reflector.db"
 
 var timeoutSeconds = 20
@@ -184,7 +184,9 @@ func getMarcUsers() ([]*User, error) {
 
 	users := make([]*User, len(lines))
 	for i, line := range lines {
-		fields := strings.Split(line, ",")
+		line = strings.Trim(line, `"`)
+		fields := strings.Split(line, `","`)
+
 		users[i] = &User{
 			ID:       fields[0],
 			Callsign: fields[1],
