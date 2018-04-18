@@ -38,7 +38,7 @@ import (
 
 var specialUsersURL = "http://registry.dstar.su/api/node.php"
 var fixedUsersURL = "https://raw.githubusercontent.com/travisgoodspeed/md380tools/master/db/fixed.csv"
-var marcUsersURL = "http://www.dmr-marc.net/cgi-bin/trbo-database/datadump.cgi?table=users&format=json"
+var marcUsersURL = "https://www.dmr-marc.net/static/users.csv"
 var reflectorUsersURL = "http://registry.dstar.su/reflector.db"
 
 var timeoutSeconds = 20
@@ -54,13 +54,12 @@ var client = &http.Client{
 }
 
 type User struct {
-	ID       string `json:"radio_id"`
-	Callsign string `json:"callsign"`
-	Name     string `json:"name"`
-	City     string `json:"city"`
-	State    string `json:"state:`
-	Country  string `json:"country"`
-	Surname  string `json:"surname"`
+	ID       string
+	Callsign string
+	Name     string
+	City     string
+	State    string
+	Country  string
 }
 
 type UsersDB struct {
@@ -170,37 +169,32 @@ func getLines(url string) ([]string, error) {
 }
 
 func getMarcUsers() ([]*User, error) {
-	var top struct {
-		Users []*User `json:"users"`
-	}
-
-	bytes, err := getBytes(marcUsersURL)
+	lines, err := getLines(marcUsersURL)
 	if err != nil {
 		errFmt := "error getting MARC users database: %s: %s"
 		err = fmt.Errorf(errFmt, marcUsersURL, err.Error())
 		return nil, err
 	}
 
-	err = json.Unmarshal(bytes, &top)
-	if err != nil {
-		errFmt := "error unmarshalling MARC users database: %s: %s: %s"
-		err = fmt.Errorf(errFmt, marcUsersURL, err.Error(), string(bytes[:100]))
-		return nil, err
-	}
-
-	if len(top.Users) < 90000 {
+	if len(lines) < 90000 {
 		errFmt := "too few MARC users database entries: %s: %d"
-		err = fmt.Errorf(errFmt, marcUsersURL, len(top.Users))
+		err = fmt.Errorf(errFmt, marcUsersURL, len(lines))
 		return nil, err
 	}
 
-	for _, user := range top.Users {
-		if len(user.Surname) > 0 {
-			user.Name += " " + user.Surname
+	users := make([]*User, len(lines))
+	for i, line := range lines {
+		fields := strings.Split(line, ",")
+		users[i] = &User{
+			ID:       fields[0],
+			Callsign: fields[1],
+			Name:     fields[2],
+			City:     fields[3],
+			State:    fields[4],
+			Country:  fields[5],
 		}
 	}
-
-	return top.Users, nil
+	return users, nil
 }
 
 func getFixedUsers() ([]*User, error) {
