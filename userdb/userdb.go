@@ -38,7 +38,7 @@ import (
 
 var specialUsersURL = "http://registry.dstar.su/api/node.php"
 var fixedUsersURL = "https://raw.githubusercontent.com/travisgoodspeed/md380tools/master/db/fixed.csv"
-var marcUsersURL = "https://www.dmr-marc.net/static/users_quoted.csv"
+var mainUsersURL = "https://www.radioid.net/static/users_quoted.csv"
 var reflectorUsersURL = "http://registry.dstar.su/reflector.db"
 
 var timeoutSeconds = 20
@@ -169,16 +169,16 @@ func getLines(url string) ([]string, error) {
 }
 
 func getMarcUsers() ([]*User, error) {
-	lines, err := getLines(marcUsersURL)
+	lines, err := getLines(mainUsersURL)
 	if err != nil {
 		errFmt := "error getting MARC users database: %s: %s"
-		err = fmt.Errorf(errFmt, marcUsersURL, err.Error())
+		err = fmt.Errorf(errFmt, mainUsersURL, err.Error())
 		return nil, err
 	}
 
 	if len(lines) < 90000 {
 		errFmt := "too few MARC users database entries: %s: %d"
-		err = fmt.Errorf(errFmt, marcUsersURL, len(lines))
+		err = fmt.Errorf(errFmt, mainUsersURL, len(lines))
 		return nil, err
 	}
 
