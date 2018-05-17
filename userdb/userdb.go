@@ -41,7 +41,7 @@ var fixedUsersURL = "https://raw.githubusercontent.com/travisgoodspeed/md380tool
 var mainUsersURL = "https://www.radioid.net/static/users_quoted.csv"
 var reflectorUsersURL = "http://registry.dstar.su/reflector.db"
 
-var timeoutSeconds = 20
+var timeoutSeconds = 40
 
 var tr = &http.Transport{
 	TLSHandshakeTimeout:   time.Duration(timeoutSeconds) * time.Second,
