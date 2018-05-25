@@ -42,16 +42,17 @@ var radioidUsersURL = "https://www.radioid.net/static/users_quoted.csv"
 var hamdigitalUsersURL = "https://ham-digital.org/status/users_quoted.csv"
 var reflectorUsersURL = "http://registry.dstar.su/reflector.db"
 
-var timeoutSeconds = 40
+var transportTimeout = 20
+var clientTimeout = 300
 
 var tr = &http.Transport{
-	TLSHandshakeTimeout:   time.Duration(timeoutSeconds) * time.Second,
-	ResponseHeaderTimeout: time.Duration(timeoutSeconds) * time.Second,
+	TLSHandshakeTimeout:   time.Duration(transportTimeout) * time.Second,
+	ResponseHeaderTimeout: time.Duration(transportTimeout) * time.Second,
 }
 
 var client = &http.Client{
 	Transport: tr,
-	Timeout:   time.Duration(timeoutSeconds) * time.Second,
+	Timeout:   time.Duration(clientTimeout) * time.Second,
 }
 
 type User struct {
