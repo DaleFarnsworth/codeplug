@@ -168,16 +168,16 @@ func getLines(url string) ([]string, error) {
 	return lines[:len(lines)-1], nil
 }
 
-func getMarcUsers() ([]*User, error) {
+func getMainUsers() ([]*User, error) {
 	lines, err := getLines(mainUsersURL)
 	if err != nil {
-		errFmt := "error getting MARC users database: %s: %s"
+		errFmt := "error getting Main users database: %s: %s"
 		err = fmt.Errorf(errFmt, mainUsersURL, err.Error())
 		return nil, err
 	}
 
-	if len(lines) < 90000 {
-		errFmt := "too few MARC users database entries: %s: %d"
+	if len(lines) < 50000 {
+		errFmt := "too few Main users database entries: %s: %d"
 		err = fmt.Errorf(errFmt, mainUsersURL, len(lines))
 		return nil, err
 	}
@@ -329,7 +329,7 @@ func do(f func() ([]*User, error), resultChan chan result) {
 func (db *UsersDB) Users() ([]*User, error) {
 	getUsersFuncs := []func() ([]*User, error){
 		getFixedUsers,
-		getMarcUsers,
+		getMainUsers,
 		getReflectorUsers,
 	}
 
