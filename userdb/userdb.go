@@ -38,7 +38,8 @@ import (
 
 var specialUsersURL = "http://registry.dstar.su/api/node.php"
 var fixedUsersURL = "https://raw.githubusercontent.com/travisgoodspeed/md380tools/master/db/fixed.csv"
-var mainUsersURL = "https://www.radioid.net/static/users_quoted.csv"
+var radioidUsersURL = "https://www.radioid.net/static/users_quoted.csv"
+var hamdigitalUsersURL = "https://ham-digital.org/status/users_quoted.csv"
 var reflectorUsersURL = "http://registry.dstar.su/reflector.db"
 
 var timeoutSeconds = 40
@@ -168,17 +169,48 @@ func getLines(url string) ([]string, error) {
 	return lines[:len(lines)-1], nil
 }
 
-func getMainUsers() ([]*User, error) {
-	lines, err := getLines(mainUsersURL)
+func getRadioidUsers() ([]*User, error) {
+	lines, err := getLines(radioidUsersURL)
 	if err != nil {
-		errFmt := "error getting Main users database: %s: %s"
-		err = fmt.Errorf(errFmt, mainUsersURL, err.Error())
+		errFmt := "error getting radioid users database: %s: %s"
+		err = fmt.Errorf(errFmt, radioidUsersURL, err.Error())
 		return nil, err
 	}
 
 	if len(lines) < 50000 {
-		errFmt := "too few Main users database entries: %s: %d"
-		err = fmt.Errorf(errFmt, mainUsersURL, len(lines))
+		errFmt := "too few radioid users database entries: %s: %d"
+		err = fmt.Errorf(errFmt, radioidUsersURL, len(lines))
+		return nil, err
+	}
+
+	users := make([]*User, len(lines))
+	for i, line := range lines {
+		line = strings.Trim(line, `"`)
+		fields := strings.Split(line, `","`)
+
+		users[i] = &User{
+			ID:       fields[0],
+			Callsign: fields[1],
+			Name:     fields[2],
+			City:     fields[3],
+			State:    fields[4],
+			Country:  fields[5],
+		}
+	}
+	return users, nil
+}
+
+func getHamdigitalUsers() ([]*User, error) {
+	lines, err := getLines(hamdigitalUsersURL)
+	if err != nil {
+		errFmt := "error getting hamdigital users database: %s: %s"
+		err = fmt.Errorf(errFmt, hamdigitalUsersURL, err.Error())
+		return nil, err
+	}
+
+	if len(lines) < 50000 {
+		errFmt := "too few hamdigital users database entries: %s: %d"
+		err = fmt.Errorf(errFmt, hamdigitalUsersURL, len(lines))
 		return nil, err
 	}
 
@@ -286,7 +318,7 @@ func getReflectorUsers() ([]*User, error) {
 	return users, nil
 }
 
-func deDupAndSort(users []*User) ([]*User, error) {
+func mergeAndSort(users []*User) ([]*User, error) {
 	idMap := make(map[int]*User)
 	for _, u := range users {
 		if u == nil || u.ID == "" {
@@ -297,7 +329,27 @@ func deDupAndSort(users []*User) ([]*User, error) {
 		if err != nil {
 			return nil, err
 		}
-		idMap[int(id)] = u
+		existing := idMap[int(id)]
+		if existing == nil {
+			idMap[int(id)] = u
+			continue
+		}
+		// non-empty fields in later entries replace fields in earlier
+		if u.Callsign != "" {
+			existing.Callsign = u.Callsign
+		}
+		if u.Name != "" {
+			existing.Name = u.Name
+		}
+		if u.City != "" {
+			existing.City = u.City
+		}
+		if u.State != "" {
+			existing.State = u.State
+		}
+		if u.Country != "" {
+			existing.Country = u.Country
+		}
 	}
 
 	ids := make([]int, 0, len(idMap))
@@ -315,13 +367,15 @@ func deDupAndSort(users []*User) ([]*User, error) {
 }
 
 type result struct {
+	index int
 	users []*User
 	err   error
 }
 
-func do(f func() ([]*User, error), resultChan chan result) {
+func do(index int, f func() ([]*User, error), resultChan chan result) {
 	var r result
 
+	r.index = index
 	r.users, r.err = f()
 	resultChan <- r
 }
@@ -329,7 +383,8 @@ func do(f func() ([]*User, error), resultChan chan result) {
 func (db *UsersDB) Users() ([]*User, error) {
 	getUsersFuncs := []func() ([]*User, error){
 		getFixedUsers,
-		getMainUsers,
+		getHamdigitalUsers,
+		getRadioidUsers,
 		getReflectorUsers,
 	}
 
@@ -346,21 +401,23 @@ func (db *UsersDB) Users() ([]*User, error) {
 	}
 
 	var users []*User
-	resultChan := make(chan result, len(getUsersFuncs))
+	resultCount := len(getUsersFuncs)
+	resultChan := make(chan result, resultCount)
 
-	for _, f := range getUsersFuncs {
-		go do(f, resultChan)
+	for i, f := range getUsersFuncs {
+		go do(i, f, resultChan)
 	}
 
-	db.setMaxProgressCount(len(getUsersFuncs))
+	db.setMaxProgressCount(resultCount)
 
-	for done := 0; done < len(getUsersFuncs); {
+	results := make([]result, resultCount)
+	for done := 0; done < resultCount; {
 		select {
 		case r := <-resultChan:
 			if r.err != nil {
 				return nil, r.err
 			}
-			users = append(users, r.users...)
+			results[r.index] = r
 			done++
 
 			err := db.progressFunc()
@@ -369,8 +426,11 @@ func (db *UsersDB) Users() ([]*User, error) {
 			}
 		}
 	}
+	for _, r := range results {
+		users = append(users, r.users...)
+	}
 
-	users, err = deDupAndSort(users)
+	users, err = mergeAndSort(users)
 	if err != nil {
 		return nil, err
 	}
