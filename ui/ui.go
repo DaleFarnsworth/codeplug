@@ -1371,7 +1371,7 @@ func InfoPopup(title string, msg string) {
 }
 
 func WarningPopup(title string, msg string) PopupValue {
-	maxLines := 20
+	maxLines := 12
 	lines := strings.SplitN(msg, "\n", maxLines+1)
 	if len(lines) > 1 {
 		msg = strings.Join(lines[:maxLines], "\n") + "\n"
