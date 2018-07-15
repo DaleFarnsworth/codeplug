@@ -508,7 +508,7 @@ func (db *UsersDB) writeUsersFile() (err error) {
 	return nil
 }
 
-func WriteMD380ToolsFile(filename string, euro bool, progress func(cur int) bool) error {
+func WriteMD380ToolsFile(filename string, progress func(cur int) bool) error {
 	db := newUserDB()
 	db.filename = filename
 	db.progressCallback = progress
@@ -516,16 +516,11 @@ func WriteMD380ToolsFile(filename string, euro bool, progress func(cur int) bool
 		return fmt.Sprintf("%s,%s,%s,%s,%s,,%s\n",
 			u.ID, u.Callsign, u.Name, u.City, u.State, u.Country)
 	}
-	if euro {
-		db.userFunc = func(u *User) string {
-			return fmt.Sprintf("%s,%s,,%s,%s,,%s\n",
-				u.ID, u.Callsign, u.City, u.State, u.Country)
-		}
-	}
+
 	return db.writeSizedUsersFile()
 }
 
-func WriteMD2017File(filename string, euro bool, progress func(cur int) bool) error {
+func WriteMD2017File(filename string, progress func(cur int) bool) error {
 	db := newUserDB()
 	db.filename = filename
 	db.progressCallback = progress
@@ -533,11 +528,6 @@ func WriteMD2017File(filename string, euro bool, progress func(cur int) bool) er
 		return fmt.Sprintf("%s,%s,%s,,%s,%s,%s\n",
 			u.ID, u.Callsign, u.Name, u.City, u.State, u.Country)
 	}
-	if euro {
-		db.userFunc = func(u *User) string {
-			return fmt.Sprintf("%s,%s,,,%s,%s,%s\n",
-				u.ID, u.Callsign, u.City, u.State, u.Country)
-		}
-	}
+
 	return db.writeUsersFile()
 }

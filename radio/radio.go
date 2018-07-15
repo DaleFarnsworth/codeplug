@@ -40,7 +40,6 @@ func usage() {
 	fmt.Fprintf(os.Stderr, "\tdumpUsers <filename>\n")
 	fmt.Fprintf(os.Stderr, "\twriteUsers <filename>\n")
 	fmt.Fprintf(os.Stderr, "\tgetUsersFile <filename>\n")
-	fmt.Fprintf(os.Stderr, "\tgetEuroUsersFile filename\n")
 	fmt.Fprintf(os.Stderr, "\twriteFirmware filename\n")
 	fmt.Fprintf(os.Stderr, "\tstdfu\n")
 	os.Exit(1)
@@ -251,26 +250,9 @@ func main() {
 			"Retrieving Users file",
 		}
 
-		euro := false
-		err := userdb.WriteMD380ToolsFile(filename, euro, progressFunc(prefixes))
+		err := userdb.WriteMD380ToolsFile(filename, progressFunc(prefixes))
 		if err != nil {
 			logFatalf("getUsersFile: %s", err.Error())
-		}
-
-	case "getEuroUsersFile":
-		if len(os.Args) != 3 {
-			usage()
-		}
-		filename := os.Args[2]
-
-		prefixes := []string{
-			"Retrieving European Users file",
-		}
-
-		euro := true
-		err := userdb.WriteMD380ToolsFile(filename, euro, progressFunc(prefixes))
-		if err != nil {
-			logFatalf("getEuroUsersFile: %s", err.Error())
 		}
 
 	case "writeFirmware":
