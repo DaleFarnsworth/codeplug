@@ -210,7 +210,7 @@ func (dfu *Dfu) setAddress(address int) error {
 	}
 
 	if dfuStatus.State != stdfu.DfuWriteIdle {
-		return wrapError("setAddress", err)
+		return errors.New("setAddress: radio is not in Write Idle state")
 	}
 
 	err = dfu.enterDfuMode()
@@ -281,7 +281,7 @@ func (dfu *Dfu) eraseBlock(address int) error {
 		return wrapError("eraseBlock", err)
 	}
 	if dfuStatus.State != stdfu.DfuWriteIdle {
-		return errors.New("eraseBlock: state != dfuWriteIdle")
+		return errors.New("eraseBlock: radio is not in Write Idle state")
 	}
 
 	err = dfu.enterDfuMode()
@@ -433,7 +433,7 @@ func (dfu *Dfu) md380Custom(acmd md380Cmd) error {
 	}
 
 	if dfuStatus.State != stdfu.DfuWriteIdle {
-		return err
+		return fmt.Errorf("md380Custom [%02x%02x]: radio is not in Write Idle state", cmd[0], cmd[1])
 	}
 
 	err = dfu.enterDfuMode()
@@ -581,12 +581,17 @@ func (dfu *Dfu) writeSPIFlashFrom(address, size int, iRdr io.Reader) error {
 func (dfu *Dfu) DumpUsers(file *os.File) error {
 	dfu.setMaxProgressCount(100)
 
+	_, err := dfu.init()
+	if err != nil {
+		return wrapError("DumpUsers", err)
+	}
+
 	size, err := dfu.spiFlashSize()
 	if err != nil {
-		return err
+		return wrapError("DumpUsers", err)
 	}
 	if size < 16*1024*1024 {
-		return fmt.Errorf("Flash is only %d bytes", size)
+		return fmt.Errorf("DumpUsers: Flash is only %d bytes", size)
 	}
 	address := 0x100000
 	size -= address
@@ -595,7 +600,7 @@ func (dfu *Dfu) DumpUsers(file *os.File) error {
 
 	err = dfu.readSPIFlashTo(address, size, file)
 	if err != nil {
-		return err
+		return wrapError("DumpUsers", err)
 	}
 
 	return nil
@@ -604,16 +609,22 @@ func (dfu *Dfu) DumpUsers(file *os.File) error {
 func (dfu *Dfu) DumpSPIFlash(file *os.File) error {
 	dfu.setMaxProgressCount(100)
 
-	size, err := dfu.spiFlashSize()
+	_, err := dfu.init()
 	if err != nil {
-		return err
+		return wrapError("DumpSPIFlash", err)
+	}
+
+	var size int
+	size, err = dfu.spiFlashSize()
+	if err != nil {
+		return wrapError("DumpSPIFlash", err)
 	}
 
 	dfu.setMaxProgressCount(size / dfu.blockSize)
 
 	err = dfu.readSPIFlashTo(0, size, file)
 	if err != nil {
-		return err
+		return wrapError("DumpSPIFlash", err)
 	}
 
 	dfu.finalProgress()
@@ -708,7 +719,7 @@ func (dfu *Dfu) getCommand() ([]byte, error) {
 	return cmd, nil
 }
 
-func (dfu *Dfu) spiFlashID() (string, error) {
+func (dfu *Dfu) internalSPIFlashID() (string, error) {
 	bytes := make([]byte, 4)
 
 	stDfu := dfu.stDfu
@@ -756,6 +767,16 @@ func (dfu *Dfu) spiFlashID() (string, error) {
 	}
 
 	return str, nil
+}
+
+func (dfu *Dfu) spiFlashID() (string, error) {
+	id, err := dfu.internalSPIFlashID()
+	if err != nil {
+		dfu.init()
+		id, err = dfu.internalSPIFlashID()
+	}
+
+	return id, err
 }
 
 func (dfu *Dfu) spiFlashSize() (int, error) {
@@ -932,6 +953,49 @@ type block struct {
 	end     int
 }
 
+func (dfu *Dfu) init() (mfg string, err error) {
+	stDfu := dfu.stDfu
+
+	stDfu.SelectCurrentConfiguration(0, 0, 0)
+
+	var dfuStatus stdfu.DfuStatus
+
+	dfuStatus, err = stDfu.GetStatus()
+	if err != nil {
+		return "", wrapError("init", err)
+	}
+
+	err = stDfu.ClrStatus()
+	if err != nil {
+		return "", wrapError("init", err)
+	}
+
+	mfg, err = stDfu.GetStringDescriptor(1)
+	if err != nil {
+		return "", wrapError("init", err)
+	}
+
+	dfuStatus, err = stDfu.GetStatus()
+	if err != nil {
+		return "", wrapError("init", err)
+	}
+
+	err = stDfu.ClrStatus()
+	if err != nil {
+		return "", wrapError("init", err)
+	}
+
+	dfuStatus, err = stDfu.GetStatus()
+	if err != nil {
+		return "", wrapError("init", err)
+	}
+	if dfuStatus.State != stdfu.DfuIdle {
+		return "", errors.New("init: radio is not in the idle state")
+	}
+
+	return mfg, nil
+}
+
 func (dfu *Dfu) writeFirmwareFrom(iRdr io.Reader) error {
 	blocks := []block{
 		block{0x0800c000, 0x04000, 0x11},
@@ -947,7 +1011,7 @@ func (dfu *Dfu) writeFirmwareFrom(iRdr io.Reader) error {
 
 	stDfu := dfu.stDfu
 
-	mfg, err := stDfu.GetStringDescriptor(1)
+	mfg, err := dfu.init()
 	if err != nil {
 		return wrapError("writeFirmware", err)
 	}
@@ -957,11 +1021,6 @@ The radio is not in bootloader mode. Enter bootloader mode by holding
 down the PTT button and the button above it while turning on the radio.
 The radio's LED will blink green and red.`
 		return errors.New(msg[1:])
-	}
-
-	dfuStatus, err := stDfu.GetStatus()
-	if dfuStatus.State != stdfu.DfuIdle {
-		return errors.New("writeFirmware: radio is not in the idle state")
 	}
 
 	err = dfu.md380Cmd([]md380Cmd{
@@ -1069,10 +1128,15 @@ func (dfu *Dfu) finalProgress() {
 func (dfu *Dfu) ReadCodeplug(data []byte) error {
 	dfu.setMaxProgressCount(620)
 
+	_, err := dfu.init()
+	if err != nil {
+		return wrapError("ReadCodeplug", err)
+	}
+
 	size := len(data)
 	buffer := bytes.NewBuffer(data[0:0])
 
-	err := dfu.md380Cmd([]md380Cmd{
+	err = dfu.md380Cmd([]md380Cmd{
 		md380Cmd{0x91, 0x01}, // Programming Mode
 		md380Cmd{0xa2, 0x02},
 		md380Cmd{0xa2, 0x02},
@@ -1097,13 +1161,18 @@ func (dfu *Dfu) ReadCodeplug(data []byte) error {
 func (dfu *Dfu) WriteCodeplug(data []byte) error {
 	dfu.setMaxProgressCount(2750)
 
+	_, err := dfu.init()
+	if err != nil {
+		return wrapError("WriteCodeplug", err)
+	}
+
 	if len(data)%dfu.blockSize != 0 {
 		return fmt.Errorf("WriteCodeplug: codeplug data size is not a multiple of blocksize %d", dfu.blockSize)
 	}
 
 	buffer := bytes.NewBuffer(data)
 
-	err := dfu.md380Cmd([]md380Cmd{
+	err = dfu.md380Cmd([]md380Cmd{
 		md380Cmd{0x91, 0x01}, // Programming Mode
 		md380Cmd{0x91, 0x01}, // Programming Mode
 		md380Cmd{0xa2, 0x02},
@@ -1134,6 +1203,11 @@ func (dfu *Dfu) WriteUsers(filename string) error {
 	}
 	defer file.Close()
 
+	_, err = dfu.init()
+	if err != nil {
+		return wrapError("WriteCodeplug", err)
+	}
+
 	size := int(fileInfo.Size())
 
 	return dfu.writeSPIFlashFrom(0x100000, size, file)
@@ -1145,6 +1219,11 @@ func (dfu *Dfu) WriteFirmware(filename string) error {
 		logFatalf("WriteFirmware: %s", err.Error())
 	}
 	defer file.Close()
+
+	_, err = dfu.init()
+	if err != nil {
+		return wrapError("WriteCodeplug", err)
+	}
 
 	return dfu.writeFirmwareFrom(file)
 }

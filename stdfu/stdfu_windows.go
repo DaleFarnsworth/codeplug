@@ -240,6 +240,12 @@ func (dfu *StDfu) GetStatus() (DfuStatus, error) {
 	return dfuStatus, err
 }
 
+func (dfu *StDfu) SelectCurrentConfiguration(configIdx, interfaceIdx, altSetIdx int) error {
+	errno, _, _ := stdfuSelectCurrentConfiguration.Call(uintptr(unsafe.Pointer(&dfu.handle)), uintptr(configIdx), uintptr(interfaceIdx), uintptr(altSetIdx))
+
+	return errorFromErrno(errno)
+}
+
 func (dfu *StDfu) GetStringDescriptor(index int) (string, error) {
 	var buf [512]byte
 

@@ -24,6 +24,7 @@
 package stdfu
 
 import (
+	"errors"
 	"fmt"
 	"time"
 
@@ -143,7 +144,7 @@ func (stDfu *StDfu) GetState() (State, error) {
 
 	_, err := stDfu.dev.Control(0xa1, reqGetState, 0, 0, bytes)
 	if err != nil {
-		return 0, wrapError("GetStatus", err)
+		return 0, wrapError("GetState", err)
 	}
 
 	return State(bytes[0]), nil
@@ -165,6 +166,20 @@ func (stDfu *StDfu) GetStatus() (DfuStatus, error) {
 	}
 
 	return dfuStatus, err
+}
+
+func (stDfu *StDfu) SelectCurrentConfiguration(configIdx, interfaceIdx, altSetIdx int) error {
+	if configIdx != 0 {
+		return errors.New("SelectCurrentConfiguration: Only configIdx 0 is supported")
+	}
+	if interfaceIdx != 0 {
+		return errors.New("SelectCurrentConfiguration: Only interfaceIdx 0 is supported")
+	}
+	if altSetIdx != 0 {
+		return errors.New("SelectCurrentConfiguration: Only altSetIdx 0 is supported")
+	}
+
+	return nil
 }
 
 func (stDfu *StDfu) GetStringDescriptor(index int) (string, error) {
