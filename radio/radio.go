@@ -28,7 +28,6 @@ import (
 	"os"
 
 	"github.com/dalefarnsworth/codeplug/dfu"
-	"github.com/dalefarnsworth/codeplug/stdfu"
 	"github.com/dalefarnsworth/codeplug/userdb"
 )
 
@@ -41,7 +40,6 @@ func usage() {
 	fmt.Fprintf(os.Stderr, "\twriteUsers <filename>\n")
 	fmt.Fprintf(os.Stderr, "\tgetUsersFile <filename>\n")
 	fmt.Fprintf(os.Stderr, "\twriteFirmware filename\n")
-	fmt.Fprintf(os.Stderr, "\tstdfu\n")
 	os.Exit(1)
 }
 
@@ -274,15 +272,6 @@ func main() {
 
 		err = dfu.WriteFirmware(filename)
 		fmt.Println()
-		if err != nil {
-			logFatalf("writeFirmware: %s", err.Error())
-		}
-	case "stdfu":
-		if len(os.Args) != 2 {
-			usage()
-		}
-
-		dfu, err := stdfu.New()
 		if err != nil {
 			logFatalf("writeFirmware: %s", err.Error())
 		}
