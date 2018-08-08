@@ -856,10 +856,10 @@ var fiBiFrequencyRange_md40 = fieldInfo{
 	bitSize:   8,
 	valueType: VtIStrings,
 	strings: &[]string{
-		"MD40 400-480 MHz",
-		"MD40HT 420-450 MHz",
-		"MD40HE 430-440 MHz",
-		"MD40T 400-480 MHz",
+		"400-480 MHz - MD40",
+		"420-450 MHz - MD40HT",
+		"430-440 MHz - MD40HE",
+		"400-480 MHz - MD40T",
 	},
 }
 
