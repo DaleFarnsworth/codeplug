@@ -277,6 +277,27 @@ func (cp *Codeplug) Ext() string {
 	return cp.codeplugInfo.Ext
 }
 
+func AllFrequencyRanges() map[string][]string {
+	models := make([]string, 0)
+	freqRanges := make(map[string][]string)
+
+	for _, cpi := range codeplugInfos {
+		for _, model := range cpi.Models {
+			for _, rInfo := range cpi.RecordInfos {
+				if rInfo.rType == RtBasicInformation_md380 {
+					for _, fInfo := range rInfo.fieldInfos {
+						if fInfo.fType == FtBiFrequencyRange_md380 {
+							freqRanges[model] = *fInfo.strings
+						}
+					}
+				}
+			}
+			models = append(models, model)
+		}
+	}
+	return freqRanges
+}
+
 // ModelsFrequencyRanges returns the potential codeplug model and
 // frequencyRange
 func (cp *Codeplug) ModelsFrequencyRanges() (models []string, frequencyRanges map[string][]string) {
