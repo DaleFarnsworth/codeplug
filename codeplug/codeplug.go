@@ -510,7 +510,7 @@ func (cp *Codeplug) SaveToFile(filename string, ignoreWarnings bool) (err error)
 		}
 	}
 
-	cp.setLastProgrammedTime(time.Now())
+	cp.SetLastProgrammedTime(time.Now())
 
 	cp.store()
 
@@ -552,7 +552,7 @@ func (cp *Codeplug) SaveToFile(filename string, ignoreWarnings bool) (err error)
 	return err
 }
 
-func (cp *Codeplug) setLastProgrammedTime(t time.Time) {
+func (cp *Codeplug) SetLastProgrammedTime(t time.Time) {
 	r := cp.rDesc[RtBasicInformation_md380].records[0]
 	f := r.Field(FtBiLastProgrammedTime)
 	f.setString(t.Format("02-Jan-2006 15:04:05"))
@@ -2001,7 +2001,7 @@ func (cp *Codeplug) WriteRadio(progress func(cur int) bool) error {
 	if err != nil {
 		return err
 	}
-	cp.setLastProgrammedTime(time.Now())
+	cp.SetLastProgrammedTime(time.Now())
 
 	savedBytes := make([]byte, len(cp.bytes))
 	copy(savedBytes, cp.bytes)
@@ -2012,7 +2012,7 @@ func (cp *Codeplug) WriteRadio(progress func(cur int) bool) error {
 	binBytes := cp.bytes[cpi.BinOffset : cpi.BinOffset+cpi.BinSize]
 
 	cp.bytes = savedBytes
-	cp.setLastProgrammedTime(savedTime)
+	cp.SetLastProgrammedTime(savedTime)
 
 	dfu, err := dfu.New(func(cur int) bool {
 		return progress(cur)
