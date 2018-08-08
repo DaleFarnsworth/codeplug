@@ -1,0 +1,1 @@
+../editcp/version.go
