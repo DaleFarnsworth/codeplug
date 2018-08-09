@@ -52,8 +52,12 @@ func usage() {
 	errorf("\twriteUsers <usersFilename>\n")
 	errorf("\tdumpSPIFlash <filename>\n")
 	errorf("\tgetUsers <usersFilename>\n")
+	errorf("\tcodeplugToText <codeplugFilename> <textFilename>\n")
+	errorf("\ttextToCodeplug <textFilename> <codeplugFilename>\n")
 	errorf("\tcodeplugToJSON <codeplugFilename> <jsonFilename>\n")
 	errorf("\tjsonToCodeplug <jsonFilename> <codeplugFilename>\n")
+	errorf("\tcodeplugToXLSX <codeplugFilename> <xlsxFilename>\n")
+	errorf("\txlsxToCodeplug <xlsxFilename> <codeplugFilename>\n")
 	errorf("\tversion\n")
 	errorf("Use '%s <subCommand> -h' for subCommand help\n", os.Args[0])
 	os.Exit(1)
@@ -385,6 +389,57 @@ func writeFirmware() error {
 	return dfu.WriteFirmware(filename)
 }
 
+func textToCodeplug() error {
+	flags := flag.NewFlagSet("textToCodeplug", flag.ExitOnError)
+
+	flags.Usage = func() {
+		errorf("Usage: %s %s <textFilename> <codeplugFilename>\n", os.Args[0], os.Args[1])
+		flags.PrintDefaults()
+		os.Exit(1)
+	}
+
+	flags.Parse(os.Args[2:len(os.Args)])
+	args := flags.Args()
+	if len(args) != 2 {
+		flags.Usage()
+	}
+	textFilename := args[0]
+	codeplugFilename := args[1]
+
+	cp, err := loadCodeplug(codeplug.FileTypeText, textFilename)
+	if err != nil {
+		return err
+	}
+
+	ignoreWarnings := true
+	return cp.SaveAs(codeplugFilename, ignoreWarnings)
+}
+
+func codeplugToText() error {
+	flags := flag.NewFlagSet("codeplugToText", flag.ExitOnError)
+
+	flags.Usage = func() {
+		errorf("Usage: %s %s <codeplugFilename> <textFilename>\n", os.Args[0], os.Args[1])
+		flags.PrintDefaults()
+		os.Exit(1)
+	}
+
+	flags.Parse(os.Args[2:len(os.Args)])
+	args := flags.Args()
+	if len(args) != 2 {
+		flags.Usage()
+	}
+	codeplugFilename := args[0]
+	textFilename := args[1]
+
+	cp, err := loadCodeplug(codeplug.FileTypeNone, codeplugFilename)
+	if err != nil {
+		return err
+	}
+
+	return cp.ExportText(textFilename)
+}
+
 func jsonToCodeplug() error {
 	flags := flag.NewFlagSet("jsonToCodeplug", flag.ExitOnError)
 
@@ -415,7 +470,7 @@ func codeplugToJSON() error {
 	flags := flag.NewFlagSet("codeplugToJSON", flag.ExitOnError)
 
 	flags.Usage = func() {
-		errorf("Usage: %s %s <codeplugFilename> <JSONFilename>\n", os.Args[0], os.Args[1])
+		errorf("Usage: %s %s <codeplugFilename> <jsonFilename>\n", os.Args[0], os.Args[1])
 		flags.PrintDefaults()
 		os.Exit(1)
 	}
@@ -434,6 +489,57 @@ func codeplugToJSON() error {
 	}
 
 	return cp.ExportJSON(jsonFilename)
+}
+
+func xlsxToCodeplug() error {
+	flags := flag.NewFlagSet("xlsxToCodeplug", flag.ExitOnError)
+
+	flags.Usage = func() {
+		errorf("Usage: %s %s <xlsxFilename> <codeplugFilename>\n", os.Args[0], os.Args[1])
+		flags.PrintDefaults()
+		os.Exit(1)
+	}
+
+	flags.Parse(os.Args[2:len(os.Args)])
+	args := flags.Args()
+	if len(args) != 2 {
+		flags.Usage()
+	}
+	xlsxFilename := args[0]
+	codeplugFilename := args[1]
+
+	cp, err := loadCodeplug(codeplug.FileTypeXLSX, xlsxFilename)
+	if err != nil {
+		return err
+	}
+
+	ignoreWarnings := true
+	return cp.SaveAs(codeplugFilename, ignoreWarnings)
+}
+
+func codeplugToXLSX() error {
+	flags := flag.NewFlagSet("codeplugToXLSX", flag.ExitOnError)
+
+	flags.Usage = func() {
+		errorf("Usage: %s %s <codeplugFilename> <xlsxFilename>\n", os.Args[0], os.Args[1])
+		flags.PrintDefaults()
+		os.Exit(1)
+	}
+
+	flags.Parse(os.Args[2:len(os.Args)])
+	args := flags.Args()
+	if len(args) != 2 {
+		flags.Usage()
+	}
+	codeplugFilename := args[0]
+	xlsxFilename := args[1]
+
+	cp, err := loadCodeplug(codeplug.FileTypeNone, codeplugFilename)
+	if err != nil {
+		return err
+	}
+
+	return cp.ExportXLSX(xlsxFilename)
 }
 
 func printVersion() error {
@@ -473,8 +579,12 @@ func main() {
 		"writeusers":     writeUsers,
 		"getusers":       getUsers,
 		"writefirmware":  writeFirmware,
+		"texttocodeplug": textToCodeplug,
+		"codeplugtotext": codeplugToText,
 		"jsontocodeplug": jsonToCodeplug,
 		"codeplugtojson": codeplugToJSON,
+		"xlsxtocodeplug": xlsxToCodeplug,
+		"codeplugtoxlsx": codeplugToXLSX,
 		"version":        printVersion,
 	}
 
