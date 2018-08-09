@@ -31,7 +31,6 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
-	"strings"
 
 	"github.com/dalefarnsworth/codeplug/codeplug"
 	"github.com/dalefarnsworth/codeplug/dfu"
@@ -61,17 +60,19 @@ func errorf(s string, v ...interface{}) {
 	fmt.Fprintf(os.Stderr, s, v...)
 }
 
-func allModels() []string {
-	modelFreqs := codeplug.AllFrequencyRanges()
-	models := make([]string, 0, len(modelFreqs))
-	for model := range modelFreqs {
+func allModelsFrequencyRanges() (models []string, freqRanges map[string][]string) {
+	freqRanges = codeplug.AllFrequencyRanges()
+	models = make([]string, 0, len(freqRanges))
+
+	for model := range freqRanges {
 		models = append(models, model)
 	}
+
 	sort.Slice(models, func(i, j int) bool {
 		return models[i] < models[j]
 	})
 
-	return models
+	return models, freqRanges
 }
 
 func loadCodeplug(fType codeplug.FileType, filename string) (*codeplug.Codeplug, error) {
@@ -104,17 +105,27 @@ func loadCodeplug(fType codeplug.FileType, filename string) (*codeplug.Codeplug,
 
 func readCodeplug() error {
 	var model string
-	modelHelp := fmt.Sprintf("one of: %s", strings.Join(allModels(), ", "))
+	var freq string
 
 	flags := flag.NewFlagSet("writeCodeplug", flag.ExitOnError)
 	//flags.BoolVar(&debugging, "debug", false, "enable debugging")
-	flags.StringVar(&model, "model", "", modelHelp)
+	flags.StringVar(&model, "model", "", "<model name>")
+	flags.StringVar(&freq, "freq", "", "<frequency range>")
 
 	flags.Usage = func() {
 		_, _ = fmt.Fprintf(os.Stderr,
-			"Usage: %s %s -model <modelName> filename\n",
+			"Usage: %s %s -model <modelName> -freq <freqRange> filename\n",
 			os.Args[0], os.Args[1])
 		flags.PrintDefaults()
+		errorf("modelName must be chosen from the following list,\n")
+		errorf("and freqRange must be one of its associated values.\n")
+		models, freqs := allModelsFrequencyRanges()
+		for _, model := range models {
+			errorf("\t%s\n", model)
+			for _, freq := range freqs[model] {
+				errorf("\t\t%s\n", "\""+freq+"\"")
+			}
+		}
 		os.Exit(1)
 	}
 
@@ -122,7 +133,19 @@ func readCodeplug() error {
 
 	flags.Parse(os.Args[2:len(os.Args)])
 	args := flags.Args()
-	if len(args) != 1 || modelFreqs[model] == nil {
+	if len(args) != 1 {
+		flags.Usage()
+	}
+	if modelFreqs[model] == nil {
+		errorf("bad modelName\n\n")
+		flags.Usage()
+	}
+	freqMap := make(map[string]bool)
+	for _, freq := range modelFreqs[model] {
+		freqMap[freq] = true
+	}
+	if !freqMap[freq] {
+		errorf("bad freqRange\n\n")
 		flags.Usage()
 	}
 	filename := args[0]
@@ -131,8 +154,6 @@ func readCodeplug() error {
 	if err != nil {
 		return err
 	}
-
-	freq := modelFreqs[model][0]
 
 	ignoreWarnings := true
 	err = cp.Load(model, freq, ignoreWarnings)
