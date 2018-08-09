@@ -31,33 +31,32 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 
 	"github.com/dalefarnsworth/codeplug/codeplug"
 	"github.com/dalefarnsworth/codeplug/dfu"
 	"github.com/dalefarnsworth/codeplug/userdb"
 )
 
-var debugging bool
+func errorf(s string, v ...interface{}) {
+	fmt.Fprintf(os.Stderr, s, v...)
+}
 
 func usage() {
 	errorf("Usage %s <subCommand> args\n", os.Args[0])
-	errorf("commands:\n")
-	errorf("\treadCodeplug -model <model> <filename>\n")
-	errorf("\twriteCodeplug <filename>\n")
-	errorf("\tcodeplugToJSON <filename> <jsonFilename>\n")
-	errorf("\tjsonToCodeplug <jsonFilename> <filename>\n")
-	errorf("\twriteFirmware <filename>\n")
-	errorf("\tdumpUsers <filename>\n")
-	errorf("\twriteUsers <filename>\n")
+	errorf("subCommands:\n")
+	errorf("\treadCodeplug -model <model> -freq <freqRange> <codeplugFilename>\n")
+	errorf("\twriteCodeplug <codeplugFilename>\n")
+	errorf("\twriteFirmware <firmwareFilename>\n")
+	errorf("\tdumpUsers <usersFilename>\n")
+	errorf("\twriteUsers <usersFilename>\n")
 	errorf("\tdumpSPIFlash <filename>\n")
-	errorf("\tgetUsers <filename>\n")
+	errorf("\tgetUsers <usersFilename>\n")
+	errorf("\tcodeplugToJSON <codeplugFilename> <jsonFilename>\n")
+	errorf("\tjsonToCodeplug <jsonFilename> <codeplugFilename>\n")
 	errorf("\tversion\n")
 	errorf("Use '%s <subCommand> -h' for subCommand help\n", os.Args[0])
 	os.Exit(1)
-}
-
-func errorf(s string, v ...interface{}) {
-	fmt.Fprintf(os.Stderr, s, v...)
 }
 
 func allModelsFrequencyRanges() (models []string, freqRanges map[string][]string) {
@@ -103,19 +102,37 @@ func loadCodeplug(fType codeplug.FileType, filename string) (*codeplug.Codeplug,
 	return cp, nil
 }
 
+func progressFunc(aPrefixes []string) func(cur int) bool {
+	var prefixes []string
+	if aPrefixes != nil {
+		prefixes = aPrefixes
+	}
+	prefixIndex := 0
+	prefix := prefixes[prefixIndex]
+	maxProgress := userdb.MaxProgress
+	return func(cur int) bool {
+		if cur == 0 {
+			if prefixIndex != 0 {
+				fmt.Println()
+			}
+			prefix = prefixes[prefixIndex]
+			prefixIndex++
+		}
+		fmt.Printf("%s... %3d%%\r", prefix, cur*100/maxProgress)
+		return true
+	}
+}
+
 func readCodeplug() error {
 	var model string
 	var freq string
 
 	flags := flag.NewFlagSet("writeCodeplug", flag.ExitOnError)
-	//flags.BoolVar(&debugging, "debug", false, "enable debugging")
 	flags.StringVar(&model, "model", "", "<model name>")
 	flags.StringVar(&freq, "freq", "", "<frequency range>")
 
 	flags.Usage = func() {
-		_, _ = fmt.Fprintf(os.Stderr,
-			"Usage: %s %s -model <modelName> -freq <freqRange> filename\n",
-			os.Args[0], os.Args[1])
+		errorf("Usage: %s %s -model <modelName> -freq <freqRange> codePlugFilename\n", os.Args[0], os.Args[1])
 		flags.PrintDefaults()
 		errorf("modelName must be chosen from the following list,\n")
 		errorf("and freqRange must be one of its associated values.\n")
@@ -176,12 +193,9 @@ func readCodeplug() error {
 
 func writeCodeplug() error {
 	flags := flag.NewFlagSet("writeCodeplug", flag.ExitOnError)
-	//flags.BoolVar(&debugging, "debug", false, "enable debugging")
 
 	flags.Usage = func() {
-		_, _ = fmt.Fprintf(os.Stderr,
-			"Usage: %s %s <codeplugFilename>\n",
-			os.Args[0], os.Args[1])
+		errorf("Usage: %s %s <codeplugFilename>\n", os.Args[0], os.Args[1])
 		flags.PrintDefaults()
 		os.Exit(1)
 	}
@@ -208,11 +222,9 @@ func writeCodeplug() error {
 
 func dumpSPIFlash() (err error) {
 	flags := flag.NewFlagSet("dumpSPIFlash", flag.ExitOnError)
-	//flags.BoolVar(&debugging, "debug", false, "enable debugging")
 
 	flags.Usage = func() {
-		_, _ = fmt.Fprintf(os.Stderr,
-			"Usage: %s %s <filename>\n", os.Args[0], os.Args[1])
+		errorf("Usage: %s %s <filename>\n", os.Args[0], os.Args[1])
 		flags.PrintDefaults()
 		os.Exit(1)
 	}
@@ -251,11 +263,9 @@ func dumpSPIFlash() (err error) {
 
 func dumpUsers() (err error) {
 	flags := flag.NewFlagSet("dumpUsers", flag.ExitOnError)
-	//flags.BoolVar(&debugging, "debug", false, "enable debugging")
 
 	flags.Usage = func() {
-		_, _ = fmt.Fprintf(os.Stderr,
-			"Usage: %s %s <usersFilename>\n", os.Args[0], os.Args[1])
+		errorf("Usage: %s %s <usersFilename>\n", os.Args[0], os.Args[1])
 		flags.PrintDefaults()
 		os.Exit(1)
 	}
@@ -294,11 +304,9 @@ func dumpUsers() (err error) {
 
 func writeUsers() error {
 	flags := flag.NewFlagSet("writeUsers", flag.ExitOnError)
-	//flags.BoolVar(&debugging, "debug", false, "enable debugging")
 
 	flags.Usage = func() {
-		_, _ = fmt.Fprintf(os.Stderr,
-			"Usage: %s %s <usersFilename>\n", os.Args[0], os.Args[1])
+		errorf("Usage: %s %s <usersFilename>\n", os.Args[0], os.Args[1])
 		flags.PrintDefaults()
 		os.Exit(1)
 	}
@@ -326,11 +334,9 @@ func writeUsers() error {
 
 func getUsers() error {
 	flags := flag.NewFlagSet("getUsers", flag.ExitOnError)
-	//flags.BoolVar(&debugging, "debug", false, "enable debugging")
 
 	flags.Usage = func() {
-		_, _ = fmt.Fprintf(os.Stderr,
-			"Usage: %s %s <usersFilename>\n", os.Args[0], os.Args[1])
+		errorf("Usage: %s %s <usersFilename>\n", os.Args[0], os.Args[1])
 		flags.PrintDefaults()
 		os.Exit(1)
 	}
@@ -351,11 +357,9 @@ func getUsers() error {
 
 func writeFirmware() error {
 	flags := flag.NewFlagSet("writeFirmware", flag.ExitOnError)
-	//flags.BoolVar(&debugging, "debug", false, "enable debugging")
 
 	flags.Usage = func() {
-		_, _ = fmt.Fprintf(os.Stderr,
-			"Usage: %s %s <firmwareFilename>\n", os.Args[0], os.Args[1])
+		errorf("Usage: %s %s <firmwareFilename>\n", os.Args[0], os.Args[1])
 		flags.PrintDefaults()
 		os.Exit(1)
 	}
@@ -383,12 +387,9 @@ func writeFirmware() error {
 
 func jsonToCodeplug() error {
 	flags := flag.NewFlagSet("jsonToCodeplug", flag.ExitOnError)
-	//flags.BoolVar(&debugging, "debug", false, "enable debugging")
 
 	flags.Usage = func() {
-		_, _ = fmt.Fprintf(os.Stderr,
-			"Usage: %s %s <jsonFilename> <codeplugFilename>\n",
-			os.Args[0], os.Args[1])
+		errorf("Usage: %s %s <jsonFilename> <codeplugFilename>\n", os.Args[0], os.Args[1])
 		flags.PrintDefaults()
 		os.Exit(1)
 	}
@@ -412,12 +413,9 @@ func jsonToCodeplug() error {
 
 func codeplugToJSON() error {
 	flags := flag.NewFlagSet("codeplugToJSON", flag.ExitOnError)
-	//flags.BoolVar(&debugging, "debug", false, "enable debugging")
 
 	flags.Usage = func() {
-		_, _ = fmt.Fprintf(os.Stderr,
-			"Usage: %s %s <codeplugFilename> <JSONFilename>\n",
-			os.Args[0], os.Args[1])
+		errorf("Usage: %s %s <codeplugFilename> <JSONFilename>\n", os.Args[0], os.Args[1])
 		flags.PrintDefaults()
 		os.Exit(1)
 	}
@@ -440,11 +438,9 @@ func codeplugToJSON() error {
 
 func printVersion() error {
 	flags := flag.NewFlagSet("version", flag.ExitOnError)
-	//flags.BoolVar(&debugging, "debug", false, "enable debugging")
 
 	flags.Usage = func() {
-		_, _ = fmt.Fprintf(os.Stderr,
-			"Usage: %s %s\n", os.Args[0], os.Args[1])
+		errorf("Usage: %s %s\n", os.Args[0], os.Args[1])
 		flags.PrintDefaults()
 		os.Exit(1)
 	}
@@ -466,67 +462,30 @@ func main() {
 	if len(os.Args) < 2 {
 		usage()
 	}
-	cmd := os.Args[1]
 
-	var err error
-	switch cmd {
-	case "readCodeplug", "readcodeplug":
-		err = readCodeplug()
+	subCommandName := strings.ToLower(os.Args[1])
 
-	case "writeCodeplug", "writecodeplug":
-		err = writeCodeplug()
+	subCommands := map[string]func() error{
+		"readcodeplug":   readCodeplug,
+		"writecodeplug":  writeCodeplug,
+		"dumpspiflash":   dumpSPIFlash,
+		"dumpusers":      dumpUsers,
+		"writeusers":     writeUsers,
+		"getusers":       getUsers,
+		"writefirmware":  writeFirmware,
+		"jsontocodeplug": jsonToCodeplug,
+		"codeplugtojson": codeplugToJSON,
+		"version":        printVersion,
+	}
 
-	case "dumpSPIFlash", "dumpspiflash":
-		err = dumpSPIFlash()
-
-	case "dumpUsers", "dumpusers":
-		err = dumpUsers()
-
-	case "writeUsers", "writeusers":
-		err = writeUsers()
-
-	case "getUsers", "getusers":
-		err = getUsers()
-
-	case "writeFirmware", "writefirmware":
-		err = writeFirmware()
-
-	case "jsonToCodeplug", "jsontocodeplug":
-		err = jsonToCodeplug()
-
-	case "codeplugToJSON", "codeplugtojson":
-		err = codeplugToJSON()
-
-	case "version":
-		err = printVersion()
-
-	default:
+	subCommand := subCommands[subCommandName]
+	if subCommand == nil {
 		usage()
 	}
 
+	err := subCommand()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
+		errorf("%s\n", err.Error())
 		os.Exit(1)
-	}
-}
-
-func progressFunc(aPrefixes []string) func(cur int) bool {
-	var prefixes []string
-	if aPrefixes != nil {
-		prefixes = aPrefixes
-	}
-	prefixIndex := 0
-	prefix := prefixes[prefixIndex]
-	maxProgress := userdb.MaxProgress
-	return func(cur int) bool {
-		if cur == 0 {
-			if prefixIndex != 0 {
-				fmt.Println()
-			}
-			prefix = prefixes[prefixIndex]
-			prefixIndex++
-		}
-		fmt.Printf("%s... %3d%%\r", prefix, cur*100/maxProgress)
-		return true
 	}
 }
