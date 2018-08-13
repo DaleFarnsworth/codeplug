@@ -238,7 +238,7 @@ func (dfu *Dfu) eraseBlocks(addr int, size int) error {
 func (dfu *Dfu) eraseSPIFlashBlocks(addr int, size int) error {
 	count := (size + dfu.eraseBlockSize - 1) / dfu.eraseBlockSize
 
-	dfu.setMaxProgressCount((count + 1) * spiEraseSPIFlashBlockDelay)
+	dfu.setMaxProgressCount(count * spiEraseSPIFlashBlockDelay)
 
 	for i := 0; i < count; i++ {
 		err := dfu.progressFunc()
@@ -449,7 +449,7 @@ func (dfu *Dfu) readSPIFlashTo(address, size int, iWriter io.Writer) error {
 	writer := bufio.NewWriter(iWriter)
 	bytes := make([]byte, dfu.blockSize)
 
-	dfu.setMaxProgressCount(size/dfu.blockSize + 1)
+	dfu.setMaxProgressCount(size / dfu.blockSize)
 
 	err := dfu.md380Cmd([]md380Cmd{
 		md380Cmd{0x91, 0x01}, // Programming Mode
@@ -527,7 +527,7 @@ func (dfu *Dfu) writeSPIFlashFrom(address, size int, iRdr io.Reader) error {
 		return wrapError("writeSPIFlashFrom", err)
 	}
 
-	dfu.setMaxProgressCount(size/dfu.blockSize + 1)
+	dfu.setMaxProgressCount(size / dfu.blockSize)
 
 	endAddress := address + size
 	for addr := address; addr < endAddress; addr += dfu.blockSize {
@@ -825,9 +825,8 @@ func (dfu *Dfu) setMaxProgressCount(max int) {
 		dfu.progressCounter = 0
 		dfu.progressFunc = func() error {
 			dfu.progressCounter += dfu.progressIncrement
-			curProgress := dfu.progressCounter
-			if curProgress > MaxProgress {
-				curProgress = MaxProgress
+			if dfu.progressCounter > MaxProgress {
+				dfu.progressCounter = MaxProgress
 			}
 
 			if !dfu.progressCallback(dfu.progressCounter) {
@@ -1041,7 +1040,7 @@ The radio's LED will blink green and red.`
 		md380Cmd{0x91, 0x31},
 	})
 
-	dfu.setMaxProgressCount(len(blocks) + 1)
+	dfu.setMaxProgressCount(len(blocks))
 
 	totalBlocks := 0
 	for _, block := range blocks {
@@ -1071,7 +1070,7 @@ The radio's LED will blink green and red.`
 
 	buf := make([]byte, dfu.blockSize)
 
-	dfu.setMaxProgressCount(totalBlocks + 1)
+	dfu.setMaxProgressCount(totalBlocks)
 
 	for _, block := range blocks {
 		err = dfu.setAddress(block.address)
