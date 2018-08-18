@@ -1989,11 +1989,11 @@ func RadioExists() error {
 	return nil
 }
 
-func (cp *Codeplug) ReadRadio(progress func(cur int) bool) error {
+func (cp *Codeplug) ReadRadio(progress func(cur int) error) error {
 	cpi := cp.codeplugInfo
 	binBytes := cp.bytes[cpi.BinOffset : cpi.BinOffset+cpi.BinSize]
 
-	dfu, err := dfu.New(func(cur int) bool {
+	dfu, err := dfu.New(func(cur int) error {
 		return progress(cur)
 	})
 	if err != nil {
@@ -2017,7 +2017,7 @@ func (cp *Codeplug) ReadRadio(progress func(cur int) bool) error {
 	return nil
 }
 
-func (cp *Codeplug) WriteRadio(progress func(cur int) bool) error {
+func (cp *Codeplug) WriteRadio(progress func(cur int) error) error {
 	savedTime, err := cp.getLastProgrammedTime()
 	if err != nil {
 		return err
@@ -2035,7 +2035,7 @@ func (cp *Codeplug) WriteRadio(progress func(cur int) bool) error {
 	cp.bytes = savedBytes
 	cp.setLastProgrammedTime(savedTime)
 
-	dfu, err := dfu.New(func(cur int) bool {
+	dfu, err := dfu.New(func(cur int) error {
 		return progress(cur)
 	})
 	if err != nil {

@@ -24,18 +24,23 @@
 package main
 
 import (
+	"bufio"
 	"errors"
 	"flag"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/dalefarnsworth/codeplug/codeplug"
 	"github.com/dalefarnsworth/codeplug/dfu"
 	"github.com/dalefarnsworth/codeplug/userdb"
+	"github.com/microcosm-cc/bluemonday"
 )
 
 func errorf(s string, v ...interface{}) {
@@ -45,19 +50,20 @@ func errorf(s string, v ...interface{}) {
 func usage() {
 	errorf("Usage %s <subCommand> args\n", os.Args[0])
 	errorf("subCommands:\n")
-	errorf("\treadCodeplug -model <model> -freq <freqRange> <codeplugFilename>\n")
-	errorf("\twriteCodeplug <codeplugFilename>\n")
-	errorf("\twriteFirmware <firmwareFilename>\n")
-	errorf("\treadUsers <usersFilename>\n")
-	errorf("\twriteUsers <usersFilename>\n")
+	errorf("\treadCodeplug -model <model> -freq <freqRange> <codeplugFile>\n")
+	errorf("\twriteCodeplug <codeplugFile>\n")
+	errorf("\twriteFirmware <firmwareFile>\n")
+	errorf("\treadUsers <usersFile>\n")
+	errorf("\twriteUsers <usersFile>\n")
 	errorf("\treadSPIFlash <filename>\n")
-	errorf("\tgetUsers <usersFilename>\n")
-	errorf("\tcodeplugToText <codeplugFilename> <textFilename>\n")
-	errorf("\ttextToCodeplug <textFilename> <codeplugFilename>\n")
-	errorf("\tcodeplugToJSON <codeplugFilename> <jsonFilename>\n")
-	errorf("\tjsonToCodeplug <jsonFilename> <codeplugFilename>\n")
-	errorf("\tcodeplugToXLSX <codeplugFilename> <xlsxFilename>\n")
-	errorf("\txlsxToCodeplug <xlsxFilename> <codeplugFilename>\n")
+	errorf("\tgetUsers <usersFile>\n")
+	errorf("\tcheckUsers <updatesFile>\n")
+	errorf("\tcodeplugToText <codeplugFile> <textFile>\n")
+	errorf("\ttextToCodeplug <textFile> <codeplugFile>\n")
+	errorf("\tcodeplugToJSON <codeplugFile> <jsonFile>\n")
+	errorf("\tjsonToCodeplug <jsonFile> <codeplugFile>\n")
+	errorf("\tcodeplugToXLSX <codeplugFile> <xlsxFile>\n")
+	errorf("\txlsxToCodeplug <xlsxFile> <codeplugFile>\n")
 	errorf("\tversion\n")
 	errorf("Use '%s <subCommand> -h' for subCommand help\n", os.Args[0])
 	os.Exit(1)
@@ -106,7 +112,7 @@ func loadCodeplug(fType codeplug.FileType, filename string) (*codeplug.Codeplug,
 	return cp, nil
 }
 
-func progressFunc(aPrefixes []string) func(cur int) bool {
+func progressCallback(aPrefixes []string) func(cur int) error {
 	var prefixes []string
 	if aPrefixes != nil {
 		prefixes = aPrefixes
@@ -114,7 +120,7 @@ func progressFunc(aPrefixes []string) func(cur int) bool {
 	prefixIndex := 0
 	prefix := prefixes[prefixIndex]
 	maxProgress := userdb.MaxProgress
-	return func(cur int) bool {
+	return func(cur int) error {
 		if cur == 0 {
 			if prefixIndex != 0 {
 				fmt.Println()
@@ -122,8 +128,9 @@ func progressFunc(aPrefixes []string) func(cur int) bool {
 			prefix = prefixes[prefixIndex]
 			prefixIndex++
 		}
-		fmt.Printf("%s... %3d%%\r", prefix, cur*100/maxProgress)
-		return true
+		percent := cur * 100 / maxProgress
+		fmt.Printf("%s... %3d%%\r", prefix, percent)
+		return nil
 	}
 }
 
@@ -187,7 +194,7 @@ func readCodeplug() error {
 		"Reading codeplug from radio.",
 	}
 
-	err = cp.ReadRadio(progressFunc(prefixes))
+	err = cp.ReadRadio(progressCallback(prefixes))
 	if err != nil {
 		return err
 	}
@@ -221,7 +228,7 @@ func writeCodeplug() error {
 		"Writing codeplug to radio.",
 	}
 
-	return cp.WriteRadio(progressFunc(prefixes))
+	return cp.WriteRadio(progressCallback(prefixes))
 }
 
 func readSPIFlash() (err error) {
@@ -245,7 +252,7 @@ func readSPIFlash() (err error) {
 		"Reading flash",
 	}
 
-	dfu, err := dfu.New(progressFunc(prefixes))
+	dfu, err := dfu.New(progressCallback(prefixes))
 	if err != nil {
 		return err
 	}
@@ -286,7 +293,7 @@ func readUsers() (err error) {
 		fmt.Sprintf("Reading users to %s", filename),
 	}
 
-	dfu, err := dfu.New(progressFunc(prefixes))
+	dfu, err := dfu.New(progressCallback(prefixes))
 	if err != nil {
 		return err
 	}
@@ -327,7 +334,7 @@ func writeUsers() error {
 		"Writing users",
 	}
 
-	dfu, err := dfu.New(progressFunc(prefixes))
+	dfu, err := dfu.New(progressCallback(prefixes))
 	if err != nil {
 		return err
 	}
@@ -357,7 +364,346 @@ func getUsers() error {
 	}
 
 	db := userdb.New()
-	return db.WriteMD380ToolsFile(filename, progressFunc(prefixes))
+	return db.WriteMD380ToolsFile(filename, progressCallback(prefixes))
+}
+
+func checkUsers() (err error) {
+	flags := flag.NewFlagSet("checkUsers", flag.ExitOnError)
+
+	flags.Usage = func() {
+		errorf("Usage: %s %s <updatesFile> <confirmedFile> <notNewFile>\n", os.Args[0], os.Args[1])
+		flags.PrintDefaults()
+		os.Exit(1)
+	}
+
+	flags.Parse(os.Args[2:len(os.Args)])
+	args := flags.Args()
+	if len(args) != 3 {
+		flags.Usage()
+	}
+	filename := args[0]
+	confirmed := args[1]
+	notNew := args[2]
+
+	prefixes := []string{
+		"Retrieving curated users file",
+	}
+
+	db := userdb.New()
+	db.SetProgressCallback(progressCallback(prefixes))
+	cUsers, err := db.CuratedUsers()
+	if err != nil {
+		return err
+	}
+
+	prefixes = []string{
+		"Retrieving non-curated users file",
+	}
+	db.SetProgressCallback(progressCallback(prefixes))
+	ncUsers, err := db.NonCuratedUsers()
+	if err != nil {
+		return err
+	}
+
+	idMap := make(map[int]bool)
+	cIDMap := make(map[int]*userdb.User)
+	ncIDMap := make(map[int]*userdb.User)
+
+	for _, u := range cUsers {
+		id64, err := strconv.ParseUint(u.ID, 10, 24)
+		if err != nil {
+			return err
+		}
+		id := int(id64)
+		idMap[id] = true
+		cIDMap[id] = u
+	}
+
+	for _, u := range ncUsers {
+		id64, err := strconv.ParseUint(u.ID, 10, 24)
+		if err != nil {
+			return err
+		}
+		id := int(id64)
+		idMap[id] = true
+		ncIDMap[id] = u
+	}
+
+	ids := make([]int, 0, len(idMap))
+	for id := range idMap {
+		ids = append(ids, id)
+	}
+	sort.Ints(ids)
+
+	file, err := os.Create(filename)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		cerr := file.Close()
+		if err == nil {
+			err = cerr
+		}
+	}()
+
+	err = printIDInfo(file, notNew, confirmed, ids, cIDMap, ncIDMap)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func readStrings(filename string) ([]string, error) {
+	strs := make([]string, 0)
+
+	file, err := os.Open(filename)
+	if err != nil {
+		return strs, err
+	}
+	scanner := bufio.NewScanner(file)
+scan:
+	for scanner.Scan() {
+		line := scanner.Text()
+		commentIndex := strings.Index(line, "#")
+		if commentIndex >= 0 {
+			line = line[0:commentIndex]
+		}
+		for _, call := range strings.Fields(line) {
+			call = strings.TrimSpace(call)
+			if call == "" {
+				continue scan
+			}
+			strs = append(strs, call)
+		}
+	}
+	err = scanner.Err()
+	if err != nil {
+		return strs, err
+	}
+	return strs, nil
+}
+
+func printIDInfo(file *os.File, notNewFilename, confirmedFilename string, ids []int, cIDMap, ncIDMap map[int]*userdb.User) error {
+	notNewMap := make(map[string]bool)
+	notNewCalls, err := readStrings(notNewFilename)
+	if err != nil {
+		return err
+	}
+	for i, call := range notNewCalls {
+		call = strings.ToUpper(call)
+		notNewCalls[i] = call
+		notNewMap[call] = true
+	}
+
+	fmt.Fprintf(file, "---- New users:\n")
+	for _, id := range ids {
+		cu := cIDMap[id]
+		ncu := ncIDMap[id]
+		if cu == nil && ncu != nil {
+			if notNewMap[ncu.Callsign] {
+				continue
+			}
+			fmt.Fprintf(file, "%s,%s,%s,%s,%s,%s,%s\n",
+				ncu.ID, ncu.Callsign, ncu.Name,
+				ncu.City, ncu.State, ncu.Nick, ncu.Country)
+		}
+	}
+
+	confirmedMap := make(map[string]int)
+	confirmedCalls, err := readStrings(confirmedFilename)
+	if err != nil {
+		return err
+	}
+	for i, call := range confirmedCalls {
+		call = strings.ToUpper(call)
+		confirmedCalls[i] = call
+		confirmedMap[call] = 1
+	}
+
+	correctIDs := make([]int, 0)
+	changedIDs := make([]int, 0)
+	possibleIDs := make([]int, 0)
+	fixedCalls := make([]string, 0)
+	notFoundCalls := make([]string, 0)
+
+	for _, id := range ids {
+		if id < 10000 {
+			continue
+		}
+		cu := cIDMap[id]
+		ncu := ncIDMap[id]
+		if cu != nil && ncu != nil {
+			if ncu.Name == "" || strings.HasPrefix(cu.Name, ncu.Name) {
+				ncIDMap[id].Name = cu.Name
+			}
+			if ncu.City == "" {
+				ncIDMap[id].City = cu.City
+			}
+			if ncu.State == "" {
+				ncIDMap[id].State = cu.State
+			}
+			if ncu.Nick == "" {
+				ncIDMap[id].Nick = cu.Nick
+			}
+			if ncu.Country == "" {
+				ncIDMap[id].Country = cu.Country
+			}
+			if cu.Callsign != ncu.Callsign {
+				if confirmedMap[cu.Callsign] != 0 {
+					correctIDs = append(correctIDs, id)
+					confirmedMap[cu.Callsign]++
+					continue
+				}
+				if confirmedMap[ncu.Callsign] != 0 {
+					changedIDs = append(changedIDs, id)
+					confirmedMap[ncu.Callsign]++
+					continue
+				}
+				possibleIDs = append(possibleIDs, id)
+				continue
+			}
+		}
+	}
+
+	for _, id := range ids {
+		cu := cIDMap[id]
+		ncu := ncIDMap[id]
+		if cu != nil && ncu != nil && cu.Country == "US" {
+			if cu.Callsign != ncu.Callsign {
+				continue
+			}
+			if confirmedMap[cu.Callsign] == 1 {
+				fixedCalls = append(fixedCalls, cu.Callsign)
+				confirmedMap[ncu.Callsign]++
+				continue
+			}
+		}
+	}
+
+	for _, call := range confirmedCalls {
+		if confirmedMap[call] == 1 {
+			notFoundCalls = append(notFoundCalls, call)
+		}
+	}
+
+	if len(correctIDs) > 0 {
+		fmt.Fprintf(file, "\n---- Callsign already correct:\n")
+		printChangedIDs(file, correctIDs, ncIDMap, cIDMap, "", "")
+	}
+
+	if len(changedIDs) > 0 {
+		fmt.Fprintf(file, "\n---- Callsign confirmed changed:\n")
+		printChangedIDs(file, changedIDs, cIDMap, ncIDMap, "", "")
+	}
+
+	if len(possibleIDs) > 0 {
+		fmt.Fprintf(file, "\n---- Callsign possibly changed:\n")
+		seenCalls := make(map[string]bool)
+		for _, id := range possibleIDs {
+			users := []*userdb.User{ncIDMap[id], cIDMap[id]}
+			for _, u := range users {
+				call := u.Callsign
+				if seenCalls[call] {
+					continue
+				}
+				name := u.Name
+				nick := u.Nick
+				var active string
+				var err error
+				if u.Country != "US" {
+					printChangedIDs(file, []int{id}, cIDMap,
+						ncIDMap, "radioid\t", "PD1WP\t")
+					seenCalls[call] = true
+					break
+				}
+
+				active, err = lookup(call)
+				if err != nil {
+					return err
+				}
+
+				if active != "" {
+					aLast := strings.Fields(active)[0]
+					aLast = strings.ToLower(aLast)
+					aLast = strings.TrimRight(aLast, ",")
+					lastFields := strings.Fields(name)
+					nLast := lastFields[len(lastFields)-1]
+					nLast = strings.ToLower(nLast)
+					if aLast == nLast {
+						fmt.Fprintf(file, "%s - confirmed\n", call)
+						seenCalls[call] = true
+						break
+					}
+					fmt.Fprintf(file, "%s %s - %s %s\n",
+						call, active, name, nick)
+					printChangedIDs(file, []int{id},
+						cIDMap, ncIDMap, "radioid\t", "PD1WP\t")
+					seenCalls[call] = true
+					break
+				}
+			}
+		}
+	}
+
+	if len(fixedCalls) > 0 {
+		fmt.Fprintf(file, "\n---- Calls that have already been fixed:\n")
+		for _, call := range fixedCalls {
+			fmt.Fprintf(file, "%s\n", call)
+		}
+
+	}
+
+	if len(notFoundCalls) > 0 {
+		fmt.Fprintf(file, "\n---- Calls that were not found:\n")
+		for _, call := range notFoundCalls {
+			fmt.Fprintf(file, "%s\n", call)
+		}
+
+	}
+
+	return nil
+}
+
+func lookup(call string) (string, error) {
+	time.Sleep(5 * time.Second)
+	url := fmt.Sprintf(`http://callsign.ualr.edu/cdetail.php?call=%s`, call)
+	resp, err := http.Get(url)
+	if err != nil {
+		return "", errors.New("lookup failed: " + err.Error())
+	}
+	lines := make([]string, 0)
+	p := bluemonday.StrictPolicy()
+	rdr := p.SanitizeReader(resp.Body)
+	scanner := bufio.NewScanner(rdr)
+	for scanner.Scan() {
+		lines = append(lines, scanner.Text())
+	}
+	var name string
+	for i, line := range lines {
+		switch line {
+		case call:
+			name = lines[i+1]
+
+		case "License status: Active":
+			return name, nil
+		}
+	}
+
+	return "", nil
+}
+
+func printChangedIDs(file *os.File, ids []int, previous map[int]*userdb.User, current map[int]*userdb.User, prefix1 string, prefix2 string) {
+	for _, id := range ids {
+		p := previous[id]
+		c := current[id]
+		fmt.Fprintf(file, "%s%s,%s,%s,%s,%s,%s,%s\n",
+			prefix1, c.ID, c.Callsign, c.Name,
+			c.City, c.State, c.Nick, c.Country)
+		fmt.Fprintf(file, "%s%s,%s,%s,%s,%s,%s,%s\n\n",
+			prefix2, p.ID, p.Callsign, p.Name,
+			p.City, p.State, p.Nick, p.Country)
+	}
 }
 
 func writeFirmware() error {
@@ -381,7 +727,7 @@ func writeFirmware() error {
 		"Writing firmware",
 	}
 
-	dfu, err := dfu.New(progressFunc(prefixes))
+	dfu, err := dfu.New(progressCallback(prefixes))
 	if err != nil {
 		return err
 	}
@@ -579,6 +925,7 @@ func main() {
 		"readusers":      readUsers,
 		"writeusers":     writeUsers,
 		"getusers":       getUsers,
+		"checkusers":     checkUsers,
 		"writefirmware":  writeFirmware,
 		"texttocodeplug": textToCodeplug,
 		"codeplugtotext": codeplugToText,

@@ -34,7 +34,7 @@ import (
 	"github.com/google/gousb"
 )
 
-func New(progressCallback func(progressCounter int) bool) (*Dfu, error) {
+func New(progressCallback func(progressCounter int) error) (*Dfu, error) {
 	stDfu, err := stdfu.New()
 	if err != nil {
 		return nil, err

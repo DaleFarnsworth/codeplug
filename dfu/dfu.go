@@ -57,7 +57,7 @@ type Dfu struct {
 	stDfu             *stdfu.StDfu
 	blockSize         int
 	eraseBlockSize    int
-	progressCallback  func(progressCounter int) bool
+	progressCallback  func(progressCounter int) error
 	progressFunc      func() error
 	progressIncrement int
 	progressCounter   int
@@ -829,11 +829,7 @@ func (dfu *Dfu) setMaxProgressCount(max int) {
 				dfu.progressCounter = MaxProgress
 			}
 
-			if !dfu.progressCallback(dfu.progressCounter) {
-				return errors.New("")
-			}
-
-			return nil
+			return dfu.progressCallback(dfu.progressCounter)
 		}
 		dfu.progressCallback(dfu.progressCounter)
 	}

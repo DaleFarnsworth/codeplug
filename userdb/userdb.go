@@ -42,8 +42,7 @@ var fixedUsersURL = "https://raw.githubusercontent.com/travisgoodspeed/md380tool
 var radioidUsersURL = "https://www.radioid.net/static/users_quoted.csv"
 var hamdigitalUsersURL = "https://ham-digital.org/status/users_quoted.csv"
 var reflectorUsersURL = "http://registry.dstar.su/reflector.db"
-var cachedSpecialUsersURL = "https://www.farnsworth.org/dale/md380tools/userdb/cachedSpecialUsers.bin"
-var cachedAmendedUsersURL = "https://www.farnsworth.org/dale/md380tools/userdb/cachedAmendedUsers.bin"
+var curatedUsersURL = "https://farnsworth.org/dale/md380tools/userdb/curated.csv"
 
 var transportTimeout = 20
 var clientTimeout = 300
@@ -58,24 +57,23 @@ var client = &http.Client{
 	Timeout:   time.Duration(clientTimeout) * time.Second,
 }
 
-type Options uint32
+// Options - Optional changes to the user entries in the database
+type Options struct {
+	AbbrevCountries    bool
+	AbbrevDirections   bool
+	AbbrevStates       bool
+	CheckTitleCase     bool
+	FixRomanNumerals   bool
+	FixStateCountries  bool
+	MiscChanges        bool
+	RemoveCallFromNick bool
+	RemoveDupSurnames  bool
+	RemoveMatchingNick bool
+	RemoveRepeats      bool
+	TitleCase          bool
+}
 
-const (
-	_ Options = 1 << iota
-	AbbrevCountries
-	AbbrevDirections
-	AbbrevStates
-	CheckTitleCase
-	FixRomanNumerals
-	FixStateCountries
-	MiscChanges
-	RemoveCallFromNick
-	RemoveDupSurnames
-	RemoveMatchingNick
-	RemoveRepeats
-	TitleCase
-)
-
+// User - A structure holding information about a user in the databae
 type User struct {
 	ID       string
 	Callsign string
@@ -86,63 +84,67 @@ type User struct {
 	Country  string
 }
 
+// UsersDB - A structure holding information about the database of DMR users
 type UsersDB struct {
 	filename          string
-	options           Options
-	uris              []string
-	verbatimURIs      []string
+	getUsersFuncs     []func() ([]*User, error)
+	options           *Options
 	printFunc         func(*User) string
-	progressCallback  func(progressCounter int) bool
+	progressCallback  func(progressCounter int) error
 	progressFunc      func() error
 	progressIncrement int
 	progressCounter   int
 }
 
-var defaultOptions = []Options{
-	FixRomanNumerals,
-	FixStateCountries,
-	MiscChanges,
-	RemoveCallFromNick,
-	RemoveDupSurnames,
-	RemoveMatchingNick,
-	RemoveRepeats,
-	TitleCase,
+var defaultOptions = &Options{
+	AbbrevCountries:    true,
+	AbbrevDirections:   true,
+	AbbrevStates:       true,
+	CheckTitleCase:     true,
+	FixRomanNumerals:   true,
+	FixStateCountries:  true,
+	MiscChanges:        true,
+	RemoveCallFromNick: true,
+	RemoveDupSurnames:  true,
+	RemoveMatchingNick: true,
+	RemoveRepeats:      true,
+	TitleCase:          true,
 }
 
+var nonCuratedGetUsersFuncs = []func() ([]*User, error){
+	getFixedUsers,
+	getHamdigitalUsers,
+	getRadioidUsers,
+	getReflectorUsers,
+}
+
+// New - Instantiate and initialize a new users db and return a pointer to it.
 func New() *UsersDB {
 	db := &UsersDB{
 		progressFunc: func() error { return nil },
 	}
 
-	db.SetOptions(defaultOptions...)
+	db.SetOptions(defaultOptions)
+	db.getUsersFuncs = nonCuratedGetUsersFuncs
+	db.getUsersFuncs = append(db.getUsersFuncs, getCuratedUsers)
 
 	return db
 }
 
-func (db *UsersDB) SetOptions(options ...Options) {
-	for _, opt := range options {
-		db.options = Options(uint32(db.options) | uint32(opt))
-	}
+// SetOptions - Set the the desired options for processing the DMR database
+func (db *UsersDB) SetOptions(options *Options) {
+	db.options = options
 }
 
-func (db *UsersDB) ClearOptions(options ...Options) {
-	for _, opt := range options {
-		db.options = Options(uint32(db.options) & ^uint32(opt))
-	}
-}
-
-func (db *UsersDB) SetURIs(uris ...string) {
-	db.uris = append(db.uris, uris...)
-}
-
-func (db *UsersDB) SetVerbatimURIs(uris ...string) {
-	db.verbatimURIs = append(db.verbatimURIs, uris...)
+// SetProgressCallback - Set callback function for progress of db operations.
+func (db *UsersDB) SetProgressCallback(fcn func(int) error) {
+	db.progressCallback = fcn
 }
 
 func (db *UsersDB) setMaxProgressCount(max int) {
 	db.progressFunc = func() error { return nil }
 	if db.progressCallback != nil {
-		db.progressIncrement = MaxProgress / max
+		db.progressIncrement = MaxProgress / max * 99 / 100
 		db.progressCounter = 0
 		db.progressFunc = func() error {
 			db.progressCounter += db.progressIncrement
@@ -151,11 +153,7 @@ func (db *UsersDB) setMaxProgressCount(max int) {
 				curProgress = MaxProgress
 			}
 
-			if !db.progressCallback(db.progressCounter) {
-				return errors.New("")
-			}
-
-			return nil
+			return db.progressCallback(db.progressCounter)
 		}
 		db.progressCallback(db.progressCounter)
 	}
@@ -168,60 +166,66 @@ func (db *UsersDB) finalProgress() {
 	}
 }
 
+// Minimum and maximum vallues of the progress counter
 const (
 	MinProgress = 0
 	MaxProgress = 1000000
 )
 
-func (u *User) amend(options Options) {
-	u.removeBlanksFromCallsigns()
+func (u *User) amend(options *Options) {
+	u.fixCallsigns()
 
-	if options&RemoveDupSurnames != 0 {
+	if options.RemoveDupSurnames {
 		u.Name = removeDupSurnames(u.Name)
 	}
-	if options&RemoveRepeats != 0 {
+	if options.RemoveRepeats {
 		u.Name = removeRepeats(u.Name)
 		u.City = removeRepeats(u.City)
 		u.State = removeRepeats(u.State)
 		u.Nick = removeRepeats(u.Nick)
 		u.Country = removeRepeats(u.Country)
 	}
-	if options&TitleCase != 0 {
+	if options.TitleCase {
 		u.Name = titleCase(u.Name)
 		u.City = titleCase(u.City)
 		u.State = titleCase(u.State)
 		u.Country = titleCase(u.Country)
 	}
-	if options&RemoveMatchingNick != 0 {
+	if options.RemoveMatchingNick {
 		u.removeMatchingNicks()
 	} else {
 		u.addNicks()
 	}
-	if options&FixStateCountries != 0 {
+	if options.FixStateCountries {
 		u.fixStateCountries()
 	}
-	if options&AbbrevCountries != 0 {
-		u.Country = countryAbbreviations[u.Country]
+	if options.AbbrevCountries {
+		abbrev, ok := countryAbbreviations[u.Country]
+		if ok {
+			u.Country = abbrev
+		}
 	}
-	if options&AbbrevStates != 0 {
-		u.State = stateAbbreviations[u.State]
+	if options.AbbrevStates {
+		abbrev, ok := stateAbbreviations[u.State]
+		if ok {
+			u.State = abbrev
+		}
 	}
-	if options&AbbrevDirections != 0 {
+	if options.AbbrevDirections {
 		u.City = abbreviateDirections(u.City)
 		u.State = abbreviateDirections(u.State)
-		u.Nick = abbreviateDirections(u.Nick)
 		u.Country = abbreviateDirections(u.Country)
 	}
-	if options&RemoveCallFromNick != 0 {
+	if options.RemoveCallFromNick {
 		u.Nick = removeSubstr(u.Nick, u.Callsign)
 	}
-	if options&MiscChanges != 0 {
+	if options.MiscChanges {
 		if strings.HasSuffix(u.City, " (B,") {
 			length := len(u.City) - len(" (B,")
 			u.City = u.City[:length]
 		}
 	}
-	if options&FixRomanNumerals != 0 {
+	if options.FixRomanNumerals {
 		u.Name = fixRomanNumerals(u.Name)
 	}
 
@@ -259,7 +263,7 @@ func asciify(field string) string {
 	return strings.Join(strs, "")
 }
 
-func (u *User) removeBlanksFromCallsigns() {
+func (u *User) fixCallsigns() {
 	id64, err := strconv.ParseUint(u.ID, 10, 24)
 	if err != nil {
 		return
@@ -269,6 +273,7 @@ func (u *User) removeBlanksFromCallsigns() {
 		return
 	}
 	u.Callsign = strings.Replace(u.Callsign, " ", "", -1)
+	u.Callsign = strings.Replace(u.Callsign, ".", "", -1)
 }
 
 var stateAbbreviations = func() map[string]string {
@@ -291,7 +296,10 @@ var titleCaseMap = func() map[string]string {
 
 func abbreviateDirections(field string) string {
 	words := strings.Split(field, " ")
-	words[0] = directionAbbreviations[words[0]]
+	dir, ok := directionAbbreviations[words[0]]
+	if ok {
+		words[0] = dir
+	}
 	return strings.Join(words, " ")
 }
 
@@ -447,7 +455,7 @@ func (u *User) fixStateCountries() {
 	}
 }
 
-func getUrlBytes(url string) ([]byte, error) {
+func getURLBytes(url string) ([]byte, error) {
 	resp, err := client.Get(url)
 	if err != nil {
 		return nil, err
@@ -461,8 +469,8 @@ func getUrlBytes(url string) ([]byte, error) {
 	return ioutil.ReadAll(resp.Body)
 }
 
-func getUrlLines(url string) ([]string, error) {
-	bytes, err := getUrlBytes(url)
+func getURLLines(url string) ([]string, error) {
+	bytes, err := getURLBytes(url)
 	if err != nil {
 		return nil, err
 	}
@@ -473,7 +481,7 @@ func getUrlLines(url string) ([]string, error) {
 }
 
 func getRadioidUsers() ([]*User, error) {
-	lines, err := getUrlLines(radioidUsersURL)
+	lines, err := getURLLines(radioidUsersURL)
 	if err != nil {
 		errFmt := "error getting radioid users database: %s: %s"
 		err = fmt.Errorf(errFmt, radioidUsersURL, err.Error())
@@ -486,12 +494,12 @@ func getRadioidUsers() ([]*User, error) {
 		return nil, err
 	}
 
-	users := make([]*User, len(lines))
-	for i, line := range lines {
+	users := make([]*User, 0, len(lines))
+	for _, line := range lines {
 		line = strings.Trim(line, `"`)
 		fields := strings.Split(line, `","`)
 
-		users[i] = &User{
+		u := &User{
 			ID:       fields[0],
 			Callsign: fields[1],
 			Name:     fields[2],
@@ -499,12 +507,27 @@ func getRadioidUsers() ([]*User, error) {
 			State:    fields[4],
 			Country:  fields[5],
 		}
+
+		switch len(fields) {
+		case 7:
+		case 6:
+			if strings.HasSuffix(u.Country, `",`) {
+				u.Country = u.Country[0 : len(u.Country)-2]
+				break
+			}
+			continue
+
+		default:
+			continue
+		}
+
+		users = append(users, u)
 	}
 	return users, nil
 }
 
 func getHamdigitalUsers() ([]*User, error) {
-	lines, err := getUrlLines(hamdigitalUsersURL)
+	lines, err := getURLLines(hamdigitalUsersURL)
 	if err != nil {
 		errFmt := "error getting hamdigital users database: %s: %s"
 		err = fmt.Errorf(errFmt, hamdigitalUsersURL, err.Error())
@@ -534,8 +557,8 @@ func getHamdigitalUsers() ([]*User, error) {
 	return users, nil
 }
 
-func getCachedSpecialUsers() ([]*User, error) {
-	lines, err := getUrlLines(cachedSpecialUsersURL)
+func getCuratedUsers() ([]*User, error) {
+	lines, err := getURLLines(curatedUsersURL)
 	if err != nil {
 		return nil, err
 	}
@@ -543,6 +566,10 @@ func getCachedSpecialUsers() ([]*User, error) {
 	users := make([]*User, len(lines))
 	for i, line := range lines {
 		fields := strings.Split(line, ",")
+		if len(fields) < 7 {
+			fmt.Println(line)
+			continue
+		}
 		users[i] = &User{
 			ID:       fields[0],
 			Callsign: fields[1],
@@ -626,9 +653,9 @@ func newFileUsersFuncs(path string) (func() ([]*User, error), error) {
 	}, nil
 }
 
-func newUrlUsersFuncs(uri string) (func() ([]*User, error), error) {
+func newURLUsersFuncs(uri string) (func() ([]*User, error), error) {
 	return func() ([]*User, error) {
-		lines, err := getUrlLines(uri)
+		lines, err := getURLLines(uri)
 		if err != nil {
 			return nil, err
 		}
@@ -638,7 +665,7 @@ func newUrlUsersFuncs(uri string) (func() ([]*User, error), error) {
 }
 
 func getFixedUsers() ([]*User, error) {
-	lines, err := getUrlLines(fixedUsersURL)
+	lines, err := getURLLines(fixedUsersURL)
 	if err != nil {
 		errFmt := "getting fixed users: %s: %s"
 		err = fmt.Errorf(errFmt, fixedUsersURL, err.Error())
@@ -663,7 +690,7 @@ type special struct {
 }
 
 func getSpecialURLs() ([]string, error) {
-	bytes, err := getUrlBytes(specialUsersURL)
+	bytes, err := getURLBytes(specialUsersURL)
 	if err != nil {
 		return nil, err
 	}
@@ -681,7 +708,7 @@ func getSpecialURLs() ([]string, error) {
 }
 
 func getSpecialUsers(url string) ([]*User, error) {
-	lines, err := getUrlLines(url)
+	lines, err := getURLLines(url)
 	if err != nil {
 		errFmt := "getting special users: %s: %s"
 		err = fmt.Errorf(errFmt, url, err.Error())
@@ -705,7 +732,7 @@ func getSpecialUsers(url string) ([]*User, error) {
 }
 
 func getReflectorUsers() ([]*User, error) {
-	lines, err := getUrlLines(reflectorUsersURL)
+	lines, err := getURLLines(reflectorUsersURL)
 	if err != nil {
 		errFmt := "getting reflector users: %s: %s"
 		err = fmt.Errorf(errFmt, reflectorUsersURL, err.Error())
@@ -724,18 +751,19 @@ func getReflectorUsers() ([]*User, error) {
 	return users, nil
 }
 
-func mergeAndSort(users []*User) ([]*User, error) {
+func mergeAndSort(users []*User, opts *Options) ([]*User, error) {
 	idMap := make(map[int]*User)
 	for _, u := range users {
 		if u == nil || u.ID == "" {
 			continue
 		}
 		u.ID = strings.TrimPrefix(u.ID, "#")
-		id, err := strconv.ParseUint(u.ID, 10, 24)
+		id64, err := strconv.ParseUint(u.ID, 10, 24)
 		if err != nil {
 			return nil, err
 		}
-		existing := idMap[int(id)]
+		id := int(id64)
+		existing := idMap[id]
 		if existing == nil {
 			idMap[int(id)] = u
 			continue
@@ -753,9 +781,17 @@ func mergeAndSort(users []*User) ([]*User, error) {
 		if u.State != "" {
 			existing.State = u.State
 		}
+		if u.Nick != "" {
+			existing.Nick = u.Nick
+		}
 		if u.Country != "" {
 			existing.Country = u.Country
 		}
+		idMap[id] = existing
+	}
+
+	for _, u := range idMap {
+		u.amend(opts)
 	}
 
 	ids := make([]int, 0, len(idMap))
@@ -786,19 +822,27 @@ func do(index int, f func() ([]*User, error), resultChan chan result) {
 	resultChan <- r
 }
 
-func (db *UsersDB) Users() ([]*User, error) {
-	getUsersFuncs := []func() ([]*User, error){
-		getFixedUsers,
-		getHamdigitalUsers,
-		getRadioidUsers,
-		getReflectorUsers,
+// CuratedUsers - Return a slice containing the PD1WP list of DMR users
+func (db *UsersDB) CuratedUsers() ([]*User, error) {
+	db.getUsersFuncs = []func() ([]*User, error){
+		getCuratedUsers,
 	}
+	return db.Users()
+}
 
+// NonCuratedUsers - Return a list of users retrieved by conventional means
+func (db *UsersDB) NonCuratedUsers() ([]*User, error) {
+	db.getUsersFuncs = nonCuratedGetUsersFuncs
+	return db.Users()
+}
+
+// Users - Return the best current list of DMR users
+func (db *UsersDB) Users() ([]*User, error) {
 	var users []*User
-	resultCount := len(getUsersFuncs)
+	resultCount := len(db.getUsersFuncs)
 	resultChan := make(chan result, resultCount)
 
-	for i, f := range getUsersFuncs {
+	for i, f := range db.getUsersFuncs {
 		go do(i, f, resultChan)
 	}
 
@@ -824,7 +868,7 @@ func (db *UsersDB) Users() ([]*User, error) {
 	}
 
 	var err error
-	users, err = mergeAndSort(users)
+	users, err = mergeAndSort(users, db.options)
 	if err != nil {
 		return nil, err
 	}
@@ -868,52 +912,6 @@ func (db *UsersDB) writeSized() (err error) {
 	}
 
 	return nil
-}
-
-func mergeUsers(userMap map[int][]*User, opts Options, verbatimIndex int) ([]*User, error) {
-	idMap := make(map[int]*User)
-	for i := 0; i < len(userMap); i++ {
-		if i == verbatimIndex {
-			for _, user := range idMap {
-				user.amend(opts)
-			}
-		}
-		for _, u := range userMap[i] {
-			if u == nil || u.ID == "" {
-				continue
-			}
-			id64, err := strconv.ParseUint(u.ID, 10, 24)
-			if err != nil {
-				return nil, err
-			}
-			id := int(id64)
-			existing, exists := idMap[id]
-			if exists {
-				idMap[id] = mergeUser(existing, u)
-				continue
-			}
-			idMap[id] = u
-		}
-	}
-
-	if verbatimIndex < 0 {
-		for _, user := range idMap {
-			user.amend(opts)
-		}
-	}
-
-	ids := make([]int, 0, len(idMap))
-	for id := range idMap {
-		ids = append(ids, id)
-	}
-
-	users := make([]*User, len(ids))
-	sort.Ints(ids)
-	for i, id := range ids {
-		users[i] = idMap[id]
-	}
-
-	return users, nil
 }
 
 func mergeUser(existing, u *User) *User {
@@ -968,7 +966,8 @@ func (db *UsersDB) write(header bool) (err error) {
 	return nil
 }
 
-func (db *UsersDB) WriteMD380ToolsFile(filename string, progress func(cur int) bool) error {
+// WriteMD380ToolsFile - Write a user db file in MD380 format
+func (db *UsersDB) WriteMD380ToolsFile(filename string, progress func(cur int) error) error {
 	db.filename = filename
 	db.progressCallback = progress
 	db.printFunc = func(u *User) string {
@@ -979,7 +978,8 @@ func (db *UsersDB) WriteMD380ToolsFile(filename string, progress func(cur int) b
 	return db.writeSized()
 }
 
-func (db *UsersDB) WriteMD2017File(filename string, progress func(cur int) bool) error {
+// WriteMD2017File - Write a user db file in MD2017 format
+func (db *UsersDB) WriteMD2017File(filename string, progress func(cur int) error) error {
 	db.filename = filename
 	db.progressCallback = progress
 	db.printFunc = func(u *User) string {
