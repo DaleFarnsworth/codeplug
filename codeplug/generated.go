@@ -988,6 +988,7 @@ var fiCiBandwidth = fieldInfo{
 		"12.5",
 		"25",
 	},
+	disabler: FtCiChannelMode,
 }
 
 var fiCiChannelMode = fieldInfo{
