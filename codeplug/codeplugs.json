@@ -1608,11 +1608,24 @@
       "bitOffset": 20,
       "bitSize": 4,
       "valueType": "privacyNumber",
-      "defaultValue": "0",
-      "span": {
-        "min": 0,
-        "max": 15
-      }
+      "strings": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16"
+      ]
     },
     {
       "typeName": "Display PTT ID",

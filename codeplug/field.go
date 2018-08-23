@@ -241,6 +241,13 @@ func (f *Field) Strings() []string {
 	case VtIStrings, VtCallType:
 		strs = *f.strings
 
+	case VtPrivacyNumber:
+		ss := f.sibling(FtCiPrivacy).String()
+		strs = *f.strings
+		if ss == "Enhanced" {
+			strs = strs[0:8]
+		}
+
 	case VtIndexedStrings:
 		strs = []string{}
 
@@ -1255,20 +1262,20 @@ func (v *name) store(f *Field) {
 
 // privacyNumber is a field value representing a privacy number.
 type privacyNumber struct {
-	span
+	iStrings
 }
 
 // String returns the privacyNumber's value as a string.
 func (v *privacyNumber) getString(f *Field) string {
 	ss := f.sibling(FtCiPrivacy).String()
 
-	value := int(v.span)
+	value := int(v.iStrings)
 	if ss == "Enhanced" && value >= 8 {
 		value = 7
 	}
 
-	s := v.span.getString(f)
-	v.span = span(value)
+	s := v.iStrings.getString(f)
+	v.iStrings = iStrings(value)
 
 	return s
 }
@@ -1279,12 +1286,12 @@ func (v *privacyNumber) setString(f *Field, s string) error {
 	if sibling != nil {
 		ss := sibling.String()
 
-		if ss == "Enhanced" && int(v.span) >= 8 {
+		if ss == "Enhanced" && int(v.iStrings) >= 8 {
 			return fmt.Errorf("must be less than 8 for enhanced privacy")
 		}
 	}
 
-	return v.span.setString(f, s)
+	return v.iStrings.setString(f, s)
 }
 
 // valid returns nil if the privacyNumber's value is valid.
@@ -1296,11 +1303,11 @@ func (v *privacyNumber) valid(f *Field) error {
 	}
 	ss := sibling.String()
 
-	if ss == "Enhanced" && int(v.span) >= 8 {
+	if ss == "Enhanced" && int(v.iStrings) >= 8 {
 		return fmt.Errorf("must be less than 8 for enhanced privacy")
 	}
 
-	return v.span.valid(f)
+	return v.iStrings.valid(f)
 }
 
 // ctcssDcs is a field value representing a CTCSS or DCS tone.

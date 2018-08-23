@@ -834,7 +834,7 @@ func (parent *Form) addFieldRow(r *codeplug.Record, fType codeplug.FieldType) {
 			}
 
 		case enablingFieldType:
-			setEnabled(w, f)
+			setEnabled(w)
 
 		default:
 			logFatal("receive(): unexpected field type")
@@ -867,18 +867,14 @@ func (parent *Form) addReadOnlyFieldRow(r *codeplug.Record, fType codeplug.Field
 	parent.layout.AddRow(w.label, w.qWidget)
 }
 
-func setEnabled(w *Widget, f *codeplug.Field) {
+func setEnabled(w *Widget) {
+	f := w.field
 	enabled := f.IsEnabled()
-	qWidget := w.qWidget.QWidget_PTR()
-	if qWidget.IsEnabled() == enabled {
-		return
-	}
-
 	if enabled && !f.IsValid() {
 		f.SetString(f.DefaultValue())
 	}
 
-	qWidget.SetEnabled(enabled)
+	w.SetEnabled(enabled)
 	w.label.SetEnabled(enabled)
 	w.receive(w)
 }
@@ -930,6 +926,8 @@ func (w *Widget) SetEnabled(b bool) {
 	switch qw.(type) {
 	case *widgets.QComboBox:
 		qw.(*widgets.QComboBox).SetEnabled(b)
+		f := w.field
+		UpdateComboboxWidget(w, f.String(), f.Strings())
 
 	case *widgets.QPushButton:
 		qw.(*widgets.QPushButton).SetEnabled(b)
@@ -1218,7 +1216,7 @@ var newFieldWidget = map[codeplug.ValueType]func(*codeplug.Field) *Widget{
 	codeplug.VtOffOn:             newFieldCheckbox,
 	codeplug.VtOnOff:             newFieldCheckbox,
 	codeplug.VtPcPassword:        newFieldLineEdit,
-	codeplug.VtPrivacyNumber:     newFieldLineEdit,
+	codeplug.VtPrivacyNumber:     newFieldCombobox,
 	codeplug.VtRadioName:         newFieldLineEdit,
 	codeplug.VtRadioPassword:     newFieldLineEdit,
 	codeplug.VtSpan:              newFieldSpinbox,
