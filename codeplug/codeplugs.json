@@ -142,6 +142,7 @@
         "GsDisableAllTones",
         "GsChFreeIndicationTone",
         "GsTalkPermitTone",
+        "GsKeypadTones",
         "GsCallAlertToneDuration",
         "GsScanDigitalHangTime",
         "GsScanAnalogHangTime",
@@ -179,6 +180,7 @@
         "GsDisableAllTones",
         "GsChFreeIndicationTone",
         "GsTalkPermitTone",
+        "GsKeypadTones",
         "GsCallAlertToneDuration",
         "GsScanDigitalHangTime",
         "GsScanAnalogHangTime",
@@ -709,6 +711,13 @@
       "typeName": "Save Preamble",
       "type": "GsSavePreamble",
       "bitOffset": 527,
+      "bitSize": 1,
+      "valueType": "offOn"
+    },
+    {
+      "typeName": "Keypad Tones",
+      "type": "GsKeypadTones",
+      "bitOffset": 530,
       "bitSize": 1,
       "valueType": "offOn"
     },

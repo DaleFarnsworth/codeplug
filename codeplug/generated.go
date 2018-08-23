@@ -128,6 +128,7 @@ const (
 	FtGsIntroScreen               FieldType = "IntroScreen"
 	FtGsIntroScreenLine1          FieldType = "IntroScreenLine1"
 	FtGsIntroScreenLine2          FieldType = "IntroScreenLine2"
+	FtGsKeypadTones               FieldType = "KeypadTones"
 	FtGsLockUnlock                FieldType = "LockUnlock"
 	FtGsLoneWorkerReminderTime    FieldType = "LoneWorkerReminderTime"
 	FtGsLoneWorkerResponseTime    FieldType = "LoneWorkerResponseTime"
@@ -584,6 +585,7 @@ var riGeneralSettings_md380 = recordInfo{
 		&fiGsDisableAllTones,
 		&fiGsChFreeIndicationTone,
 		&fiGsTalkPermitTone,
+		&fiGsKeypadTones,
 		&fiGsCallAlertToneDuration,
 		&fiGsScanDigitalHangTime,
 		&fiGsScanAnalogHangTime,
@@ -623,6 +625,7 @@ var riGeneralSettings_md40 = recordInfo{
 		&fiGsDisableAllTones,
 		&fiGsChFreeIndicationTone,
 		&fiGsTalkPermitTone,
+		&fiGsKeypadTones,
 		&fiGsCallAlertToneDuration,
 		&fiGsScanDigitalHangTime,
 		&fiGsScanAnalogHangTime,
@@ -1756,6 +1759,15 @@ var fiGsIntroScreenLine2 = fieldInfo{
 	bitOffset: 160,
 	bitSize:   160,
 	valueType: VtIntroLine,
+}
+
+var fiGsKeypadTones = fieldInfo{
+	fType:     FtGsKeypadTones,
+	typeName:  "Keypad Tones",
+	max:       1,
+	bitOffset: 530,
+	bitSize:   1,
+	valueType: VtOffOn,
 }
 
 var fiGsLockUnlock = fieldInfo{
