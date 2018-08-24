@@ -27,6 +27,8 @@ package codeplug
 
 import (
 	"bytes"
+	"encoding/hex"
+	"errors"
 	"fmt"
 	"sort"
 	"strconv"
@@ -200,7 +202,7 @@ func (f *Field) memberListNames() []string {
 	return memberNames
 }
 
-// Returns the fields Span struct, if any
+// Span returns the fields Span struct, if any
 func (f *Field) Span() Span {
 	if f.span == nil {
 		return Span{}
@@ -334,6 +336,7 @@ func (f *Field) IsValid() bool {
 	return !invalid
 }
 
+// DefaultValue returns the fields default value
 func (f *Field) DefaultValue() string {
 	return f.defaultValue
 }
@@ -398,6 +401,7 @@ func (f *Field) sibling(fType FieldType) *Field {
 	return fields[0]
 }
 
+// IsEnabled returns true if the field is enabled
 func (f *Field) IsEnabled() bool {
 	enablingField := f.enablingField()
 	if enablingField == nil {
@@ -429,6 +433,7 @@ func (f *Field) enablingField() *Field {
 	return f.sibling(siblingType)
 }
 
+// EnablingFieldType returns the type of the field's enabling field.
 func (f *Field) EnablingFieldType() FieldType {
 	var siblingType FieldType
 
@@ -547,7 +552,7 @@ func (fi *fieldInfo) size() (fSize int) {
 // frequency is a field value representing a frequency in Hertz.
 type frequency float64
 
-// String returns the frequency's value as a string.
+// getString returns the frequency's value as a string.
 func (v *frequency) getString(f *Field) string {
 	return frequencyToString(float64(*v))
 }
@@ -588,7 +593,7 @@ func (v *frequency) store(f *Field) {
 // It is used when a 1 bit in the codeplug represents false
 type onOff bool
 
-// String returns the onOff's value as a string.
+// getString returns the onOff's value as a string.
 func (v *onOff) getString(f *Field) string {
 	s := "Off"
 	if *v {
@@ -663,7 +668,7 @@ func (v *offOn) store(f *Field) {
 // into a slice of strings.
 type iStrings int
 
-// String returns the iStrings' value as a string.
+// getString returns the iStrings' value as a string.
 func (v *iStrings) getString(f *Field) string {
 	i := int(*v)
 	strings := *f.strings
@@ -709,7 +714,7 @@ func (v *iStrings) valid(f *Field) error {
 	return nil
 }
 
-// valid returns nil if the iStrings' value is valid.
+// load sets the iString's value from its bits in cp.bytes.
 func (v *iStrings) load(f *Field) {
 	*v = iStrings(f.bytes()[0])
 }
@@ -722,7 +727,7 @@ func (v *iStrings) store(f *Field) {
 // span is a field value representing a range of integer values
 type span uint8
 
-// String returns the span's value as a string.
+// getString returns the span's value as a string.
 func (v *span) getString(f *Field) string {
 	sp := *f.span
 	i := uint8(*v)
@@ -814,7 +819,7 @@ func (v *gpsReportInterval) valid(f *Field) error {
 // represent specific strings.
 type indexedStrings uint16
 
-// String returns the indexedStrings's value as a string.
+// getString returns the indexedStrings's value as a string.
 func (v *indexedStrings) getString(f *Field) string {
 	for _, is := range *(*f.fDesc).indexedStrings {
 		if is.Index == uint16(*v) {
@@ -870,7 +875,7 @@ func (v *indexedStrings) store(f *Field) {
 // biFrequency is a field value representing a frequency in Hertz.
 type biFrequency float64
 
-// String returns the biFrequency's value as a string.
+// getString returns the biFrequency's value as a string.
 func (v *biFrequency) getString(f *Field) string {
 	return frequencyToString(float64(*v))
 }
@@ -899,7 +904,7 @@ func (v *biFrequency) store(f *Field) {
 // introLine is a field value representing a introductory line of text
 type introLine string
 
-// String returns the introLine's value as a string.
+// getString returns the introLine's value as a string.
 func (v *introLine) getString(f *Field) string {
 	return string(*v)
 }
@@ -965,9 +970,9 @@ func (v *callType) setString(f *Field, s string) error {
 		return err
 	}
 
-	callIdField := f.record.Field(FtDcCallID)
-	if callIdField != nil {
-		callIdField.SetString("16777215")
+	callIDField := f.record.Field(FtDcCallID)
+	if callIDField != nil {
+		callIDField.SetString("16777215")
 	}
 
 	return nil
@@ -976,7 +981,7 @@ func (v *callType) setString(f *Field, s string) error {
 // callID is a field value representing a DMR Call ID
 type callID int32
 
-// String returns the callID's value as a string.
+// getString returns the callID's value as a string.
 func (v *callID) getString(f *Field) string {
 	return fmt.Sprintf("%d", int(*v))
 }
@@ -1021,7 +1026,7 @@ func (v *callID) store(f *Field) {
 // radioPassword is a field value representing password for the radio.
 type radioPassword string
 
-// String returns the radioPassword's value as a string.
+// getString returns the radioPassword's value as a string.
 func (v *radioPassword) getString(f *Field) string {
 	return string(*v)
 }
@@ -1069,7 +1074,7 @@ func (v *radioPassword) store(f *Field) {
 // pcPassword is a field value representing a password for the computer.
 type pcPassword string
 
-// String returns the pcPassword's value as a string.
+// getString returns the pcPassword's value as a string.
 func (v *pcPassword) getString(f *Field) string {
 	if string(*v) == "\xff\xff\xff\xff\xff\xff\xff\xff" {
 		return ""
@@ -1127,7 +1132,7 @@ func (v *pcPassword) store(f *Field) {
 // radioName is a field value representing the name of the radio.
 type radioName string
 
-// String returns the radioName's value as a string.
+// getString returns the radioName's value as a string.
 func (v *radioName) getString(f *Field) string {
 	return string(*v)
 }
@@ -1176,12 +1181,12 @@ func (v *radioName) store(f *Field) {
 // textMessage is a field value representing a text message
 type textMessage string
 
-// String returns the textMessage's value as a string.
+// getString returns the textMessage's value as a string.
 func (v *textMessage) getString(f *Field) string {
 	return string(*v)
 }
 
-// valid returns nil if the textMessage's value is valid.
+// setString sets the textMessages value from a string
 func (v *textMessage) setString(f *Field, s string) error {
 	if utf8.RuneCountInString(s) >= f.size()/2 {
 		return fmt.Errorf("line too long")
@@ -1223,7 +1228,7 @@ type uniqueName struct {
 // name is a field value representing a utf8 name.
 type name string
 
-// String returns the name's value as a string.
+// getString returns the name's value as a string.
 func (v *name) getString(f *Field) string {
 	return string(*v)
 }
@@ -1265,7 +1270,7 @@ type privacyNumber struct {
 	iStrings
 }
 
-// String returns the privacyNumber's value as a string.
+// getString returns the privacyNumber's value as a string.
 func (v *privacyNumber) getString(f *Field) string {
 	ss := f.sibling(FtCiPrivacy).String()
 
@@ -1313,7 +1318,7 @@ func (v *privacyNumber) valid(f *Field) error {
 // ctcssDcs is a field value representing a CTCSS or DCS tone.
 type ctcssDcs int
 
-// String returns the ctcssDcs's value as a string.
+// getString returns the ctcssDcs's value as a string.
 func (v *ctcssDcs) getString(f *Field) string {
 	s, _ := ctcssDcsCode(int(*v))
 
@@ -1356,7 +1361,7 @@ type memberListIndex struct {
 	listIndex
 }
 
-// String returns the memberListIndex's value as a string.
+// getString returns the memberListIndex's value as a string.
 func (v *memberListIndex) getString(f *Field) string {
 	name := v.listIndex.getString(f)
 	if v.listIndex > 0 && int(v.listIndex) <= len(f.fields) {
@@ -1452,7 +1457,7 @@ func (v *gpsListIndex) valid(f *Field) error {
 // listIndex is a field value representing an index into a slice of records
 type listIndex uint16
 
-// String returns the listIndex's value as a string.
+// getString returns the listIndex's value as a string.
 func (v *listIndex) getString(f *Field) string {
 	fd := f.fDesc
 
@@ -1535,7 +1540,7 @@ type model struct {
 	ascii
 }
 
-// String returns the ascii's value as a string.
+// getString returns the ascii's value as a string.
 func (v *model) getString(f *Field) string {
 	s := v.ascii.getString(f)
 
@@ -1560,7 +1565,7 @@ func (v *model) setString(f *Field, s string) error {
 // ascii is a field value representing a ASCII string.
 type ascii string
 
-// String returns the ascii's value as a string.
+// getString returns the ascii's value as a string.
 func (v *ascii) getString(f *Field) string {
 	return string(*v)
 }
@@ -1602,7 +1607,7 @@ func (v *ascii) store(f *Field) {
 // timeStamp is a field value representing a BCD-encoded time string
 type timeStamp string
 
-// String returns the timeStamp's value as a string.
+// getString returns the timeStamp's value as a string.
 func (v *timeStamp) getString(f *Field) string {
 	t, _ := time.Parse("20060102150405", string(*v))
 	return t.Format("02-Jan-2006 15:04:05")
@@ -1643,7 +1648,7 @@ func (v *timeStamp) store(f *Field) {
 // timeStamp is a field value representing a BCD-encoded time string
 type cpsVersion string
 
-// String returns the cpsVersion's value as a string.
+// getString returns the cpsVersion's value as a string.
 func (v *cpsVersion) getString(f *Field) string {
 	return string(*v)
 }
@@ -1685,6 +1690,56 @@ func (v *cpsVersion) store(f *Field) {
 		bytes[i] = byte(int(r) - int('0'))
 	}
 	f.storeBytes(bytes)
+}
+
+func reverseBytes(bytes []byte) []byte {
+	length := len(bytes)
+	result := make([]byte, length)
+	for i, b := range bytes {
+		result[length-1-i] = b
+	}
+
+	return result
+}
+
+// hexadecimal is a field containing an arbitrary value displayed as hexadecimal
+type hexadecimal []byte
+
+// getString returns the hexadecimal value as a string.
+func (v *hexadecimal) getString(f *Field) string {
+	return strings.ToUpper(hex.EncodeToString(reverseBytes(*v)))
+}
+
+// setString sets the hexadecimal value from a string.
+func (v *hexadecimal) setString(f *Field, s string) error {
+	fullLength := len(*v) * 2
+	if len(s) != fullLength {
+		return fmt.Errorf("must contain %d hex characters", fullLength)
+	}
+
+	reversedBytes, err := hex.DecodeString(s)
+	if err != nil {
+		return errors.New("contains non-hexadecimal characters")
+	}
+
+	*v = reverseBytes(reversedBytes)
+
+	return nil
+}
+
+// valid returns nil if the hexadecimal value is valid.
+func (v *hexadecimal) valid(f *Field) error {
+	return nil
+}
+
+// load sets the hexadecimal value from its bits in cp.bytes.
+func (v *hexadecimal) load(f *Field) {
+	*v = f.bytes()
+}
+
+// store stores the hexadecimal value into its bits in cp.bytes.
+func (v *hexadecimal) store(f *Field) {
+	f.storeBytes(*v)
 }
 
 type biFilename struct {

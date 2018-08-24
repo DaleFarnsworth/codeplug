@@ -29,7 +29,8 @@
       "recordTypes": [
         "BasicInformation_md380",
         "GeneralSettings_md380",
-	"MenuItems",
+        "MenuItems",
+        "PrivacySettings",
         "Contacts",
         "GroupLists",
         "Zones_md380",
@@ -50,7 +51,8 @@
       "recordTypes": [
         "BasicInformation_md390",
         "GeneralSettings_md380",
-	"MenuItems",
+        "MenuItems",
+        "PrivacySettings",
         "Contacts",
         "GroupLists",
         "Zones_md380",
@@ -71,7 +73,8 @@
       "recordTypes": [
         "BasicInformation_md40",
         "GeneralSettings_md40",
-	"MenuItems",
+        "MenuItems",
+        "PrivacySettings",
         "Contacts",
         "GroupLists",
         "Zones_md40",
@@ -256,6 +259,17 @@
       ],
       "fieldTypes": [
         "TmTextMessage"
+      ]
+    },
+    {
+      "typeName": "Privacy Settings",
+      "type":"PrivacySettings",
+      "offset": 23525,
+      "size":176,
+      "max": 1,
+      "fieldTypes": [
+        "PsEnhancedKey",
+        "PsBasicKey"
       ]
     },
     {
@@ -1209,6 +1223,22 @@
       "valueType": "textMessage"
     },
     {
+      "typeName": "Key Value (Enhanced)",
+      "type": "PsEnhancedKey",
+      "bitOffset": 0,
+      "bitSize": 128,
+      "max": 8,
+      "valueType": "hexadecimal"
+    },
+    {
+      "typeName": "Key Value (Basic)",
+      "type": "PsBasicKey",
+      "bitOffset": 1152,
+      "bitSize": 16,
+      "max": 16,
+      "valueType": "hexadecimal"
+    },
+    {
       "typeName": "Call ID",
       "type": "DcCallID",
       "bitOffset": 0,
@@ -1526,7 +1556,7 @@
           "CiRxSignallingSystem",
           "CiDisplayPTTID",
           "CiCtcssEncode",
-	  "CiBandwidth",
+          "CiBandwidth",
           "CiTxSignallingSystem"
         ]
       }

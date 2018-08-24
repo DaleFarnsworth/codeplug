@@ -786,28 +786,36 @@ func (parent *Form) AddRow(label string, w *Widget) {
 }
 
 func (parent *Form) AddFieldRows(r *codeplug.Record, fTypes ...codeplug.FieldType) {
+	labelFunc := func(f *codeplug.Field) string {
+		return fmt.Sprintf("%s", f.Type())
+	}
 	for _, fType := range fTypes {
-		parent.addFieldRow(r, fType)
+		f := r.Field(fType)
+		// We just ignore non-existent fields.  This is not an
+		// error because some forms are used for multiple models.
+		if f != nil {
+			parent.addFieldRow(r.Field(fType), labelFunc)
+		}
 	}
 }
 
-func (parent *Form) addFieldRow(r *codeplug.Record, fType codeplug.FieldType) {
-	f := r.Field(fType)
-	if f == nil {
-		// This is not an error because some forms are used for
-		// multiple models. We just ignore non-existent fields.
-		return
+func (parent *Form) AddFieldListRows(fields []*codeplug.Field, labelFunc func(*codeplug.Field) string) {
+	for _, f := range fields {
+		parent.addFieldRow(f, labelFunc)
 	}
+}
 
+func (parent *Form) addFieldRow(f *codeplug.Field, labelFunc func(*codeplug.Field) string) {
 	newFieldWidgetFunc := newFieldWidget[f.ValueType()]
 	if newFieldWidgetFunc == nil {
 		logFatalf("No %s entry in newFieldWidget slice", f.ValueType())
 	}
 	w := newFieldWidgetFunc(f)
-	w.label = widgets.NewQLabel2(f.TypeName(), nil, 0)
+	w.label = widgets.NewQLabel2(labelFunc(f), nil, 0)
 	parent.layout.AddRow(w.label, w.qWidget)
 
 	widgets := parent.window.widgets
+	fType := f.Type()
 	widgets[fType] = w
 
 	enablingFieldType := f.EnablingFieldType()
@@ -1205,6 +1213,7 @@ var newFieldWidget = map[codeplug.ValueType]func(*codeplug.Field) *Widget{
 	codeplug.VtCtcssDcs:          newFieldCombobox,
 	codeplug.VtFrequency:         newFieldLineEdit,
 	codeplug.VtGpsReportInterval: newFieldSpinbox,
+	codeplug.VtHexadecimal:       newFieldLineEdit,
 	codeplug.VtIndexedStrings:    newFieldCombobox,
 	codeplug.VtIntroLine:         newFieldLineEdit,
 	codeplug.VtIStrings:          newFieldCombobox,

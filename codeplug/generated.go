@@ -40,6 +40,7 @@ const (
 	RtGeneralSettings_md40   RecordType = "GeneralSettings"
 	RtGroupLists             RecordType = "GroupLists"
 	RtMenuItems              RecordType = "MenuItems"
+	RtPrivacySettings        RecordType = "PrivacySettings"
 	RtScanLists_md380        RecordType = "ScanLists"
 	RtScanLists_md40         RecordType = "ScanLists"
 	RtTextMessages           RecordType = "TextMessages"
@@ -179,6 +180,8 @@ const (
 	FtMiTextMessage               FieldType = "TextMessage"
 	FtMiToneOrAlert               FieldType = "ToneOrAlert"
 	FtMiVox                       FieldType = "Vox"
+	FtPsBasicKey                  FieldType = "BasicKey"
+	FtPsEnhancedKey               FieldType = "EnhancedKey"
 	FtSlChannel_md380             FieldType = "Channel"
 	FtSlChannel_md40              FieldType = "Channel"
 	FtSlName                      FieldType = "Name"
@@ -207,6 +210,7 @@ const (
 	VtFrequency         ValueType = "frequency"
 	VtGpsListIndex      ValueType = "gpsListIndex"
 	VtGpsReportInterval ValueType = "gpsReportInterval"
+	VtHexadecimal       ValueType = "hexadecimal"
 	VtIStrings          ValueType = "iStrings"
 	VtIndexedStrings    ValueType = "indexedStrings"
 	VtIntroLine         ValueType = "introLine"
@@ -247,6 +251,8 @@ func newValue(vt ValueType) value {
 		return new(gpsListIndex)
 	case VtGpsReportInterval:
 		return new(gpsReportInterval)
+	case VtHexadecimal:
+		return new(hexadecimal)
 	case VtIStrings:
 		return new(iStrings)
 	case VtIndexedStrings:
@@ -306,6 +312,7 @@ var cpMd380 = CodeplugInfo{
 		&riBasicInformation_md380,
 		&riGeneralSettings_md380,
 		&riMenuItems,
+		&riPrivacySettings,
 		&riContacts,
 		&riGroupLists,
 		&riZones_md380,
@@ -328,6 +335,7 @@ var cpMd390 = CodeplugInfo{
 		&riBasicInformation_md390,
 		&riGeneralSettings_md380,
 		&riMenuItems,
+		&riPrivacySettings,
 		&riContacts,
 		&riGroupLists,
 		&riZones_md380,
@@ -350,6 +358,7 @@ var cpMd40 = CodeplugInfo{
 		&riBasicInformation_md40,
 		&riGeneralSettings_md40,
 		&riMenuItems,
+		&riPrivacySettings,
 		&riContacts,
 		&riGroupLists,
 		&riZones_md40,
@@ -705,6 +714,18 @@ var riMenuItems = recordInfo{
 		&fiMiProgramRadio,
 		&fiMiDisplayMode,
 		&fiMiPasswordAndLock,
+	},
+}
+
+var riPrivacySettings = recordInfo{
+	rType:    RtPrivacySettings,
+	typeName: "Privacy Settings",
+	max:      1,
+	offset:   23525,
+	size:     176,
+	fieldInfos: []*fieldInfo{
+		&fiPsEnhancedKey,
+		&fiPsBasicKey,
 	},
 }
 
@@ -2309,6 +2330,24 @@ var fiMiVox = fieldInfo{
 	bitOffset: 24,
 	bitSize:   1,
 	valueType: VtOffOn,
+}
+
+var fiPsBasicKey = fieldInfo{
+	fType:     FtPsBasicKey,
+	typeName:  "Key Value (Basic)",
+	max:       16,
+	bitOffset: 1152,
+	bitSize:   16,
+	valueType: VtHexadecimal,
+}
+
+var fiPsEnhancedKey = fieldInfo{
+	fType:     FtPsEnhancedKey,
+	typeName:  "Key Value (Enhanced)",
+	max:       8,
+	bitOffset: 0,
+	bitSize:   128,
+	valueType: VtHexadecimal,
 }
 
 var fiSlChannel_md380 = fieldInfo{
