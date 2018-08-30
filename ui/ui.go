@@ -935,7 +935,9 @@ func (w *Widget) SetEnabled(b bool) {
 	case *widgets.QComboBox:
 		qw.(*widgets.QComboBox).SetEnabled(b)
 		f := w.field
-		UpdateComboboxWidget(w, f.String(), f.Strings())
+		if f != nil {
+			UpdateComboboxWidget(w, f.String(), f.Strings())
+		}
 
 	case *widgets.QPushButton:
 		qw.(*widgets.QPushButton).SetEnabled(b)
