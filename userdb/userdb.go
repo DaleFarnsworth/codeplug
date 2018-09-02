@@ -567,7 +567,6 @@ func getCuratedUsers() ([]*User, error) {
 	for i, line := range lines {
 		fields := strings.Split(line, ",")
 		if len(fields) < 7 {
-			fmt.Println(line)
 			continue
 		}
 		users[i] = &User{
@@ -951,7 +950,7 @@ func (db *UsersDB) write(header bool) (err error) {
 	}()
 
 	if header {
-		fmt.Sprintln("Radio ID,CallSign,Name,City,State,Firstname,Country")
+		fmt.Fprintln(file, "Radio ID,CallSign,Name,City,State,Firstname,Country")
 	}
 
 	users, err := db.Users()
