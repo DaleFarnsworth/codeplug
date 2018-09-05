@@ -1415,8 +1415,8 @@ var fiCiRxSignallingSystem = fieldInfo{
 	fType:        FtCiRxSignallingSystem,
 	typeName:     "Rx Signaling System",
 	max:          1,
-	bitOffset:    229,
-	bitSize:      3,
+	bitOffset:    224,
+	bitSize:      8,
 	valueType:    VtIStrings,
 	defaultValue: "Off",
 	strings: &[]string{
@@ -1533,8 +1533,8 @@ var fiCiTxSignallingSystem = fieldInfo{
 	fType:        FtCiTxSignallingSystem,
 	typeName:     "Tx Signaling System",
 	max:          1,
-	bitOffset:    237,
-	bitSize:      3,
+	bitOffset:    232,
+	bitSize:      8,
 	valueType:    VtIStrings,
 	defaultValue: "Off",
 	strings: &[]string{

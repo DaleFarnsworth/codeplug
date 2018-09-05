@@ -1952,8 +1952,8 @@
     {
       "typeName": "Rx Signaling System",
       "type": "CiRxSignallingSystem",
-      "bitOffset": 229,
-      "bitSize": 3,
+      "bitOffset": 224,
+      "bitSize": 8,
       "valueType": "iStrings",
       "defaultValue": "Off",
       "strings": [
@@ -1980,8 +1980,8 @@
     {
       "typeName": "Tx Signaling System",
       "type": "CiTxSignallingSystem",
-      "bitOffset": 237,
-      "bitSize": 3,
+      "bitOffset": 232,
+      "bitSize": 8,
       "valueType": "iStrings",
       "defaultValue": "Off",
       "strings": [
