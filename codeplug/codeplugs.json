@@ -1520,11 +1520,12 @@
       "typeName": "Bandwidth",
       "type": "CiBandwidth",
       "bitOffset": 4,
-      "bitSize": 1,
+      "bitSize": 2,
       "valueType": "iStrings",
       "strings": [
-        "12.5",
-        "25"
+        "12.5 KHz",
+	"20 KHz",
+        "25 KHz"
       ]
     },
     {

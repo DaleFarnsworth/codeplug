@@ -1006,10 +1006,11 @@ var fiCiBandwidth = fieldInfo{
 	typeName:  "Bandwidth",
 	max:       1,
 	bitOffset: 4,
-	bitSize:   1,
+	bitSize:   2,
 	valueType: VtIStrings,
 	strings: &[]string{
 		"12.5",
+		"20",
 		"25",
 	},
 	disabler: FtCiChannelMode,
