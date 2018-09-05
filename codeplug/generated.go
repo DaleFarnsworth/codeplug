@@ -82,6 +82,7 @@ const (
 	FtCiDecode8                   FieldType = "Decode8"
 	FtCiDisplayPTTID              FieldType = "DisplayPTTID"
 	FtCiEmergencyAlarmAck         FieldType = "EmergencyAlarmAck"
+	FtCiEmergencySystem           FieldType = "EmergencySystem"
 	FtCiGPSSystem                 FieldType = "GPSSystem"
 	FtCiGroupList                 FieldType = "GroupList"
 	FtCiInCallCriteria            FieldType = "InCallCriteria"
@@ -454,6 +455,7 @@ var riChannels_md380 = recordInfo{
 		&fiCiEmergencyAlarmAck,
 		&fiCiDataCallConfirmed,
 		&fiCiCompressedUdpDataHeader,
+		&fiCiEmergencySystem,
 		&fiCiContactName,
 		&fiCiGroupList,
 		&fiCiColorCode,
@@ -518,6 +520,7 @@ var riChannels_md40 = recordInfo{
 		&fiCiEmergencyAlarmAck,
 		&fiCiDataCallConfirmed,
 		&fiCiCompressedUdpDataHeader,
+		&fiCiEmergencySystem,
 		&fiCiContactName,
 		&fiCiGroupList,
 		&fiCiColorCode,
@@ -1201,6 +1204,21 @@ var fiCiEmergencyAlarmAck = fieldInfo{
 	bitSize:   1,
 	valueType: VtOffOn,
 	enabler:   FtCiChannelMode,
+}
+
+var fiCiEmergencySystem = fieldInfo{
+	fType:     FtCiEmergencySystem,
+	typeName:  "Emergency System",
+	max:       1,
+	bitOffset: 80,
+	bitSize:   8,
+	valueType: VtSpan,
+	span: &Span{
+		min:       0,
+		max:       32,
+		minString: "None",
+	},
+	enabler: FtCiChannelMode,
 }
 
 var fiCiGPSSystem = fieldInfo{

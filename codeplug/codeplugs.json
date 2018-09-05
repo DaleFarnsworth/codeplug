@@ -428,6 +428,7 @@
         "CiEmergencyAlarmAck",
         "CiDataCallConfirmed",
         "CiCompressedUdpDataHeader",
+	"CiEmergencySystem",
         "CiContactName",
         "CiGroupList",
         "CiColorCode",
@@ -491,6 +492,7 @@
         "CiEmergencyAlarmAck",
         "CiDataCallConfirmed",
         "CiCompressedUdpDataHeader",
+	"CiEmergencySystem",
         "CiContactName",
         "CiGroupList",
         "CiColorCode",
@@ -1546,6 +1548,7 @@
           "CiEmergencyAlarmAck",
           "CiDataCallConfirmed",
           "CiCompressedUdpDataHeader",
+	  "CiEmergencySystem",
           "CiContactName",
           "CiGroupList",
           "CiColorCode",
@@ -1800,6 +1803,18 @@
       "span": {
         "min": 0,
         "max": 255
+      }
+    },
+    {
+      "typeName": "Emergency System",
+      "type": "CiEmergencySystem",
+      "bitOffset": 80,
+      "bitSize": 8,
+      "valueType": "span",
+      "span": {
+        "min": 0,
+        "max": 32,
+        "minString": "None"
       }
     },
     {
