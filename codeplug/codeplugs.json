@@ -1780,12 +1780,12 @@
     {
       "typeName": "TOT (S)",
       "type": "CiTot",
-      "bitOffset": 66,
-      "bitSize": 6,
+      "bitOffset": 64,
+      "bitSize": 8,
       "valueType": "span",
       "span": {
         "min": 0,
-        "max": 63,
+        "max": 37,
         "scale": 15,
         "minString": "Infinite"
       }
