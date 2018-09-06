@@ -553,7 +553,7 @@ func (vBox *VBox) AddFieldMembers(r *codeplug.Record, sortAvailable *bool, nameT
 
 	row := vBox.AddHbox()
 	form := row.AddForm()
-	form.AddFieldRows(r, nameType)
+	form.AddFieldTypeRows(r, nameType)
 
 	row = vBox.AddHbox()
 

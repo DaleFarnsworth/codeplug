@@ -785,27 +785,30 @@ func (parent *Form) AddRow(label string, w *Widget) {
 	parent.AddWidget(w)
 }
 
-func (parent *Form) AddFieldRows(r *codeplug.Record, fTypes ...codeplug.FieldType) {
+func (parent *Form) AddFieldTypeRows(r *codeplug.Record, fTypes ...codeplug.FieldType) {
+	fields := make([]*codeplug.Field, len(fTypes))
+	for i, fType := range fTypes {
+		fields[i] = r.Field(fType)
+	}
 	labelFunc := func(f *codeplug.Field) string {
-		return fmt.Sprintf("%s", f.Type())
+		return f.TypeName()
 	}
-	for _, fType := range fTypes {
-		f := r.Field(fType)
-		// We just ignore non-existent fields.  This is not an
-		// error because some forms are used for multiple models.
-		if f != nil {
-			parent.addFieldRow(r.Field(fType), labelFunc)
-		}
-	}
+	parent.AddFieldRows(labelFunc, fields...)
 }
 
-func (parent *Form) AddFieldListRows(fields []*codeplug.Field, labelFunc func(*codeplug.Field) string) {
+func (parent *Form) AddFieldRows(labelFunc func(*codeplug.Field) string, fields ...*codeplug.Field) {
 	for _, f := range fields {
-		parent.addFieldRow(f, labelFunc)
+		parent.AddFieldRow(labelFunc, f)
 	}
 }
 
-func (parent *Form) addFieldRow(f *codeplug.Field, labelFunc func(*codeplug.Field) string) {
+func (parent *Form) AddFieldRow(labelFunc func(*codeplug.Field) string, f *codeplug.Field) {
+	if f == nil {
+		// This is not an error because some forms are used for
+		// multiple models and some models do not include all fields.
+		// We just ignore non-existent fields.
+		return
+	}
 	newFieldWidgetFunc := newFieldWidget[f.ValueType()]
 	if newFieldWidgetFunc == nil {
 		logFatalf("No %s entry in newFieldWidget slice", f.ValueType())
@@ -855,22 +858,33 @@ func (parent *Form) addFieldRow(f *codeplug.Field, labelFunc func(*codeplug.Fiel
 
 }
 
-func (parent *Form) AddReadOnlyFieldRows(r *codeplug.Record, fTypes ...codeplug.FieldType) {
-	for _, fType := range fTypes {
-		parent.addReadOnlyFieldRow(r, fType)
+func (parent *Form) AddReadOnlyFieldTypeRows(r *codeplug.Record, fTypes ...codeplug.FieldType) {
+	fields := make([]*codeplug.Field, len(fTypes))
+	for i, fType := range fTypes {
+		fields[i] = r.Field(fType)
+	}
+	labelFunc := func(f *codeplug.Field) string {
+		return f.TypeName()
+	}
+	parent.AddReadOnlyFieldRows(labelFunc, fields...)
+}
+
+func (parent *Form) AddReadOnlyFieldRows(labelFunc func(*codeplug.Field) string, fields ...*codeplug.Field) {
+	for _, f := range fields {
+		parent.AddReadOnlyFieldRow(labelFunc, f)
 	}
 }
 
-func (parent *Form) addReadOnlyFieldRow(r *codeplug.Record, fType codeplug.FieldType) {
-	f := r.Field(fType)
+func (parent *Form) AddReadOnlyFieldRow(labelFunc func(*codeplug.Field) string, f *codeplug.Field) {
 	if f == nil {
 		// This is not an error because some forms are used for
-		// multiple models. We just ignore non-existent fields.
+		// multiple models and some models do not include all fields.
+		// We just ignore non-existent fields.
 		return
 	}
 
 	w := newFieldLineEdit(f)
-	w.label = widgets.NewQLabel2(f.TypeName(), nil, 0)
+	w.label = widgets.NewQLabel2(labelFunc(f), nil, 0)
 	w.SetReadOnly(true)
 	parent.layout.AddRow(w.label, w.qWidget)
 }
