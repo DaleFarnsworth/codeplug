@@ -374,6 +374,7 @@ func (mw *MainWindow) NewWindow() *Window {
 	w.layout = widgets.NewQHBoxLayout2(&w.qWidget)
 	w.mainWindow = mw
 	w.window = w
+	w.qWidget.Resize2(500, 500)
 
 	w.qWidget.ConnectCloseEvent(func(event *gui.QCloseEvent) {
 		if w.connectClose != nil {
@@ -1180,6 +1181,43 @@ func NewButtonWidget(text string, clicked func()) *Widget {
 	w.qWidget = b
 
 	return w
+}
+
+type TextEdit struct {
+	qWidget widgets.QTextEdit
+}
+
+func NewTextEdit() *TextEdit {
+	t := new(TextEdit)
+	t.qWidget = *widgets.NewQTextEdit(nil)
+
+	return t
+}
+
+func (parent *HBox) AddTextEdit() *TextEdit {
+	t := NewTextEdit()
+	parent.layout.AddWidget(&t.qWidget, 0, 0)
+
+	return t
+}
+
+func (parent *VBox) AddTextEdit() *TextEdit {
+	t := NewTextEdit()
+	parent.layout.AddWidget(&t.qWidget, 0, 0)
+
+	return t
+}
+
+func (t *TextEdit) SetPlainText(str string) {
+	t.qWidget.SetPlainText(str)
+}
+
+func (t *TextEdit) SetNoLineWrap() {
+	t.qWidget.SetLineWrapMode(widgets.QTextEdit__NoWrap)
+}
+
+func (t *TextEdit) SetReadOnly(ro bool) {
+	t.qWidget.SetReadOnly(ro)
 }
 
 func newFieldSpinbox(f *codeplug.Field) *Widget {

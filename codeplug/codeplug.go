@@ -88,6 +88,7 @@ type Codeplug struct {
 	cachedNameToRt      map[string]RecordType
 	cachedNameToFt      map[RecordType]map[string]FieldType
 	deferredValueFields []*Field
+	errCount            int
 }
 
 type CodeplugInfo struct {
@@ -394,6 +395,10 @@ func (cp *Codeplug) Type() string {
 	return cp.codeplugInfo.Type
 }
 
+func (cp *Codeplug) ErrorCount() int {
+	return cp.errCount
+}
+
 // Codeplugs returns a slice containing all currently open codeplugs.
 func Codeplugs() []*Codeplug {
 	return codeplugs
@@ -484,7 +489,7 @@ func (cp *Codeplug) Revert(ignoreWarnings bool) error {
 
 	cp.load()
 
-	if err := cp.valid(); err != nil && !ignoreWarnings {
+	if err := cp.Valid(); err != nil && !ignoreWarnings {
 		return err
 	}
 
@@ -524,7 +529,7 @@ func (cp *Codeplug) SaveAs(filename string, ignoreWarnings bool) error {
 // The state of the codeplug is not changed, so this
 // is useful for use by an autosave function.
 func (cp *Codeplug) SaveToFile(filename string, ignoreWarnings bool) (err error) {
-	if err = cp.valid(); err != nil {
+	if err = cp.Valid(); err != nil {
 		_, warning := err.(Warning)
 		if !warning || !ignoreWarnings {
 			return err
@@ -805,12 +810,14 @@ func (cp *Codeplug) newRecord(rType RecordType, rIndex int) *Record {
 }
 
 // valid returns nil if all fields in the codeplug are valid.
-func (cp *Codeplug) valid() error {
+func (cp *Codeplug) Valid() error {
 	errStr := ""
+	cp.errCount = 0
 	for _, rType := range cp.RecordTypes() {
 		for _, r := range cp.records(rType) {
 			if err := r.valid(); err != nil {
 				errStr += err.Error()
+				cp.errCount++
 			}
 		}
 	}
@@ -818,6 +825,7 @@ func (cp *Codeplug) valid() error {
 	for _, f := range cp.deferredValueFields {
 		if err := f.valid(); err != nil {
 			errStr += fmt.Sprintf("%s %s\n", f.FullTypeName(), err.Error())
+			cp.errCount++
 		}
 	}
 	cp.deferredValueFields = nil
