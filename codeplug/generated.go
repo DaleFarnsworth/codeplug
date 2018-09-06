@@ -106,7 +106,7 @@ const (
 	FtCiSquelch                   FieldType = "Squelch"
 	FtCiTot                       FieldType = "Tot"
 	FtCiTotRekeyDelay             FieldType = "TotRekeyDelay"
-	FtCiTxFrequency               FieldType = "TxFrequency"
+	FtCiTxFrequencyOffset         FieldType = "TxFrequencyOffset"
 	FtCiTxRefFrequency            FieldType = "TxRefFrequency"
 	FtCiTxSignallingSystem        FieldType = "TxSignallingSystem"
 	FtCiVox                       FieldType = "Vox"
@@ -209,6 +209,7 @@ const (
 	VtCpsVersion        ValueType = "cpsVersion"
 	VtCtcssDcs          ValueType = "ctcssDcs"
 	VtFrequency         ValueType = "frequency"
+	VtFrequencyOffset   ValueType = "frequencyOffset"
 	VtGpsListIndex      ValueType = "gpsListIndex"
 	VtGpsReportInterval ValueType = "gpsReportInterval"
 	VtHexadecimal       ValueType = "hexadecimal"
@@ -248,6 +249,8 @@ func newValue(vt ValueType) value {
 		return new(ctcssDcs)
 	case VtFrequency:
 		return new(frequency)
+	case VtFrequencyOffset:
+		return new(frequencyOffset)
 	case VtGpsListIndex:
 		return new(gpsListIndex)
 	case VtGpsReportInterval:
@@ -435,7 +438,7 @@ var riChannels_md380 = recordInfo{
 	fieldInfos: []*fieldInfo{
 		&fiCiName,
 		&fiCiRxFrequency,
-		&fiCiTxFrequency,
+		&fiCiTxFrequencyOffset,
 		&fiCiChannelMode,
 		&fiCiBandwidth,
 		&fiCiScanList_md380,
@@ -500,7 +503,7 @@ var riChannels_md40 = recordInfo{
 	fieldInfos: []*fieldInfo{
 		&fiCiName,
 		&fiCiRxFrequency,
-		&fiCiTxFrequency,
+		&fiCiTxFrequencyOffset,
 		&fiCiChannelMode,
 		&fiCiBandwidth,
 		&fiCiScanList_md40,
@@ -1012,9 +1015,9 @@ var fiCiBandwidth = fieldInfo{
 	bitSize:   2,
 	valueType: VtIStrings,
 	strings: &[]string{
-		"12.5",
-		"20",
-		"25",
+		"12.5 KHz",
+		"20 KHz",
+		"25 KHz",
 	},
 	disabler: FtCiChannelMode,
 }
@@ -1525,13 +1528,13 @@ var fiCiTotRekeyDelay = fieldInfo{
 	},
 }
 
-var fiCiTxFrequency = fieldInfo{
-	fType:     FtCiTxFrequency,
-	typeName:  "Tx Frequency (MHz)",
+var fiCiTxFrequencyOffset = fieldInfo{
+	fType:     FtCiTxFrequencyOffset,
+	typeName:  "Tx Offset (MHz)",
 	max:       1,
 	bitOffset: 160,
 	bitSize:   32,
-	valueType: VtFrequency,
+	valueType: VtFrequencyOffset,
 }
 
 var fiCiTxRefFrequency = fieldInfo{

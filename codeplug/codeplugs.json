@@ -408,7 +408,7 @@
       "fieldTypes": [
         "CiName",
         "CiRxFrequency",
-        "CiTxFrequency",
+        "CiTxFrequencyOffset",
         "CiChannelMode",
         "CiBandwidth",
         "CiScanList_md380",
@@ -472,7 +472,7 @@
       "fieldTypes": [
         "CiName",
         "CiRxFrequency",
-        "CiTxFrequency",
+        "CiTxFrequencyOffset",
         "CiChannelMode",
         "CiBandwidth",
         "CiScanList_md40",
@@ -1936,11 +1936,11 @@
       "valueType": "frequency"
     },
     {
-      "typeName": "Tx Frequency (MHz)",
-      "type": "CiTxFrequency",
+      "typeName": "Tx Offset (MHz)",
+      "type": "CiTxFrequencyOffset",
       "bitOffset": 160,
       "bitSize": 32,
-      "valueType": "frequency"
+      "valueType": "frequencyOffset"
     },
     {
       "typeName": "CTCSS/DCS Decode",

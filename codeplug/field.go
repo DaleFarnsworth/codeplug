@@ -589,6 +589,66 @@ func (v *frequency) store(f *Field) {
 	f.storeBytes(frequencyToBytes(float64(*v)))
 }
 
+type frequencyOffset struct {
+	offset float64
+	loaded bool
+}
+
+// getString returns the frequencyOffset's value as a string.
+func (v *frequencyOffset) getString(f *Field) string {
+	return frequencyToSignedString(v.offset)
+}
+
+// setString sets the frequencyOffset's value from a string.
+func (v *frequencyOffset) setString(f *Field, s string) error {
+	freq, err := stringToFrequency(s)
+	if err != nil {
+		return err
+	}
+
+	if f.record.codeplug.frequencyValid(freq) == nil {
+		freq -= rxFrequency(f)
+	} else {
+		err = f.record.codeplug.frequencyValid(rxFrequency(f) + freq)
+		if err != nil {
+			return err
+		}
+	}
+
+	v.offset = freq
+
+	return nil
+}
+
+// valid returns nil if the frequencyOffset's value is valid.
+func (v *frequencyOffset) valid(f *Field) error {
+	if !v.loaded {
+		v.load(f)
+	}
+	return f.record.codeplug.frequencyValid(rxFrequency(f) + v.offset)
+}
+
+// load sets the frequencyOffset's value from its bits in cp.bytes.
+func (v *frequencyOffset) load(f *Field) {
+	if f.sibling(FtCiRxFrequency) == nil {
+		v.loaded = false
+		return
+	}
+
+	v.offset = bytesToFrequency(f.bytes()) - rxFrequency(f)
+	v.loaded = true
+}
+
+// store stores the frequencyOffset's value into its bits in cp.bytes.
+func (v *frequencyOffset) store(f *Field) {
+	f.storeBytes(frequencyToBytes(v.offset + rxFrequency(f)))
+}
+
+func rxFrequency(f *Field) float64 {
+	rxFrequency, _ := f.sibling(FtCiRxFrequency).value.(*frequency)
+	return float64(*rxFrequency)
+}
+
 // onOff is a field value representing a boolean value.
 // It is used when a 1 bit in the codeplug represents false
 type onOff bool

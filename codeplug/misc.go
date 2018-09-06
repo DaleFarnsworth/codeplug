@@ -109,6 +109,11 @@ func frequencyToString(f float64) string {
 	return fmt.Sprintf("%3.5f", f)
 }
 
+// frequencyToSignedString produces a string from a floating point frequency.
+func frequencyToSignedString(f float64) string {
+	return fmt.Sprintf("%+3.5f", f)
+}
+
 // stringToFrequency converts a string to a floating point frequency.
 func stringToFrequency(s string) (float64, error) {
 	freq, err := strconv.ParseFloat(s, 64)

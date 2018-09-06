@@ -1228,6 +1228,7 @@ var newFieldWidget = map[codeplug.ValueType]func(*codeplug.Field) *Widget{
 	codeplug.VtCallType:          newFieldCombobox,
 	codeplug.VtCtcssDcs:          newFieldCombobox,
 	codeplug.VtFrequency:         newFieldLineEdit,
+	codeplug.VtFrequencyOffset:   newFieldLineEdit,
 	codeplug.VtGpsReportInterval: newFieldSpinbox,
 	codeplug.VtHexadecimal:       newFieldLineEdit,
 	codeplug.VtIndexedStrings:    newFieldCombobox,
