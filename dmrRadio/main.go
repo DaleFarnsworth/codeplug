@@ -103,8 +103,7 @@ func loadCodeplug(fType codeplug.FileType, filename string) (*codeplug.Codeplug,
 
 	freq := freqs[model][0]
 
-	ignoreWarnings := true
-	err = cp.Load(model, freq, ignoreWarnings)
+	err = cp.Load(model, freq)
 	if err != nil {
 		return nil, err
 	}
@@ -183,8 +182,7 @@ func readCodeplug() error {
 		return err
 	}
 
-	ignoreWarnings := true
-	err = cp.Load(model, freq, ignoreWarnings)
+	err = cp.Load(model, freq)
 	if err != nil {
 		return err
 	}
@@ -199,7 +197,7 @@ func readCodeplug() error {
 		return err
 	}
 
-	return cp.SaveAs(filename, ignoreWarnings)
+	return cp.SaveAs(filename)
 }
 
 func writeCodeplug() error {
@@ -758,8 +756,7 @@ func textToCodeplug() error {
 		return err
 	}
 
-	ignoreWarnings := true
-	return cp.SaveAs(codeplugFilename, ignoreWarnings)
+	return cp.SaveAs(codeplugFilename)
 }
 
 func codeplugToText() error {
@@ -809,8 +806,7 @@ func jsonToCodeplug() error {
 		return err
 	}
 
-	ignoreWarnings := true
-	return cp.SaveAs(codeplugFilename, ignoreWarnings)
+	return cp.SaveAs(codeplugFilename)
 }
 
 func codeplugToJSON() error {
@@ -860,8 +856,7 @@ func xlsxToCodeplug() error {
 		return err
 	}
 
-	ignoreWarnings := true
-	return cp.SaveAs(codeplugFilename, ignoreWarnings)
+	return cp.SaveAs(codeplugFilename)
 }
 
 func codeplugToXLSX() error {
