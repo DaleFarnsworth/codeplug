@@ -1009,15 +1009,15 @@ var fiCiAutoscan = fieldInfo{
 
 var fiCiBandwidth = fieldInfo{
 	fType:     FtCiBandwidth,
-	typeName:  "Bandwidth",
+	typeName:  "Bandwidth (KHz)",
 	max:       1,
 	bitOffset: 4,
 	bitSize:   2,
 	valueType: VtIStrings,
 	strings: &[]string{
-		"12.5 KHz",
-		"20 KHz",
-		"25 KHz",
+		"12.5",
+		"20",
+		"25",
 	},
 	disabler: FtCiChannelMode,
 }

@@ -428,7 +428,7 @@
         "CiEmergencyAlarmAck",
         "CiDataCallConfirmed",
         "CiCompressedUdpDataHeader",
-	"CiEmergencySystem",
+        "CiEmergencySystem",
         "CiContactName",
         "CiGroupList",
         "CiColorCode",
@@ -492,7 +492,7 @@
         "CiEmergencyAlarmAck",
         "CiDataCallConfirmed",
         "CiCompressedUdpDataHeader",
-	"CiEmergencySystem",
+        "CiEmergencySystem",
         "CiContactName",
         "CiGroupList",
         "CiColorCode",
@@ -1519,15 +1519,15 @@
       "valueType": "offOn"
     },
     {
-      "typeName": "Bandwidth",
+      "typeName": "Bandwidth (KHz)",
       "type": "CiBandwidth",
       "bitOffset": 4,
       "bitSize": 2,
       "valueType": "iStrings",
       "strings": [
-        "12.5 KHz",
-	"20 KHz",
-        "25 KHz"
+        "12.5",
+        "20",
+        "25"
       ]
     },
     {
@@ -1548,7 +1548,7 @@
           "CiEmergencyAlarmAck",
           "CiDataCallConfirmed",
           "CiCompressedUdpDataHeader",
-	  "CiEmergencySystem",
+          "CiEmergencySystem",
           "CiContactName",
           "CiGroupList",
           "CiColorCode",
