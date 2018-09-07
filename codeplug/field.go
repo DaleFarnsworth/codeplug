@@ -510,8 +510,8 @@ func (fd *fDesc) bytes(r *Record, fIndex int) []byte {
 // storeBytes inserts bytes value into the field's bits in cp.bytes.
 func (fd *fDesc) storeBytes(bytes []byte, r *Record, fIndex int) {
 	if fd.size() != len(bytes) {
-		panic(fmt.Sprintf("%s: storeBytes(%v) size mismatch",
-			fd.typeName, bytes))
+		panic(fmt.Sprintf("%s: storeBytes(%v) size mismatch: %d vs %d",
+			fd.typeName, bytes, fd.size(), len(bytes)))
 	}
 
 	cp := r.codeplug
@@ -1712,6 +1712,9 @@ func (v *hexadecimal) getString(f *Field) string {
 
 // setString sets the hexadecimal value from a string.
 func (v *hexadecimal) setString(f *Field, s string) error {
+	if len(*v) == 0 {
+		*v = make([]byte, f.bitSize/8)
+	}
 	fullLength := len(*v) * 2
 	if len(s) != fullLength {
 		return fmt.Errorf("must contain %d hex characters", fullLength)
