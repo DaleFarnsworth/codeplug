@@ -88,8 +88,7 @@ type Codeplug struct {
 	cachedNameToRt      map[string]RecordType
 	cachedNameToFt      map[RecordType]map[string]FieldType
 	deferredValueFields []*Field
-	errCount            int
-	//warnings            []string
+	warnings            []string
 }
 
 type CodeplugInfo struct {
@@ -396,8 +395,8 @@ func (cp *Codeplug) Type() string {
 	return cp.codeplugInfo.Type
 }
 
-func (cp *Codeplug) ErrorCount() int {
-	return cp.errCount
+func (cp *Codeplug) Warnings() []string {
+	return cp.warnings
 }
 
 // Codeplugs returns a slice containing all currently open codeplugs.
@@ -528,12 +527,7 @@ func (cp *Codeplug) SaveAs(filename string) error {
 // The state of the codeplug is not changed, so this
 // is useful for use by an autosave function.
 func (cp *Codeplug) SaveToFile(filename string) (err error) {
-	if err = cp.Valid(); err != nil {
-		_, warning := err.(Warning)
-		if !warning {
-			return err
-		}
-	}
+	cp.Valid()
 
 	cp.setLastProgrammedTime(time.Now())
 
@@ -809,31 +803,28 @@ func (cp *Codeplug) newRecord(rType RecordType, rIndex int) *Record {
 }
 
 // valid returns nil if all fields in the codeplug are valid.
-func (cp *Codeplug) Valid() error {
-	errStr := ""
-	cp.errCount = 0
+func (cp *Codeplug) Valid() bool {
+	cp.warnings = make([]string, 0)
 	for _, rType := range cp.RecordTypes() {
 		for _, r := range cp.records(rType) {
 			if err := r.valid(); err != nil {
-				errStr += err.Error()
-				cp.errCount++
+				cp.warnings = append(cp.warnings, err.Error())
 			}
 		}
 	}
 
 	for _, f := range cp.deferredValueFields {
 		if err := f.valid(); err != nil {
-			errStr += fmt.Sprintf("%s %s\n", f.FullTypeName(), err.Error())
-			cp.errCount++
+			cp.warnings = append(cp.warnings, err.Error())
 		}
 	}
 	cp.deferredValueFields = nil
 
-	if errStr != "" {
-		return Warning{fmt.Errorf("%s", errStr)}
+	if len(cp.warnings) != 0 {
+		return false
 	}
 
-	return nil
+	return true
 }
 
 // findFileType sets the codeplug type based on file size
