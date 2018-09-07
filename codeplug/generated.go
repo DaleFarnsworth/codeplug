@@ -32,25 +32,33 @@ const (
 	RtBasicInformation_md380 RecordType = "BasicInformation"
 	RtBasicInformation_md390 RecordType = "BasicInformation"
 	RtBasicInformation_md40  RecordType = "BasicInformation"
+	RtBasicInformation_uv380 RecordType = "BasicInformation"
 	RtChannels_md380         RecordType = "Channels"
 	RtChannels_md40          RecordType = "Channels"
+	RtChannels_uv380         RecordType = "Channels"
 	RtContacts               RecordType = "Contacts"
+	RtContacts_uv380         RecordType = "Contacts"
 	RtGPSSystems             RecordType = "GPSSystems"
 	RtGeneralSettings_md380  RecordType = "GeneralSettings"
 	RtGeneralSettings_md40   RecordType = "GeneralSettings"
+	RtGeneralSettings_uv380  RecordType = "GeneralSettings"
 	RtGroupLists             RecordType = "GroupLists"
 	RtMenuItems              RecordType = "MenuItems"
 	RtPrivacySettings        RecordType = "PrivacySettings"
 	RtScanLists_md380        RecordType = "ScanLists"
 	RtScanLists_md40         RecordType = "ScanLists"
+	RtScanLists_uv380        RecordType = "ScanLists"
 	RtTextMessages           RecordType = "TextMessages"
 	RtZones_md380            RecordType = "Zones"
 	RtZones_md40             RecordType = "Zones"
+	RtZones_uv380            RecordType = "Zones"
 )
 
 // Field types
 const (
 	FtBiCpsVersion                FieldType = "CpsVersion"
+	FtBiFrequencyRangeA_uv380     FieldType = "FrequencyRangeA"
+	FtBiFrequencyRangeB_uv380     FieldType = "FrequencyRangeB"
 	FtBiFrequencyRange_md380      FieldType = "FrequencyRange"
 	FtBiFrequencyRange_md390      FieldType = "FrequencyRange"
 	FtBiFrequencyRange_md40       FieldType = "FrequencyRange"
@@ -61,6 +69,7 @@ const (
 	FtBiNewFilename_md380         FieldType = "NewFilename"
 	FtBiNewFilename_md390         FieldType = "NewFilename"
 	FtBiNewFilename_md40          FieldType = "NewFilename"
+	FtBiNewFilename_uv380         FieldType = "NewFilename"
 	FtCiAdmitCriteria             FieldType = "AdmitCriteria"
 	FtCiAllowTalkaround           FieldType = "AllowTalkaround"
 	FtCiAutoscan                  FieldType = "Autoscan"
@@ -195,6 +204,8 @@ const (
 	FtSlTxDesignatedChannel_md380 FieldType = "TxDesignatedChannel"
 	FtSlTxDesignatedChannel_md40  FieldType = "TxDesignatedChannel"
 	FtTmTextMessage               FieldType = "TextMessage"
+	FtZiChannelA_uv380            FieldType = "ChannelA"
+	FtZiChannelB_uv380            FieldType = "ChannelB"
 	FtZiChannel_md380             FieldType = "Channel"
 	FtZiChannel_md40              FieldType = "Channel"
 	FtZiName                      FieldType = "Name"
@@ -300,6 +311,8 @@ var codeplugInfos = []*CodeplugInfo{
 	&cpMd380,
 	&cpMd390,
 	&cpMd40,
+	&cpUv380,
+	&cpUv390,
 }
 
 var cpMd380 = CodeplugInfo{
@@ -371,6 +384,50 @@ var cpMd40 = CodeplugInfo{
 	},
 }
 
+var cpUv380 = CodeplugInfo{
+	Type: "uv380",
+	Models: []string{
+		"MD-UV380",
+	},
+	Ext:       "rdt",
+	RdtSize:   852533,
+	BinSize:   851968,
+	BinOffset: 549,
+	RecordInfos: []*recordInfo{
+		&riBasicInformation_uv380,
+		&riGeneralSettings_uv380,
+		&riMenuItems,
+		&riPrivacySettings,
+		&riContacts_uv380,
+		&riGroupLists,
+		&riZones_uv380,
+		&riScanLists_uv380,
+		&riChannels_uv380,
+	},
+}
+
+var cpUv390 = CodeplugInfo{
+	Type: "uv390",
+	Models: []string{
+		"MD-UV390",
+	},
+	Ext:       "rdt",
+	RdtSize:   852533,
+	BinSize:   851968,
+	BinOffset: 549,
+	RecordInfos: []*recordInfo{
+		&riBasicInformation_uv380,
+		&riGeneralSettings_uv380,
+		&riMenuItems,
+		&riPrivacySettings,
+		&riContacts_uv380,
+		&riGroupLists,
+		&riZones_uv380,
+		&riScanLists_uv380,
+		&riChannels_uv380,
+	},
+}
+
 var riBasicInformation_md380 = recordInfo{
 	rType:    RtBasicInformation_md380,
 	typeName: "Basic Information",
@@ -415,6 +472,24 @@ var riBasicInformation_md40 = recordInfo{
 		&fiBiModel,
 		&fiBiFrequencyRange_md40,
 		&fiBiNewFilename_md40,
+		&fiBiLowFrequency,
+		&fiBiHighFrequency,
+		&fiBiLastProgrammedTime,
+		&fiBiCpsVersion,
+	},
+}
+
+var riBasicInformation_uv380 = recordInfo{
+	rType:    RtBasicInformation_uv380,
+	typeName: "Basic Information",
+	max:      1,
+	offset:   0,
+	size:     8805,
+	fieldInfos: []*fieldInfo{
+		&fiBiModel,
+		&fiBiFrequencyRangeA_uv380,
+		&fiBiFrequencyRangeB_uv380,
+		&fiBiNewFilename_uv380,
 		&fiBiLowFrequency,
 		&fiBiHighFrequency,
 		&fiBiLastProgrammedTime,
@@ -548,11 +623,93 @@ var riChannels_md40 = recordInfo{
 	},
 }
 
+var riChannels_uv380 = recordInfo{
+	rType:    RtChannels_uv380,
+	typeName: "Channels",
+	max:      3000,
+	offset:   262693,
+	size:     64,
+	delDescs: []delDesc{
+		delDesc{
+			offset: 16,
+			size:   1,
+			value:  255,
+		},
+	},
+	fieldInfos: []*fieldInfo{
+		&fiCiName,
+		&fiCiRxFrequency,
+		&fiCiTxFrequencyOffset,
+		&fiCiChannelMode,
+		&fiCiBandwidth,
+		&fiCiScanList_md40,
+		&fiCiSquelch,
+		&fiCiRxRefFrequency,
+		&fiCiTxRefFrequency,
+		&fiCiTot,
+		&fiCiTotRekeyDelay,
+		&fiCiPower,
+		&fiCiAdmitCriteria,
+		&fiCiAutoscan,
+		&fiCiRxOnly,
+		&fiCiLoneWorker,
+		&fiCiVox,
+		&fiCiAllowTalkaround,
+		&fiCiPrivateCallConfirmed,
+		&fiCiEmergencyAlarmAck,
+		&fiCiDataCallConfirmed,
+		&fiCiCompressedUdpDataHeader,
+		&fiCiEmergencySystem,
+		&fiCiContactName,
+		&fiCiGroupList,
+		&fiCiColorCode,
+		&fiCiRepeaterSlot,
+		&fiCiPrivacy,
+		&fiCiPrivacyNumber,
+		&fiCiDisplayPTTID,
+		&fiCiCtcssEncode,
+		&fiCiTxSignallingSystem,
+		&fiCiQtReverse,
+		&fiCiReverseBurst,
+		&fiCiCtcssDecode,
+		&fiCiRxSignallingSystem,
+		&fiCiDecode1,
+		&fiCiDecode2,
+		&fiCiDecode3,
+		&fiCiDecode4,
+		&fiCiDecode5,
+		&fiCiDecode6,
+		&fiCiDecode7,
+		&fiCiDecode8,
+	},
+}
+
 var riContacts = recordInfo{
 	rType:    RtContacts,
 	typeName: "Contacts",
 	max:      1000,
 	offset:   24997,
+	size:     36,
+	delDescs: []delDesc{
+		delDesc{
+			offset: 3,
+			size:   1,
+			value:  192,
+		},
+	},
+	fieldInfos: []*fieldInfo{
+		&fiDcName,
+		&fiDcCallID,
+		&fiDcCallType,
+		&fiDcCallReceiveTone,
+	},
+}
+
+var riContacts_uv380 = recordInfo{
+	rType:    RtContacts_uv380,
+	typeName: "Contacts",
+	max:      10000,
+	offset:   459301,
 	size:     36,
 	delDescs: []delDesc{
 		delDesc{
@@ -625,6 +782,49 @@ var riGeneralSettings_md380 = recordInfo{
 
 var riGeneralSettings_md40 = recordInfo{
 	rType:    RtGeneralSettings_md40,
+	typeName: "General Settings",
+	max:      1,
+	offset:   8805,
+	size:     144,
+	fieldInfos: []*fieldInfo{
+		&fiGsRadioName,
+		&fiGsRadioID,
+		&fiGsIntroScreen,
+		&fiGsIntroScreenLine1,
+		&fiGsIntroScreenLine2,
+		&fiGsSavePreamble,
+		&fiGsSaveModeReceive,
+		&fiGsDisableAllTones,
+		&fiGsChFreeIndicationTone,
+		&fiGsTalkPermitTone,
+		&fiGsKeypadTones,
+		&fiGsCallAlertToneDuration,
+		&fiGsScanDigitalHangTime,
+		&fiGsScanAnalogHangTime,
+		&fiGsLoneWorkerResponseTime,
+		&fiGsLoneWorkerReminderTime,
+		&fiGsPwAndLockEnable,
+		&fiGsPowerOnPassword,
+		&fiGsMonitorType,
+		&fiGsVoxSensitivity,
+		&fiGsTxPreambleDuration,
+		&fiGsRxLowBatteryInterval,
+		&fiGsPcProgPassword,
+		&fiGsRadioProgPassword,
+		&fiGsMode,
+		&fiGsFreqChannelMode,
+		&fiGsBacklightColor,
+		&fiGsModeSelect,
+		&fiGsLockUnlock,
+		&fiGsSetKeypadLockTime,
+		&fiGsDisableAllLeds,
+		&fiGsGroupCallHangTime,
+		&fiGsPrivateCallHangTime,
+	},
+}
+
+var riGeneralSettings_uv380 = recordInfo{
+	rType:    RtGeneralSettings_uv380,
 	typeName: "General Settings",
 	max:      1,
 	offset:   8805,
@@ -783,6 +983,30 @@ var riScanLists_md40 = recordInfo{
 	},
 }
 
+var riScanLists_uv380 = recordInfo{
+	rType:    RtScanLists_uv380,
+	typeName: "Scan Lists",
+	max:      250,
+	offset:   100997,
+	size:     104,
+	delDescs: []delDesc{
+		delDesc{
+			offset: 0,
+			size:   1,
+			value:  0,
+		},
+	},
+	fieldInfos: []*fieldInfo{
+		&fiSlName,
+		&fiSlPriorityChannel1_md40,
+		&fiSlPriorityChannel2_md40,
+		&fiSlTxDesignatedChannel_md40,
+		&fiSlSignallingHoldTime,
+		&fiSlPrioritySampleTime,
+		&fiSlChannel_md40,
+	},
+}
+
 var riTextMessages = recordInfo{
 	rType:    RtTextMessages,
 	typeName: "Text Messages",
@@ -839,6 +1063,26 @@ var riZones_md40 = recordInfo{
 	},
 }
 
+var riZones_uv380 = recordInfo{
+	rType:    RtZones_uv380,
+	typeName: "Zones",
+	max:      250,
+	offset:   84997,
+	size:     64,
+	delDescs: []delDesc{
+		delDesc{
+			offset: 0,
+			size:   1,
+			value:  0,
+		},
+	},
+	fieldInfos: []*fieldInfo{
+		&fiZiName,
+		&fiZiChannelA_uv380,
+		&fiZiChannelB_uv380,
+	},
+}
+
 var fiBiCpsVersion = fieldInfo{
 	fType:     FtBiCpsVersion,
 	typeName:  "CPS Version",
@@ -846,6 +1090,30 @@ var fiBiCpsVersion = fieldInfo{
 	bitOffset: 69992,
 	bitSize:   32,
 	valueType: VtCpsVersion,
+}
+
+var fiBiFrequencyRangeA_uv380 = fieldInfo{
+	fType:     FtBiFrequencyRangeA_uv380,
+	typeName:  "Frequency Range A",
+	max:       1,
+	bitOffset: 2480,
+	bitSize:   8,
+	valueType: VtIStrings,
+	strings: &[]string{
+		"136-174 MHz",
+	},
+}
+
+var fiBiFrequencyRangeB_uv380 = fieldInfo{
+	fType:     FtBiFrequencyRangeB_uv380,
+	typeName:  "Frequency Range B",
+	max:       1,
+	bitOffset: 2480,
+	bitSize:   8,
+	valueType: VtIStrings,
+	strings: &[]string{
+		"400-480 MHz",
+	},
 }
 
 var fiBiFrequencyRange_md380 = fieldInfo{
@@ -971,6 +1239,18 @@ var fiBiNewFilename_md40 = fieldInfo{
 		"md40ht_420-450.rdt",
 		"md40he_430-440.rdt",
 		"md40t_400-480.rdt",
+	},
+}
+
+var fiBiNewFilename_uv380 = fieldInfo{
+	fType:     FtBiNewFilename_uv380,
+	typeName:  "Codeplug Model Filename",
+	max:       1,
+	bitOffset: 2480,
+	bitSize:   8,
+	valueType: VtBiFilename,
+	strings: &[]string{
+		"md-uv380_136-174_400-480.rdt",
 	},
 }
 
@@ -2526,6 +2806,29 @@ var fiTmTextMessage = fieldInfo{
 	bitOffset: 0,
 	bitSize:   2304,
 	valueType: VtTextMessage,
+}
+
+var fiZiChannelA_uv380 = fieldInfo{
+	fType:          FtZiChannelA_uv380,
+	typeName:       "A Channels",
+	max:            64,
+	bitOffset:      256,
+	bitSize:        16,
+	valueType:      VtListIndex,
+	listRecordType: RtChannels_uv380,
+	extOffset:      201253,
+	extSize:        224,
+	extIndex:       16,
+}
+
+var fiZiChannelB_uv380 = fieldInfo{
+	fType:          FtZiChannelB_uv380,
+	typeName:       "B Channels",
+	max:            64,
+	bitOffset:      0,
+	bitSize:        16,
+	valueType:      VtListIndex,
+	listRecordType: RtChannels_uv380,
 }
 
 var fiZiChannel_md380 = fieldInfo{

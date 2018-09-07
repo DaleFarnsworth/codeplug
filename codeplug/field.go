@@ -82,6 +82,7 @@ type fieldInfo struct {
 	extOffset      int
 	extSize        int
 	extIndex       int
+	extBitOffset   int
 	index          int
 }
 
@@ -475,10 +476,10 @@ func (fd *fDesc) deleteField(r *Record, fIndex int) {
 
 func (fd *fDesc) fieldOffset(r *Record, fIndex int) int {
 	var offset int
-	if fd.extIndex == 0 || fIndex < fd.extIndex {
+	if fd.extSize == 0 || fIndex < fd.extIndex {
 		offset = r.offset + r.rIndex*r.size + fd.offset(fIndex)
 	} else {
-		fExtOffset := (fIndex - fd.extIndex) * fd.size()
+		fExtOffset := fd.extBitOffset/8 + (fIndex-fd.extIndex)*fd.size()
 		offset = fd.extOffset + r.rIndex*fd.extSize + fExtOffset
 	}
 

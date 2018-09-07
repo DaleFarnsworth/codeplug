@@ -81,6 +81,48 @@
         "ScanLists_md40",
         "Channels_md40"
       ]
+    },
+    {
+      "type": "uv380",
+      "models": [
+              "MD-UV380"
+      ],
+      "ext": "rdt",
+      "rdtSize": 852533,
+      "binSize": 851968,
+      "binOffset": 549,
+      "recordTypes": [
+        "BasicInformation_uv380",
+        "GeneralSettings_uv380",
+        "MenuItems",
+        "PrivacySettings",
+        "Contacts_uv380",
+        "GroupLists",
+        "Zones_uv380",
+        "ScanLists_uv380",
+        "Channels_uv380"
+      ]
+    },
+    {
+      "type": "uv390",
+      "models": [
+              "MD-UV390"
+      ],
+      "ext": "rdt",
+      "rdtSize": 852533,
+      "binSize": 851968,
+      "binOffset": 549,
+      "recordTypes": [
+        "BasicInformation_uv380",
+        "GeneralSettings_uv380",
+        "MenuItems",
+        "PrivacySettings",
+        "Contacts_uv380",
+        "GroupLists",
+        "Zones_uv380",
+        "ScanLists_uv380",
+        "Channels_uv380"
+      ]
     }
   ],
   "records": [
@@ -130,6 +172,22 @@
       ]
     },
     {
+      "typeName": "Basic Information",
+      "type": "BasicInformation_uv380",
+      "offset": 0,
+      "size": 8805,
+      "fieldTypes": [
+        "BiModel",
+        "BiFrequencyRangeA_uv380",
+        "BiFrequencyRangeB_uv380",
+        "BiNewFilename_uv380",
+        "BiLowFrequency",
+        "BiHighFrequency",
+        "BiLastProgrammedTime",
+        "BiCpsVersion"
+      ]
+    },
+    {
       "typeName": "General Settings",
       "type": "GeneralSettings_md380",
       "offset": 8805,
@@ -170,6 +228,47 @@
     {
       "typeName": "General Settings",
       "type": "GeneralSettings_md40",
+      "offset": 8805,
+      "size": 144,
+      "fieldTypes": [
+        "GsRadioName",
+        "GsRadioID",
+        "GsIntroScreen",
+        "GsIntroScreenLine1",
+        "GsIntroScreenLine2",
+        "GsSavePreamble",
+        "GsSaveModeReceive",
+        "GsDisableAllTones",
+        "GsChFreeIndicationTone",
+        "GsTalkPermitTone",
+        "GsKeypadTones",
+        "GsCallAlertToneDuration",
+        "GsScanDigitalHangTime",
+        "GsScanAnalogHangTime",
+        "GsLoneWorkerResponseTime",
+        "GsLoneWorkerReminderTime",
+        "GsPwAndLockEnable",
+        "GsPowerOnPassword",
+        "GsMonitorType",
+        "GsVoxSensitivity",
+        "GsTxPreambleDuration",
+        "GsRxLowBatteryInterval",
+        "GsPcProgPassword",
+        "GsRadioProgPassword",
+        "GsMode",
+        "GsFreqChannelMode",
+        "GsBacklightColor",
+        "GsModeSelect",
+        "GsLockUnlock",
+        "GsSetKeypadLockTime",
+        "GsDisableAllLeds",
+        "GsGroupCallHangTime",
+        "GsPrivateCallHangTime"
+      ]
+    },
+    {
+      "typeName": "General Settings",
+      "type": "GeneralSettings_uv380",
       "offset": 8805,
       "size": 144,
       "fieldTypes": [
@@ -293,6 +392,26 @@
       ]
     },
     {
+      "typeName": "Contacts",
+      "type": "Contacts_uv380",
+      "offset": 459301,
+      "size": 36,
+      "max": 10000,
+      "delDescs": [
+        {
+          "offset": 3,
+          "size": 1,
+          "value": 192
+        }
+      ],
+      "fieldTypes": [
+        "DcName",
+        "DcCallID",
+        "DcCallType",
+        "DcCallReceiveTone"
+      ]
+    },
+    {
       "typeName": "RX Group Lists",
       "type": "GroupLists",
       "offset": 60997,
@@ -347,6 +466,25 @@
       ]
     },
     {
+      "typeName": "Zones",
+      "type": "Zones_uv380",
+      "offset": 84997,
+      "size": 64,
+      "max": 250,
+      "delDescs": [
+        {
+          "offset": 0,
+          "size": 1,
+          "value": 0
+        }
+      ],
+      "fieldTypes": [
+        "ZiName",
+        "ZiChannelA_uv380",
+        "ZiChannelB_uv380"
+      ]
+    },
+    {
       "typeName": "Scan Lists",
       "type": "ScanLists_md380",
       "offset": 100997,
@@ -372,6 +510,29 @@
     {
       "typeName": "Scan Lists",
       "type": "ScanLists_md40",
+      "offset": 100997,
+      "size": 104,
+      "max": 250,
+      "delDescs": [
+        {
+          "offset": 0,
+          "size": 1,
+          "value": 0
+        }
+      ],
+      "fieldTypes": [
+        "SlName",
+        "SlPriorityChannel1_md40",
+        "SlPriorityChannel2_md40",
+        "SlTxDesignatedChannel_md40",
+        "SlSignallingHoldTime",
+        "SlPrioritySampleTime",
+        "SlChannel_md40"
+      ]
+    },
+    {
+      "typeName": "Scan Lists",
+      "type": "ScanLists_uv380",
       "offset": 100997,
       "size": 104,
       "max": 250,
@@ -462,6 +623,66 @@
       "offset": 127013,
       "size": 64,
       "max": 1000,
+      "delDescs": [
+        {
+          "offset": 16,
+          "size": 1,
+          "value": 255
+        }
+      ],
+      "fieldTypes": [
+        "CiName",
+        "CiRxFrequency",
+        "CiTxFrequencyOffset",
+        "CiChannelMode",
+        "CiBandwidth",
+        "CiScanList_md40",
+        "CiSquelch",
+        "CiRxRefFrequency",
+        "CiTxRefFrequency",
+        "CiTot",
+        "CiTotRekeyDelay",
+        "CiPower",
+        "CiAdmitCriteria",
+        "CiAutoscan",
+        "CiRxOnly",
+        "CiLoneWorker",
+        "CiVox",
+        "CiAllowTalkaround",
+        "CiPrivateCallConfirmed",
+        "CiEmergencyAlarmAck",
+        "CiDataCallConfirmed",
+        "CiCompressedUdpDataHeader",
+        "CiEmergencySystem",
+        "CiContactName",
+        "CiGroupList",
+        "CiColorCode",
+        "CiRepeaterSlot",
+        "CiPrivacy",
+        "CiPrivacyNumber",
+        "CiDisplayPTTID",
+        "CiCtcssEncode",
+        "CiTxSignallingSystem",
+        "CiQtReverse",
+        "CiReverseBurst",
+        "CiCtcssDecode",
+        "CiRxSignallingSystem",
+        "CiDecode1",
+        "CiDecode2",
+        "CiDecode3",
+        "CiDecode4",
+        "CiDecode5",
+        "CiDecode6",
+        "CiDecode7",
+        "CiDecode8"
+      ]
+    },
+    {
+      "typeName": "Channels",
+      "type": "Channels_uv380",
+      "offset": 262693,
+      "size": 64,
+      "max": 3000,
       "delDescs": [
         {
           "offset": 16,
@@ -614,6 +835,36 @@
         "md40ht_420-450.rdt",
         "md40he_430-440.rdt",
         "md40t_400-480.rdt"
+      ]
+    },
+    {
+      "typeName": "Frequency Range A",
+      "type": "BiFrequencyRangeA_uv380",
+      "bitOffset": 2480,
+      "bitSize": 8,
+      "valueType": "iStrings",
+      "strings": [
+        "136-174 MHz"
+      ]
+    },
+    {
+      "typeName": "Frequency Range B",
+      "type": "BiFrequencyRangeB_uv380",
+      "bitOffset": 2480,
+      "bitSize": 8,
+      "valueType": "iStrings",
+      "strings": [
+        "400-480 MHz"
+      ]
+    },
+    {
+      "typeName": "Codeplug Model Filename",
+      "type": "BiNewFilename_uv380",
+      "bitOffset": 2480,
+      "bitSize": 8,
+      "valueType": "biFilename",
+      "strings": [
+        "md-uv380_136-174_400-480.rdt"
       ]
     },
     {
@@ -1321,6 +1572,31 @@
       "extOffset": 201253,
       "extSize": 224,
       "extIndex": 16
+    },
+    {
+      "typeName": "A Channels",
+      "type": "ZiChannelA_uv380",
+      "bitOffset": 256,
+      "bitSize": 16,
+      "max": 64,
+      "valueType": "listIndex",
+      "listType": "Channels_uv380",
+      "extOffset": 201253,
+      "extBitOffset": 0,
+      "extSize": 224,
+      "extIndex": 16
+    },
+    {
+      "typeName": "B Channels",
+      "type": "ZiChannelB_uv380",
+      "bitSize": 16,
+      "max": 64,
+      "valueType": "listIndex",
+      "listType": "Channels_uv380",
+      "extOffset": 201253,
+      "extBitOffset": 768,
+      "extSize": 224,
+      "extIndex": 0
     },
     {
       "typeName": "Scan List Name",
