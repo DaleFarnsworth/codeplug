@@ -565,12 +565,14 @@ func (v *frequency) setString(f *Field, s string) error {
 		return err
 	}
 
-	err = f.record.codeplug.frequencyValid(freq)
+	save := *v
+	*v = frequency(freq)
+
+	err = v.valid(f)
 	if err != nil {
+		*v = save
 		return err
 	}
-
-	*v = frequency(freq)
 
 	return nil
 }
@@ -590,14 +592,11 @@ func (v *frequency) store(f *Field) {
 	f.storeBytes(frequencyToBytes(float64(*v)))
 }
 
-type frequencyOffset struct {
-	offset    float64
-	notloaded bool
-}
+type frequencyOffset float64
 
 // getString returns the frequencyOffset's value as a string.
 func (v *frequencyOffset) getString(f *Field) string {
-	return frequencyToSignedString(v.offset)
+	return frequencyToSignedString(float64(*v))
 }
 
 // setString sets the frequencyOffset's value from a string.
@@ -607,54 +606,43 @@ func (v *frequencyOffset) setString(f *Field, s string) error {
 		return err
 	}
 
-	if f.record.codeplug.frequencyValid(freq) == nil {
-		freq -= *rxFrequency(f)
-	} else {
-		rxfp := rxFrequency(f)
-		if rxfp != nil {
-			err = f.record.codeplug.frequencyValid(*rxfp + freq)
-			if err != nil {
-				return err
-			}
-		}
-	}
+	save := *v
+	*v = frequencyOffset(freq)
 
-	v.offset = freq
+	err = v.valid(f)
+	if err != nil {
+		*v = save
+		return err
+	}
 
 	return nil
 }
 
 // valid returns nil if the frequencyOffset's value is valid.
 func (v *frequencyOffset) valid(f *Field) error {
-	if v.notloaded {
-		v.load(f)
+	freq := float64(*v)
+	if f.record.codeplug.frequencyValid(freq) == nil {
+		*v = frequencyOffset(freq - rxFrequency(f))
+		return nil
 	}
-	return f.record.codeplug.frequencyValid(*rxFrequency(f) + v.offset)
+
+	return f.record.codeplug.frequencyValid(rxFrequency(f) + freq)
 }
 
 // load sets the frequencyOffset's value from its bits in cp.bytes.
 func (v *frequencyOffset) load(f *Field) {
-	if f.sibling(FtCiRxFrequency) == nil {
-		v.notloaded = true
-		return
-	}
-
-	v.offset = bytesToFrequency(f.bytes()) - *rxFrequency(f)
-	v.notloaded = false
+	// The call to v.valid(f) will convert it to an offset
+	*v = frequencyOffset(bytesToFrequency(f.bytes()))
 }
 
 // store stores the frequencyOffset's value into its bits in cp.bytes.
 func (v *frequencyOffset) store(f *Field) {
-	f.storeBytes(frequencyToBytes(v.offset + *rxFrequency(f)))
+	f.storeBytes(frequencyToBytes(float64(*v) + rxFrequency(f)))
 }
 
-func rxFrequency(f *Field) *float64 {
-	sibling := f.sibling(FtCiRxFrequency)
-	if sibling == nil {
-		return nil
-	}
+func rxFrequency(f *Field) float64 {
 	rxFrequency, _ := f.sibling(FtCiRxFrequency).value.(*frequency)
-	return (*float64)(rxFrequency)
+	return float64(*rxFrequency)
 }
 
 // onOff is a field value representing a boolean value.
