@@ -117,7 +117,7 @@ func (rl *RecordList) Update() {
 	rl.qListView.DataChanged(topLeft, bottomRight, []int{})
 }
 
-func (rl *RecordList) AddSelected() error {
+func (rl *RecordList) AddDupSelected(add bool) error {
 	w := rl.window
 	rType := w.recordType
 	cp := w.mainWindow.codeplug
@@ -135,7 +135,10 @@ func (rl *RecordList) AddSelected() error {
 	model := rl.qListView.Model()
 	qModelIndex := core.NewQModelIndex()
 
-	row := len(cp.Records(rType))
+	row := records[len(records)-1].Index() + 1
+	if add {
+		row = len(cp.Records(rType))
+	}
 
 	change := cp.InsertRecordsChange(records)
 	for i, r := range records {
@@ -151,10 +154,20 @@ func (rl *RecordList) AddSelected() error {
 	change.Complete()
 
 	rl.Update()
-	rl.SetCurrent(len(cp.Records(rType)) - 1)
+	if add {
+		rl.SetCurrent(len(cp.Records(rType)) - 1)
+	}
 	w.recordFunc()
 
 	return nil
+}
+func (rl *RecordList) AddSelected() error {
+	add := true
+	return rl.AddDupSelected(add)
+}
+func (rl *RecordList) DupSelected() error {
+	add := false
+	return rl.AddDupSelected(add)
 }
 
 func (rl *RecordList) RemoveSelected() error {
