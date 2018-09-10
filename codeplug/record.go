@@ -419,12 +419,31 @@ func (rd *rDesc) ListNames() *[]string {
 }
 
 // MemberListNames returns a slice of possible member list names
-func (rd *rDesc) MemberListNames() *[]string {
+func (rd *rDesc) MemberListNames(filter func(r *Record) bool) *[]string {
 	if rd.rType != RtContacts {
-		return rd.ListNames()
+		if filter == nil {
+			return rd.ListNames()
+		}
+
+		names := make([]string, 0)
+		for i, r := range rd.records {
+			if !filter(r) {
+				continue
+			}
+			name := r.Name()
+			if name == "" {
+				name = rd.namePrefix + fmt.Sprintf("%d", i+1)
+			}
+			names = append(names, name)
+		}
+
+		return &names
 	}
 	names := make([]string, 0, len(rd.records))
 	for _, r := range rd.records {
+		if filter != nil && !filter(r) {
+			continue
+		}
 		typeField := r.Field(FtDcCallType)
 		if typeField.String() == "Group" {
 			names = append(names, r.NameField().String())
@@ -573,4 +592,8 @@ func (r *Record) FindFieldByName(fType FieldType, name string) *Field {
 		}
 	}
 	return nil
+}
+
+func (r *Record) HasFieldType(fType FieldType) bool {
+	return r.Field(fType) != nil
 }

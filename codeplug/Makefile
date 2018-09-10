@@ -7,8 +7,8 @@ default: generated.go newfiles.go
 generated.go: template codeplugs.json
 	go generate
 
-newfiles.go: new.tgz
+newfiles.go: new.tar.bz2
 	go generate
 
-new.tgz: new/*
-	cd new && tar czf ../new.tgz *
+new.tar.bz2: new/*
+	cd new && tar cjf ../new.tar.bz2 *

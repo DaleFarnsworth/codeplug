@@ -17,10 +17,11 @@
   ],
   "codeplugs": [
     {
-      "type": "md380",
+      "type": "MD-380",
       "models": [
               "MD380",
-              "DR780"
+              "DR780",
+              "MD-380"
       ],
       "ext": "rdt",
       "rdtSize": 262709,
@@ -40,9 +41,10 @@
       ]
     },
     {
-      "type": "md390",
+      "type": "MD-390",
       "models": [
-              "MD390"
+              "MD390",
+              "MD-390"
       ],
       "ext": "rdt",
       "rdtSize": 262709,
@@ -62,7 +64,7 @@
       ]
     },
     {
-      "type": "md40",
+      "type": "DJ-MD40",
       "models": [
               "DJ-MD40"
       ],
@@ -83,7 +85,7 @@
       ]
     },
     {
-      "type": "uv380",
+      "type": "MD-UV380",
       "models": [
               "MD-UV380"
       ],
@@ -100,11 +102,12 @@
         "GroupLists",
         "Zones_uv380",
         "ScanLists_uv380",
-        "Channels_uv380"
+        "Channels_uv380",
+        "GPSSystems"
       ]
     },
     {
-      "type": "uv390",
+      "type": "MD-UV390",
       "models": [
               "MD-UV390"
       ],
@@ -121,7 +124,31 @@
         "GroupLists",
         "Zones_uv380",
         "ScanLists_uv380",
-        "Channels_uv380"
+        "Channels_uv380",
+        "GPSSystems"
+      ]
+    },
+    {
+      "type": "MD-2017",
+      "models": [
+              "2017",
+              "MD-2017"
+      ],
+      "ext": "rdt",
+      "rdtSize": 852533,
+      "binSize": 851968,
+      "binOffset": 549,
+      "recordTypes": [
+        "BasicInformation_uv380",
+        "GeneralSettings_md2017",
+        "MenuItems",
+        "PrivacySettings",
+        "Contacts_uv380",
+        "GroupLists",
+        "Zones_uv380",
+        "ScanLists_uv380",
+        "Channels_md2017",
+        "GPSSystems"
       ]
     }
   ],
@@ -134,7 +161,6 @@
       "fieldTypes": [
         "BiModel",
         "BiFrequencyRange_md380",
-        "BiNewFilename_md380",
         "BiLowFrequency",
         "BiHighFrequency",
         "BiLastProgrammedTime",
@@ -149,7 +175,6 @@
       "fieldTypes": [
         "BiModel",
         "BiFrequencyRange_md390",
-        "BiNewFilename_md390",
         "BiLowFrequency",
         "BiHighFrequency",
         "BiLastProgrammedTime",
@@ -164,7 +189,6 @@
       "fieldTypes": [
         "BiModel",
         "BiFrequencyRange_md40",
-        "BiNewFilename_md40",
         "BiLowFrequency",
         "BiHighFrequency",
         "BiLastProgrammedTime",
@@ -178,11 +202,12 @@
       "size": 8805,
       "fieldTypes": [
         "BiModel",
-        "BiFrequencyRangeA_uv380",
-        "BiFrequencyRangeB_uv380",
-        "BiNewFilename_uv380",
-        "BiLowFrequency",
-        "BiHighFrequency",
+        "BiFrequencyRangeA",
+        "BiFrequencyRangeB",
+        "BiLowFrequencyA",
+        "BiHighFrequencyA",
+        "BiLowFrequencyB",
+        "BiHighFrequencyB",
         "BiLastProgrammedTime",
         "BiCpsVersion"
       ]
@@ -217,7 +242,6 @@
         "GsRxLowBatteryInterval",
         "GsPcProgPassword",
         "GsRadioProgPassword",
-        "GsMode",
         "GsBacklightTime",
         "GsSetKeypadLockTime",
         "GsDisableAllLeds",
@@ -255,7 +279,6 @@
         "GsRxLowBatteryInterval",
         "GsPcProgPassword",
         "GsRadioProgPassword",
-        "GsMode",
         "GsFreqChannelMode",
         "GsBacklightColor",
         "GsModeSelect",
@@ -278,11 +301,61 @@
         "GsIntroScreenLine1",
         "GsIntroScreenLine2",
         "GsSavePreamble",
+        "GsCHVoiceAnnouncement",
         "GsSaveModeReceive",
         "GsDisableAllTones",
         "GsChFreeIndicationTone",
         "GsTalkPermitTone",
-        "GsKeypadTones",
+        "GsCallAlertToneDuration",
+        "GsScanDigitalHangTime",
+        "GsScanAnalogHangTime",
+        "GsLoneWorkerResponseTime",
+        "GsLoneWorkerReminderTime",
+        "GsPwAndLockEnable",
+        "GsPowerOnPassword",
+        "GsMonitorType",
+        "GsVoxSensitivity",
+        "GsTxPreambleDuration",
+        "GsRxLowBatteryInterval",
+        "GsChannelsHangTime",
+        "GsPcProgPassword",
+        "GsRadioProgPassword",
+        "GsSetKeypadLockTime",
+        "GsFreqChannelMode_uv380",
+        "GsModeSelectA",
+        "GsModeSelectB",
+        "GsTimeZone",
+        "GsBacklightTime",
+        "GsDisableAllLeds",
+        "GsGroupCallMatch",
+        "GsPrivateCallMatch",
+        "GsGroupCallHangTime",
+        "GsPrivateCallHangTime",
+        "GsRadioID1",
+        "GsRadioID2",
+        "GsRadioID3",
+        "GsMicLevel",
+        "GsTxMode",
+        "GsEditRadioID",
+        "GsPublicZone"
+      ]
+    },
+    {
+      "typeName": "General Settings",
+      "type": "GeneralSettings_md2017",
+      "offset": 8805,
+      "size": 144,
+      "fieldTypes": [
+        "GsRadioName",
+        "GsRadioID",
+        "GsIntroScreen",
+        "GsIntroScreenLine1",
+        "GsIntroScreenLine2",
+        "GsSavePreamble",
+        "GsSaveModeReceive",
+        "GsDisableAllTones",
+        "GsChFreeIndicationTone",
+        "GsTalkPermitTone",
         "GsCallAlertToneDuration",
         "GsScanDigitalHangTime",
         "GsScanAnalogHangTime",
@@ -296,13 +369,15 @@
         "GsRxLowBatteryInterval",
         "GsPcProgPassword",
         "GsRadioProgPassword",
-        "GsMode",
-        "GsFreqChannelMode",
-        "GsBacklightColor",
-        "GsModeSelect",
-        "GsLockUnlock",
+        "GsBacklightTime",
         "GsSetKeypadLockTime",
+        "GsFreqChannelMode_uv380",
+        "GsModeSelectA",
+        "GsModeSelectB",
+        "GsTimeZone",
         "GsDisableAllLeds",
+        "GsGroupCallMatch",
+        "GsPrivateCallMatch",
         "GsGroupCallHangTime",
         "GsPrivateCallHangTime"
       ]
@@ -394,7 +469,7 @@
     {
       "typeName": "Contacts",
       "type": "Contacts_uv380",
-      "offset": 459301,
+      "offset": 459317,
       "size": 36,
       "max": 10000,
       "delDescs": [
@@ -680,7 +755,72 @@
     {
       "typeName": "Channels",
       "type": "Channels_uv380",
-      "offset": 262693,
+      "offset": 262709,
+      "size": 64,
+      "max": 3000,
+      "delDescs": [
+        {
+          "offset": 16,
+          "size": 1,
+          "value": 255
+        }
+      ],
+      "fieldTypes": [
+        "CiName",
+        "CiRxFrequency",
+        "CiTxFrequencyOffset",
+        "CiChannelMode",
+        "CiBandwidth",
+        "CiScanList_md40",
+        "CiSquelch_uv380",
+        "CiRxRefFrequency",
+        "CiTxRefFrequency",
+        "CiTot",
+        "CiTotRekeyDelay",
+        "CiPower_uv380",
+        "CiAdmitCriteria",
+        "CiAutoscan",
+        "CiRxOnly",
+        "CiLoneWorker",
+        "CiVox",
+        "CiAllowTalkaround",
+        "CiSendGPSInfo",
+        "CiReceiveGPSInfo",
+        "CiPrivateCallConfirmed",
+        "CiEmergencyAlarmAck",
+        "CiDataCallConfirmed",
+        "CiDCDMSwitch",
+        "CiLeaderMS",
+        "CiEmergencySystem",
+        "CiContactName",
+        "CiGroupList",
+        "CiColorCode",
+        "CiRepeaterSlot",
+        "CiPrivacy",
+        "CiPrivacyNumber",
+        "CiGPSSystem",
+        "CiInCallCriteria",
+        "CiDisplayPTTID",
+        "CiCtcssEncode",
+        "CiTxSignallingSystem",
+        "CiQtReverse",
+        "CiReverseBurst",
+        "CiCtcssDecode",
+        "CiRxSignallingSystem",
+        "CiDecode1",
+        "CiDecode2",
+        "CiDecode3",
+        "CiDecode4",
+        "CiDecode5",
+        "CiDecode6",
+        "CiDecode7",
+        "CiDecode8"
+      ]
+    },
+    {
+      "typeName": "Channels",
+      "type": "Channels_md2017",
+      "offset": 262709,
       "size": 64,
       "max": 3000,
       "delDescs": [
@@ -702,17 +842,20 @@
         "CiTxRefFrequency",
         "CiTot",
         "CiTotRekeyDelay",
-        "CiPower",
+        "CiPower_uv380",
         "CiAdmitCriteria",
         "CiAutoscan",
         "CiRxOnly",
         "CiLoneWorker",
         "CiVox",
         "CiAllowTalkaround",
+        "CiSendGPSInfo",
+        "CiReceiveGPSInfo",
         "CiPrivateCallConfirmed",
         "CiEmergencyAlarmAck",
         "CiDataCallConfirmed",
-        "CiCompressedUdpDataHeader",
+        "CiDCDMSwitch",
+        "CiLeaderMS",
         "CiEmergencySystem",
         "CiContactName",
         "CiGroupList",
@@ -720,9 +863,12 @@
         "CiRepeaterSlot",
         "CiPrivacy",
         "CiPrivacyNumber",
+        "CiGPSSystem",
+        "CiInCallCriteria",
         "CiDisplayPTTID",
         "CiCtcssEncode",
         "CiTxSignallingSystem",
+        "CiDQTTurnoffFreq",
         "CiQtReverse",
         "CiReverseBurst",
         "CiCtcssDecode",
@@ -757,114 +903,71 @@
       "type": "BiModel",
       "bitOffset": 2344,
       "bitSize": 64,
-      "valueType": "model"
+      "valueType": "ascii"
     },
     {
-      "typeName": "Frequency Range",
+      "typeName": "Frequency Range (MHz)",
       "type": "BiFrequencyRange_md380",
       "bitOffset": 2480,
       "bitSize": 8,
       "valueType": "iStrings",
       "strings": [
-        "136-174 MHz",
-        "350-400 MHz",
-        "400-480 MHz",
-        "450-520 MHz"
+        "136-174",
+        "350-400",
+        "400-480",
+        "450-520"
       ]
     },
     {
-      "typeName": "Codeplug Model Filename",
-      "type": "BiNewFilename_md380",
-      "bitOffset": 2480,
-      "bitSize": 8,
-      "valueType": "biFilename",
-      "strings": [
-        "md380_136-174.rdt",
-        "md380_350-400.rdt",
-        "md380_400-480.rdt",
-        "md380_450-520.rdt"
-      ]
-    },
-    {
-      "typeName": "Frequency Range",
+      "typeName": "Frequency Range (MHz)",
       "type": "BiFrequencyRange_md390",
       "bitOffset": 2480,
       "bitSize": 8,
       "valueType": "iStrings",
       "strings": [
-        "136-174 MHz",
-        "350-400 MHz",
-        "400-480 MHz",
-        "450-520 MHz"
+        "136-174",
+        "350-400",
+        "400-480",
+        "450-520"
       ]
     },
     {
-      "typeName": "Codeplug Model Filename",
-      "type": "BiNewFilename_md390",
-      "bitOffset": 2480,
-      "bitSize": 8,
-      "valueType": "biFilename",
-      "strings": [
-        "md390_136-174.rdt",
-        "md390_350-400.rdt",
-        "md390_400-480.rdt",
-        "md390_450-520.rdt"
-      ]
-    },
-    {
-      "typeName": "Frequency Range",
+      "typeName": "Frequency Range (MHz)",
       "type": "BiFrequencyRange_md40",
       "bitOffset": 2480,
       "bitSize": 8,
       "valueType": "iStrings",
       "strings": [
-        "400-480 MHz - MD40",
-        "420-450 MHz - MD40HT",
-        "430-440 MHz - MD40HE",
-        "400-480 MHz - MD40T"
+        "MD40 400-480",
+        "MD40HT 420-450",
+        "MD40HE 430-440",
+        "MD40T 400-480"
       ]
     },
     {
-      "typeName": "Codeplug Model Filename",
-      "type": "BiNewFilename_md40",
-      "bitOffset": 2480,
-      "bitSize": 8,
-      "valueType": "biFilename",
-      "strings": [
-        "md40_400-480.rdt",
-        "md40ht_420-450.rdt",
-        "md40he_430-440.rdt",
-        "md40t_400-480.rdt"
-      ]
-    },
-    {
-      "typeName": "Frequency Range A",
-      "type": "BiFrequencyRangeA_uv380",
+      "typeName": "Frequency Range A (MHz)",
+      "type": "BiFrequencyRangeA",
       "bitOffset": 2480,
       "bitSize": 8,
       "valueType": "iStrings",
       "strings": [
-        "136-174 MHz"
+        "136-174",
+        "350-400",
+        "400-480",
+        "450-520"
       ]
     },
     {
-      "typeName": "Frequency Range B",
-      "type": "BiFrequencyRangeB_uv380",
-      "bitOffset": 2480,
+      "typeName": "Frequency Range B (MHz)",
+      "type": "BiFrequencyRangeB",
+      "bitOffset": 2488,
       "bitSize": 8,
       "valueType": "iStrings",
       "strings": [
-        "400-480 MHz"
-      ]
-    },
-    {
-      "typeName": "Codeplug Model Filename",
-      "type": "BiNewFilename_uv380",
-      "bitOffset": 2480,
-      "bitSize": 8,
-      "valueType": "biFilename",
-      "strings": [
-        "md-uv380_136-174_400-480.rdt"
+        "136-174",
+        "350-400",
+        "400-480",
+        "450-520"
       ]
     },
     {
@@ -878,6 +981,34 @@
       "typeName": "High Frequency",
       "type": "BiHighFrequency",
       "bitOffset": 2520,
+      "bitSize": 16,
+      "valueType": "biFrequency"
+    },
+    {
+      "typeName": "Low Frequency A",
+      "type": "BiLowFrequencyA",
+      "bitOffset": 2504,
+      "bitSize": 16,
+      "valueType": "biFrequency"
+    },
+    {
+      "typeName": "High Frequency A",
+      "type": "BiHighFrequencyA",
+      "bitOffset": 2520,
+      "bitSize": 16,
+      "valueType": "biFrequency"
+    },
+    {
+      "typeName": "Low Frequency B",
+      "type": "BiLowFrequencyB",
+      "bitOffset": 2536,
+      "bitSize": 16,
+      "valueType": "biFrequency"
+    },
+    {
+      "typeName": "High Frequency B",
+      "type": "BiHighFrequencyB",
+      "bitOffset": 2552,
       "bitSize": 16,
       "valueType": "biFrequency"
     },
@@ -908,6 +1039,19 @@
       "bitOffset": 160,
       "bitSize": 160,
       "valueType": "introLine"
+    },
+    {
+      "typeName": "Tx Mode",
+      "type": "GsTxMode",
+      "bitOffset": 512,
+      "bitSize": 2,
+      "valueType": "iStrings",
+      "strings": [
+        "Last Call CH",
+        "Last Call + Hand CH",
+        "Designed CH",
+        "Designed CH + Hand CH"
+      ]
     },
     {
       "typeName": "Monitor Type",
@@ -982,6 +1126,13 @@
       "valueType": "offOn"
     },
     {
+      "typeName": "CH Voice Announcement",
+      "type": "GsCHVoiceAnnouncement",
+      "bitOffset": 534,
+      "bitSize": 1,
+      "valueType": "offOn"
+    },
+    {
       "typeName": "Keypad Tones",
       "type": "GsKeypadTones",
       "bitOffset": 530,
@@ -1034,6 +1185,28 @@
       "typeName": "Mode Select",
       "type": "GsModeSelect",
       "bitOffset": 541,
+      "bitSize": 1,
+      "valueType": "iStrings",
+      "strings": [
+        "VFO",
+        "Memory"
+      ]
+    },
+    {
+      "typeName": "Mode Select A",
+      "type": "GsModeSelectA",
+      "bitOffset": 541,
+      "bitSize": 1,
+      "valueType": "iStrings",
+      "strings": [
+        "VFO",
+        "Memory"
+      ]
+    },
+    {
+      "typeName": "Mode Select B",
+      "type": "GsModeSelectB",
+      "bitOffset": 536,
       "bitSize": 1,
       "valueType": "iStrings",
       "strings": [
@@ -1222,21 +1395,31 @@
       ]
     },
     {
-      "typeName": "Mode",
-      "type": "GsMode",
+      "typeName": "Freq/Channel Mode",
+      "type": "GsFreqChannelMode_uv380",
       "bitOffset": 696,
       "bitSize": 8,
       "valueType": "indexedStrings",
       "indexedStrings": [
         {
           "index": 0,
-          "string": "Memory"
+          "string": "Frequency"
         },
         {
           "index": 255,
           "string": "Channel"
         }
-      ]
+      ],
+      "enabling": {
+        "value": "VFO",
+        "enables": [
+          "GsModeSelectA",
+          "GsModeSelectB"
+        ],
+        "disables": [
+          "GsLockUnlock"
+        ]
+      }
     },
     {
       "typeName": "Power On Password",
@@ -1251,7 +1434,7 @@
       "type": "GsRadioProgPassword",
       "bitOffset": 736,
       "bitSize": 32,
-      "valueType": "radioPassword"
+      "valueType": "radioProgPassword"
     },
     {
       "typeName": "PC Programming Password",
@@ -1261,11 +1444,122 @@
       "valueType": "pcPassword"
     },
     {
+      "typeName": "Time Zone",
+      "type": "GsTimeZone",
+      "bitOffset": 856,
+      "bitSize": 5,
+      "valueType": "iStrings",
+      "strings": [
+        "UTC-12:00",
+        "UTC-11:00",
+        "UTC-10:00",
+        "UTC-9:00",
+        "UTC-8:00",
+        "UTC-7:00",
+        "UTC-6:00",
+        "UTC-5:00",
+        "UTC-4:00",
+        "UTC-3:00",
+        "UTC-2:00",
+        "UTC-1:00",
+        "UTC+0:00",
+        "UTC+1:00",
+        "UTC+2:00",
+        "UTC+3:00",
+        "UTC+4:00",
+        "UTC+5:00",
+        "UTC+6:00",
+        "UTC+7:00",
+        "UTC+8:00",
+        "UTC+9:00",
+        "UTC+10:00",
+        "UTC+11:00",
+        "UTC+12:00"
+      ]
+    },
+    {
+      "typeName": "Private Call Match",
+      "type": "GsPrivateCallMatch",
+      "bitOffset": 862,
+      "bitSize": 1,
+      "valueType": "offOn"
+    },
+    {
+      "typeName": "Group Call Match",
+      "type": "GsGroupCallMatch",
+      "bitOffset": 863,
+      "bitSize": 1,
+      "valueType": "offOn"
+    },
+    {
       "typeName": "Radio Name",
       "type": "GsRadioName",
       "bitOffset": 896,
       "bitSize": 256,
       "valueType": "radioName"
+    },
+    {
+      "typeName": "Channels Hang Time (mS)",
+      "type": "GsChannelsHangTime",
+      "bitOffset": 1152,
+      "bitSize": 8,
+      "valueType": "span",
+      "span": {
+        "min": 0,
+        "max": 70,
+        "scale": 100,
+        "interval": 5
+      }
+    },
+    {
+      "typeName": "Public Zone",
+      "type": "GsPublicZone",
+      "bitOffset": 1173,
+      "bitSize": 1,
+      "valueType": "offOn"
+    },
+    {
+      "typeName": "Radio ID 1",
+      "type": "GsRadioID1",
+      "bitOffset": 1184,
+      "bitSize": 24,
+      "valueType": "callID"
+    },
+    {
+      "typeName": "Radio ID 2",
+      "type": "GsRadioID2",
+      "bitOffset": 1216,
+      "bitSize": 24,
+      "valueType": "callID"
+    },
+    {
+      "typeName": "Radio ID 3",
+      "type": "GsRadioID3",
+      "bitOffset": 1248,
+      "bitSize": 24,
+      "valueType": "callID"
+    },
+    {
+      "typeName": "Edit Radio ID",
+      "type": "GsEditRadioID",
+      "bitOffset": 1281,
+      "bitSize": 1,
+      "valueType": "onOff"
+    },
+    {
+      "typeName": "MIC Level",
+      "type": "GsMicLevel",
+      "bitOffset": 1282,
+      "bitSize": 3,
+      "valueType": "iStrings",
+      "strings": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6"
+      ]
     },
     {
       "typeName": "Hang Time",
@@ -1589,6 +1883,7 @@
     {
       "typeName": "B Channels",
       "type": "ZiChannelB_uv380",
+      "bitOffset": 256,
       "bitSize": 16,
       "max": 64,
       "valueType": "listIndex",
@@ -1788,6 +2083,17 @@
       ]
     },
     {
+      "typeName": "Squelch",
+      "type": "CiSquelch_uv380",
+      "bitOffset": 124,
+      "bitSize": 4,
+      "valueType": "span",
+      "span": {
+        "min": 0,
+        "max": 9
+      }
+    },
+    {
       "typeName": "Autoscan",
       "type": "CiAutoscan",
       "bitOffset": 3,
@@ -1837,7 +2143,8 @@
           "CiDisplayPTTID",
           "CiCtcssEncode",
           "CiBandwidth",
-          "CiTxSignallingSystem"
+          "CiTxSignallingSystem",
+          "CiDQTTurnoffFreq"
         ]
       }
     },
@@ -2032,6 +2339,27 @@
       ]
     },
     {
+      "typeName": "Non-QT/DQT Turn-off Freq",
+      "type": "CiDQTTurnoffFreq",
+      "bitOffset": 40,
+      "bitSize": 2,
+      "valueType": "indexedStrings",
+      "indexedStrings": [
+        {
+          "index": 0,
+          "string": "259.2 Hz"
+        },
+        {
+          "index": 2,
+          "string": "55.2 Hz"
+        },
+        {
+          "index": 3,
+          "string": "None"
+        }
+      ]
+    },
+    {
       "typeName": "In Call Criteria",
       "type": "CiInCallCriteria",
       "bitOffset": 43,
@@ -2216,7 +2544,13 @@
       "type": "CiTxFrequencyOffset",
       "bitOffset": 160,
       "bitSize": 32,
-      "valueType": "frequencyOffset"
+      "valueType": "frequencyOffset",
+      "enabling": {
+        "value": "+0.00000",
+        "disables": [
+          "CiAllowTalkaround"
+        ]
+      }
     },
     {
       "typeName": "CTCSS/DCS Decode",
@@ -2283,6 +2617,47 @@
         "DTMF-3",
         "DTMF-4"
       ]
+    },
+    {
+      "typeName": "Power",
+      "type": "CiPower_uv380",
+      "bitOffset": 246,
+      "bitSize": 2,
+      "valueType": "indexedStrings",
+      "indexedStrings": [
+        {
+          "index": 0,
+          "string": "Low"
+        },
+        {
+          "index": 2,
+          "string": "Middle"
+        },
+        {
+          "index": 3,
+          "string": "High"
+        }
+      ]
+    },
+    {
+      "typeName": "Leader/MS",
+      "type": "CiLeaderMS",
+      "bitOffset": 252,
+      "bitSize": 1,
+      "valueType": "onOff"
+    },
+    {
+      "typeName": "DCDM Switch",
+      "type": "CiDCDMSwitch",
+      "bitOffset": 253,
+      "bitSize": 1,
+      "valueType": "onOff",
+      "enabling": {
+        "value": "On",
+        "enables": [
+          "CiLeaderMS"
+        ]
+      }
     },
     {
       "typeName": "Receive GPS Info",

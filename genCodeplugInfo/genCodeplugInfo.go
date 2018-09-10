@@ -27,7 +27,6 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
-	"html/template"
 	"io"
 	"io/ioutil"
 	"log"
@@ -36,8 +35,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-	"unicode"
-	"unicode/utf8"
+	"text/template"
 )
 
 type top struct {
@@ -87,6 +85,7 @@ type Field struct {
 	ExtOffset      int             `json:"extOffset"`
 	ExtSize        int             `json:"extSize"`
 	ExtIndex       int             `json:"extIndex"`
+	ExtBitOffset   int             `json:"extBitOffset"`
 	ListType       *string         `json:"listType"`
 	Enabling       *Enabling       `json:"enabling"`
 	EnablingValue  string
@@ -126,25 +125,13 @@ type TemplateVars struct {
 	Fields           []*Field
 	SortedFields     []*Field
 	ValueTypes       []string
-	Capitalize       func(string) string
+	Sanitize         func(string) string
 	RecordTypeString func(string) string
 	FieldTypeString  func(string) string
 }
 
-func capitalize(s string) string {
-	if s == "" {
-		return ""
-	}
-	r, n := utf8.DecodeRuneInString(s)
-	return string(unicode.ToUpper(r)) + s[n:]
-}
-
-func unCapitalize(s string) string {
-	if s == "" {
-		return ""
-	}
-	r, n := utf8.DecodeRuneInString(s)
-	return string(unicode.ToLower(r)) + s[n:]
+func sanitize(s string) string {
+	return strings.Title(strings.Replace(s, "-", "", -1))
 }
 
 func RecordTypeString(s string) string {
@@ -280,7 +267,7 @@ func readCodeplugJson(filename string) TemplateVars {
 	sort.Strings(valueTypes)
 	templateVars.ValueTypes = valueTypes
 
-	templateVars.Capitalize = strings.Title
+	templateVars.Sanitize = sanitize
 	templateVars.RecordTypeString = RecordTypeString
 	templateVars.FieldTypeString = FieldTypeString
 

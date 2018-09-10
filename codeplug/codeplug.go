@@ -29,7 +29,7 @@ import (
 	"archive/tar"
 	"bufio"
 	"bytes"
-	"compress/gzip"
+	"compress/bzip2"
 	"crypto/sha256"
 	"encoding/json"
 	"fmt"
@@ -80,6 +80,8 @@ type Codeplug struct {
 	changed             bool
 	lowFrequency        float64
 	highFrequency       float64
+	lowFrequencyB       float64
+	highFrequencyB      float64
 	connectChange       func(*Change)
 	changeList          []*Change
 	changeIndex         int
@@ -172,9 +174,7 @@ type Warning struct {
 	error
 }
 
-func (cp *Codeplug) Load(model string, frequencyRange string) error {
-	notFound := fmt.Errorf("codeplug type not found: %s", model)
-
+func (cp *Codeplug) Load(model string, freqRange string) error {
 	found := false
 findCodeplugInfo:
 	for _, cpi := range codeplugInfos {
@@ -187,21 +187,12 @@ findCodeplugInfo:
 		}
 	}
 	if !found {
-		return notFound
+		return fmt.Errorf("codeplug type not found: %s", model)
 	}
 
 	switch cp.fileType {
 	case FileTypeNew, FileTypeBin, FileTypeText, FileTypeJSON, FileTypeXLSX:
-		var filename string
-		for i, v := range cp.frequencyRanges() {
-			if v == frequencyRange {
-				filename = cp.newFilenames()[i]
-				break
-			}
-		}
-		if filename == "" {
-			return notFound
-		}
+		filename := cp.Type() + "_" + freqRange + "." + cp.Ext()
 		err := cp.readNew(filename)
 		if err != nil {
 			return err
@@ -278,40 +269,68 @@ func (cp *Codeplug) Ext() string {
 	return cp.codeplugInfo.Ext
 }
 
+func (cp *Codeplug) CodeplugInfo() *CodeplugInfo {
+	return cp.codeplugInfo
+}
+
+func (cp *Codeplug) HasRecordType(rType RecordType) bool {
+	return cp.rDesc[rType] != nil
+}
+
 func AllFrequencyRanges() map[string][]string {
-	models := make([]string, 0)
 	freqRanges := make(map[string][]string)
 
 	for _, cpi := range codeplugInfos {
-		for _, model := range cpi.Models {
-			for _, rInfo := range cpi.RecordInfos {
-				if rInfo.rType == RtBasicInformation_md380 {
-					for _, fInfo := range rInfo.fieldInfos {
-						if fInfo.fType == FtBiFrequencyRange_md380 {
-							freqRanges[model] = *fInfo.strings
+		model := cpi.Type
+		for _, rInfo := range cpi.RecordInfos {
+			if rInfo.rType == RtBasicInformation_md380 {
+				for _, fInfo := range rInfo.fieldInfos {
+					if fInfo.fType == FtBiFrequencyRange_md380 {
+						freqRanges[model] = *fInfo.strings
+					}
+					if fInfo.fType == FtBiFrequencyRangeA {
+						freqRanges[model] = *fInfo.strings
+					}
+				}
+			}
+		}
+	}
+
+	for _, cpi := range codeplugInfos {
+		model := cpi.Type
+		for _, rInfo := range cpi.RecordInfos {
+			if rInfo.rType == RtBasicInformation_md380 {
+				for _, fInfo := range rInfo.fieldInfos {
+					if fInfo.fType == FtBiFrequencyRangeB {
+						aRanges := freqRanges[model]
+						freqRanges[model] = make([]string, 0)
+						for _, ra := range aRanges {
+							for _, rb := range *fInfo.strings {
+								freqRanges[model] = append(freqRanges[model], ra+"_"+rb)
+							}
 						}
 					}
 				}
 			}
-			models = append(models, model)
 		}
 	}
+
 	return freqRanges
 }
 
 // ModelsFrequencyRanges returns the potential codeplug model and
-// frequencyRange
-func (cp *Codeplug) ModelsFrequencyRanges() (models []string, frequencyRanges map[string][]string) {
+// freqRange
+func (cp *Codeplug) ModelsFrequencyRanges() (models []string, freqRanges map[string][]string) {
 	models = make([]string, 0)
-	frequencyRanges = make(map[string][]string)
+	freqRanges = make(map[string][]string)
 	var model string
-	var frequencyRange string
+	var freqRange string
 
 	switch cp.fileType {
 	case FileTypeRdt:
 
 	case FileTypeText, FileTypeJSON, FileTypeXLSX:
-		model, frequencyRange = cp.parseModelFrequencyRange()
+		model, freqRange = cp.parseModelFrequencyRange()
 		fallthrough
 	default:
 		cp.bytes = make([]byte, codeplugInfos[0].RdtSize)
@@ -320,8 +339,9 @@ func (cp *Codeplug) ModelsFrequencyRanges() (models []string, frequencyRanges ma
 	for _, cpi := range codeplugInfos {
 		cp.codeplugInfo = cpi
 		cp.loadHeader()
-		mainModel := cpi.Models[0]
-		frequencyRanges[mainModel] = cp.frequencyRanges()
+		mainModel := cp.Type()
+		ranges := cp.freqRanges()
+		freqRanges[mainModel] = ranges
 
 		if cp.fileType == FileTypeRdt {
 			if cpi.RdtSize != cp.rdtSize {
@@ -329,18 +349,18 @@ func (cp *Codeplug) ModelsFrequencyRanges() (models []string, frequencyRanges ma
 				continue
 			}
 			model = cp.Model()
-			frequencyRange = cp.FrequencyRange()
+			freqRange = cp.FrequencyRange()
 		}
 
 		for _, cpiModel := range cpi.Models {
 			if cpiModel == model {
 				models = []string{mainModel}
-				for _, v := range frequencyRanges[mainModel] {
-					if v == frequencyRange {
-						frequencyRanges[mainModel] = []string{v}
+				for _, r := range freqRanges[mainModel] {
+					if r == freqRange {
+						freqRanges[mainModel] = []string{r}
 					}
 				}
-				return models, frequencyRanges
+				return models, freqRanges
 			}
 		}
 		models = append(models, mainModel)
@@ -352,7 +372,7 @@ func (cp *Codeplug) ModelsFrequencyRanges() (models []string, frequencyRanges ma
 
 	cp.codeplugInfo = nil
 
-	return models, frequencyRanges
+	return models, freqRanges
 }
 
 func (cp *Codeplug) Model() string {
@@ -361,34 +381,59 @@ func (cp *Codeplug) Model() string {
 }
 
 func (cp *Codeplug) FrequencyRange() string {
+	freqRange := ""
 	fDescs := cp.rDesc[RtBasicInformation_md380].records[0].fDesc
-	return (*fDescs)[FtBiFrequencyRange_md380].fields[0].String()
+	r := (*fDescs)[FtBiFrequencyRange_md380]
+	if r != nil {
+		freqRange = r.fields[0].String()
+	}
+	r = (*fDescs)[FtBiFrequencyRangeA]
+	if r != nil {
+		freqRange = r.fields[0].String()
+	}
+	r = (*fDescs)[FtBiFrequencyRangeB]
+	if r != nil {
+		freqRange += "_" + r.fields[0].String()
+	}
+	return freqRange
 }
 
-func (cp *Codeplug) frequencyRanges() []string {
-	for _, rInfo := range cp.codeplugInfo.RecordInfos {
-		if rInfo.rType == RtBasicInformation_md380 {
+func (cp *Codeplug) freqRanges() []string {
+	cpi := cp.codeplugInfo
+
+	var rangesA []string
+	var rangesB []string
+	for _, rInfo := range cpi.RecordInfos {
+		if rInfo.rType == RtBasicInformation_uv380 {
 			for _, fInfo := range rInfo.fieldInfos {
-				if fInfo.fType == FtBiFrequencyRange_md380 {
-					return *fInfo.strings
+				switch fInfo.fType {
+				case FtBiFrequencyRange_md380:
+					rangesA = *fInfo.strings
+				case FtBiFrequencyRangeA:
+					rangesA = *fInfo.strings
+				}
+			}
+			for _, fInfo := range rInfo.fieldInfos {
+				switch fInfo.fType {
+				case FtBiFrequencyRangeB:
+					rangesB = *fInfo.strings
 				}
 			}
 		}
 	}
-	return nil
-}
 
-func (cp *Codeplug) newFilenames() []string {
-	for _, rInfo := range cp.codeplugInfo.RecordInfos {
-		if rInfo.rType == RtBasicInformation_md380 {
-			for _, fInfo := range rInfo.fieldInfos {
-				if fInfo.fType == FtBiNewFilename_md380 {
-					return *fInfo.strings
-				}
+	ranges := rangesA
+	if len(rangesB) > 1 {
+		ranges = make([]string, 0)
+
+		for i := range rangesA {
+			for j := range rangesB {
+				ranges = append(ranges, rangesA[i]+"_"+rangesB[j])
 			}
 		}
 	}
-	return nil
+
+	return ranges
 }
 
 func (cp *Codeplug) Type() string {
@@ -418,13 +463,7 @@ func (cp *Codeplug) Free() {
 }
 
 func (cp *Codeplug) readNew(filename string) error {
-	gzipped := bytes.NewReader(new_tgz)
-
-	archive, err := gzip.NewReader(gzipped)
-	if err != nil {
-		logFatal(err)
-	}
-
+	archive := bzip2.NewReader(bytes.NewReader(new_tar_bz2))
 	tarfile := tar.NewReader(archive)
 
 	var bytes []byte
@@ -873,18 +912,59 @@ func (cp *Codeplug) store() {
 	}
 }
 
-// frequencyValid returns nil if the given frequency is valid for the
-// codeplug.
-func (cp *Codeplug) frequencyValid(freq float64) error {
+func (cp *Codeplug) FrequencyValidA(freq float64) bool {
 	if cp.lowFrequency == 0 {
 		fDescs := cp.record(RtBasicInformation_md380).fDesc
-		s := (*fDescs)[FtBiLowFrequency].fields[0].String()
-		cp.lowFrequency, _ = strconv.ParseFloat(s, 64)
-		s = (*fDescs)[FtBiHighFrequency].fields[0].String()
-		cp.highFrequency, _ = strconv.ParseFloat(s, 64)
+		fDescLow := (*fDescs)[FtBiLowFrequency]
+		fDescLowA := (*fDescs)[FtBiLowFrequencyA]
+		if fDescLow != nil {
+			s := fDescLow.fields[0].String()
+			cp.lowFrequency, _ = strconv.ParseFloat(s, 64)
+			s = (*fDescs)[FtBiHighFrequency].fields[0].String()
+			cp.highFrequency, _ = strconv.ParseFloat(s, 64)
+		} else if fDescLowA != nil {
+			s := fDescLowA.fields[0].String()
+			cp.lowFrequency, _ = strconv.ParseFloat(s, 64)
+			s = (*fDescs)[FtBiHighFrequencyA].fields[0].String()
+			cp.highFrequency, _ = strconv.ParseFloat(s, 64)
+		}
 	}
 
 	if freq >= cp.lowFrequency && freq <= cp.highFrequency {
+		return true
+	}
+
+	return false
+}
+
+func (cp *Codeplug) FrequencyValidB(freq float64) bool {
+	if cp.lowFrequencyB == 0 {
+		fDescs := cp.record(RtBasicInformation_md380).fDesc
+		fDescLowB := (*fDescs)[FtBiLowFrequencyB]
+
+		if fDescLowB != nil {
+			s := fDescLowB.fields[0].String()
+			cp.lowFrequencyB, _ = strconv.ParseFloat(s, 64)
+			s = (*fDescs)[FtBiHighFrequencyB].fields[0].String()
+			cp.highFrequencyB, _ = strconv.ParseFloat(s, 64)
+		}
+	}
+
+	if cp.lowFrequencyB == 0 {
+		return false
+	}
+
+	if freq >= cp.lowFrequencyB && freq <= cp.highFrequencyB {
+		return true
+	}
+
+	return false
+}
+
+// frequencyValid returns nil if the given frequency is valid for the
+// codeplug.
+func (cp *Codeplug) frequencyValid(freq float64) error {
+	if cp.FrequencyValidA(freq) || cp.FrequencyValidB(freq) {
 		return nil
 	}
 
@@ -906,7 +986,7 @@ func filterField(rType RecordType, fType FieldType) bool {
 	switch rType {
 	case RtBasicInformation_md380:
 		switch fType {
-		case FtBiCpsVersion, FtBiNewFilename_md380:
+		case FtBiCpsVersion:
 			return true
 		case FtBiLowFrequency, FtBiHighFrequency:
 			return true
@@ -1195,10 +1275,11 @@ func (e *PositionError) Column() int {
 	return e.position.column + 1
 }
 
-func (cp *Codeplug) parseModelFrequencyRange() (model string, frequencyRange string) {
+func (cp *Codeplug) parseModelFrequencyRange() (model string, freqRange string) {
+	var freqRangeB string
 	file, err := os.Open(cp.importFilename)
 	if err != nil {
-		return model, frequencyRange
+		return model, freqRange
 	}
 	defer file.Close()
 
@@ -1224,17 +1305,22 @@ func (cp *Codeplug) parseModelFrequencyRange() (model string, frequencyRange str
 			case string(FtBiModel):
 				model = pf.value
 			case string(FtBiFrequencyRange_md380):
-				frequencyRange = pf.value
+				freqRange = pf.value
+			case string(FtBiFrequencyRangeA):
+				freqRange = pf.value
+			case string(FtBiFrequencyRangeB):
+				freqRangeB = pf.value
 			default:
 				continue
-			}
-			if model != "" && frequencyRange != "" {
-				return model, frequencyRange
 			}
 		}
 	}
 
-	return model, frequencyRange
+	if freqRangeB != "" {
+		freqRange += "_" + freqRangeB
+	}
+
+	return model, freqRange
 }
 
 type parsedField struct {

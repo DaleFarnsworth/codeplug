@@ -33,12 +33,14 @@ const (
 	RtBasicInformation_md390 RecordType = "BasicInformation"
 	RtBasicInformation_md40  RecordType = "BasicInformation"
 	RtBasicInformation_uv380 RecordType = "BasicInformation"
+	RtChannels_md2017        RecordType = "Channels"
 	RtChannels_md380         RecordType = "Channels"
 	RtChannels_md40          RecordType = "Channels"
 	RtChannels_uv380         RecordType = "Channels"
 	RtContacts               RecordType = "Contacts"
 	RtContacts_uv380         RecordType = "Contacts"
 	RtGPSSystems             RecordType = "GPSSystems"
+	RtGeneralSettings_md2017 RecordType = "GeneralSettings"
 	RtGeneralSettings_md380  RecordType = "GeneralSettings"
 	RtGeneralSettings_md40   RecordType = "GeneralSettings"
 	RtGeneralSettings_uv380  RecordType = "GeneralSettings"
@@ -57,19 +59,19 @@ const (
 // Field types
 const (
 	FtBiCpsVersion                FieldType = "CpsVersion"
-	FtBiFrequencyRangeA_uv380     FieldType = "FrequencyRangeA"
-	FtBiFrequencyRangeB_uv380     FieldType = "FrequencyRangeB"
+	FtBiFrequencyRangeA           FieldType = "FrequencyRangeA"
+	FtBiFrequencyRangeB           FieldType = "FrequencyRangeB"
 	FtBiFrequencyRange_md380      FieldType = "FrequencyRange"
 	FtBiFrequencyRange_md390      FieldType = "FrequencyRange"
 	FtBiFrequencyRange_md40       FieldType = "FrequencyRange"
 	FtBiHighFrequency             FieldType = "HighFrequency"
+	FtBiHighFrequencyA            FieldType = "HighFrequencyA"
+	FtBiHighFrequencyB            FieldType = "HighFrequencyB"
 	FtBiLastProgrammedTime        FieldType = "LastProgrammedTime"
 	FtBiLowFrequency              FieldType = "LowFrequency"
+	FtBiLowFrequencyA             FieldType = "LowFrequencyA"
+	FtBiLowFrequencyB             FieldType = "LowFrequencyB"
 	FtBiModel                     FieldType = "Model"
-	FtBiNewFilename_md380         FieldType = "NewFilename"
-	FtBiNewFilename_md390         FieldType = "NewFilename"
-	FtBiNewFilename_md40          FieldType = "NewFilename"
-	FtBiNewFilename_uv380         FieldType = "NewFilename"
 	FtCiAdmitCriteria             FieldType = "AdmitCriteria"
 	FtCiAllowTalkaround           FieldType = "AllowTalkaround"
 	FtCiAutoscan                  FieldType = "Autoscan"
@@ -80,6 +82,8 @@ const (
 	FtCiContactName               FieldType = "ContactName"
 	FtCiCtcssDecode               FieldType = "CtcssDecode"
 	FtCiCtcssEncode               FieldType = "CtcssEncode"
+	FtCiDCDMSwitch                FieldType = "DCDMSwitch"
+	FtCiDQTTurnoffFreq            FieldType = "DQTTurnoffFreq"
 	FtCiDataCallConfirmed         FieldType = "DataCallConfirmed"
 	FtCiDecode1                   FieldType = "Decode1"
 	FtCiDecode2                   FieldType = "Decode2"
@@ -95,9 +99,11 @@ const (
 	FtCiGPSSystem                 FieldType = "GPSSystem"
 	FtCiGroupList                 FieldType = "GroupList"
 	FtCiInCallCriteria            FieldType = "InCallCriteria"
+	FtCiLeaderMS                  FieldType = "LeaderMS"
 	FtCiLoneWorker                FieldType = "LoneWorker"
 	FtCiName                      FieldType = "Name"
 	FtCiPower                     FieldType = "Power"
+	FtCiPower_uv380               FieldType = "Power"
 	FtCiPrivacy                   FieldType = "Privacy"
 	FtCiPrivacyNumber             FieldType = "PrivacyNumber"
 	FtCiPrivateCallConfirmed      FieldType = "PrivateCallConfirmed"
@@ -113,6 +119,7 @@ const (
 	FtCiScanList_md40             FieldType = "ScanList"
 	FtCiSendGPSInfo               FieldType = "SendGPSInfo"
 	FtCiSquelch                   FieldType = "Squelch"
+	FtCiSquelch_uv380             FieldType = "Squelch"
 	FtCiTot                       FieldType = "Tot"
 	FtCiTotRekeyDelay             FieldType = "TotRekeyDelay"
 	FtCiTxFrequencyOffset         FieldType = "TxFrequencyOffset"
@@ -130,12 +137,17 @@ const (
 	FtGpGPSRevertChannel          FieldType = "GPSRevertChannel"
 	FtGsBacklightColor            FieldType = "BacklightColor"
 	FtGsBacklightTime             FieldType = "BacklightTime"
+	FtGsCHVoiceAnnouncement       FieldType = "CHVoiceAnnouncement"
 	FtGsCallAlertToneDuration     FieldType = "CallAlertToneDuration"
 	FtGsChFreeIndicationTone      FieldType = "ChFreeIndicationTone"
+	FtGsChannelsHangTime          FieldType = "ChannelsHangTime"
 	FtGsDisableAllLeds            FieldType = "DisableAllLeds"
 	FtGsDisableAllTones           FieldType = "DisableAllTones"
+	FtGsEditRadioID               FieldType = "EditRadioID"
 	FtGsFreqChannelMode           FieldType = "FreqChannelMode"
+	FtGsFreqChannelMode_uv380     FieldType = "FreqChannelMode"
 	FtGsGroupCallHangTime         FieldType = "GroupCallHangTime"
+	FtGsGroupCallMatch            FieldType = "GroupCallMatch"
 	FtGsIntroScreen               FieldType = "IntroScreen"
 	FtGsIntroScreenLine1          FieldType = "IntroScreenLine1"
 	FtGsIntroScreenLine2          FieldType = "IntroScreenLine2"
@@ -143,14 +155,21 @@ const (
 	FtGsLockUnlock                FieldType = "LockUnlock"
 	FtGsLoneWorkerReminderTime    FieldType = "LoneWorkerReminderTime"
 	FtGsLoneWorkerResponseTime    FieldType = "LoneWorkerResponseTime"
-	FtGsMode                      FieldType = "Mode"
+	FtGsMicLevel                  FieldType = "MicLevel"
 	FtGsModeSelect                FieldType = "ModeSelect"
+	FtGsModeSelectA               FieldType = "ModeSelectA"
+	FtGsModeSelectB               FieldType = "ModeSelectB"
 	FtGsMonitorType               FieldType = "MonitorType"
 	FtGsPcProgPassword            FieldType = "PcProgPassword"
 	FtGsPowerOnPassword           FieldType = "PowerOnPassword"
 	FtGsPrivateCallHangTime       FieldType = "PrivateCallHangTime"
+	FtGsPrivateCallMatch          FieldType = "PrivateCallMatch"
+	FtGsPublicZone                FieldType = "PublicZone"
 	FtGsPwAndLockEnable           FieldType = "PwAndLockEnable"
 	FtGsRadioID                   FieldType = "RadioID"
+	FtGsRadioID1                  FieldType = "RadioID1"
+	FtGsRadioID2                  FieldType = "RadioID2"
+	FtGsRadioID3                  FieldType = "RadioID3"
 	FtGsRadioName                 FieldType = "RadioName"
 	FtGsRadioProgPassword         FieldType = "RadioProgPassword"
 	FtGsRxLowBatteryInterval      FieldType = "RxLowBatteryInterval"
@@ -160,6 +179,8 @@ const (
 	FtGsScanDigitalHangTime       FieldType = "ScanDigitalHangTime"
 	FtGsSetKeypadLockTime         FieldType = "SetKeypadLockTime"
 	FtGsTalkPermitTone            FieldType = "TalkPermitTone"
+	FtGsTimeZone                  FieldType = "TimeZone"
+	FtGsTxMode                    FieldType = "TxMode"
 	FtGsTxPreambleDuration        FieldType = "TxPreambleDuration"
 	FtGsVoxSensitivity            FieldType = "VoxSensitivity"
 	FtMiAnswered                  FieldType = "Answered"
@@ -213,7 +234,7 @@ const (
 
 // The value types a field may contain
 const (
-	VtBiFilename        ValueType = "biFilename"
+	VtAscii             ValueType = "ascii"
 	VtBiFrequency       ValueType = "biFrequency"
 	VtCallID            ValueType = "callID"
 	VtCallType          ValueType = "callType"
@@ -229,7 +250,6 @@ const (
 	VtIntroLine         ValueType = "introLine"
 	VtListIndex         ValueType = "listIndex"
 	VtMemberListIndex   ValueType = "memberListIndex"
-	VtModel             ValueType = "model"
 	VtName              ValueType = "name"
 	VtOffOn             ValueType = "offOn"
 	VtOnOff             ValueType = "onOff"
@@ -237,6 +257,7 @@ const (
 	VtPrivacyNumber     ValueType = "privacyNumber"
 	VtRadioName         ValueType = "radioName"
 	VtRadioPassword     ValueType = "radioPassword"
+	VtRadioProgPassword ValueType = "radioProgPassword"
 	VtSpan              ValueType = "span"
 	VtTextMessage       ValueType = "textMessage"
 	VtTimeStamp         ValueType = "timeStamp"
@@ -246,8 +267,8 @@ const (
 // newValue returns a new value of the given ValueType
 func newValue(vt ValueType) value {
 	switch vt {
-	case VtBiFilename:
-		return new(biFilename)
+	case VtAscii:
+		return new(ascii)
 	case VtBiFrequency:
 		return new(biFrequency)
 	case VtCallID:
@@ -278,8 +299,6 @@ func newValue(vt ValueType) value {
 		return new(listIndex)
 	case VtMemberListIndex:
 		return new(memberListIndex)
-	case VtModel:
-		return new(model)
 	case VtName:
 		return new(name)
 	case VtOffOn:
@@ -294,6 +313,8 @@ func newValue(vt ValueType) value {
 		return new(radioName)
 	case VtRadioPassword:
 		return new(radioPassword)
+	case VtRadioProgPassword:
+		return new(radioProgPassword)
 	case VtSpan:
 		return new(span)
 	case VtTextMessage:
@@ -308,18 +329,20 @@ func newValue(vt ValueType) value {
 }
 
 var codeplugInfos = []*CodeplugInfo{
-	&cpMd380,
-	&cpMd390,
-	&cpMd40,
-	&cpUv380,
-	&cpUv390,
+	&cpMD380,
+	&cpMD390,
+	&cpDJMD40,
+	&cpMDUV380,
+	&cpMDUV390,
+	&cpMD2017,
 }
 
-var cpMd380 = CodeplugInfo{
-	Type: "md380",
+var cpMD380 = CodeplugInfo{
+	Type: "MD-380",
 	Models: []string{
 		"MD380",
 		"DR780",
+		"MD-380",
 	},
 	Ext:       "rdt",
 	RdtSize:   262709,
@@ -339,10 +362,11 @@ var cpMd380 = CodeplugInfo{
 	},
 }
 
-var cpMd390 = CodeplugInfo{
-	Type: "md390",
+var cpMD390 = CodeplugInfo{
+	Type: "MD-390",
 	Models: []string{
 		"MD390",
+		"MD-390",
 	},
 	Ext:       "rdt",
 	RdtSize:   262709,
@@ -362,8 +386,8 @@ var cpMd390 = CodeplugInfo{
 	},
 }
 
-var cpMd40 = CodeplugInfo{
-	Type: "md40",
+var cpDJMD40 = CodeplugInfo{
+	Type: "DJ-MD40",
 	Models: []string{
 		"DJ-MD40",
 	},
@@ -384,8 +408,8 @@ var cpMd40 = CodeplugInfo{
 	},
 }
 
-var cpUv380 = CodeplugInfo{
-	Type: "uv380",
+var cpMDUV380 = CodeplugInfo{
+	Type: "MD-UV380",
 	Models: []string{
 		"MD-UV380",
 	},
@@ -403,11 +427,12 @@ var cpUv380 = CodeplugInfo{
 		&riZones_uv380,
 		&riScanLists_uv380,
 		&riChannels_uv380,
+		&riGPSSystems,
 	},
 }
 
-var cpUv390 = CodeplugInfo{
-	Type: "uv390",
+var cpMDUV390 = CodeplugInfo{
+	Type: "MD-UV390",
 	Models: []string{
 		"MD-UV390",
 	},
@@ -425,6 +450,31 @@ var cpUv390 = CodeplugInfo{
 		&riZones_uv380,
 		&riScanLists_uv380,
 		&riChannels_uv380,
+		&riGPSSystems,
+	},
+}
+
+var cpMD2017 = CodeplugInfo{
+	Type: "MD-2017",
+	Models: []string{
+		"2017",
+		"MD-2017",
+	},
+	Ext:       "rdt",
+	RdtSize:   852533,
+	BinSize:   851968,
+	BinOffset: 549,
+	RecordInfos: []*recordInfo{
+		&riBasicInformation_uv380,
+		&riGeneralSettings_md2017,
+		&riMenuItems,
+		&riPrivacySettings,
+		&riContacts_uv380,
+		&riGroupLists,
+		&riZones_uv380,
+		&riScanLists_uv380,
+		&riChannels_md2017,
+		&riGPSSystems,
 	},
 }
 
@@ -437,7 +487,6 @@ var riBasicInformation_md380 = recordInfo{
 	fieldInfos: []*fieldInfo{
 		&fiBiModel,
 		&fiBiFrequencyRange_md380,
-		&fiBiNewFilename_md380,
 		&fiBiLowFrequency,
 		&fiBiHighFrequency,
 		&fiBiLastProgrammedTime,
@@ -454,7 +503,6 @@ var riBasicInformation_md390 = recordInfo{
 	fieldInfos: []*fieldInfo{
 		&fiBiModel,
 		&fiBiFrequencyRange_md390,
-		&fiBiNewFilename_md390,
 		&fiBiLowFrequency,
 		&fiBiHighFrequency,
 		&fiBiLastProgrammedTime,
@@ -471,7 +519,6 @@ var riBasicInformation_md40 = recordInfo{
 	fieldInfos: []*fieldInfo{
 		&fiBiModel,
 		&fiBiFrequencyRange_md40,
-		&fiBiNewFilename_md40,
 		&fiBiLowFrequency,
 		&fiBiHighFrequency,
 		&fiBiLastProgrammedTime,
@@ -487,13 +534,81 @@ var riBasicInformation_uv380 = recordInfo{
 	size:     8805,
 	fieldInfos: []*fieldInfo{
 		&fiBiModel,
-		&fiBiFrequencyRangeA_uv380,
-		&fiBiFrequencyRangeB_uv380,
-		&fiBiNewFilename_uv380,
-		&fiBiLowFrequency,
-		&fiBiHighFrequency,
+		&fiBiFrequencyRangeA,
+		&fiBiFrequencyRangeB,
+		&fiBiLowFrequencyA,
+		&fiBiHighFrequencyA,
+		&fiBiLowFrequencyB,
+		&fiBiHighFrequencyB,
 		&fiBiLastProgrammedTime,
 		&fiBiCpsVersion,
+	},
+}
+
+var riChannels_md2017 = recordInfo{
+	rType:    RtChannels_md2017,
+	typeName: "Channels",
+	max:      3000,
+	offset:   262709,
+	size:     64,
+	delDescs: []delDesc{
+		delDesc{
+			offset: 16,
+			size:   1,
+			value:  255,
+		},
+	},
+	fieldInfos: []*fieldInfo{
+		&fiCiName,
+		&fiCiRxFrequency,
+		&fiCiTxFrequencyOffset,
+		&fiCiChannelMode,
+		&fiCiBandwidth,
+		&fiCiScanList_md40,
+		&fiCiSquelch,
+		&fiCiRxRefFrequency,
+		&fiCiTxRefFrequency,
+		&fiCiTot,
+		&fiCiTotRekeyDelay,
+		&fiCiPower_uv380,
+		&fiCiAdmitCriteria,
+		&fiCiAutoscan,
+		&fiCiRxOnly,
+		&fiCiLoneWorker,
+		&fiCiVox,
+		&fiCiAllowTalkaround,
+		&fiCiSendGPSInfo,
+		&fiCiReceiveGPSInfo,
+		&fiCiPrivateCallConfirmed,
+		&fiCiEmergencyAlarmAck,
+		&fiCiDataCallConfirmed,
+		&fiCiDCDMSwitch,
+		&fiCiLeaderMS,
+		&fiCiEmergencySystem,
+		&fiCiContactName,
+		&fiCiGroupList,
+		&fiCiColorCode,
+		&fiCiRepeaterSlot,
+		&fiCiPrivacy,
+		&fiCiPrivacyNumber,
+		&fiCiGPSSystem,
+		&fiCiInCallCriteria,
+		&fiCiDisplayPTTID,
+		&fiCiCtcssEncode,
+		&fiCiTxSignallingSystem,
+		&fiCiDQTTurnoffFreq,
+		&fiCiQtReverse,
+		&fiCiReverseBurst,
+		&fiCiCtcssDecode,
+		&fiCiRxSignallingSystem,
+		&fiCiDecode1,
+		&fiCiDecode2,
+		&fiCiDecode3,
+		&fiCiDecode4,
+		&fiCiDecode5,
+		&fiCiDecode6,
+		&fiCiDecode7,
+		&fiCiDecode8,
 	},
 }
 
@@ -627,7 +742,7 @@ var riChannels_uv380 = recordInfo{
 	rType:    RtChannels_uv380,
 	typeName: "Channels",
 	max:      3000,
-	offset:   262693,
+	offset:   262709,
 	size:     64,
 	delDescs: []delDesc{
 		delDesc{
@@ -643,22 +758,25 @@ var riChannels_uv380 = recordInfo{
 		&fiCiChannelMode,
 		&fiCiBandwidth,
 		&fiCiScanList_md40,
-		&fiCiSquelch,
+		&fiCiSquelch_uv380,
 		&fiCiRxRefFrequency,
 		&fiCiTxRefFrequency,
 		&fiCiTot,
 		&fiCiTotRekeyDelay,
-		&fiCiPower,
+		&fiCiPower_uv380,
 		&fiCiAdmitCriteria,
 		&fiCiAutoscan,
 		&fiCiRxOnly,
 		&fiCiLoneWorker,
 		&fiCiVox,
 		&fiCiAllowTalkaround,
+		&fiCiSendGPSInfo,
+		&fiCiReceiveGPSInfo,
 		&fiCiPrivateCallConfirmed,
 		&fiCiEmergencyAlarmAck,
 		&fiCiDataCallConfirmed,
-		&fiCiCompressedUdpDataHeader,
+		&fiCiDCDMSwitch,
+		&fiCiLeaderMS,
 		&fiCiEmergencySystem,
 		&fiCiContactName,
 		&fiCiGroupList,
@@ -666,6 +784,8 @@ var riChannels_uv380 = recordInfo{
 		&fiCiRepeaterSlot,
 		&fiCiPrivacy,
 		&fiCiPrivacyNumber,
+		&fiCiGPSSystem,
+		&fiCiInCallCriteria,
 		&fiCiDisplayPTTID,
 		&fiCiCtcssEncode,
 		&fiCiTxSignallingSystem,
@@ -709,7 +829,7 @@ var riContacts_uv380 = recordInfo{
 	rType:    RtContacts_uv380,
 	typeName: "Contacts",
 	max:      10000,
-	offset:   459301,
+	offset:   459317,
 	size:     36,
 	delDescs: []delDesc{
 		delDesc{
@@ -737,6 +857,50 @@ var riGPSSystems = recordInfo{
 		&fiGpGPSRevertChannel,
 		&fiGpGPSDefaultReportInterval,
 		&fiGpDestinationID,
+	},
+}
+
+var riGeneralSettings_md2017 = recordInfo{
+	rType:    RtGeneralSettings_md2017,
+	typeName: "General Settings",
+	max:      1,
+	offset:   8805,
+	size:     144,
+	fieldInfos: []*fieldInfo{
+		&fiGsRadioName,
+		&fiGsRadioID,
+		&fiGsIntroScreen,
+		&fiGsIntroScreenLine1,
+		&fiGsIntroScreenLine2,
+		&fiGsSavePreamble,
+		&fiGsSaveModeReceive,
+		&fiGsDisableAllTones,
+		&fiGsChFreeIndicationTone,
+		&fiGsTalkPermitTone,
+		&fiGsCallAlertToneDuration,
+		&fiGsScanDigitalHangTime,
+		&fiGsScanAnalogHangTime,
+		&fiGsLoneWorkerResponseTime,
+		&fiGsLoneWorkerReminderTime,
+		&fiGsPwAndLockEnable,
+		&fiGsPowerOnPassword,
+		&fiGsMonitorType,
+		&fiGsVoxSensitivity,
+		&fiGsTxPreambleDuration,
+		&fiGsRxLowBatteryInterval,
+		&fiGsPcProgPassword,
+		&fiGsRadioProgPassword,
+		&fiGsBacklightTime,
+		&fiGsSetKeypadLockTime,
+		&fiGsFreqChannelMode_uv380,
+		&fiGsModeSelectA,
+		&fiGsModeSelectB,
+		&fiGsTimeZone,
+		&fiGsDisableAllLeds,
+		&fiGsGroupCallMatch,
+		&fiGsPrivateCallMatch,
+		&fiGsGroupCallHangTime,
+		&fiGsPrivateCallHangTime,
 	},
 }
 
@@ -771,7 +935,6 @@ var riGeneralSettings_md380 = recordInfo{
 		&fiGsRxLowBatteryInterval,
 		&fiGsPcProgPassword,
 		&fiGsRadioProgPassword,
-		&fiGsMode,
 		&fiGsBacklightTime,
 		&fiGsSetKeypadLockTime,
 		&fiGsDisableAllLeds,
@@ -811,7 +974,6 @@ var riGeneralSettings_md40 = recordInfo{
 		&fiGsRxLowBatteryInterval,
 		&fiGsPcProgPassword,
 		&fiGsRadioProgPassword,
-		&fiGsMode,
 		&fiGsFreqChannelMode,
 		&fiGsBacklightColor,
 		&fiGsModeSelect,
@@ -836,11 +998,11 @@ var riGeneralSettings_uv380 = recordInfo{
 		&fiGsIntroScreenLine1,
 		&fiGsIntroScreenLine2,
 		&fiGsSavePreamble,
+		&fiGsCHVoiceAnnouncement,
 		&fiGsSaveModeReceive,
 		&fiGsDisableAllTones,
 		&fiGsChFreeIndicationTone,
 		&fiGsTalkPermitTone,
-		&fiGsKeypadTones,
 		&fiGsCallAlertToneDuration,
 		&fiGsScanDigitalHangTime,
 		&fiGsScanAnalogHangTime,
@@ -852,17 +1014,27 @@ var riGeneralSettings_uv380 = recordInfo{
 		&fiGsVoxSensitivity,
 		&fiGsTxPreambleDuration,
 		&fiGsRxLowBatteryInterval,
+		&fiGsChannelsHangTime,
 		&fiGsPcProgPassword,
 		&fiGsRadioProgPassword,
-		&fiGsMode,
-		&fiGsFreqChannelMode,
-		&fiGsBacklightColor,
-		&fiGsModeSelect,
-		&fiGsLockUnlock,
 		&fiGsSetKeypadLockTime,
+		&fiGsFreqChannelMode_uv380,
+		&fiGsModeSelectA,
+		&fiGsModeSelectB,
+		&fiGsTimeZone,
+		&fiGsBacklightTime,
 		&fiGsDisableAllLeds,
+		&fiGsGroupCallMatch,
+		&fiGsPrivateCallMatch,
 		&fiGsGroupCallHangTime,
 		&fiGsPrivateCallHangTime,
+		&fiGsRadioID1,
+		&fiGsRadioID2,
+		&fiGsRadioID3,
+		&fiGsMicLevel,
+		&fiGsTxMode,
+		&fiGsEditRadioID,
+		&fiGsPublicZone,
 	},
 }
 
@@ -1092,72 +1264,78 @@ var fiBiCpsVersion = fieldInfo{
 	valueType: VtCpsVersion,
 }
 
-var fiBiFrequencyRangeA_uv380 = fieldInfo{
-	fType:     FtBiFrequencyRangeA_uv380,
-	typeName:  "Frequency Range A",
+var fiBiFrequencyRangeA = fieldInfo{
+	fType:     FtBiFrequencyRangeA,
+	typeName:  "Frequency Range A (MHz)",
 	max:       1,
 	bitOffset: 2480,
 	bitSize:   8,
 	valueType: VtIStrings,
 	strings: &[]string{
-		"136-174 MHz",
+		"136-174",
+		"350-400",
+		"400-480",
+		"450-520",
 	},
 }
 
-var fiBiFrequencyRangeB_uv380 = fieldInfo{
-	fType:     FtBiFrequencyRangeB_uv380,
-	typeName:  "Frequency Range B",
+var fiBiFrequencyRangeB = fieldInfo{
+	fType:     FtBiFrequencyRangeB,
+	typeName:  "Frequency Range B (MHz)",
 	max:       1,
-	bitOffset: 2480,
+	bitOffset: 2488,
 	bitSize:   8,
 	valueType: VtIStrings,
 	strings: &[]string{
-		"400-480 MHz",
+		"136-174",
+		"350-400",
+		"400-480",
+		"450-520",
 	},
 }
 
 var fiBiFrequencyRange_md380 = fieldInfo{
 	fType:     FtBiFrequencyRange_md380,
-	typeName:  "Frequency Range",
+	typeName:  "Frequency Range (MHz)",
 	max:       1,
 	bitOffset: 2480,
 	bitSize:   8,
 	valueType: VtIStrings,
 	strings: &[]string{
-		"136-174 MHz",
-		"350-400 MHz",
-		"400-480 MHz",
-		"450-520 MHz",
+		"136-174",
+		"350-400",
+		"400-480",
+		"450-520",
 	},
 }
 
 var fiBiFrequencyRange_md390 = fieldInfo{
 	fType:     FtBiFrequencyRange_md390,
-	typeName:  "Frequency Range",
+	typeName:  "Frequency Range (MHz)",
 	max:       1,
 	bitOffset: 2480,
 	bitSize:   8,
 	valueType: VtIStrings,
 	strings: &[]string{
-		"136-174 MHz",
-		"350-400 MHz",
-		"400-480 MHz",
-		"450-520 MHz",
+		"136-174",
+		"350-400",
+		"400-480",
+		"450-520",
 	},
 }
 
 var fiBiFrequencyRange_md40 = fieldInfo{
 	fType:     FtBiFrequencyRange_md40,
-	typeName:  "Frequency Range",
+	typeName:  "Frequency Range (MHz)",
 	max:       1,
 	bitOffset: 2480,
 	bitSize:   8,
 	valueType: VtIStrings,
 	strings: &[]string{
-		"400-480 MHz - MD40",
-		"420-450 MHz - MD40HT",
-		"430-440 MHz - MD40HE",
-		"400-480 MHz - MD40T",
+		"MD40 400-480",
+		"MD40HT 420-450",
+		"MD40HE 430-440",
+		"MD40T 400-480",
 	},
 }
 
@@ -1166,6 +1344,24 @@ var fiBiHighFrequency = fieldInfo{
 	typeName:  "High Frequency",
 	max:       1,
 	bitOffset: 2520,
+	bitSize:   16,
+	valueType: VtBiFrequency,
+}
+
+var fiBiHighFrequencyA = fieldInfo{
+	fType:     FtBiHighFrequencyA,
+	typeName:  "High Frequency A",
+	max:       1,
+	bitOffset: 2520,
+	bitSize:   16,
+	valueType: VtBiFrequency,
+}
+
+var fiBiHighFrequencyB = fieldInfo{
+	fType:     FtBiHighFrequencyB,
+	typeName:  "High Frequency B",
+	max:       1,
+	bitOffset: 2552,
 	bitSize:   16,
 	valueType: VtBiFrequency,
 }
@@ -1188,70 +1384,31 @@ var fiBiLowFrequency = fieldInfo{
 	valueType: VtBiFrequency,
 }
 
+var fiBiLowFrequencyA = fieldInfo{
+	fType:     FtBiLowFrequencyA,
+	typeName:  "Low Frequency A",
+	max:       1,
+	bitOffset: 2504,
+	bitSize:   16,
+	valueType: VtBiFrequency,
+}
+
+var fiBiLowFrequencyB = fieldInfo{
+	fType:     FtBiLowFrequencyB,
+	typeName:  "Low Frequency B",
+	max:       1,
+	bitOffset: 2536,
+	bitSize:   16,
+	valueType: VtBiFrequency,
+}
+
 var fiBiModel = fieldInfo{
 	fType:     FtBiModel,
 	typeName:  "Model Name",
 	max:       1,
 	bitOffset: 2344,
 	bitSize:   64,
-	valueType: VtModel,
-}
-
-var fiBiNewFilename_md380 = fieldInfo{
-	fType:     FtBiNewFilename_md380,
-	typeName:  "Codeplug Model Filename",
-	max:       1,
-	bitOffset: 2480,
-	bitSize:   8,
-	valueType: VtBiFilename,
-	strings: &[]string{
-		"md380_136-174.rdt",
-		"md380_350-400.rdt",
-		"md380_400-480.rdt",
-		"md380_450-520.rdt",
-	},
-}
-
-var fiBiNewFilename_md390 = fieldInfo{
-	fType:     FtBiNewFilename_md390,
-	typeName:  "Codeplug Model Filename",
-	max:       1,
-	bitOffset: 2480,
-	bitSize:   8,
-	valueType: VtBiFilename,
-	strings: &[]string{
-		"md390_136-174.rdt",
-		"md390_350-400.rdt",
-		"md390_400-480.rdt",
-		"md390_450-520.rdt",
-	},
-}
-
-var fiBiNewFilename_md40 = fieldInfo{
-	fType:     FtBiNewFilename_md40,
-	typeName:  "Codeplug Model Filename",
-	max:       1,
-	bitOffset: 2480,
-	bitSize:   8,
-	valueType: VtBiFilename,
-	strings: &[]string{
-		"md40_400-480.rdt",
-		"md40ht_420-450.rdt",
-		"md40he_430-440.rdt",
-		"md40t_400-480.rdt",
-	},
-}
-
-var fiBiNewFilename_uv380 = fieldInfo{
-	fType:     FtBiNewFilename_uv380,
-	typeName:  "Codeplug Model Filename",
-	max:       1,
-	bitOffset: 2480,
-	bitSize:   8,
-	valueType: VtBiFilename,
-	strings: &[]string{
-		"md-uv380_136-174_400-480.rdt",
-	},
+	valueType: VtAscii,
 }
 
 var fiCiAdmitCriteria = fieldInfo{
@@ -1276,6 +1433,7 @@ var fiCiAllowTalkaround = fieldInfo{
 	bitOffset: 15,
 	bitSize:   1,
 	valueType: VtOffOn,
+	disabler:  FtCiTxFrequencyOffset,
 }
 
 var fiCiAutoscan = fieldInfo{
@@ -1377,6 +1535,31 @@ var fiCiCtcssEncode = fieldInfo{
 	defaultValue:  "None",
 	enablingValue: "None",
 	disabler:      FtCiChannelMode,
+}
+
+var fiCiDCDMSwitch = fieldInfo{
+	fType:         FtCiDCDMSwitch,
+	typeName:      "DCDM Switch",
+	max:           1,
+	bitOffset:     253,
+	bitSize:       1,
+	valueType:     VtOnOff,
+	enablingValue: "On",
+}
+
+var fiCiDQTTurnoffFreq = fieldInfo{
+	fType:     FtCiDQTTurnoffFreq,
+	typeName:  "Non-QT/DQT Turn-off Freq",
+	max:       1,
+	bitOffset: 40,
+	bitSize:   2,
+	valueType: VtIndexedStrings,
+	indexedStrings: &[]IndexedString{
+		IndexedString{0, "259.2 Hz"},
+		IndexedString{2, "55.2 Hz"},
+		IndexedString{3, "None"},
+	},
+	disabler: FtCiChannelMode,
 }
 
 var fiCiDataCallConfirmed = fieldInfo{
@@ -1546,6 +1729,16 @@ var fiCiInCallCriteria = fieldInfo{
 	},
 }
 
+var fiCiLeaderMS = fieldInfo{
+	fType:     FtCiLeaderMS,
+	typeName:  "Leader/MS",
+	max:       1,
+	bitOffset: 252,
+	bitSize:   1,
+	valueType: VtOnOff,
+	enabler:   FtCiDCDMSwitch,
+}
+
 var fiCiLoneWorker = fieldInfo{
 	fType:     FtCiLoneWorker,
 	typeName:  "Lone Worker",
@@ -1574,6 +1767,20 @@ var fiCiPower = fieldInfo{
 	strings: &[]string{
 		"Low",
 		"High",
+	},
+}
+
+var fiCiPower_uv380 = fieldInfo{
+	fType:     FtCiPower_uv380,
+	typeName:  "Power",
+	max:       1,
+	bitOffset: 246,
+	bitSize:   2,
+	valueType: VtIndexedStrings,
+	indexedStrings: &[]IndexedString{
+		IndexedString{0, "Low"},
+		IndexedString{2, "Middle"},
+		IndexedString{3, "High"},
 	},
 }
 
@@ -1780,6 +1987,19 @@ var fiCiSquelch = fieldInfo{
 	},
 }
 
+var fiCiSquelch_uv380 = fieldInfo{
+	fType:     FtCiSquelch_uv380,
+	typeName:  "Squelch",
+	max:       1,
+	bitOffset: 124,
+	bitSize:   4,
+	valueType: VtSpan,
+	span: &Span{
+		min: 0,
+		max: 9,
+	},
+}
+
 var fiCiTot = fieldInfo{
 	fType:     FtCiTot,
 	typeName:  "TOT (S)",
@@ -1809,12 +2029,13 @@ var fiCiTotRekeyDelay = fieldInfo{
 }
 
 var fiCiTxFrequencyOffset = fieldInfo{
-	fType:     FtCiTxFrequencyOffset,
-	typeName:  "Tx Offset (MHz)",
-	max:       1,
-	bitOffset: 160,
-	bitSize:   32,
-	valueType: VtFrequencyOffset,
+	fType:         FtCiTxFrequencyOffset,
+	typeName:      "Tx Offset (MHz)",
+	max:           1,
+	bitOffset:     160,
+	bitSize:       32,
+	valueType:     VtFrequencyOffset,
+	enablingValue: "+0.00000",
 }
 
 var fiCiTxRefFrequency = fieldInfo{
@@ -1995,6 +2216,15 @@ var fiGsBacklightTime = fieldInfo{
 	},
 }
 
+var fiGsCHVoiceAnnouncement = fieldInfo{
+	fType:     FtGsCHVoiceAnnouncement,
+	typeName:  "CH Voice Announcement",
+	max:       1,
+	bitOffset: 534,
+	bitSize:   1,
+	valueType: VtOffOn,
+}
+
 var fiGsCallAlertToneDuration = fieldInfo{
 	fType:     FtGsCallAlertToneDuration,
 	typeName:  "Call Alert Tone Duration (S)",
@@ -2019,6 +2249,21 @@ var fiGsChFreeIndicationTone = fieldInfo{
 	valueType: VtOnOff,
 }
 
+var fiGsChannelsHangTime = fieldInfo{
+	fType:     FtGsChannelsHangTime,
+	typeName:  "Channels Hang Time (mS)",
+	max:       1,
+	bitOffset: 1152,
+	bitSize:   8,
+	valueType: VtSpan,
+	span: &Span{
+		min:      0,
+		max:      70,
+		scale:    100,
+		interval: 5,
+	},
+}
+
 var fiGsDisableAllLeds = fieldInfo{
 	fType:     FtGsDisableAllLeds,
 	typeName:  "Disable All LEDS",
@@ -2037,6 +2282,15 @@ var fiGsDisableAllTones = fieldInfo{
 	valueType: VtOnOff,
 }
 
+var fiGsEditRadioID = fieldInfo{
+	fType:     FtGsEditRadioID,
+	typeName:  "Edit Radio ID",
+	max:       1,
+	bitOffset: 1281,
+	bitSize:   1,
+	valueType: VtOnOff,
+}
+
 var fiGsFreqChannelMode = fieldInfo{
 	fType:     FtGsFreqChannelMode,
 	typeName:  "Freq/Channel Mode",
@@ -2049,6 +2303,20 @@ var fiGsFreqChannelMode = fieldInfo{
 		"Channel",
 	},
 	enablingValue: "Frequency",
+}
+
+var fiGsFreqChannelMode_uv380 = fieldInfo{
+	fType:     FtGsFreqChannelMode_uv380,
+	typeName:  "Freq/Channel Mode",
+	max:       1,
+	bitOffset: 696,
+	bitSize:   8,
+	valueType: VtIndexedStrings,
+	indexedStrings: &[]IndexedString{
+		IndexedString{0, "Frequency"},
+		IndexedString{255, "Channel"},
+	},
+	enablingValue: "VFO",
 }
 
 var fiGsGroupCallHangTime = fieldInfo{
@@ -2064,6 +2332,15 @@ var fiGsGroupCallHangTime = fieldInfo{
 		scale:    100,
 		interval: 5,
 	},
+}
+
+var fiGsGroupCallMatch = fieldInfo{
+	fType:     FtGsGroupCallMatch,
+	typeName:  "Group Call Match",
+	max:       1,
+	bitOffset: 863,
+	bitSize:   1,
+	valueType: VtOffOn,
 }
 
 var fiGsIntroScreen = fieldInfo{
@@ -2117,7 +2394,7 @@ var fiGsLockUnlock = fieldInfo{
 		"Unlock",
 		"Lock",
 	},
-	disabler: FtGsFreqChannelMode,
+	disabler: FtGsFreqChannelMode_uv380,
 }
 
 var fiGsLoneWorkerReminderTime = fieldInfo{
@@ -2146,16 +2423,20 @@ var fiGsLoneWorkerResponseTime = fieldInfo{
 	},
 }
 
-var fiGsMode = fieldInfo{
-	fType:     FtGsMode,
-	typeName:  "Mode",
+var fiGsMicLevel = fieldInfo{
+	fType:     FtGsMicLevel,
+	typeName:  "MIC Level",
 	max:       1,
-	bitOffset: 696,
-	bitSize:   8,
-	valueType: VtIndexedStrings,
-	indexedStrings: &[]IndexedString{
-		IndexedString{0, "Memory"},
-		IndexedString{255, "Channel"},
+	bitOffset: 1282,
+	bitSize:   3,
+	valueType: VtIStrings,
+	strings: &[]string{
+		"1",
+		"2",
+		"3",
+		"4",
+		"5",
+		"6",
 	},
 }
 
@@ -2171,6 +2452,34 @@ var fiGsModeSelect = fieldInfo{
 		"Memory",
 	},
 	enabler: FtGsFreqChannelMode,
+}
+
+var fiGsModeSelectA = fieldInfo{
+	fType:     FtGsModeSelectA,
+	typeName:  "Mode Select A",
+	max:       1,
+	bitOffset: 541,
+	bitSize:   1,
+	valueType: VtIStrings,
+	strings: &[]string{
+		"VFO",
+		"Memory",
+	},
+	enabler: FtGsFreqChannelMode_uv380,
+}
+
+var fiGsModeSelectB = fieldInfo{
+	fType:     FtGsModeSelectB,
+	typeName:  "Mode Select B",
+	max:       1,
+	bitOffset: 536,
+	bitSize:   1,
+	valueType: VtIStrings,
+	strings: &[]string{
+		"VFO",
+		"Memory",
+	},
+	enabler: FtGsFreqChannelMode_uv380,
 }
 
 var fiGsMonitorType = fieldInfo{
@@ -2221,6 +2530,24 @@ var fiGsPrivateCallHangTime = fieldInfo{
 	},
 }
 
+var fiGsPrivateCallMatch = fieldInfo{
+	fType:     FtGsPrivateCallMatch,
+	typeName:  "Private Call Match",
+	max:       1,
+	bitOffset: 862,
+	bitSize:   1,
+	valueType: VtOffOn,
+}
+
+var fiGsPublicZone = fieldInfo{
+	fType:     FtGsPublicZone,
+	typeName:  "Public Zone",
+	max:       1,
+	bitOffset: 1173,
+	bitSize:   1,
+	valueType: VtOffOn,
+}
+
 var fiGsPwAndLockEnable = fieldInfo{
 	fType:         FtGsPwAndLockEnable,
 	typeName:      "Password And Lock Enable",
@@ -2240,6 +2567,33 @@ var fiGsRadioID = fieldInfo{
 	valueType: VtCallID,
 }
 
+var fiGsRadioID1 = fieldInfo{
+	fType:     FtGsRadioID1,
+	typeName:  "Radio ID 1",
+	max:       1,
+	bitOffset: 1184,
+	bitSize:   24,
+	valueType: VtCallID,
+}
+
+var fiGsRadioID2 = fieldInfo{
+	fType:     FtGsRadioID2,
+	typeName:  "Radio ID 2",
+	max:       1,
+	bitOffset: 1216,
+	bitSize:   24,
+	valueType: VtCallID,
+}
+
+var fiGsRadioID3 = fieldInfo{
+	fType:     FtGsRadioID3,
+	typeName:  "Radio ID 3",
+	max:       1,
+	bitOffset: 1248,
+	bitSize:   24,
+	valueType: VtCallID,
+}
+
 var fiGsRadioName = fieldInfo{
 	fType:     FtGsRadioName,
 	typeName:  "Radio Name",
@@ -2255,7 +2609,7 @@ var fiGsRadioProgPassword = fieldInfo{
 	max:       1,
 	bitOffset: 736,
 	bitSize:   32,
-	valueType: VtRadioPassword,
+	valueType: VtRadioProgPassword,
 }
 
 var fiGsRxLowBatteryInterval = fieldInfo{
@@ -2347,6 +2701,57 @@ var fiGsTalkPermitTone = fieldInfo{
 		"Digital",
 		"Analog",
 		"Digital and Analog",
+	},
+}
+
+var fiGsTimeZone = fieldInfo{
+	fType:     FtGsTimeZone,
+	typeName:  "Time Zone",
+	max:       1,
+	bitOffset: 856,
+	bitSize:   5,
+	valueType: VtIStrings,
+	strings: &[]string{
+		"UTC-12:00",
+		"UTC-11:00",
+		"UTC-10:00",
+		"UTC-9:00",
+		"UTC-8:00",
+		"UTC-7:00",
+		"UTC-6:00",
+		"UTC-5:00",
+		"UTC-4:00",
+		"UTC-3:00",
+		"UTC-2:00",
+		"UTC-1:00",
+		"UTC+0:00",
+		"UTC+1:00",
+		"UTC+2:00",
+		"UTC+3:00",
+		"UTC+4:00",
+		"UTC+5:00",
+		"UTC+6:00",
+		"UTC+7:00",
+		"UTC+8:00",
+		"UTC+9:00",
+		"UTC+10:00",
+		"UTC+11:00",
+		"UTC+12:00",
+	},
+}
+
+var fiGsTxMode = fieldInfo{
+	fType:     FtGsTxMode,
+	typeName:  "Tx Mode",
+	max:       1,
+	bitOffset: 512,
+	bitSize:   2,
+	valueType: VtIStrings,
+	strings: &[]string{
+		"Last Call CH",
+		"Last Call + Hand CH",
+		"Designed CH",
+		"Designed CH + Hand CH",
 	},
 }
 
@@ -2819,16 +3224,21 @@ var fiZiChannelA_uv380 = fieldInfo{
 	extOffset:      201253,
 	extSize:        224,
 	extIndex:       16,
+	extBitOffset:   0,
 }
 
 var fiZiChannelB_uv380 = fieldInfo{
 	fType:          FtZiChannelB_uv380,
 	typeName:       "B Channels",
 	max:            64,
-	bitOffset:      0,
+	bitOffset:      256,
 	bitSize:        16,
 	valueType:      VtListIndex,
 	listRecordType: RtChannels_uv380,
+	extOffset:      201253,
+	extSize:        224,
+	extIndex:       0,
+	extBitOffset:   768,
 }
 
 var fiZiChannel_md380 = fieldInfo{
@@ -2852,6 +3262,7 @@ var fiZiChannel_md40 = fieldInfo{
 	extOffset:      201253,
 	extSize:        224,
 	extIndex:       16,
+	extBitOffset:   0,
 }
 
 var fiZiName = fieldInfo{

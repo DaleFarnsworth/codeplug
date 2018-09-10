@@ -138,7 +138,7 @@ func (f Field) String() string {
 	return f.value.getString(&f)
 }
 
-// SetString set the strings value from the given string, recording a change.
+// SetString set the string's value from the given string, recording a change.
 func (f *Field) SetString(str string) error {
 	previousString := f.String()
 	if str == previousString {
@@ -159,6 +159,7 @@ func (f *Field) setString(s string) error {
 		f.value = invalidValue{value: f.value}
 		return nil
 	}
+
 	err := f.value.setString(f, s)
 	if err != nil {
 		return err
@@ -585,6 +586,7 @@ func (v *frequency) valid(f *Field) error {
 // load sets the frequency's value from its bits in cp.bytes.
 func (v *frequency) load(f *Field) {
 	*v = frequency(bytesToFrequency(f.bytes()))
+
 }
 
 // store stores the frequency's value into its bits in cp.bytes.
@@ -1127,6 +1129,54 @@ func (v *radioPassword) store(f *Field) {
 	f.storeBytes(bytes)
 }
 
+// radioPassword is a field value representing password for the radio.
+type radioProgPassword string
+
+// getString returns the radioProgPassword's value as a string.
+func (v *radioProgPassword) getString(f *Field) string {
+	return string(*v)
+}
+
+// setString sets the radioProgPassword's value from a string.
+func (v *radioProgPassword) setString(f *Field, s string) error {
+	length := f.size() * 2
+	if len(s) != length && len(s) != 0 {
+		return fmt.Errorf("password must be %d characters long", length)
+	}
+	if err := mustBeNumericAscii(s); err != nil {
+		return err
+	}
+
+	*v = radioProgPassword(s)
+
+	return nil
+}
+
+// valid returns nil if the radioProgPassword's value is valid.
+func (v *radioProgPassword) valid(f *Field) error {
+	return mustBeNumericAscii(string(*v))
+}
+
+// load sets the radioProgPassword's value from its bits in cp.bytes.
+func (v *radioProgPassword) load(f *Field) {
+	intValue := bytesToInt(f.bytes())
+	if uint(intValue) == 0xffffffff {
+		*v = radioProgPassword("")
+		return
+	}
+	*v = radioProgPassword(fmt.Sprintf("%08d", revBcdToBinary(intValue)))
+}
+
+// store stores the radioProgPassword's value into its bits in cp.bytes.
+func (v *radioProgPassword) store(f *Field) {
+	val, _ := strconv.ParseUint(string(*v), 10, 32)
+	bytes := intToBytes(binaryToRevBcd(int(val)), f.size())
+	if *v == "" {
+		bytes = []byte{0xff, 0xff, 0xff, 0xff}
+	}
+	f.storeBytes(bytes)
+}
+
 // pcPassword is a field value representing a password for the computer.
 type pcPassword string
 
@@ -1589,33 +1639,6 @@ func (v *listIndex) load(f *Field) {
 // store stores the listIndex's value into its bits in cp.bytes.
 func (v *listIndex) store(f *Field) {
 	f.storeBytes(intToBytes(int(*v), f.size()))
-}
-
-// model is a field value representing a codeplug model name
-type model struct {
-	ascii
-}
-
-// getString returns the ascii's value as a string.
-func (v *model) getString(f *Field) string {
-	s := v.ascii.getString(f)
-
-	cpi := f.record.codeplug.codeplugInfo
-	if len(cpi.Models) > 1 && s == cpi.Models[1] {
-		s = cpi.Models[0]
-	}
-
-	return s
-}
-
-// setString sets the ascii's value from a string.
-func (v *model) setString(f *Field, s string) error {
-	cpi := f.record.codeplug.codeplugInfo
-	if len(cpi.Models) > 1 && s == cpi.Models[0] {
-		s = cpi.Models[1]
-	}
-
-	return v.ascii.setString(f, s)
 }
 
 // ascii is a field value representing a ASCII string.

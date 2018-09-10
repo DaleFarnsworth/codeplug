@@ -313,11 +313,16 @@ func (w *Window) RecordType() codeplug.RecordType {
 
 func (box *HBox) Clear() {
 	clear(box.qWidget)
+	//box.layout.Invalidate()
 }
 
 func (box *VBox) Clear() {
 	clear(box.qWidget)
-	box.layout.Invalidate()
+	//box.layout.Invalidate()
+}
+
+func (form *Form) RemoveWidget(widget *Widget) {
+	form.layout.RemoveRow2(widget.qWidget)
 }
 
 func (box *HBox) SetEnabled(enable bool) {
@@ -917,8 +922,12 @@ func (form *Form) subscribe(sender codeplug.FieldType, receiver codeplug.FieldTy
 	subs[sender] = append(subs[sender], receiver)
 }
 
-func (w *Widget) SetLabel(label string) {
-	w.label = widgets.NewQLabel2(label, nil, 0)
+func (w *Widget) SetLabel(text string) {
+	if w.label == nil {
+		w.label = widgets.NewQLabel2(text, nil, 0)
+		return
+	}
+	w.label.SetText(text)
 }
 
 func (w *Widget) update() {
@@ -983,6 +992,34 @@ func (w *Widget) SetReadOnly(b bool) {
 
 	default:
 		logFatal("SetReadOnly(): unexpected widget type")
+	}
+}
+
+func (w *Widget) SetVisible(b bool) {
+	qw := w.qWidget
+
+	switch qw.(type) {
+	case *widgets.QComboBox:
+		qw.(*widgets.QComboBox).SetVisible(b)
+
+	case *widgets.QPushButton:
+		qw.(*widgets.QPushButton).SetVisible(b)
+
+	case *widgets.QCheckBox:
+		qw.(*widgets.QCheckBox).SetVisible(b)
+
+	case *widgets.QSpinBox:
+		qw.(*widgets.QSpinBox).SetVisible(b)
+
+	case *widgets.QLineEdit:
+		qw.(*widgets.QLineEdit).SetVisible(b)
+
+	default:
+		logFatal("SetEnabled(): unexpected widget type")
+	}
+
+	if w.label != nil {
+		w.label.SetVisible(b)
 	}
 }
 
@@ -1261,6 +1298,7 @@ func newFieldTextEdit(f *codeplug.Field) *Widget {
 }
 
 var newFieldWidget = map[codeplug.ValueType]func(*codeplug.Field) *Widget{
+	codeplug.VtAscii:             newFieldLineEdit,
 	codeplug.VtBiFrequency:       newFieldLineEdit,
 	codeplug.VtCallID:            newFieldLineEdit,
 	codeplug.VtCallType:          newFieldCombobox,
@@ -1275,7 +1313,6 @@ var newFieldWidget = map[codeplug.ValueType]func(*codeplug.Field) *Widget{
 	codeplug.VtListIndex:         newFieldCombobox,
 	codeplug.VtGpsListIndex:      newFieldCombobox,
 	codeplug.VtMemberListIndex:   newFieldCombobox,
-	codeplug.VtModel:             newFieldLineEdit,
 	codeplug.VtName:              newFieldLineEdit,
 	codeplug.VtOffOn:             newFieldCheckbox,
 	codeplug.VtOnOff:             newFieldCheckbox,
@@ -1283,6 +1320,7 @@ var newFieldWidget = map[codeplug.ValueType]func(*codeplug.Field) *Widget{
 	codeplug.VtPrivacyNumber:     newFieldCombobox,
 	codeplug.VtRadioName:         newFieldLineEdit,
 	codeplug.VtRadioPassword:     newFieldLineEdit,
+	codeplug.VtRadioProgPassword: newFieldLineEdit,
 	codeplug.VtSpan:              newFieldSpinbox,
 	codeplug.VtTextMessage:       newFieldTextEdit,
 	codeplug.VtTimeStamp:         newFieldLineEdit,

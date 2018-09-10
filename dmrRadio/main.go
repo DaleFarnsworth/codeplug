@@ -53,11 +53,12 @@ func usage() {
 	errorf("\treadCodeplug -model <model> -freq <freqRange> <codeplugFile>\n")
 	errorf("\twriteCodeplug <codeplugFile>\n")
 	errorf("\twriteFirmware <firmwareFile>\n")
-	errorf("\treadUsers <usersFile>\n")
-	errorf("\twriteUsers <usersFile>\n")
+	errorf("\treadMD380Users <usersFile>\n")
+	errorf("\twriteMD380Users <usersFile>\n")
+	errorf("\twriteMD2017Users <usersFile>\n")
+	errorf("\twriteUV380Users <usersFile>\n")
 	errorf("\treadSPIFlash <filename>\n")
 	errorf("\tgetUsers <usersFile>\n")
-	errorf("\tcheckUsers <updatesFile>\n")
 	errorf("\tcodeplugToText <codeplugFile> <textFile>\n")
 	errorf("\ttextToCodeplug <textFile> <codeplugFile>\n")
 	errorf("\tcodeplugToJSON <codeplugFile> <jsonFile>\n")
@@ -101,9 +102,9 @@ func loadCodeplug(fType codeplug.FileType, filename string) (*codeplug.Codeplug,
 		return nil, errors.New("unknown frequency range in codeplug")
 	}
 
-	freq := freqs[model][0]
+	freqRange := freqs[model][0]
 
-	err = cp.Load(model, freq)
+	err = cp.Load(model, freqRange)
 	if err != nil {
 		return nil, err
 	}
@@ -270,8 +271,8 @@ func readSPIFlash() (err error) {
 	return dfu.ReadSPIFlash(file)
 }
 
-func readUsers() (err error) {
-	flags := flag.NewFlagSet("readUsers", flag.ExitOnError)
+func usersFilename() string {
+	flags := flag.NewFlagSet("writeUsers", flag.ExitOnError)
 
 	flags.Usage = func() {
 		errorf("Usage: %s %s <usersFilename>\n", os.Args[0], os.Args[1])
@@ -284,7 +285,12 @@ func readUsers() (err error) {
 	if len(args) != 1 {
 		flags.Usage()
 	}
-	filename := args[0]
+
+	return args[0]
+}
+
+func readMD380Users() (err error) {
+	filename := usersFilename()
 
 	prefixes := []string{
 		"Preparing to read users",
@@ -311,21 +317,8 @@ func readUsers() (err error) {
 	return dfu.ReadUsers(file)
 }
 
-func writeUsers() error {
-	flags := flag.NewFlagSet("writeUsers", flag.ExitOnError)
-
-	flags.Usage = func() {
-		errorf("Usage: %s %s <usersFilename>\n", os.Args[0], os.Args[1])
-		flags.PrintDefaults()
-		os.Exit(1)
-	}
-
-	flags.Parse(os.Args[2:len(os.Args)])
-	args := flags.Args()
-	if len(args) != 1 {
-		flags.Usage()
-	}
-	filename := args[0]
+func writeMD380Users() error {
+	filename := usersFilename()
 
 	prefixes := []string{
 		"Erasing flash memory",
@@ -339,6 +332,55 @@ func writeUsers() error {
 	defer dfu.Close()
 
 	return dfu.WriteUsers(filename)
+}
+
+func writeMD2017Users() error {
+	filename := usersFilename()
+
+	prefixes := []string{
+		"Erasing flash memory",
+		"Writing users",
+	}
+
+	df, err := dfu.New(progressCallback(prefixes))
+	if err != nil {
+		return err
+	}
+	defer df.Close()
+
+	var file *os.File
+	file, err = os.Open(filename)
+	if err != nil {
+		return err
+	}
+
+	users := dfu.ParseUsers(file)
+	return df.WriteMD2017Users(users)
+}
+
+func writeUV380Users() error {
+	filename := usersFilename()
+
+	prefixes := []string{
+		"Erasing flash memory",
+		"Writing users",
+	}
+
+	df, err := dfu.New(progressCallback(prefixes))
+	if err != nil {
+		return err
+	}
+	defer df.Close()
+
+	var file *os.File
+	file, err = os.Open(filename)
+	if err != nil {
+		return err
+	}
+
+	users := dfu.ParseUsers(file)
+
+	return df.WriteMD2017Users(users)
 }
 
 func getUsers() error {
@@ -914,21 +956,23 @@ func main() {
 	subCommandName := strings.ToLower(os.Args[1])
 
 	subCommands := map[string]func() error{
-		"readcodeplug":   readCodeplug,
-		"writecodeplug":  writeCodeplug,
-		"readspiflash":   readSPIFlash,
-		"readusers":      readUsers,
-		"writeusers":     writeUsers,
-		"getusers":       getUsers,
-		"checkusers":     checkUsers,
-		"writefirmware":  writeFirmware,
-		"texttocodeplug": textToCodeplug,
-		"codeplugtotext": codeplugToText,
-		"jsontocodeplug": jsonToCodeplug,
-		"codeplugtojson": codeplugToJSON,
-		"xlsxtocodeplug": xlsxToCodeplug,
-		"codeplugtoxlsx": codeplugToXLSX,
-		"version":        printVersion,
+		"readcodeplug":     readCodeplug,
+		"writecodeplug":    writeCodeplug,
+		"readspiflash":     readSPIFlash,
+		"readmd380users":   readMD380Users,
+		"writemd380users":  writeMD380Users,
+		"writemd2017users": writeMD2017Users,
+		"writeuv380users":  writeUV380Users,
+		"getusers":         getUsers,
+		"checkusers":       checkUsers,
+		"writefirmware":    writeFirmware,
+		"texttocodeplug":   textToCodeplug,
+		"codeplugtotext":   codeplugToText,
+		"jsontocodeplug":   jsonToCodeplug,
+		"codeplugtojson":   codeplugToJSON,
+		"xlsxtocodeplug":   xlsxToCodeplug,
+		"codeplugtoxlsx":   codeplugToXLSX,
+		"version":          printVersion,
 	}
 
 	subCommand := subCommands[subCommandName]

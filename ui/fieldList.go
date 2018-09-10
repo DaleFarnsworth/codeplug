@@ -89,8 +89,12 @@ func addMemberList(parent *VBox, fm *FieldMembers, fieldNames []string) *fieldNa
 	view.Viewport().SetAcceptDrops(true)
 	view.SetDragDropMode(widgets.QAbstractItemView__DragDrop)
 	view.SetSelectionMode(widgets.QAbstractItemView__ExtendedSelection)
-	view.SetMinimumWidth(view.SizeHintForColumn(0) + 20)
-	view.SetMaximumWidth(view.SizeHintForColumn(0) + 20)
+	width := view.SizeHintForColumn(0) + 20
+	if width < 100 {
+		width = 100
+	}
+	view.SetMinimumWidth(width)
+	view.SetMaximumWidth(width)
 	view.SetDefaultDropAction(core.Qt__MoveAction)
 	view.SetAcceptDrops(true)
 	view.SetDropIndicatorShown(true)
@@ -120,8 +124,12 @@ func addAvailableList(parent *VBox, fm *FieldMembers, fieldNames []string) *fiel
 	view.Viewport().SetAcceptDrops(true)
 	view.SetDragDropMode(widgets.QAbstractItemView__DragDrop)
 	view.SetSelectionMode(widgets.QAbstractItemView__ExtendedSelection)
-	view.SetMinimumWidth(view.SizeHintForColumn(0) + 20)
-	view.SetMaximumWidth(view.SizeHintForColumn(0) + 20)
+	width := view.SizeHintForColumn(0) + 20
+	if width < 100 {
+		width = 100
+	}
+	view.SetMinimumWidth(width)
+	view.SetMaximumWidth(width)
 	view.SetDefaultDropAction(core.Qt__MoveAction)
 	view.SetAcceptDrops(true)
 	view.SetDropIndicatorShown(true)
@@ -512,7 +520,7 @@ type FieldMembers struct {
 	id            string
 }
 
-func (vBox *VBox) AddFieldMembers(r *codeplug.Record, sortAvailable *bool, nameType codeplug.FieldType, memberType codeplug.FieldType, name string) *FieldMembers {
+func (hBox *HBox) AddFieldMembers(r *codeplug.Record, memberType codeplug.FieldType, sortAvailable *bool) {
 	var err error
 	fm := new(FieldMembers)
 	fm.record = r
@@ -523,7 +531,8 @@ func (vBox *VBox) AddFieldMembers(r *codeplug.Record, sortAvailable *bool, nameT
 	}
 
 	listRecordType := r.NewField(memberType).ListRecordType()
-	names := *r.Codeplug().Record(listRecordType).MemberListNames()
+	record := r.Codeplug().Record(listRecordType)
+	names := *record.MemberListNames(nil)
 
 	availableMap := make(map[string]bool)
 	for _, name := range names {
@@ -551,14 +560,7 @@ func (vBox *VBox) AddFieldMembers(r *codeplug.Record, sortAvailable *bool, nameT
 		sort.Strings(names)
 	}
 
-	row := vBox.AddHbox()
-	form := row.AddForm()
-	form.AddFieldTypeRows(r, nameType)
-
-	row = vBox.AddHbox()
-
-	group := row.AddGroupbox(name)
-	groupColumn := group.AddVbox()
+	groupColumn := hBox.AddVbox()
 	groupRow := groupColumn.AddHbox()
 	column := groupRow.AddVbox()
 	column.AddLabel("Available")
@@ -586,7 +588,7 @@ func (vBox *VBox) AddFieldMembers(r *codeplug.Record, sortAvailable *bool, nameT
 	groupRow.AddFiller()
 
 	groupRow = groupColumn.AddHbox()
-	form = groupRow.AddForm()
+	form := groupRow.AddForm()
 	label := widgets.NewQLabel2("Sort", nil, 0)
 	checkBox := widgets.NewQCheckBox(nil)
 	checkState := core.Qt__Unchecked
@@ -667,5 +669,5 @@ func (vBox *VBox) AddFieldMembers(r *codeplug.Record, sortAvailable *bool, nameT
 		change.Complete()
 	})
 
-	return fm
+	return
 }

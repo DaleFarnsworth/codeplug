@@ -16,7 +16,7 @@ const (
 // The value types a field may contain
 const (
 {{- range $vt := $.ValueTypes}}
-	Vt{{call $.Capitalize $vt}} ValueType = "{{$vt}}"
+	Vt{{call $.Sanitize $vt}} ValueType = "{{$vt}}"
 {{- end}}
 )
 
@@ -24,7 +24,7 @@ const (
 func newValue(vt ValueType) value {
 	switch vt {
 	{{- range $vt := $.ValueTypes}}
-	case Vt{{call $.Capitalize $vt}}:
+	case Vt{{call $.Sanitize $vt}}:
 		return new({{$vt}})
 	{{- end}}
 	}
@@ -34,13 +34,13 @@ func newValue(vt ValueType) value {
 
 var codeplugInfos = []*CodeplugInfo{
 {{- range $c := $.Codeplugs}}
-	&cp{{call $.Capitalize $c.Type}},
+	&cp{{call $.Sanitize $c.Type}},
 {{- end}}
 }
 
 {{- range $c := $.Codeplugs}}
 
-var cp{{call $.Capitalize $c.Type}} = CodeplugInfo{
+var cp{{call $.Sanitize $c.Type}} = CodeplugInfo{
 	Type: "{{$c.Type}}",
 	Models: []string{
 	{{- range $name := $c.Models}}
@@ -97,7 +97,7 @@ var fi{{$f.Type}} = fieldInfo{
 	max: {{$f.Max}},
 	bitOffset: {{$f.BitOffset}},
 	bitSize: {{$f.BitSize}},
-	valueType: Vt{{call $.Capitalize $f.ValueType}},
+	valueType: Vt{{call $.Sanitize $f.ValueType}},
 {{- if $f.DefaultValue}}
 	defaultValue: "{{$f.DefaultValue}}",
 {{- end}}
@@ -142,10 +142,11 @@ var fi{{$f.Type}} = fieldInfo{
 {{- if $f.Disabler}}
 	disabler: Ft{{$f.Disabler}},
 {{- end}}
-{{- if $f.ExtIndex}}
+{{- if $f.ExtSize}}
 	extOffset: {{$f.ExtOffset}},
 	extSize: {{$f.ExtSize}},
 	extIndex: {{$f.ExtIndex}},
+	extBitOffset: {{$f.ExtBitOffset}},
 {{- end}}
 }
 {{- end}}
