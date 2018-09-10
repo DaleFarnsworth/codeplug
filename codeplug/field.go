@@ -591,8 +591,8 @@ func (v *frequency) store(f *Field) {
 }
 
 type frequencyOffset struct {
-	offset float64
-	loaded bool
+	offset    float64
+	notloaded bool
 }
 
 // getString returns the frequencyOffset's value as a string.
@@ -608,11 +608,14 @@ func (v *frequencyOffset) setString(f *Field, s string) error {
 	}
 
 	if f.record.codeplug.frequencyValid(freq) == nil {
-		freq -= rxFrequency(f)
+		freq -= *rxFrequency(f)
 	} else {
-		err = f.record.codeplug.frequencyValid(rxFrequency(f) + freq)
-		if err != nil {
-			return err
+		rxfp := rxFrequency(f)
+		if rxfp != nil {
+			err = f.record.codeplug.frequencyValid(*rxfp + freq)
+			if err != nil {
+				return err
+			}
 		}
 	}
 
@@ -623,31 +626,35 @@ func (v *frequencyOffset) setString(f *Field, s string) error {
 
 // valid returns nil if the frequencyOffset's value is valid.
 func (v *frequencyOffset) valid(f *Field) error {
-	if !v.loaded {
+	if v.notloaded {
 		v.load(f)
 	}
-	return f.record.codeplug.frequencyValid(rxFrequency(f) + v.offset)
+	return f.record.codeplug.frequencyValid(*rxFrequency(f) + v.offset)
 }
 
 // load sets the frequencyOffset's value from its bits in cp.bytes.
 func (v *frequencyOffset) load(f *Field) {
 	if f.sibling(FtCiRxFrequency) == nil {
-		v.loaded = false
+		v.notloaded = true
 		return
 	}
 
-	v.offset = bytesToFrequency(f.bytes()) - rxFrequency(f)
-	v.loaded = true
+	v.offset = bytesToFrequency(f.bytes()) - *rxFrequency(f)
+	v.notloaded = false
 }
 
 // store stores the frequencyOffset's value into its bits in cp.bytes.
 func (v *frequencyOffset) store(f *Field) {
-	f.storeBytes(frequencyToBytes(v.offset + rxFrequency(f)))
+	f.storeBytes(frequencyToBytes(v.offset + *rxFrequency(f)))
 }
 
-func rxFrequency(f *Field) float64 {
+func rxFrequency(f *Field) *float64 {
+	sibling := f.sibling(FtCiRxFrequency)
+	if sibling == nil {
+		return nil
+	}
 	rxFrequency, _ := f.sibling(FtCiRxFrequency).value.(*frequency)
-	return float64(*rxFrequency)
+	return (*float64)(rxFrequency)
 }
 
 // onOff is a field value representing a boolean value.
