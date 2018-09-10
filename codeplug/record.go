@@ -364,7 +364,8 @@ func (r *Record) makeNameUnique(namesp *[]string) error {
 		return nil
 	}
 
-	baseName := strings.TrimRight(strings.TrimSpace(name), "0123456789")
+	name = strings.TrimSpace(name)
+	baseName := strings.TrimRight(name, "0123456789")
 	suffix := strings.TrimPrefix(name, baseName)
 	if suffix == "" {
 		suffix = "2"
@@ -382,7 +383,7 @@ func (r *Record) makeNameUnique(namesp *[]string) error {
 		for len(baseName)+len(suffix) > maxNameLen {
 			baseName = baseName[:len(baseName)-1]
 		}
-		newName := strings.TrimSpace(baseName) + fmt.Sprintf("%d", n)
+		newName := baseName + fmt.Sprintf("%d", n)
 		if !stringInSlice(newName, names) {
 			nameField.value = newValue(nameField.ValueType())
 			nameField.value.setString(nameField, newName)
