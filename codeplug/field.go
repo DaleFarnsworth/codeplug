@@ -286,6 +286,10 @@ func (f *Field) Record() *Record {
 	return f.record
 }
 
+func (f *Field) Codeplug() *Codeplug {
+	return f.record.Codeplug()
+}
+
 // Index returns the field's slice index.
 func (f *Field) Index() int {
 	return f.fIndex

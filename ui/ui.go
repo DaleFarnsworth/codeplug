@@ -895,11 +895,16 @@ func (parent *Form) AddReadOnlyFieldRow(labelFunc func(*codeplug.Field) string, 
 	parent.layout.AddRow(w.label, w.qWidget)
 }
 
+func setFieldString(f *codeplug.Field, s string) {
+	f.SetString(s)
+	ResetWindows(f.Codeplug())
+}
+
 func setEnabled(w *Widget) {
 	f := w.field
 	enabled := f.IsEnabled()
 	if enabled && !f.IsValid() {
-		f.SetString(f.DefaultValue())
+		setFieldString(f, f.DefaultValue())
 	}
 
 	w.SetEnabled(enabled)
