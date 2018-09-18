@@ -773,7 +773,14 @@ func writeFirmware() error {
 	}
 	defer dfu.Close()
 
-	return dfu.WriteFirmware(filename)
+	file, err := os.Open(filename)
+	if err != nil {
+		logFatalf("writeFirmware: %s", err.Error())
+	}
+
+	defer file.Close()
+
+	return dfu.WriteFirmware(file)
 }
 
 func textToCodeplug() error {

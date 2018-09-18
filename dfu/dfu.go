@@ -624,7 +624,7 @@ func (dfu *Dfu) ReadUsers(file *os.File) error {
 	return nil
 }
 
-func (dfu *Dfu) ReadSPIFlash(file *os.File) error {
+func (dfu *Dfu) ReadSPIFlash(writer io.Writer) error {
 	dfu.setMaxProgressCount(100)
 
 	_, err := dfu.init()
@@ -640,7 +640,7 @@ func (dfu *Dfu) ReadSPIFlash(file *os.File) error {
 
 	dfu.setMaxProgressCount(size / dfu.blockSize)
 
-	err = dfu.readSPIFlashTo(0, size, file)
+	err = dfu.readSPIFlashTo(0, size, writer)
 	if err != nil {
 		return wrapError("ReadSPIFlash", err)
 	}
@@ -1246,19 +1246,13 @@ func (dfu *Dfu) WriteUsers(filename string) error {
 	return nil
 }
 
-func (dfu *Dfu) WriteFirmware(filename string) error {
-	file, err := os.Open(filename)
-	if err != nil {
-		logFatalf("WriteFirmware: %s", err.Error())
-	}
-	defer file.Close()
-
-	_, err = dfu.init()
+func (dfu *Dfu) WriteFirmware(iRdr io.Reader) error {
+	_, err := dfu.init()
 	if err != nil {
 		return wrapError("WriteCodeplug", err)
 	}
 
-	return dfu.writeFirmwareFrom(file)
+	return dfu.writeFirmwareFrom(iRdr)
 }
 
 func wrapError(prefix string, err error) error {
