@@ -976,16 +976,3 @@ func (db *UsersDB) WriteMD380ToolsFile(filename string, progress func(cur int) e
 
 	return db.writeSized()
 }
-
-// WriteMD2017File - Write a user db file in MD2017 format
-func (db *UsersDB) WriteMD2017File(filename string, progress func(cur int) error) error {
-	db.filename = filename
-	db.progressCallback = progress
-	db.printFunc = func(u *User) string {
-		return fmt.Sprintf("%s,%s,%s,,%s,%s,%s\n",
-			u.ID, u.Callsign, u.Name, u.City, u.State, u.Country)
-	}
-
-	header := true
-	return db.write(header)
-}

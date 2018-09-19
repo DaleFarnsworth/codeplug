@@ -35,6 +35,7 @@ import (
 	"io"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/dalefarnsworth/codeplug/stdfu"
@@ -1228,7 +1229,7 @@ func (dfu *Dfu) WriteUsers(filename string) error {
 
 	_, err = dfu.init()
 	if err != nil {
-		return wrapError("WriteCodeplug", err)
+		return wrapError("WriteUsers", err)
 	}
 
 	size := int(fileInfo.Size())
@@ -1241,6 +1242,163 @@ func (dfu *Dfu) WriteUsers(filename string) error {
 	err = dfu.md380Reboot()
 	if err != nil {
 		return wrapError("WriteUsers", err)
+	}
+
+	return nil
+}
+
+type md2017User struct {
+	id   int
+	call string
+	rest string
+}
+
+const (
+	MaxMD2017Users = 122197
+)
+
+const (
+	idField      = 0
+	callField    = 1
+	nameField    = 2
+	cityField    = 3
+	stateField   = 4
+	nickField    = 5
+	countryField = 6
+)
+
+func ParseUsers(reader io.Reader) [][]string {
+	users := make([][]string, 0)
+	scanner := bufio.NewScanner(reader)
+	for scanner.Scan() {
+		fields := strings.Split(scanner.Text(), ",")
+		if len(fields) != 7 {
+			continue
+		}
+		users = append(users, fields)
+	}
+	if err := scanner.Err(); err != nil {
+		logFatalf("ParseUsers: %s", err.Error())
+	}
+
+	return users
+}
+
+func FilterUsers(users [][]string, countryMap map[string]bool) [][]string {
+	filteredUsers := make([][]string, 0)
+	for _, fields := range users {
+		if len(fields) != 7 {
+			continue
+		}
+
+		if countryMap != nil {
+			found, ok := countryMap[fields[countryField]]
+			if ok && !found {
+				continue
+			}
+		}
+
+		filteredUsers = append(filteredUsers, fields)
+	}
+
+	return filteredUsers
+}
+
+func md2017UserImage(userSlice [][]string) []byte {
+	users := make([]md2017User, 0)
+	for _, fields := range userSlice {
+		i64, err := strconv.ParseInt(fields[idField], 10, 64)
+		if err != nil {
+			continue
+		}
+
+		var user md2017User
+
+		user.id = int(i64)
+
+		user.call = fields[1]
+
+		restFields := []string{
+			fields[nameField],
+			fields[nickField],
+			fields[cityField],
+			fields[stateField],
+			fields[countryField],
+		}
+		user.rest = strings.Join(restFields, ",")
+
+		users = append(users, user)
+	}
+
+	if len(users) > MaxMD2017Users {
+		users = users[0:MaxMD2017Users]
+	}
+	nUsers := len(users)
+
+	image := bytes.Repeat([]byte{0xff}, 0x1000000-0x200000)
+
+	image[0] = byte(nUsers >> 16)
+	image[1] = byte(nUsers >> 8)
+	image[2] = byte(nUsers)
+
+	lastHigh12 := -1
+	j := 0
+	for i := range users {
+		user := &users[i]
+		id := user.id
+		high12 := id >> 12
+		if high12 == lastHigh12 {
+			continue
+		}
+		offset := 3 + j*4
+		index := i + 1
+		image[offset] = byte(id >> 16)
+		image[offset+1] = byte(((id >> 8) & 0xf0) | (index >> 16))
+		image[offset+2] = byte(index >> 8)
+		image[offset+3] = byte(index)
+		lastHigh12 = high12
+		j++
+	}
+
+	for i := range users {
+		user := &users[i]
+
+		userOffset := 0x4003 + i*120
+		idOffset := userOffset
+		callOffset := userOffset + 4
+		restOffset := userOffset + 20
+
+		image[idOffset] = byte(user.id)
+		image[idOffset+1] = byte(user.id >> 8)
+		image[idOffset+2] = byte(user.id >> 16)
+
+		copy(image[callOffset:callOffset+16], user.call+"\000")
+		copy(image[restOffset:restOffset+100], user.rest+"\000")
+	}
+
+	// truncate image to 1KB boundary
+	end := (0x4003 + len(users)*120 + 1023) & ^1023
+
+	return image[0:end]
+}
+
+func (dfu *Dfu) WriteMD2017Users(users [][]string) error {
+	image := md2017UserImage(users)
+	imageReader := bytes.NewReader(image)
+
+	_, err := dfu.init()
+	if err != nil {
+		return wrapError("WriteMD2017Users", err)
+	}
+
+	err = dfu.writeSPIFlashFrom(0x200000, len(image), imageReader)
+	if err != nil {
+		return wrapError("WriteMD2017Users", err)
+	}
+
+	err = dfu.md380Reboot()
+	if err != nil {
+		return wrapError("WriteMD2017Users", err)
 	}
 
 	return nil
