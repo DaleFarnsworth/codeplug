@@ -227,7 +227,11 @@ findCodeplugInfo:
 		var err error
 		switch cp.fileType {
 		case FileTypeText:
-			err = cp.importText(cp.importFilename)
+			file, err := os.Open(cp.importFilename)
+			if err == nil {
+				defer file.Close()
+				err = cp.ImportText(file)
+			}
 		case FileTypeJSON:
 			err = cp.importJSON(cp.importFilename)
 		case FileTypeXLSX:
@@ -275,6 +279,19 @@ func (cp *Codeplug) CodeplugInfo() *CodeplugInfo {
 
 func (cp *Codeplug) HasRecordType(rType RecordType) bool {
 	return cp.rDesc[rType] != nil
+}
+
+func (cp *Codeplug) TextLines() []string {
+	lines := make([]string, 0)
+	for _, rType := range cp.RecordTypes() {
+		for _, r := range cp.records(rType) {
+			var w bytes.Buffer
+			PrintRecordWithIndex(&w, r)
+			lines = append(lines, w.String())
+		}
+	}
+
+	return lines
 }
 
 func AllFrequencyRanges() map[string][]string {
@@ -988,8 +1005,6 @@ func filterField(rType RecordType, fType FieldType) bool {
 		switch fType {
 		case FtBiCpsVersion:
 			return true
-		case FtBiLowFrequency, FtBiHighFrequency:
-			return true
 		}
 	}
 	return false
@@ -1005,12 +1020,9 @@ func PrintRecord(w io.Writer, r *Record) {
 
 	fmt.Fprintf(w, "%s%s:\n", string(rType), ind)
 
-	for i, fType := range r.FieldTypes() {
+	for _, fType := range r.FieldTypes() {
 		if filterField(rType, fType) {
 			continue
-		}
-
-		if i == 0 {
 		}
 
 		name := string(fType)
@@ -1034,6 +1046,10 @@ func PrintRecordWithIndex(w io.Writer, r *Record) {
 	fmt.Fprintf(w, "%s%s:", string(rType), ind)
 
 	for _, fType := range r.FieldTypes() {
+		if filterField(rType, fType) {
+			continue
+		}
+
 		name := string(fType)
 		for _, f := range r.Fields(fType) {
 			value := quoteString(f.String())
@@ -1658,14 +1674,9 @@ func (cp *Codeplug) ExportText(filename string) (err error) {
 	return nil
 }
 
-func (cp *Codeplug) importText(filename string) error {
-	file, err := os.Open(filename)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
+func (cp *Codeplug) ImportText(reader io.Reader) error {
 
-	records, err := cp.ParseRecords(file)
+	records, err := cp.ParseRecords(reader)
 	err = cp.storeParsedRecords(records)
 	if err != nil {
 		return err
