@@ -940,6 +940,12 @@ func (v *biFrequency) getString(f *Field) string {
 
 // setString sets the biFrequency's value from a string.
 func (v *biFrequency) setString(f *Field, s string) error {
+	freq, err := stringToFrequency(s)
+	if err != nil {
+		return err
+	}
+
+	*v = biFrequency(freq)
 	return nil
 }
 
