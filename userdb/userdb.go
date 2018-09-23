@@ -499,6 +499,10 @@ func getRadioidUsers() ([]*User, error) {
 		line = strings.Trim(line, `"`)
 		fields := strings.Split(line, `","`)
 
+		if fields[0] == "Radio ID" {
+			continue
+		}
+
 		u := &User{
 			ID:       fields[0],
 			Callsign: fields[1],
