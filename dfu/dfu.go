@@ -1364,6 +1364,7 @@ func md2017UserImage(userSlice [][]string) []byte {
 		user := &users[i]
 
 		userOffset := 0x4003 + i*120
+
 		idOffset := userOffset
 		callOffset := userOffset + 4
 		restOffset := userOffset + 20
@@ -1372,8 +1373,11 @@ func md2017UserImage(userSlice [][]string) []byte {
 		image[idOffset+1] = byte(user.id >> 8)
 		image[idOffset+2] = byte(user.id >> 16)
 
-		copy(image[callOffset:callOffset+16], user.call+"\000")
-		copy(image[restOffset:restOffset+100], user.rest+"\000")
+		zeros := bytes.Repeat([]byte{0}, 116)
+		copy(image[callOffset:callOffset+116], zeros)
+
+		copy(image[callOffset:callOffset+15], user.call)
+		copy(image[restOffset:restOffset+99], user.rest)
 	}
 
 	// truncate image to 1KB boundary
