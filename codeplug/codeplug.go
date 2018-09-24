@@ -191,6 +191,7 @@ func (cp *Codeplug) Load(model string, freqRange string) error {
 
 	switch cp.fileType {
 	case FileTypeNew, FileTypeBin, FileTypeText, FileTypeJSON, FileTypeXLSX:
+		freqRange = strings.Replace(freqRange, " ", "_", -1)
 		filename := cp.Type() + "_" + freqRange + "." + cp.Ext()
 		err := cp.readNew(filename)
 		if err != nil {
