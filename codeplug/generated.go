@@ -345,7 +345,6 @@ var cpRT3 = CodeplugInfo{
 	Type: "RT3",
 	Models: []string{
 		"DR780",
-		"RT3",
 	},
 	Ext:       "rdt",
 	RdtSize:   262709,
@@ -370,7 +369,6 @@ var cpMD380 = CodeplugInfo{
 	Models: []string{
 		"MD380",
 		"DR780",
-		"MD-380",
 	},
 	Ext:       "rdt",
 	RdtSize:   262709,
@@ -394,7 +392,6 @@ var cpRT3G = CodeplugInfo{
 	Type: "RT3-G",
 	Models: []string{
 		"MD390",
-		"RT3-G",
 	},
 	Ext:       "rdt",
 	RdtSize:   262709,
@@ -418,7 +415,6 @@ var cpMD390 = CodeplugInfo{
 	Type: "MD-390",
 	Models: []string{
 		"MD390",
-		"MD-390",
 	},
 	Ext:       "rdt",
 	RdtSize:   262709,
@@ -510,7 +506,6 @@ var cpRT3S = CodeplugInfo{
 	Type: "RT3S",
 	Models: []string{
 		"MD-UV390",
-		"RT3S",
 	},
 	Ext:       "rdt",
 	RdtSize:   852533,
@@ -534,7 +529,6 @@ var cpMD2017 = CodeplugInfo{
 	Type: "MD-2017",
 	Models: []string{
 		"2017",
-		"MD-2017",
 	},
 	Ext:       "rdt",
 	RdtSize:   852533,
@@ -558,7 +552,6 @@ var cpRT82 = CodeplugInfo{
 	Type: "RT82",
 	Models: []string{
 		"2017",
-		"RT82",
 	},
 	Ext:       "rdt",
 	RdtSize:   852533,

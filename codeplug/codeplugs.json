@@ -19,8 +19,7 @@
     {
       "type": "RT3",
       "models": [
-              "DR780",
-              "RT3"
+              "DR780"
       ],
       "ext": "rdt",
       "rdtSize": 262709,
@@ -43,8 +42,7 @@
       "type": "MD-380",
       "models": [
               "MD380",
-              "DR780",
-              "MD-380"
+              "DR780"
       ],
       "ext": "rdt",
       "rdtSize": 262709,
@@ -66,8 +64,7 @@
     {
       "type": "RT3-G",
       "models": [
-              "MD390",
-              "RT3-G"
+              "MD390"
       ],
       "ext": "rdt",
       "rdtSize": 262709,
@@ -89,8 +86,7 @@
     {
       "type": "MD-390",
       "models": [
-              "MD390",
-              "MD-390"
+              "MD390"
       ],
       "ext": "rdt",
       "rdtSize": 262709,
@@ -177,8 +173,7 @@
     {
       "type": "RT3S",
       "models": [
-              "MD-UV390",
-	      "RT3S"
+              "MD-UV390"
       ],
       "ext": "rdt",
       "rdtSize": 852533,
@@ -200,8 +195,7 @@
     {
       "type": "MD-2017",
       "models": [
-              "2017",
-              "MD-2017"
+              "2017"
       ],
       "ext": "rdt",
       "rdtSize": 852533,
@@ -223,8 +217,7 @@
     {
       "type": "RT82",
       "models": [
-              "2017",
-              "RT82"
+              "2017"
       ],
       "ext": "rdt",
       "rdtSize": 852533,
