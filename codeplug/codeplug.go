@@ -389,6 +389,8 @@ func (cp *Codeplug) ModelsFrequencyRanges() (models []string, freqRanges map[str
 
 	cp.codeplugInfo = nil
 
+	sort.Strings(models)
+
 	return models, freqRanges
 }
 
