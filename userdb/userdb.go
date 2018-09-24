@@ -750,7 +750,7 @@ func getReflectorUsers() ([]*User, error) {
 	return users, nil
 }
 
-func mergeAndSort(users []*User, opts *Options) ([]*User, error) {
+func mergeAndSort(users []*User, opts *Options) []*User {
 	idMap := make(map[int]*User)
 	for _, u := range users {
 		if u == nil || u.ID == "" {
@@ -759,7 +759,7 @@ func mergeAndSort(users []*User, opts *Options) ([]*User, error) {
 		u.ID = strings.TrimPrefix(u.ID, "#")
 		id64, err := strconv.ParseUint(u.ID, 10, 24)
 		if err != nil {
-			return nil, err
+			continue
 		}
 		id := int(id64)
 		existing := idMap[id]
@@ -804,7 +804,7 @@ func mergeAndSort(users []*User, opts *Options) ([]*User, error) {
 		users[i] = idMap[id]
 	}
 
-	return users, nil
+	return users
 }
 
 type result struct {
@@ -866,11 +866,7 @@ func (db *UsersDB) Users() ([]*User, error) {
 		users = append(users, r.users...)
 	}
 
-	var err error
-	users, err = mergeAndSort(users, db.options)
-	if err != nil {
-		return nil, err
-	}
+	users = mergeAndSort(users, db.options)
 
 	db.finalProgress()
 
