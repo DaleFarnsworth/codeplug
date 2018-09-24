@@ -329,12 +329,40 @@ func newValue(vt ValueType) value {
 }
 
 var codeplugInfos = []*CodeplugInfo{
+	&cpRT3,
 	&cpMD380,
+	&cpRT3G,
 	&cpMD390,
 	&cpDJMD40,
 	&cpMDUV380,
 	&cpMDUV390,
+	&cpRT3S,
 	&cpMD2017,
+	&cpRT82,
+}
+
+var cpRT3 = CodeplugInfo{
+	Type: "RT3",
+	Models: []string{
+		"DR780",
+		"RT3",
+	},
+	Ext:       "rdt",
+	RdtSize:   262709,
+	BinSize:   262144,
+	BinOffset: 549,
+	RecordInfos: []*recordInfo{
+		&riBasicInformation_md380,
+		&riGeneralSettings_md380,
+		&riMenuItems,
+		&riPrivacySettings,
+		&riContacts,
+		&riGroupLists,
+		&riZones_md380,
+		&riScanLists_md380,
+		&riChannels_md380,
+		&riGPSSystems,
+	},
 }
 
 var cpMD380 = CodeplugInfo{
@@ -350,6 +378,30 @@ var cpMD380 = CodeplugInfo{
 	BinOffset: 549,
 	RecordInfos: []*recordInfo{
 		&riBasicInformation_md380,
+		&riGeneralSettings_md380,
+		&riMenuItems,
+		&riPrivacySettings,
+		&riContacts,
+		&riGroupLists,
+		&riZones_md380,
+		&riScanLists_md380,
+		&riChannels_md380,
+		&riGPSSystems,
+	},
+}
+
+var cpRT3G = CodeplugInfo{
+	Type: "RT3-G",
+	Models: []string{
+		"MD390",
+		"RT3-G",
+	},
+	Ext:       "rdt",
+	RdtSize:   262709,
+	BinSize:   262144,
+	BinOffset: 549,
+	RecordInfos: []*recordInfo{
+		&riBasicInformation_md390,
 		&riGeneralSettings_md380,
 		&riMenuItems,
 		&riPrivacySettings,
@@ -454,11 +506,59 @@ var cpMDUV390 = CodeplugInfo{
 	},
 }
 
+var cpRT3S = CodeplugInfo{
+	Type: "RT3S",
+	Models: []string{
+		"MD-UV390",
+		"RT3S",
+	},
+	Ext:       "rdt",
+	RdtSize:   852533,
+	BinSize:   851968,
+	BinOffset: 549,
+	RecordInfos: []*recordInfo{
+		&riBasicInformation_uv380,
+		&riGeneralSettings_uv380,
+		&riMenuItems,
+		&riPrivacySettings,
+		&riContacts_uv380,
+		&riGroupLists,
+		&riZones_uv380,
+		&riScanLists_uv380,
+		&riChannels_uv380,
+		&riGPSSystems,
+	},
+}
+
 var cpMD2017 = CodeplugInfo{
 	Type: "MD-2017",
 	Models: []string{
 		"2017",
 		"MD-2017",
+	},
+	Ext:       "rdt",
+	RdtSize:   852533,
+	BinSize:   851968,
+	BinOffset: 549,
+	RecordInfos: []*recordInfo{
+		&riBasicInformation_uv380,
+		&riGeneralSettings_md2017,
+		&riMenuItems,
+		&riPrivacySettings,
+		&riContacts_uv380,
+		&riGroupLists,
+		&riZones_uv380,
+		&riScanLists_uv380,
+		&riChannels_md2017,
+		&riGPSSystems,
+	},
+}
+
+var cpRT82 = CodeplugInfo{
+	Type: "RT82",
+	Models: []string{
+		"2017",
+		"RT82",
 	},
 	Ext:       "rdt",
 	RdtSize:   852533,
