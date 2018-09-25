@@ -334,6 +334,11 @@ var codeplugInfos = []*CodeplugInfo{
 	&cpRT3G,
 	&cpMD390,
 	&cpDJMD40,
+	&cpMDUV380,
+	&cpMDUV390,
+	&cpRT3S,
+	&cpMD2017,
+	&cpRT82,
 }
 
 var cpRT3 = CodeplugInfo{
@@ -448,6 +453,121 @@ var cpDJMD40 = CodeplugInfo{
 		&riZones_md40,
 		&riScanLists_md40,
 		&riChannels_md40,
+	},
+}
+
+var cpMDUV380 = CodeplugInfo{
+	Type: "MD-UV380",
+	Models: []string{
+		"MD-UV380",
+	},
+	Ext:       "rdt",
+	RdtSize:   852533,
+	BinSize:   851968,
+	BinOffset: 549,
+	RecordInfos: []*recordInfo{
+		&riBasicInformation_uv380,
+		&riGeneralSettings_uv380,
+		&riMenuItems,
+		&riPrivacySettings,
+		&riContacts_uv380,
+		&riGroupLists,
+		&riZones_uv380,
+		&riScanLists_uv380,
+		&riChannels_uv380,
+		&riGPSSystems,
+	},
+}
+
+var cpMDUV390 = CodeplugInfo{
+	Type: "MD-UV390",
+	Models: []string{
+		"MD-UV390",
+	},
+	Ext:       "rdt",
+	RdtSize:   852533,
+	BinSize:   851968,
+	BinOffset: 549,
+	RecordInfos: []*recordInfo{
+		&riBasicInformation_uv380,
+		&riGeneralSettings_uv380,
+		&riMenuItems,
+		&riPrivacySettings,
+		&riContacts_uv380,
+		&riGroupLists,
+		&riZones_uv380,
+		&riScanLists_uv380,
+		&riChannels_uv380,
+		&riGPSSystems,
+	},
+}
+
+var cpRT3S = CodeplugInfo{
+	Type: "RT3S",
+	Models: []string{
+		"MD-UV390",
+	},
+	Ext:       "rdt",
+	RdtSize:   852533,
+	BinSize:   851968,
+	BinOffset: 549,
+	RecordInfos: []*recordInfo{
+		&riBasicInformation_uv380,
+		&riGeneralSettings_uv380,
+		&riMenuItems,
+		&riPrivacySettings,
+		&riContacts_uv380,
+		&riGroupLists,
+		&riZones_uv380,
+		&riScanLists_uv380,
+		&riChannels_uv380,
+		&riGPSSystems,
+	},
+}
+
+var cpMD2017 = CodeplugInfo{
+	Type: "MD-2017",
+	Models: []string{
+		"2017",
+	},
+	Ext:       "rdt",
+	RdtSize:   852533,
+	BinSize:   851968,
+	BinOffset: 549,
+	RecordInfos: []*recordInfo{
+		&riBasicInformation_uv380,
+		&riGeneralSettings_md2017,
+		&riMenuItems,
+		&riPrivacySettings,
+		&riContacts_uv380,
+		&riGroupLists,
+		&riZones_uv380,
+		&riScanLists_uv380,
+		&riChannels_md2017,
+		&riGPSSystems,
+	},
+}
+
+var cpRT82 = CodeplugInfo{
+	Type: "RT82",
+	Models: []string{
+		"2017",
+	},
+	Ext:       "rdt",
+	RdtSize:   852533,
+	BinSize:   851968,
+	BinOffset: 549,
+	RecordInfos: []*recordInfo{
+		&riBasicInformation_uv380,
+		&riGeneralSettings_md2017,
+		&riMenuItems,
+		&riPrivacySettings,
+		&riContacts_uv380,
+		&riGroupLists,
+		&riZones_uv380,
+		&riScanLists_uv380,
+		&riChannels_md2017,
+		&riGPSSystems,
 	},
 }
 

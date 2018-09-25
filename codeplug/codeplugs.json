@@ -125,6 +125,116 @@
         "ScanLists_md40",
         "Channels_md40"
       ]
+    },
+    {
+      "type": "MD-UV380",
+      "models": [
+              "MD-UV380"
+      ],
+      "ext": "rdt",
+      "rdtSize": 852533,
+      "binSize": 851968,
+      "binOffset": 549,
+      "recordTypes": [
+        "BasicInformation_uv380",
+        "GeneralSettings_uv380",
+        "MenuItems",
+        "PrivacySettings",
+        "Contacts_uv380",
+        "GroupLists",
+        "Zones_uv380",
+        "ScanLists_uv380",
+        "Channels_uv380",
+        "GPSSystems"
+      ]
+    },
+    {
+      "type": "MD-UV390",
+      "models": [
+              "MD-UV390"
+      ],
+      "ext": "rdt",
+      "rdtSize": 852533,
+      "binSize": 851968,
+      "binOffset": 549,
+      "recordTypes": [
+        "BasicInformation_uv380",
+        "GeneralSettings_uv380",
+        "MenuItems",
+        "PrivacySettings",
+        "Contacts_uv380",
+        "GroupLists",
+        "Zones_uv380",
+        "ScanLists_uv380",
+        "Channels_uv380",
+        "GPSSystems"
+      ]
+    },
+    {
+      "type": "RT3S",
+      "models": [
+              "MD-UV390"
+      ],
+      "ext": "rdt",
+      "rdtSize": 852533,
+      "binSize": 851968,
+      "binOffset": 549,
+      "recordTypes": [
+        "BasicInformation_uv380",
+        "GeneralSettings_uv380",
+        "MenuItems",
+        "PrivacySettings",
+        "Contacts_uv380",
+        "GroupLists",
+        "Zones_uv380",
+        "ScanLists_uv380",
+        "Channels_uv380",
+        "GPSSystems"
+      ]
+    },
+    {
+      "type": "MD-2017",
+      "models": [
+              "2017"
+      ],
+      "ext": "rdt",
+      "rdtSize": 852533,
+      "binSize": 851968,
+      "binOffset": 549,
+      "recordTypes": [
+        "BasicInformation_uv380",
+        "GeneralSettings_md2017",
+        "MenuItems",
+        "PrivacySettings",
+        "Contacts_uv380",
+        "GroupLists",
+        "Zones_uv380",
+        "ScanLists_uv380",
+        "Channels_md2017",
+        "GPSSystems"
+      ]
+    },
+    {
+      "type": "RT82",
+      "models": [
+              "2017"
+      ],
+      "ext": "rdt",
+      "rdtSize": 852533,
+      "binSize": 851968,
+      "binOffset": 549,
+      "recordTypes": [
+        "BasicInformation_uv380",
+        "GeneralSettings_md2017",
+        "MenuItems",
+        "PrivacySettings",
+        "Contacts_uv380",
+        "GroupLists",
+        "Zones_uv380",
+        "ScanLists_uv380",
+        "Channels_md2017",
+        "GPSSystems"
+      ]
     }
   ],
   "records": [
