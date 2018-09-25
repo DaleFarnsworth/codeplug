@@ -45,13 +45,14 @@ type top struct {
 }
 
 type Codeplug struct {
-	Models      []string `json:"models"`
-	Type        string   `json:"type"`
-	Ext         string   `json:"ext"`
-	RdtSize     int      `json:"rdtSize"`
-	BinSize     int      `json:"binSize"`
-	BinOffset   int      `json:"binOffset"`
-	RecordTypes []string `json:"recordTypes"`
+	Models        []string `json:"models"`
+	Type          string   `json:"type"`
+	Ext           string   `json:"ext"`
+	RdtSize       int      `json:"rdtSize"`
+	HeaderSize    int      `json:"headerSize"`
+	TrailerOffset int      `json:"trailerOffset"`
+	TrailerSize   int      `json:"trailerSize"`
+	RecordTypes   []string `json:"recordTypes"`
 }
 
 type Record struct {

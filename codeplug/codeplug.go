@@ -94,13 +94,14 @@ type Codeplug struct {
 }
 
 type CodeplugInfo struct {
-	Type        string
-	Models      []string
-	Ext         string
-	RdtSize     int
-	BinSize     int
-	BinOffset   int
-	RecordInfos []*recordInfo
+	Type          string
+	Models        []string
+	Ext           string
+	RdtSize       int
+	HeaderSize    int
+	TrailerOffset int
+	TrailerSize   int
+	RecordInfos   []*recordInfo
 }
 
 // NewCodeplug returns a Codeplug, given a filename and codeplug type.
@@ -528,7 +529,7 @@ func (cp *Codeplug) read(filename string) error {
 	if cp.bytes == nil {
 		cp.bytes = make([]byte, cp.fileOffset+cp.fileSize)
 	}
-	bytes := cp.bytes[cp.fileOffset : cp.fileOffset+cp.fileSize]
+	bytes := make([]byte, cp.fileSize)
 
 	bytesRead, err := file.Read(bytes)
 	if err != nil {
@@ -539,6 +540,25 @@ func (cp *Codeplug) read(filename string) error {
 		err = fmt.Errorf("Failed to read all of %s", filename)
 		return err
 	}
+
+	if cp.fileType != FileTypeBin {
+		copy(cp.bytes, bytes)
+		return nil
+	}
+
+	cpi := cp.codeplugInfo
+
+	srcBegin := 0
+	srcEnd := cpi.TrailerOffset - cpi.HeaderSize
+	dstBegin := cpi.HeaderSize
+	dstEnd := cpi.TrailerOffset
+	copy(cp.bytes[dstBegin:dstEnd], bytes[srcBegin:srcEnd])
+
+	srcBegin = cpi.TrailerOffset - cpi.HeaderSize
+	srcEnd = len(bytes)
+	dstBegin = cpi.TrailerOffset + cpi.TrailerSize
+	dstEnd = len(cp.bytes)
+	copy(cp.bytes[dstBegin:dstEnd], bytes[srcBegin:srcEnd])
 
 	return nil
 }
@@ -909,10 +929,10 @@ func (cp *Codeplug) findFileType(filename string) error {
 			cp.fileOffset = 0
 			return nil
 
-		case int64(cpi.BinSize):
+		case int64(cpi.RdtSize - cpi.HeaderSize - cpi.TrailerSize):
 			cp.fileType = FileTypeBin
-			cp.fileSize = cpi.BinSize
-			cp.fileOffset = cpi.BinOffset
+			cp.fileSize = cpi.RdtSize - cpi.HeaderSize - cpi.TrailerSize
+			cp.fileOffset = cpi.HeaderSize
 			return nil
 		}
 	}
@@ -2088,7 +2108,6 @@ func RadioExists() error {
 
 func (cp *Codeplug) ReadRadio(progress func(cur int) error) error {
 	cpi := cp.codeplugInfo
-	binBytes := cp.bytes[cpi.BinOffset : cpi.BinOffset+cpi.BinSize]
 
 	dfu, err := dfu.New(func(cur int) error {
 		return progress(cur)
@@ -2098,13 +2117,23 @@ func (cp *Codeplug) ReadRadio(progress func(cur int) error) error {
 	}
 	defer dfu.Close()
 
-	bytes := make([]byte, len(binBytes))
+	bytes := make([]byte, cpi.RdtSize-cpi.HeaderSize-cpi.TrailerSize)
 	err = dfu.ReadCodeplug(bytes)
 	if err != nil {
 		return err
 	}
 
-	copy(binBytes, bytes)
+	srcBegin := 0
+	srcEnd := cpi.TrailerOffset - cpi.HeaderSize
+	dstBegin := cpi.HeaderSize
+	dstEnd := cpi.TrailerOffset
+	copy(cp.bytes[dstBegin:dstEnd], bytes[srcBegin:srcEnd])
+
+	srcBegin = cpi.TrailerOffset - cpi.HeaderSize
+	srcEnd = len(bytes)
+	dstBegin = cpi.TrailerOffset + cpi.TrailerSize
+	dstEnd = cpi.RdtSize
+	copy(cp.bytes[dstBegin:dstEnd], bytes[srcBegin:srcEnd])
 
 	cp.Revert()
 
@@ -2126,7 +2155,11 @@ func (cp *Codeplug) WriteRadio(progress func(cur int) error) error {
 	cp.store()
 
 	cpi := cp.codeplugInfo
-	binBytes := cp.bytes[cpi.BinOffset : cpi.BinOffset+cpi.BinSize]
+	binBytes := cp.bytes[cpi.HeaderSize:cpi.TrailerOffset]
+
+	begin := cpi.TrailerOffset + cpi.TrailerSize
+	end := len(cp.bytes)
+	binBytes = append(binBytes, cp.bytes[begin:end]...)
 
 	cp.bytes = savedBytes
 	cp.setLastProgrammedTime(savedTime)

@@ -49,8 +49,9 @@ var cp{{call $.Sanitize $c.Type}} = CodeplugInfo{
 	},
 	Ext: "{{$c.Ext}}",
 	RdtSize: {{$c.RdtSize}},
-	BinSize: {{$c.BinSize}},
-	BinOffset: {{$c.BinOffset}},
+	HeaderSize: {{$c.HeaderSize}},
+	TrailerOffset: {{$c.TrailerOffset}},
+	TrailerSize: {{$c.TrailerSize}},
 	RecordInfos: []*recordInfo{
 	{{- range $rt := $c.RecordTypes}}
 		&ri{{$rt}},
