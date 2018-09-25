@@ -17,29 +17,6 @@
   ],
   "codeplugs": [
     {
-      "type": "RT3",
-      "models": [
-              "DR780"
-      ],
-      "ext": "rdt",
-      "rdtSize": 262709,
-      "headerSize": 549,
-      "trailerOffset": 262693,
-      "trailerSize": 16,
-      "recordTypes": [
-        "BasicInformation_md380",
-        "GeneralSettings_md380",
-        "MenuItems",
-        "PrivacySettings",
-        "Contacts",
-        "GroupLists",
-        "Zones_md380",
-        "ScanLists_md380",
-        "Channels_md380",
-        "GPSSystems"
-      ]
-    },
-    {
       "type": "MD-380",
       "models": [
               "MD380",
@@ -64,7 +41,30 @@
       ]
     },
     {
-      "type": "RT3-G",
+      "type": "RT3",
+      "models": [
+              "DR780"
+      ],
+      "ext": "rdt",
+      "rdtSize": 262709,
+      "headerSize": 549,
+      "trailerOffset": 262693,
+      "trailerSize": 16,
+      "recordTypes": [
+        "BasicInformation_md380",
+        "GeneralSettings_md380",
+        "MenuItems",
+        "PrivacySettings",
+        "Contacts",
+        "GroupLists",
+        "Zones_md380",
+        "ScanLists_md380",
+        "Channels_md380",
+        "GPSSystems"
+      ]
+    },
+    {
+      "type": "MD-390",
       "models": [
               "MD390"
       ],
@@ -87,7 +87,7 @@
       ]
     },
     {
-      "type": "MD-390",
+      "type": "RT3-G",
       "models": [
               "MD390"
       ],

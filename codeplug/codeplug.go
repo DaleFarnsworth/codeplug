@@ -175,20 +175,17 @@ type Warning struct {
 	error
 }
 
-func (cp *Codeplug) Load(model string, freqRange string) error {
-	modelsMap := make(map[string]*CodeplugInfo)
+func (cp *Codeplug) Load(typ string, freqRange string) error {
+	cp.codeplugInfo = nil
 	for _, cpi := range codeplugInfos {
-		modelsMap[cpi.Type] = cpi
-		for _, cpiModel := range cpi.Models {
-			modelsMap[cpiModel] = cpi
+		if typ == cpi.Type {
+			cp.codeplugInfo = cpi
 		}
 	}
 
-	cpi := modelsMap[model]
-	if cpi == nil {
-		return fmt.Errorf("codeplug type not found: %s", model)
+	if cp.codeplugInfo == nil {
+		return fmt.Errorf("codeplug type not found: %s", typ)
 	}
-	cp.codeplugInfo = cpi
 
 	switch cp.fileType {
 	case FileTypeNew, FileTypeBin, FileTypeText, FileTypeJSON, FileTypeXLSX:
@@ -336,10 +333,10 @@ func AllFrequencyRanges() map[string][]string {
 	return freqRanges
 }
 
-// ModelsFrequencyRanges returns the potential codeplug model and
+// TypesFrequencyRanges returns the potential codeplug model and
 // freqRange
-func (cp *Codeplug) ModelsFrequencyRanges() (mainModels []string, freqRanges map[string][]string) {
-	mainModels = make([]string, 0)
+func (cp *Codeplug) TypesFrequencyRanges() (types []string, freqRanges map[string][]string) {
+	types = make([]string, 0)
 	freqRanges = make(map[string][]string)
 	var model string
 	var freqRange string
@@ -357,35 +354,35 @@ func (cp *Codeplug) ModelsFrequencyRanges() (mainModels []string, freqRanges map
 	for _, cpi := range codeplugInfos {
 		cp.codeplugInfo = cpi
 		cp.loadHeader()
-		mainModel := cp.Type()
-		freqRanges[mainModel] = cp.freqRanges()
+		typ := cp.Type()
+		freqRanges[typ] = cp.freqRanges()
 
 		if cp.fileType == FileTypeRdt {
 			if cpi.RdtSize != cp.rdtSize {
-				mainModels = append(mainModels, model)
+				types = append(types, typ)
 				continue
 			}
 			model = cp.Model()
 			freqRange = cp.FrequencyRange()
 		}
 
-		modelsMap := make(map[string]bool)
 		for _, cpiModel := range cpi.Models {
-			modelsMap[cpiModel] = true
-		}
-		modelsMap[mainModel] = true
-
-		if modelsMap[model] {
-			mainModels = []string{mainModel}
-			for _, r := range freqRanges[mainModel] {
-				if r == freqRange {
-					freqRanges[mainModel] = []string{r}
-				}
+			if cpiModel != model {
+				continue
 			}
-			return mainModels, freqRanges
+
+			for _, r := range freqRanges[typ] {
+				if r != freqRange {
+					continue
+				}
+				types = []string{typ}
+				freqRanges = make(map[string][]string)
+				freqRanges[typ] = []string{r}
+				return types, freqRanges
+			}
 		}
 
-		mainModels = append(mainModels, mainModel)
+		types = append(types, typ)
 	}
 
 	if cp.fileType != FileTypeRdt {
@@ -394,9 +391,9 @@ func (cp *Codeplug) ModelsFrequencyRanges() (mainModels []string, freqRanges map
 
 	cp.codeplugInfo = nil
 
-	sort.Strings(mainModels)
+	sort.Strings(types)
 
-	return mainModels, freqRanges
+	return types, freqRanges
 }
 
 func (cp *Codeplug) Model() string {
@@ -1701,7 +1698,6 @@ func (cp *Codeplug) ExportText(filename string) (err error) {
 }
 
 func (cp *Codeplug) ImportText(reader io.Reader) error {
-
 	records, err := cp.ParseRecords(reader)
 	err = cp.storeParsedRecords(records)
 	if err != nil {

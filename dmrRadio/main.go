@@ -70,19 +70,17 @@ func usage() {
 	os.Exit(1)
 }
 
-func allModelsFrequencyRanges() (models []string, freqRanges map[string][]string) {
+func allTypesFrequencyRanges() (types []string, freqRanges map[string][]string) {
 	freqRanges = codeplug.AllFrequencyRanges()
-	models = make([]string, 0, len(freqRanges))
+	types = make([]string, 0, len(freqRanges))
 
-	for model := range freqRanges {
-		models = append(models, model)
+	for typ := range freqRanges {
+		types = append(types, typ)
 	}
 
-	sort.Slice(models, func(i, j int) bool {
-		return models[i] < models[j]
-	})
+	sort.Strings(types)
 
-	return models, freqRanges
+	return types, freqRanges
 }
 
 func loadCodeplug(fType codeplug.FileType, filename string) (*codeplug.Codeplug, error) {
@@ -91,20 +89,20 @@ func loadCodeplug(fType codeplug.FileType, filename string) (*codeplug.Codeplug,
 		return nil, err
 	}
 
-	models, freqs := cp.ModelsFrequencyRanges()
-	if len(models) == 0 {
+	types, freqs := cp.TypesFrequencyRanges()
+	if len(types) == 0 {
 		return nil, errors.New("unknown model in codeplug")
 	}
 
-	model := models[0]
+	typ := types[0]
 
-	if len(freqs[model]) == 0 {
+	if len(freqs[typ]) == 0 {
 		return nil, errors.New("unknown frequency range in codeplug")
 	}
 
-	freqRange := freqs[model][0]
+	freqRange := freqs[typ][0]
 
-	err = cp.Load(model, freqRange)
+	err = cp.Load(typ, freqRange)
 	if err != nil {
 		return nil, err
 	}
@@ -135,11 +133,11 @@ func progressCallback(aPrefixes []string) func(cur int) error {
 }
 
 func readCodeplug() error {
-	var model string
+	var typ string
 	var freq string
 
 	flags := flag.NewFlagSet("writeCodeplug", flag.ExitOnError)
-	flags.StringVar(&model, "model", "", "<model name>")
+	flags.StringVar(&typ, "model", "", "<model name>")
 	flags.StringVar(&freq, "freq", "", "<frequency range>")
 
 	flags.Usage = func() {
@@ -147,29 +145,29 @@ func readCodeplug() error {
 		flags.PrintDefaults()
 		errorf("modelName must be chosen from the following list,\n")
 		errorf("and freqRange must be one of its associated values.\n")
-		models, freqs := allModelsFrequencyRanges()
-		for _, model := range models {
-			errorf("\t%s\n", model)
-			for _, freq := range freqs[model] {
+		types, freqs := allTypesFrequencyRanges()
+		for _, typ := range types {
+			errorf("\t%s\n", typ)
+			for _, freq := range freqs[typ] {
 				errorf("\t\t%s\n", "\""+freq+"\"")
 			}
 		}
 		os.Exit(1)
 	}
 
-	modelFreqs := codeplug.AllFrequencyRanges()
+	typeFreqs := codeplug.AllFrequencyRanges()
 
 	flags.Parse(os.Args[2:len(os.Args)])
 	args := flags.Args()
 	if len(args) != 1 {
 		flags.Usage()
 	}
-	if modelFreqs[model] == nil {
+	if typeFreqs[typ] == nil {
 		errorf("bad modelName\n\n")
 		flags.Usage()
 	}
 	freqMap := make(map[string]bool)
-	for _, freq := range modelFreqs[model] {
+	for _, freq := range typeFreqs[typ] {
 		freqMap[freq] = true
 	}
 	if !freqMap[freq] {
@@ -183,7 +181,7 @@ func readCodeplug() error {
 		return err
 	}
 
-	err = cp.Load(model, freq)
+	err = cp.Load(typ, freq)
 	if err != nil {
 		return err
 	}

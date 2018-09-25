@@ -329,40 +329,16 @@ func newValue(vt ValueType) value {
 }
 
 var codeplugInfos = []*CodeplugInfo{
-	&cpRT3,
 	&cpMD380,
-	&cpRT3G,
+	&cpRT3,
 	&cpMD390,
+	&cpRT3G,
 	&cpDJMD40,
 	&cpMDUV380,
 	&cpMDUV390,
 	&cpRT3S,
 	&cpMD2017,
 	&cpRT82,
-}
-
-var cpRT3 = CodeplugInfo{
-	Type: "RT3",
-	Models: []string{
-		"DR780",
-	},
-	Ext:           "rdt",
-	RdtSize:       262709,
-	HeaderSize:    549,
-	TrailerOffset: 262693,
-	TrailerSize:   16,
-	RecordInfos: []*recordInfo{
-		&riBasicInformation_md380,
-		&riGeneralSettings_md380,
-		&riMenuItems,
-		&riPrivacySettings,
-		&riContacts,
-		&riGroupLists,
-		&riZones_md380,
-		&riScanLists_md380,
-		&riChannels_md380,
-		&riGPSSystems,
-	},
 }
 
 var cpMD380 = CodeplugInfo{
@@ -390,8 +366,32 @@ var cpMD380 = CodeplugInfo{
 	},
 }
 
-var cpRT3G = CodeplugInfo{
-	Type: "RT3-G",
+var cpRT3 = CodeplugInfo{
+	Type: "RT3",
+	Models: []string{
+		"DR780",
+	},
+	Ext:           "rdt",
+	RdtSize:       262709,
+	HeaderSize:    549,
+	TrailerOffset: 262693,
+	TrailerSize:   16,
+	RecordInfos: []*recordInfo{
+		&riBasicInformation_md380,
+		&riGeneralSettings_md380,
+		&riMenuItems,
+		&riPrivacySettings,
+		&riContacts,
+		&riGroupLists,
+		&riZones_md380,
+		&riScanLists_md380,
+		&riChannels_md380,
+		&riGPSSystems,
+	},
+}
+
+var cpMD390 = CodeplugInfo{
+	Type: "MD-390",
 	Models: []string{
 		"MD390",
 	},
@@ -414,8 +414,8 @@ var cpRT3G = CodeplugInfo{
 	},
 }
 
-var cpMD390 = CodeplugInfo{
-	Type: "MD-390",
+var cpRT3G = CodeplugInfo{
+	Type: "RT3-G",
 	Models: []string{
 		"MD390",
 	},
