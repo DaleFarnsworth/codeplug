@@ -249,7 +249,7 @@ func (f *Field) Strings() []string {
 		ss := f.sibling(FtCiPrivacy).String()
 		strs = *f.strings
 		if ss == "Enhanced" {
-			strs = strs[0:8]
+			strs = strs[:8]
 		}
 
 	case VtIndexedStrings:
@@ -320,6 +320,18 @@ func (f *Field) FullTypeName() string {
 	return s
 }
 
+func (f *Field) SetDefault() {
+	fi := f.fDesc.fieldInfo
+	if fi.max > 1 {
+		return
+	}
+
+	dv := fi.defaultValue
+	if dv != "" {
+		f.setString(dv)
+	}
+}
+
 // valid returns nil if the field's value is valid.
 func (f *Field) valid() error {
 	err := f.value.valid(f)
@@ -340,11 +352,6 @@ func (f *Field) valid() error {
 func (f *Field) IsValid() bool {
 	_, invalid := f.value.(invalidValue)
 	return !invalid
-}
-
-// DefaultValue returns the fields default value
-func (f *Field) DefaultValue() string {
-	return f.defaultValue
 }
 
 // load sets the field's value from the field's part of cp.bytes.
@@ -1792,18 +1799,15 @@ func reverseBytes(bytes []byte) []byte {
 }
 
 // hexadecimal is a field containing an arbitrary value displayed as hexadecimal
-type hexadecimal []byte
+type hexadecimal4 [2]byte
 
-// getString returns the hexadecimal value as a string.
-func (v *hexadecimal) getString(f *Field) string {
-	return strings.ToUpper(hex.EncodeToString(reverseBytes(*v)))
+// getString returns the hexadecimal4 value as a string.
+func (v *hexadecimal4) getString(f *Field) string {
+	return strings.ToUpper(hex.EncodeToString(reverseBytes((*v)[:])))
 }
 
-// setString sets the hexadecimal value from a string.
-func (v *hexadecimal) setString(f *Field, s string) error {
-	if len(*v) == 0 {
-		*v = make([]byte, f.bitSize/8)
-	}
+// setString sets the hexadecimal4 value from a string.
+func (v *hexadecimal4) setString(f *Field, s string) error {
 	fullLength := len(*v) * 2
 	if len(s) != fullLength {
 		return fmt.Errorf("must contain %d hex characters", fullLength)
@@ -1814,24 +1818,64 @@ func (v *hexadecimal) setString(f *Field, s string) error {
 		return errors.New("contains non-hexadecimal characters")
 	}
 
-	*v = reverseBytes(reversedBytes)
+	copy((*v)[:], reverseBytes(reversedBytes))
 
 	return nil
 }
 
-// valid returns nil if the hexadecimal value is valid.
-func (v *hexadecimal) valid(f *Field) error {
+// valid returns nil if the hexadecimal4 value is valid.
+func (v *hexadecimal4) valid(f *Field) error {
 	return nil
 }
 
-// load sets the hexadecimal value from its bits in cp.bytes.
-func (v *hexadecimal) load(f *Field) {
-	*v = f.bytes()
+// load sets the hexadecimal4 value from its bits in cp.bytes.
+func (v *hexadecimal4) load(f *Field) {
+	copy((*v)[:], f.bytes())
 }
 
-// store stores the hexadecimal value into its bits in cp.bytes.
-func (v *hexadecimal) store(f *Field) {
-	f.storeBytes(*v)
+// store stores the hexadecimal4 value into its bits in cp.bytes.
+func (v *hexadecimal4) store(f *Field) {
+	f.storeBytes((*v)[:])
+}
+
+// hexadecimal is a field containing an arbitrary value displayed as hexadecimal
+type hexadecimal32 [16]byte
+
+// getString returns the hexadecimal32 value as a string.
+func (v *hexadecimal32) getString(f *Field) string {
+	return strings.ToUpper(hex.EncodeToString(reverseBytes((*v)[:])))
+}
+
+// setString sets the hexadecimal32 value from a string.
+func (v *hexadecimal32) setString(f *Field, s string) error {
+	fullLength := len(*v) * 2
+	if len(s) != fullLength {
+		return fmt.Errorf("must contain %d hex characters", fullLength)
+	}
+
+	reversedBytes, err := hex.DecodeString(s)
+	if err != nil {
+		return errors.New("contains non-hexadecimal characters")
+	}
+
+	copy((*v)[:], reverseBytes(reversedBytes))
+
+	return nil
+}
+
+// valid returns nil if the hexadecimal32 value is valid.
+func (v *hexadecimal32) valid(f *Field) error {
+	return nil
+}
+
+// load sets the hexadecimal32 value from its bits in cp.bytes.
+func (v *hexadecimal32) load(f *Field) {
+	copy((*v)[:], f.bytes())
+}
+
+// store stores the hexadecimal32 value into its bits in cp.bytes.
+func (v *hexadecimal32) store(f *Field) {
+	f.storeBytes((*v)[:])
 }
 
 type biFilename struct {

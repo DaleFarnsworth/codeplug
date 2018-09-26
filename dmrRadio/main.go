@@ -157,7 +157,7 @@ func readCodeplug() error {
 
 	typeFreqs := codeplug.AllFrequencyRanges()
 
-	flags.Parse(os.Args[2:len(os.Args)])
+	flags.Parse(os.Args[2:])
 	args := flags.Args()
 	if len(args) != 1 {
 		flags.Usage()
@@ -208,7 +208,7 @@ func writeCodeplug() error {
 		os.Exit(1)
 	}
 
-	flags.Parse(os.Args[2:len(os.Args)])
+	flags.Parse(os.Args[2:])
 	args := flags.Args()
 	if len(args) != 1 {
 		flags.Usage()
@@ -237,7 +237,7 @@ func readSPIFlash() (err error) {
 		os.Exit(1)
 	}
 
-	flags.Parse(os.Args[2:len(os.Args)])
+	flags.Parse(os.Args[2:])
 	args := flags.Args()
 	if len(args) != 1 {
 		flags.Usage()
@@ -278,7 +278,7 @@ func usersFilename() string {
 		os.Exit(1)
 	}
 
-	flags.Parse(os.Args[2:len(os.Args)])
+	flags.Parse(os.Args[2:])
 	args := flags.Args()
 	if len(args) != 1 {
 		flags.Usage()
@@ -390,7 +390,7 @@ func getUsers() error {
 		os.Exit(1)
 	}
 
-	flags.Parse(os.Args[2:len(os.Args)])
+	flags.Parse(os.Args[2:])
 	args := flags.Args()
 	if len(args) != 1 {
 		flags.Usage()
@@ -414,7 +414,7 @@ func checkUsers() (err error) {
 		os.Exit(1)
 	}
 
-	flags.Parse(os.Args[2:len(os.Args)])
+	flags.Parse(os.Args[2:])
 	args := flags.Args()
 	if len(args) != 3 {
 		flags.Usage()
@@ -505,7 +505,7 @@ scan:
 		line := scanner.Text()
 		commentIndex := strings.Index(line, "#")
 		if commentIndex >= 0 {
-			line = line[0:commentIndex]
+			line = line[:commentIndex]
 		}
 		for _, call := range strings.Fields(line) {
 			call = strings.TrimSpace(call)
@@ -753,7 +753,7 @@ func writeFirmware() error {
 		os.Exit(1)
 	}
 
-	flags.Parse(os.Args[2:len(os.Args)])
+	flags.Parse(os.Args[2:])
 	args := flags.Args()
 	if len(args) != 1 {
 		flags.Usage()
@@ -790,7 +790,7 @@ func textToCodeplug() error {
 		os.Exit(1)
 	}
 
-	flags.Parse(os.Args[2:len(os.Args)])
+	flags.Parse(os.Args[2:])
 	args := flags.Args()
 	if len(args) != 2 {
 		flags.Usage()
@@ -815,7 +815,7 @@ func codeplugToText() error {
 		os.Exit(1)
 	}
 
-	flags.Parse(os.Args[2:len(os.Args)])
+	flags.Parse(os.Args[2:])
 	args := flags.Args()
 	if len(args) != 2 {
 		flags.Usage()
@@ -840,7 +840,7 @@ func jsonToCodeplug() error {
 		os.Exit(1)
 	}
 
-	flags.Parse(os.Args[2:len(os.Args)])
+	flags.Parse(os.Args[2:])
 	args := flags.Args()
 	if len(args) != 2 {
 		flags.Usage()
@@ -865,7 +865,7 @@ func codeplugToJSON() error {
 		os.Exit(1)
 	}
 
-	flags.Parse(os.Args[2:len(os.Args)])
+	flags.Parse(os.Args[2:])
 	args := flags.Args()
 	if len(args) != 2 {
 		flags.Usage()
@@ -890,7 +890,7 @@ func xlsxToCodeplug() error {
 		os.Exit(1)
 	}
 
-	flags.Parse(os.Args[2:len(os.Args)])
+	flags.Parse(os.Args[2:])
 	args := flags.Args()
 	if len(args) != 2 {
 		flags.Usage()
@@ -915,7 +915,7 @@ func codeplugToXLSX() error {
 		os.Exit(1)
 	}
 
-	flags.Parse(os.Args[2:len(os.Args)])
+	flags.Parse(os.Args[2:])
 	args := flags.Args()
 	if len(args) != 2 {
 		flags.Usage()
@@ -940,7 +940,7 @@ func printVersion() error {
 		os.Exit(1)
 	}
 
-	flags.Parse(os.Args[2:len(os.Args)])
+	flags.Parse(os.Args[2:])
 	args := flags.Args()
 	if len(args) != 0 {
 		flags.Usage()

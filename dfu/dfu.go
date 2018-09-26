@@ -1143,7 +1143,7 @@ func (dfu *Dfu) ReadCodeplug(data []byte) error {
 	}
 
 	size := len(data)
-	buffer := bytes.NewBuffer(data[0:0])
+	buffer := bytes.NewBuffer(data[:0])
 
 	err = dfu.md380Cmd([]md380Cmd{
 		md380Cmd{0x91, 0x01}, // Programming Mode
@@ -1331,7 +1331,7 @@ func md2017UserImage(userSlice [][]string) []byte {
 	}
 
 	if len(users) > MaxMD2017Users {
-		users = users[0:MaxMD2017Users]
+		users = users[:MaxMD2017Users]
 	}
 	nUsers := len(users)
 
@@ -1383,7 +1383,7 @@ func md2017UserImage(userSlice [][]string) []byte {
 	// truncate image to 1KB boundary
 	end := (0x4003 + len(users)*120 + 1023) & ^1023
 
-	return image[0:end]
+	return image[:end]
 }
 
 func (dfu *Dfu) WriteMD2017Users(users [][]string) error {

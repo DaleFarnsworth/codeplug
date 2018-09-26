@@ -130,6 +130,7 @@ func (r *Record) NewField(fType FieldType) *Field {
 	}
 	f.fDesc = fd
 	f.value = newValue(fd.valueType)
+	f.SetDefault()
 
 	return f
 }

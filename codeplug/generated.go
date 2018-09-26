@@ -244,7 +244,8 @@ const (
 	VtFrequencyOffset   ValueType = "frequencyOffset"
 	VtGpsListIndex      ValueType = "gpsListIndex"
 	VtGpsReportInterval ValueType = "gpsReportInterval"
-	VtHexadecimal       ValueType = "hexadecimal"
+	VtHexadecimal32     ValueType = "hexadecimal32"
+	VtHexadecimal4      ValueType = "hexadecimal4"
 	VtIStrings          ValueType = "iStrings"
 	VtIndexedStrings    ValueType = "indexedStrings"
 	VtIntroLine         ValueType = "introLine"
@@ -287,8 +288,10 @@ func newValue(vt ValueType) value {
 		return new(gpsListIndex)
 	case VtGpsReportInterval:
 		return new(gpsReportInterval)
-	case VtHexadecimal:
-		return new(hexadecimal)
+	case VtHexadecimal32:
+		return new(hexadecimal32)
+	case VtHexadecimal4:
+		return new(hexadecimal4)
 	case VtIStrings:
 		return new(iStrings)
 	case VtIndexedStrings:
@@ -1359,12 +1362,13 @@ var riZones_uv380 = recordInfo{
 }
 
 var fiBiCpsVersion = fieldInfo{
-	fType:     FtBiCpsVersion,
-	typeName:  "CPS Version",
-	max:       1,
-	bitOffset: 69992,
-	bitSize:   32,
-	valueType: VtCpsVersion,
+	fType:        FtBiCpsVersion,
+	typeName:     "CPS Version",
+	max:          1,
+	bitOffset:    69992,
+	bitSize:      32,
+	valueType:    VtCpsVersion,
+	defaultValue: "    ",
 }
 
 var fiBiFrequencyRangeA = fieldInfo{
@@ -1515,12 +1519,13 @@ var fiBiModel = fieldInfo{
 }
 
 var fiCiAdmitCriteria = fieldInfo{
-	fType:     FtCiAdmitCriteria,
-	typeName:  "Admit Criteria",
-	max:       1,
-	bitOffset: 32,
-	bitSize:   2,
-	valueType: VtIStrings,
+	fType:        FtCiAdmitCriteria,
+	typeName:     "Admit Criteria",
+	max:          1,
+	bitOffset:    32,
+	bitSize:      2,
+	valueType:    VtIStrings,
+	defaultValue: "Always",
 	strings: &[]string{
 		"Always",
 		"Channel free",
@@ -1530,31 +1535,34 @@ var fiCiAdmitCriteria = fieldInfo{
 }
 
 var fiCiAllowTalkaround = fieldInfo{
-	fType:     FtCiAllowTalkaround,
-	typeName:  "Allow Talkaround",
-	max:       1,
-	bitOffset: 15,
-	bitSize:   1,
-	valueType: VtOffOn,
-	disabler:  FtCiTxFrequencyOffset,
+	fType:        FtCiAllowTalkaround,
+	typeName:     "Allow Talkaround",
+	max:          1,
+	bitOffset:    15,
+	bitSize:      1,
+	valueType:    VtOffOn,
+	defaultValue: "Off",
+	disabler:     FtCiTxFrequencyOffset,
 }
 
 var fiCiAutoscan = fieldInfo{
-	fType:     FtCiAutoscan,
-	typeName:  "Autoscan",
-	max:       1,
-	bitOffset: 3,
-	bitSize:   1,
-	valueType: VtOffOn,
+	fType:        FtCiAutoscan,
+	typeName:     "Autoscan",
+	max:          1,
+	bitOffset:    3,
+	bitSize:      1,
+	valueType:    VtOffOn,
+	defaultValue: "Off",
 }
 
 var fiCiBandwidth = fieldInfo{
-	fType:     FtCiBandwidth,
-	typeName:  "Bandwidth (KHz)",
-	max:       1,
-	bitOffset: 4,
-	bitSize:   2,
-	valueType: VtIStrings,
+	fType:        FtCiBandwidth,
+	typeName:     "Bandwidth (KHz)",
+	max:          1,
+	bitOffset:    4,
+	bitSize:      2,
+	valueType:    VtIStrings,
+	defaultValue: "12.5",
 	strings: &[]string{
 		"12.5",
 		"20",
@@ -1564,12 +1572,13 @@ var fiCiBandwidth = fieldInfo{
 }
 
 var fiCiChannelMode = fieldInfo{
-	fType:     FtCiChannelMode,
-	typeName:  "Channel Mode",
-	max:       1,
-	bitOffset: 6,
-	bitSize:   2,
-	valueType: VtIStrings,
+	fType:        FtCiChannelMode,
+	typeName:     "Channel Mode",
+	max:          1,
+	bitOffset:    6,
+	bitSize:      2,
+	valueType:    VtIStrings,
+	defaultValue: "Analog",
 	strings: &[]string{
 		"",
 		"Analog",
@@ -1579,12 +1588,13 @@ var fiCiChannelMode = fieldInfo{
 }
 
 var fiCiColorCode = fieldInfo{
-	fType:     FtCiColorCode,
-	typeName:  "Color Code",
-	max:       1,
-	bitOffset: 8,
-	bitSize:   4,
-	valueType: VtSpan,
+	fType:        FtCiColorCode,
+	typeName:     "Color Code",
+	max:          1,
+	bitOffset:    8,
+	bitSize:      4,
+	valueType:    VtSpan,
+	defaultValue: "1",
 	span: &Span{
 		min: 0,
 		max: 15,
@@ -1593,13 +1603,14 @@ var fiCiColorCode = fieldInfo{
 }
 
 var fiCiCompressedUdpDataHeader = fieldInfo{
-	fType:     FtCiCompressedUdpDataHeader,
-	typeName:  "Compressed UDP Data Header",
-	max:       1,
-	bitOffset: 25,
-	bitSize:   1,
-	valueType: VtOffOn,
-	enabler:   FtCiChannelMode,
+	fType:        FtCiCompressedUdpDataHeader,
+	typeName:     "Compressed UDP Data Header",
+	max:          1,
+	bitOffset:    25,
+	bitSize:      1,
+	valueType:    VtOffOn,
+	defaultValue: "On",
+	enabler:      FtCiChannelMode,
 }
 
 var fiCiContactName = fieldInfo{
@@ -1647,16 +1658,18 @@ var fiCiDCDMSwitch = fieldInfo{
 	bitOffset:     253,
 	bitSize:       1,
 	valueType:     VtOnOff,
+	defaultValue:  "Off",
 	enablingValue: "On",
 }
 
 var fiCiDQTTurnoffFreq = fieldInfo{
-	fType:     FtCiDQTTurnoffFreq,
-	typeName:  "Non-QT/DQT Turn-off Freq",
-	max:       1,
-	bitOffset: 40,
-	bitSize:   2,
-	valueType: VtIndexedStrings,
+	fType:        FtCiDQTTurnoffFreq,
+	typeName:     "Non-QT/DQT Turn-off Freq",
+	max:          1,
+	bitOffset:    40,
+	bitSize:      2,
+	valueType:    VtIndexedStrings,
+	defaultValue: "None",
 	indexedStrings: &[]IndexedString{
 		IndexedString{0, "259.2 Hz"},
 		IndexedString{2, "55.2 Hz"},
@@ -1666,122 +1679,134 @@ var fiCiDQTTurnoffFreq = fieldInfo{
 }
 
 var fiCiDataCallConfirmed = fieldInfo{
-	fType:     FtCiDataCallConfirmed,
-	typeName:  "Data Call Confirmed",
-	max:       1,
-	bitOffset: 16,
-	bitSize:   1,
-	valueType: VtOffOn,
-	enabler:   FtCiChannelMode,
+	fType:        FtCiDataCallConfirmed,
+	typeName:     "Data Call Confirmed",
+	max:          1,
+	bitOffset:    16,
+	bitSize:      1,
+	valueType:    VtOffOn,
+	defaultValue: "Off",
+	enabler:      FtCiChannelMode,
 }
 
 var fiCiDecode1 = fieldInfo{
-	fType:     FtCiDecode1,
-	typeName:  "Decode 1",
-	max:       1,
-	bitOffset: 112,
-	bitSize:   1,
-	valueType: VtOffOn,
-	disabler:  FtCiRxSignallingSystem,
+	fType:        FtCiDecode1,
+	typeName:     "Decode 1",
+	max:          1,
+	bitOffset:    112,
+	bitSize:      1,
+	valueType:    VtOffOn,
+	defaultValue: "Off",
+	disabler:     FtCiRxSignallingSystem,
 }
 
 var fiCiDecode2 = fieldInfo{
-	fType:     FtCiDecode2,
-	typeName:  "Decode 2",
-	max:       1,
-	bitOffset: 113,
-	bitSize:   1,
-	valueType: VtOffOn,
-	disabler:  FtCiRxSignallingSystem,
+	fType:        FtCiDecode2,
+	typeName:     "Decode 2",
+	max:          1,
+	bitOffset:    113,
+	bitSize:      1,
+	valueType:    VtOffOn,
+	defaultValue: "Off",
+	disabler:     FtCiRxSignallingSystem,
 }
 
 var fiCiDecode3 = fieldInfo{
-	fType:     FtCiDecode3,
-	typeName:  "Decode 3",
-	max:       1,
-	bitOffset: 114,
-	bitSize:   1,
-	valueType: VtOffOn,
-	disabler:  FtCiRxSignallingSystem,
+	fType:        FtCiDecode3,
+	typeName:     "Decode 3",
+	max:          1,
+	bitOffset:    114,
+	bitSize:      1,
+	valueType:    VtOffOn,
+	defaultValue: "Off",
+	disabler:     FtCiRxSignallingSystem,
 }
 
 var fiCiDecode4 = fieldInfo{
-	fType:     FtCiDecode4,
-	typeName:  "Decode 4",
-	max:       1,
-	bitOffset: 115,
-	bitSize:   1,
-	valueType: VtOffOn,
-	disabler:  FtCiRxSignallingSystem,
+	fType:        FtCiDecode4,
+	typeName:     "Decode 4",
+	max:          1,
+	bitOffset:    115,
+	bitSize:      1,
+	valueType:    VtOffOn,
+	defaultValue: "Off",
+	disabler:     FtCiRxSignallingSystem,
 }
 
 var fiCiDecode5 = fieldInfo{
-	fType:     FtCiDecode5,
-	typeName:  "Decode 5",
-	max:       1,
-	bitOffset: 116,
-	bitSize:   1,
-	valueType: VtOffOn,
-	disabler:  FtCiRxSignallingSystem,
+	fType:        FtCiDecode5,
+	typeName:     "Decode 5",
+	max:          1,
+	bitOffset:    116,
+	bitSize:      1,
+	valueType:    VtOffOn,
+	defaultValue: "Off",
+	disabler:     FtCiRxSignallingSystem,
 }
 
 var fiCiDecode6 = fieldInfo{
-	fType:     FtCiDecode6,
-	typeName:  "Decode 6",
-	max:       1,
-	bitOffset: 117,
-	bitSize:   1,
-	valueType: VtOffOn,
-	disabler:  FtCiRxSignallingSystem,
+	fType:        FtCiDecode6,
+	typeName:     "Decode 6",
+	max:          1,
+	bitOffset:    117,
+	bitSize:      1,
+	valueType:    VtOffOn,
+	defaultValue: "Off",
+	disabler:     FtCiRxSignallingSystem,
 }
 
 var fiCiDecode7 = fieldInfo{
-	fType:     FtCiDecode7,
-	typeName:  "Decode 7",
-	max:       1,
-	bitOffset: 118,
-	bitSize:   1,
-	valueType: VtOffOn,
-	disabler:  FtCiRxSignallingSystem,
+	fType:        FtCiDecode7,
+	typeName:     "Decode 7",
+	max:          1,
+	bitOffset:    118,
+	bitSize:      1,
+	valueType:    VtOffOn,
+	defaultValue: "Off",
+	disabler:     FtCiRxSignallingSystem,
 }
 
 var fiCiDecode8 = fieldInfo{
-	fType:     FtCiDecode8,
-	typeName:  "Decode 8",
-	max:       1,
-	bitOffset: 119,
-	bitSize:   1,
-	valueType: VtOffOn,
-	disabler:  FtCiRxSignallingSystem,
+	fType:        FtCiDecode8,
+	typeName:     "Decode 8",
+	max:          1,
+	bitOffset:    119,
+	bitSize:      1,
+	valueType:    VtOffOn,
+	defaultValue: "Off",
+	disabler:     FtCiRxSignallingSystem,
 }
 
 var fiCiDisplayPTTID = fieldInfo{
-	fType:     FtCiDisplayPTTID,
-	typeName:  "Display PTT ID",
-	max:       1,
-	bitOffset: 24,
-	bitSize:   1,
-	valueType: VtOnOff,
-	disabler:  FtCiChannelMode,
+	fType:        FtCiDisplayPTTID,
+	typeName:     "Display PTT ID",
+	max:          1,
+	bitOffset:    24,
+	bitSize:      1,
+	valueType:    VtOnOff,
+	defaultValue: "Off",
+	disabler:     FtCiChannelMode,
 }
 
 var fiCiEmergencyAlarmAck = fieldInfo{
-	fType:     FtCiEmergencyAlarmAck,
-	typeName:  "Emergency Alarm Ack",
-	max:       1,
-	bitOffset: 28,
-	bitSize:   1,
-	valueType: VtOffOn,
-	enabler:   FtCiChannelMode,
+	fType:        FtCiEmergencyAlarmAck,
+	typeName:     "Emergency Alarm Ack",
+	max:          1,
+	bitOffset:    28,
+	bitSize:      1,
+	valueType:    VtOffOn,
+	defaultValue: "Off",
+	enabler:      FtCiChannelMode,
 }
 
 var fiCiEmergencySystem = fieldInfo{
-	fType:     FtCiEmergencySystem,
-	typeName:  "Emergency System",
-	max:       1,
-	bitOffset: 80,
-	bitSize:   8,
-	valueType: VtSpan,
+	fType:        FtCiEmergencySystem,
+	typeName:     "Emergency System",
+	max:          1,
+	bitOffset:    80,
+	bitSize:      8,
+	valueType:    VtSpan,
+	defaultValue: "None",
 	span: &Span{
 		min:       0,
 		max:       32,
@@ -1791,12 +1816,13 @@ var fiCiEmergencySystem = fieldInfo{
 }
 
 var fiCiGPSSystem = fieldInfo{
-	fType:     FtCiGPSSystem,
-	typeName:  "GPS System",
-	max:       1,
-	bitOffset: 107,
-	bitSize:   5,
-	valueType: VtSpan,
+	fType:        FtCiGPSSystem,
+	typeName:     "GPS System",
+	max:          1,
+	bitOffset:    107,
+	bitSize:      5,
+	valueType:    VtSpan,
+	defaultValue: "None",
 	span: &Span{
 		min:       0,
 		max:       16,
@@ -1820,12 +1846,13 @@ var fiCiGroupList = fieldInfo{
 }
 
 var fiCiInCallCriteria = fieldInfo{
-	fType:     FtCiInCallCriteria,
-	typeName:  "In Call Criteria",
-	max:       1,
-	bitOffset: 43,
-	bitSize:   1,
-	valueType: VtIStrings,
+	fType:        FtCiInCallCriteria,
+	typeName:     "In Call Criteria",
+	max:          1,
+	bitOffset:    43,
+	bitSize:      1,
+	valueType:    VtIStrings,
+	defaultValue: "Always",
 	strings: &[]string{
 		"Always",
 		"Follow Admit Criteria",
@@ -1833,40 +1860,44 @@ var fiCiInCallCriteria = fieldInfo{
 }
 
 var fiCiLeaderMS = fieldInfo{
-	fType:     FtCiLeaderMS,
-	typeName:  "Leader/MS",
-	max:       1,
-	bitOffset: 252,
-	bitSize:   1,
-	valueType: VtOnOff,
-	enabler:   FtCiDCDMSwitch,
+	fType:        FtCiLeaderMS,
+	typeName:     "Leader/MS",
+	max:          1,
+	bitOffset:    252,
+	bitSize:      1,
+	valueType:    VtOnOff,
+	defaultValue: "Off",
+	enabler:      FtCiDCDMSwitch,
 }
 
 var fiCiLoneWorker = fieldInfo{
-	fType:     FtCiLoneWorker,
-	typeName:  "Lone Worker",
-	max:       1,
-	bitOffset: 0,
-	bitSize:   1,
-	valueType: VtOffOn,
+	fType:        FtCiLoneWorker,
+	typeName:     "Lone Worker",
+	max:          1,
+	bitOffset:    0,
+	bitSize:      1,
+	valueType:    VtOffOn,
+	defaultValue: "Off",
 }
 
 var fiCiName = fieldInfo{
-	fType:     FtCiName,
-	typeName:  "Channel Name",
-	max:       1,
-	bitOffset: 256,
-	bitSize:   256,
-	valueType: VtUniqueName,
+	fType:        FtCiName,
+	typeName:     "Channel Name",
+	max:          1,
+	bitOffset:    256,
+	bitSize:      256,
+	valueType:    VtUniqueName,
+	defaultValue: "Channel1",
 }
 
 var fiCiPower = fieldInfo{
-	fType:     FtCiPower,
-	typeName:  "Power",
-	max:       1,
-	bitOffset: 34,
-	bitSize:   1,
-	valueType: VtIStrings,
+	fType:        FtCiPower,
+	typeName:     "Power",
+	max:          1,
+	bitOffset:    34,
+	bitSize:      1,
+	valueType:    VtIStrings,
+	defaultValue: "High",
 	strings: &[]string{
 		"Low",
 		"High",
@@ -1874,12 +1905,13 @@ var fiCiPower = fieldInfo{
 }
 
 var fiCiPower_uv380 = fieldInfo{
-	fType:     FtCiPower_uv380,
-	typeName:  "Power",
-	max:       1,
-	bitOffset: 246,
-	bitSize:   2,
-	valueType: VtIndexedStrings,
+	fType:        FtCiPower_uv380,
+	typeName:     "Power",
+	max:          1,
+	bitOffset:    246,
+	bitSize:      2,
+	valueType:    VtIndexedStrings,
+	defaultValue: "High",
 	indexedStrings: &[]IndexedString{
 		IndexedString{0, "Low"},
 		IndexedString{2, "Middle"},
@@ -1905,12 +1937,13 @@ var fiCiPrivacy = fieldInfo{
 }
 
 var fiCiPrivacyNumber = fieldInfo{
-	fType:     FtCiPrivacyNumber,
-	typeName:  "Privacy Number",
-	max:       1,
-	bitOffset: 20,
-	bitSize:   4,
-	valueType: VtPrivacyNumber,
+	fType:        FtCiPrivacyNumber,
+	typeName:     "Privacy Number",
+	max:          1,
+	bitOffset:    20,
+	bitSize:      4,
+	valueType:    VtPrivacyNumber,
+	defaultValue: "1",
 	strings: &[]string{
 		"1",
 		"2",
@@ -1933,22 +1966,24 @@ var fiCiPrivacyNumber = fieldInfo{
 }
 
 var fiCiPrivateCallConfirmed = fieldInfo{
-	fType:     FtCiPrivateCallConfirmed,
-	typeName:  "Private Call Confimed",
-	max:       1,
-	bitOffset: 17,
-	bitSize:   1,
-	valueType: VtOffOn,
-	enabler:   FtCiChannelMode,
+	fType:        FtCiPrivateCallConfirmed,
+	typeName:     "Private Call Confimed",
+	max:          1,
+	bitOffset:    17,
+	bitSize:      1,
+	valueType:    VtOffOn,
+	defaultValue: "Off",
+	enabler:      FtCiChannelMode,
 }
 
 var fiCiQtReverse = fieldInfo{
-	fType:     FtCiQtReverse,
-	typeName:  "QT Reverse",
-	max:       1,
-	bitOffset: 36,
-	bitSize:   1,
-	valueType: VtIStrings,
+	fType:        FtCiQtReverse,
+	typeName:     "QT Reverse",
+	max:          1,
+	bitOffset:    36,
+	bitSize:      1,
+	valueType:    VtIStrings,
+	defaultValue: "180",
 	strings: &[]string{
 		"180",
 		"120",
@@ -1957,12 +1992,13 @@ var fiCiQtReverse = fieldInfo{
 }
 
 var fiCiReceiveGPSInfo = fieldInfo{
-	fType:     FtCiReceiveGPSInfo,
-	typeName:  "Receive GPS Info",
-	max:       1,
-	bitOffset: 254,
-	bitSize:   1,
-	valueType: VtOnOff,
+	fType:        FtCiReceiveGPSInfo,
+	typeName:     "Receive GPS Info",
+	max:          1,
+	bitOffset:    254,
+	bitSize:      1,
+	valueType:    VtOnOff,
+	defaultValue: "Off",
 }
 
 var fiCiRepeaterSlot = fieldInfo{
@@ -1982,40 +2018,44 @@ var fiCiRepeaterSlot = fieldInfo{
 }
 
 var fiCiReverseBurst = fieldInfo{
-	fType:     FtCiReverseBurst,
-	typeName:  "Reverse Burst/Turn Off Code",
-	max:       1,
-	bitOffset: 37,
-	bitSize:   1,
-	valueType: VtOffOn,
-	disabler:  FtCiCtcssEncode,
+	fType:        FtCiReverseBurst,
+	typeName:     "Reverse Burst/Turn Off Code",
+	max:          1,
+	bitOffset:    37,
+	bitSize:      1,
+	valueType:    VtOffOn,
+	defaultValue: "On",
+	disabler:     FtCiCtcssEncode,
 }
 
 var fiCiRxFrequency = fieldInfo{
-	fType:     FtCiRxFrequency,
-	typeName:  "Rx Frequency (MHz)",
-	max:       1,
-	bitOffset: 128,
-	bitSize:   32,
-	valueType: VtFrequency,
+	fType:        FtCiRxFrequency,
+	typeName:     "Rx Frequency (MHz)",
+	max:          1,
+	bitOffset:    128,
+	bitSize:      32,
+	valueType:    VtFrequency,
+	defaultValue: "0",
 }
 
 var fiCiRxOnly = fieldInfo{
-	fType:     FtCiRxOnly,
-	typeName:  "Rx Only",
-	max:       1,
-	bitOffset: 14,
-	bitSize:   1,
-	valueType: VtOffOn,
+	fType:        FtCiRxOnly,
+	typeName:     "Rx Only",
+	max:          1,
+	bitOffset:    14,
+	bitSize:      1,
+	valueType:    VtOffOn,
+	defaultValue: "Off",
 }
 
 var fiCiRxRefFrequency = fieldInfo{
-	fType:     FtCiRxRefFrequency,
-	typeName:  "Rx Ref Frequency",
-	max:       1,
-	bitOffset: 30,
-	bitSize:   2,
-	valueType: VtIStrings,
+	fType:        FtCiRxRefFrequency,
+	typeName:     "Rx Ref Frequency",
+	max:          1,
+	bitOffset:    30,
+	bitSize:      2,
+	valueType:    VtIStrings,
+	defaultValue: "Low",
 	strings: &[]string{
 		"Low",
 		"Medium",
@@ -2043,12 +2083,13 @@ var fiCiRxSignallingSystem = fieldInfo{
 }
 
 var fiCiScanList_md380 = fieldInfo{
-	fType:     FtCiScanList_md380,
-	typeName:  "Scan List",
-	max:       1,
-	bitOffset: 88,
-	bitSize:   8,
-	valueType: VtListIndex,
+	fType:        FtCiScanList_md380,
+	typeName:     "Scan List",
+	max:          1,
+	bitOffset:    88,
+	bitSize:      8,
+	valueType:    VtListIndex,
+	defaultValue: "None",
 	indexedStrings: &[]IndexedString{
 		IndexedString{0, "None"},
 	},
@@ -2056,12 +2097,13 @@ var fiCiScanList_md380 = fieldInfo{
 }
 
 var fiCiScanList_md40 = fieldInfo{
-	fType:     FtCiScanList_md40,
-	typeName:  "Scan List",
-	max:       1,
-	bitOffset: 88,
-	bitSize:   8,
-	valueType: VtListIndex,
+	fType:        FtCiScanList_md40,
+	typeName:     "Scan List",
+	max:          1,
+	bitOffset:    88,
+	bitSize:      8,
+	valueType:    VtListIndex,
+	defaultValue: "None",
 	indexedStrings: &[]IndexedString{
 		IndexedString{0, "None"},
 	},
@@ -2069,21 +2111,23 @@ var fiCiScanList_md40 = fieldInfo{
 }
 
 var fiCiSendGPSInfo = fieldInfo{
-	fType:     FtCiSendGPSInfo,
-	typeName:  "Send GPS Info",
-	max:       1,
-	bitOffset: 255,
-	bitSize:   1,
-	valueType: VtOnOff,
+	fType:        FtCiSendGPSInfo,
+	typeName:     "Send GPS Info",
+	max:          1,
+	bitOffset:    255,
+	bitSize:      1,
+	valueType:    VtOnOff,
+	defaultValue: "Off",
 }
 
 var fiCiSquelch = fieldInfo{
-	fType:     FtCiSquelch,
-	typeName:  "Squelch",
-	max:       1,
-	bitOffset: 2,
-	bitSize:   1,
-	valueType: VtIStrings,
+	fType:        FtCiSquelch,
+	typeName:     "Squelch",
+	max:          1,
+	bitOffset:    2,
+	bitSize:      1,
+	valueType:    VtIStrings,
+	defaultValue: "Normal",
 	strings: &[]string{
 		"Tight",
 		"Normal",
@@ -2091,12 +2135,13 @@ var fiCiSquelch = fieldInfo{
 }
 
 var fiCiSquelch_uv380 = fieldInfo{
-	fType:     FtCiSquelch_uv380,
-	typeName:  "Squelch",
-	max:       1,
-	bitOffset: 124,
-	bitSize:   4,
-	valueType: VtSpan,
+	fType:        FtCiSquelch_uv380,
+	typeName:     "Squelch",
+	max:          1,
+	bitOffset:    124,
+	bitSize:      4,
+	valueType:    VtSpan,
+	defaultValue: "1",
 	span: &Span{
 		min: 0,
 		max: 9,
@@ -2104,12 +2149,13 @@ var fiCiSquelch_uv380 = fieldInfo{
 }
 
 var fiCiTot = fieldInfo{
-	fType:     FtCiTot,
-	typeName:  "TOT (S)",
-	max:       1,
-	bitOffset: 64,
-	bitSize:   8,
-	valueType: VtSpan,
+	fType:        FtCiTot,
+	typeName:     "TOT (S)",
+	max:          1,
+	bitOffset:    64,
+	bitSize:      8,
+	valueType:    VtSpan,
+	defaultValue: "60",
 	span: &Span{
 		min:       0,
 		max:       37,
@@ -2119,12 +2165,13 @@ var fiCiTot = fieldInfo{
 }
 
 var fiCiTotRekeyDelay = fieldInfo{
-	fType:     FtCiTotRekeyDelay,
-	typeName:  "TOT Rekey Delay (S)",
-	max:       1,
-	bitOffset: 72,
-	bitSize:   8,
-	valueType: VtSpan,
+	fType:        FtCiTotRekeyDelay,
+	typeName:     "TOT Rekey Delay (S)",
+	max:          1,
+	bitOffset:    72,
+	bitSize:      8,
+	valueType:    VtSpan,
+	defaultValue: "0",
 	span: &Span{
 		min: 0,
 		max: 255,
@@ -2138,16 +2185,18 @@ var fiCiTxFrequencyOffset = fieldInfo{
 	bitOffset:     160,
 	bitSize:       32,
 	valueType:     VtFrequencyOffset,
+	defaultValue:  "0",
 	enablingValue: "+0.00000",
 }
 
 var fiCiTxRefFrequency = fieldInfo{
-	fType:     FtCiTxRefFrequency,
-	typeName:  "Tx Ref Frequency",
-	max:       1,
-	bitOffset: 38,
-	bitSize:   2,
-	valueType: VtIStrings,
+	fType:        FtCiTxRefFrequency,
+	typeName:     "Tx Ref Frequency",
+	max:          1,
+	bitOffset:    38,
+	bitSize:      2,
+	valueType:    VtIStrings,
+	defaultValue: "Low",
 	strings: &[]string{
 		"Low",
 		"Medium",
@@ -2174,30 +2223,33 @@ var fiCiTxSignallingSystem = fieldInfo{
 }
 
 var fiCiVox = fieldInfo{
-	fType:     FtCiVox,
-	typeName:  "VOX",
-	max:       1,
-	bitOffset: 35,
-	bitSize:   1,
-	valueType: VtOffOn,
+	fType:        FtCiVox,
+	typeName:     "VOX",
+	max:          1,
+	bitOffset:    35,
+	bitSize:      1,
+	valueType:    VtOffOn,
+	defaultValue: "Off",
 }
 
 var fiDcCallID = fieldInfo{
-	fType:     FtDcCallID,
-	typeName:  "Call ID",
-	max:       1,
-	bitOffset: 0,
-	bitSize:   24,
-	valueType: VtCallID,
+	fType:        FtDcCallID,
+	typeName:     "Call ID",
+	max:          1,
+	bitOffset:    0,
+	bitSize:      24,
+	valueType:    VtCallID,
+	defaultValue: "1",
 }
 
 var fiDcCallReceiveTone = fieldInfo{
-	fType:     FtDcCallReceiveTone,
-	typeName:  "Call Receive Tone",
-	max:       1,
-	bitOffset: 26,
-	bitSize:   1,
-	valueType: VtIStrings,
+	fType:        FtDcCallReceiveTone,
+	typeName:     "Call Receive Tone",
+	max:          1,
+	bitOffset:    26,
+	bitSize:      1,
+	valueType:    VtIStrings,
+	defaultValue: "No",
 	strings: &[]string{
 		"No",
 		"Yes",
@@ -2205,12 +2257,13 @@ var fiDcCallReceiveTone = fieldInfo{
 }
 
 var fiDcCallType = fieldInfo{
-	fType:     FtDcCallType,
-	typeName:  "Call Type",
-	max:       1,
-	bitOffset: 30,
-	bitSize:   2,
-	valueType: VtCallType,
+	fType:        FtDcCallType,
+	typeName:     "Call Type",
+	max:          1,
+	bitOffset:    30,
+	bitSize:      2,
+	valueType:    VtCallType,
+	defaultValue: "Group",
 	strings: &[]string{
 		"",
 		"Group",
@@ -2220,12 +2273,13 @@ var fiDcCallType = fieldInfo{
 }
 
 var fiDcName = fieldInfo{
-	fType:     FtDcName,
-	typeName:  "Contact Name",
-	max:       1,
-	bitOffset: 32,
-	bitSize:   256,
-	valueType: VtName,
+	fType:        FtDcName,
+	typeName:     "Contact Name",
+	max:          1,
+	bitOffset:    32,
+	bitSize:      256,
+	valueType:    VtName,
+	defaultValue: "Contact1",
 }
 
 var fiGlContact = fieldInfo{
@@ -2239,12 +2293,13 @@ var fiGlContact = fieldInfo{
 }
 
 var fiGlName = fieldInfo{
-	fType:     FtGlName,
-	typeName:  "RX Group List Name",
-	max:       1,
-	bitOffset: 0,
-	bitSize:   256,
-	valueType: VtUniqueName,
+	fType:        FtGlName,
+	typeName:     "RX Group List Name",
+	max:          1,
+	bitOffset:    0,
+	bitSize:      256,
+	valueType:    VtUniqueName,
+	defaultValue: "GroupList1",
 }
 
 var fiGpDestinationID = fieldInfo{
@@ -2262,12 +2317,13 @@ var fiGpDestinationID = fieldInfo{
 }
 
 var fiGpGPSDefaultReportInterval = fieldInfo{
-	fType:     FtGpGPSDefaultReportInterval,
-	typeName:  "GPS Default Report Interval (S)",
-	max:       1,
-	bitOffset: 16,
-	bitSize:   8,
-	valueType: VtGpsReportInterval,
+	fType:        FtGpGPSDefaultReportInterval,
+	typeName:     "GPS Default Report Interval (S)",
+	max:          1,
+	bitOffset:    16,
+	bitSize:      8,
+	valueType:    VtGpsReportInterval,
+	defaultValue: "Off",
 	span: &Span{
 		min:       0,
 		max:       240,
@@ -2277,12 +2333,13 @@ var fiGpGPSDefaultReportInterval = fieldInfo{
 }
 
 var fiGpGPSRevertChannel = fieldInfo{
-	fType:     FtGpGPSRevertChannel,
-	typeName:  "GPS Revert Channel",
-	max:       1,
-	bitOffset: 0,
-	bitSize:   16,
-	valueType: VtGpsListIndex,
+	fType:        FtGpGPSRevertChannel,
+	typeName:     "GPS Revert Channel",
+	max:          1,
+	bitOffset:    0,
+	bitSize:      16,
+	valueType:    VtGpsListIndex,
+	defaultValue: "Current Channel",
 	indexedStrings: &[]IndexedString{
 		IndexedString{0, "Current Channel"},
 	},
@@ -2290,12 +2347,13 @@ var fiGpGPSRevertChannel = fieldInfo{
 }
 
 var fiGsBacklightColor = fieldInfo{
-	fType:     FtGsBacklightColor,
-	typeName:  "Backlight Color",
-	max:       1,
-	bitOffset: 542,
-	bitSize:   2,
-	valueType: VtIStrings,
+	fType:        FtGsBacklightColor,
+	typeName:     "Backlight Color",
+	max:          1,
+	bitOffset:    542,
+	bitSize:      2,
+	valueType:    VtIStrings,
+	defaultValue: "White",
 	strings: &[]string{
 		"Off",
 		"Orange",
@@ -2305,12 +2363,13 @@ var fiGsBacklightColor = fieldInfo{
 }
 
 var fiGsBacklightTime = fieldInfo{
-	fType:     FtGsBacklightTime,
-	typeName:  "Backlight Time (S)",
-	max:       1,
-	bitOffset: 686,
-	bitSize:   2,
-	valueType: VtIStrings,
+	fType:        FtGsBacklightTime,
+	typeName:     "Backlight Time (S)",
+	max:          1,
+	bitOffset:    686,
+	bitSize:      2,
+	valueType:    VtIStrings,
+	defaultValue: "Always",
 	strings: &[]string{
 		"Always",
 		"5",
@@ -2320,21 +2379,23 @@ var fiGsBacklightTime = fieldInfo{
 }
 
 var fiGsCHVoiceAnnouncement = fieldInfo{
-	fType:     FtGsCHVoiceAnnouncement,
-	typeName:  "CH Voice Announcement",
-	max:       1,
-	bitOffset: 534,
-	bitSize:   1,
-	valueType: VtOffOn,
+	fType:        FtGsCHVoiceAnnouncement,
+	typeName:     "CH Voice Announcement",
+	max:          1,
+	bitOffset:    534,
+	bitSize:      1,
+	valueType:    VtOffOn,
+	defaultValue: "On",
 }
 
 var fiGsCallAlertToneDuration = fieldInfo{
-	fType:     FtGsCallAlertToneDuration,
-	typeName:  "Call Alert Tone Duration (S)",
-	max:       1,
-	bitOffset: 632,
-	bitSize:   8,
-	valueType: VtSpan,
+	fType:        FtGsCallAlertToneDuration,
+	typeName:     "Call Alert Tone Duration (S)",
+	max:          1,
+	bitOffset:    632,
+	bitSize:      8,
+	valueType:    VtSpan,
+	defaultValue: "Continue",
 	span: &Span{
 		min:       0,
 		max:       240,
@@ -2344,21 +2405,23 @@ var fiGsCallAlertToneDuration = fieldInfo{
 }
 
 var fiGsChFreeIndicationTone = fieldInfo{
-	fType:     FtGsChFreeIndicationTone,
-	typeName:  "Channel Free Indication Tone",
-	max:       1,
-	bitOffset: 523,
-	bitSize:   1,
-	valueType: VtOnOff,
+	fType:        FtGsChFreeIndicationTone,
+	typeName:     "Channel Free Indication Tone",
+	max:          1,
+	bitOffset:    523,
+	bitSize:      1,
+	valueType:    VtOnOff,
+	defaultValue: "Off",
 }
 
 var fiGsChannelsHangTime = fieldInfo{
-	fType:     FtGsChannelsHangTime,
-	typeName:  "Channels Hang Time (mS)",
-	max:       1,
-	bitOffset: 1152,
-	bitSize:   8,
-	valueType: VtSpan,
+	fType:        FtGsChannelsHangTime,
+	typeName:     "Channels Hang Time (mS)",
+	max:          1,
+	bitOffset:    1152,
+	bitSize:      8,
+	valueType:    VtSpan,
+	defaultValue: "3000",
 	span: &Span{
 		min:      0,
 		max:      70,
@@ -2368,39 +2431,43 @@ var fiGsChannelsHangTime = fieldInfo{
 }
 
 var fiGsDisableAllLeds = fieldInfo{
-	fType:     FtGsDisableAllLeds,
-	typeName:  "Disable All LEDS",
-	max:       1,
-	bitOffset: 517,
-	bitSize:   1,
-	valueType: VtOnOff,
+	fType:        FtGsDisableAllLeds,
+	typeName:     "Disable All LEDS",
+	max:          1,
+	bitOffset:    517,
+	bitSize:      1,
+	valueType:    VtOnOff,
+	defaultValue: "Off",
 }
 
 var fiGsDisableAllTones = fieldInfo{
-	fType:     FtGsDisableAllTones,
-	typeName:  "Disable All Tones",
-	max:       1,
-	bitOffset: 525,
-	bitSize:   1,
-	valueType: VtOnOff,
+	fType:        FtGsDisableAllTones,
+	typeName:     "Disable All Tones",
+	max:          1,
+	bitOffset:    525,
+	bitSize:      1,
+	valueType:    VtOnOff,
+	defaultValue: "Off",
 }
 
 var fiGsEditRadioID = fieldInfo{
-	fType:     FtGsEditRadioID,
-	typeName:  "Edit Radio ID",
-	max:       1,
-	bitOffset: 1281,
-	bitSize:   1,
-	valueType: VtOnOff,
+	fType:        FtGsEditRadioID,
+	typeName:     "Edit Radio ID",
+	max:          1,
+	bitOffset:    1281,
+	bitSize:      1,
+	valueType:    VtOnOff,
+	defaultValue: "Off",
 }
 
 var fiGsFreqChannelMode = fieldInfo{
-	fType:     FtGsFreqChannelMode,
-	typeName:  "Freq/Channel Mode",
-	max:       1,
-	bitOffset: 540,
-	bitSize:   1,
-	valueType: VtIStrings,
+	fType:        FtGsFreqChannelMode,
+	typeName:     "Freq/Channel Mode",
+	max:          1,
+	bitOffset:    540,
+	bitSize:      1,
+	valueType:    VtIStrings,
+	defaultValue: "Channel",
 	strings: &[]string{
 		"Frequency",
 		"Channel",
@@ -2409,12 +2476,13 @@ var fiGsFreqChannelMode = fieldInfo{
 }
 
 var fiGsFreqChannelMode_uv380 = fieldInfo{
-	fType:     FtGsFreqChannelMode_uv380,
-	typeName:  "Freq/Channel Mode",
-	max:       1,
-	bitOffset: 696,
-	bitSize:   8,
-	valueType: VtIndexedStrings,
+	fType:        FtGsFreqChannelMode_uv380,
+	typeName:     "Freq/Channel Mode",
+	max:          1,
+	bitOffset:    696,
+	bitSize:      8,
+	valueType:    VtIndexedStrings,
+	defaultValue: "Channel",
 	indexedStrings: &[]IndexedString{
 		IndexedString{0, "Frequency"},
 		IndexedString{255, "Channel"},
@@ -2423,12 +2491,13 @@ var fiGsFreqChannelMode_uv380 = fieldInfo{
 }
 
 var fiGsGroupCallHangTime = fieldInfo{
-	fType:     FtGsGroupCallHangTime,
-	typeName:  "Group Call Hang Time (mS)",
-	max:       1,
-	bitOffset: 584,
-	bitSize:   8,
-	valueType: VtSpan,
+	fType:        FtGsGroupCallHangTime,
+	typeName:     "Group Call Hang Time (mS)",
+	max:          1,
+	bitOffset:    584,
+	bitSize:      8,
+	valueType:    VtSpan,
+	defaultValue: "3000",
 	span: &Span{
 		min:      0,
 		max:      70,
@@ -2438,21 +2507,23 @@ var fiGsGroupCallHangTime = fieldInfo{
 }
 
 var fiGsGroupCallMatch = fieldInfo{
-	fType:     FtGsGroupCallMatch,
-	typeName:  "Group Call Match",
-	max:       1,
-	bitOffset: 863,
-	bitSize:   1,
-	valueType: VtOffOn,
+	fType:        FtGsGroupCallMatch,
+	typeName:     "Group Call Match",
+	max:          1,
+	bitOffset:    863,
+	bitSize:      1,
+	valueType:    VtOffOn,
+	defaultValue: "On",
 }
 
 var fiGsIntroScreen = fieldInfo{
-	fType:     FtGsIntroScreen,
-	typeName:  "Intro Screen",
-	max:       1,
-	bitOffset: 531,
-	bitSize:   1,
-	valueType: VtIStrings,
+	fType:        FtGsIntroScreen,
+	typeName:     "Intro Screen",
+	max:          1,
+	bitOffset:    531,
+	bitSize:      1,
+	valueType:    VtIStrings,
+	defaultValue: "Character String",
 	strings: &[]string{
 		"Character String",
 		"Picture",
@@ -2478,21 +2549,23 @@ var fiGsIntroScreenLine2 = fieldInfo{
 }
 
 var fiGsKeypadTones = fieldInfo{
-	fType:     FtGsKeypadTones,
-	typeName:  "Keypad Tones",
-	max:       1,
-	bitOffset: 530,
-	bitSize:   1,
-	valueType: VtOffOn,
+	fType:        FtGsKeypadTones,
+	typeName:     "Keypad Tones",
+	max:          1,
+	bitOffset:    530,
+	bitSize:      1,
+	valueType:    VtOffOn,
+	defaultValue: "On",
 }
 
 var fiGsLockUnlock = fieldInfo{
-	fType:     FtGsLockUnlock,
-	typeName:  "Lock/Unlock",
-	max:       1,
-	bitOffset: 539,
-	bitSize:   1,
-	valueType: VtIStrings,
+	fType:        FtGsLockUnlock,
+	typeName:     "Lock/Unlock",
+	max:          1,
+	bitOffset:    539,
+	bitSize:      1,
+	valueType:    VtIStrings,
+	defaultValue: "Unlock",
 	strings: &[]string{
 		"Unlock",
 		"Lock",
@@ -2501,12 +2574,13 @@ var fiGsLockUnlock = fieldInfo{
 }
 
 var fiGsLoneWorkerReminderTime = fieldInfo{
-	fType:     FtGsLoneWorkerReminderTime,
-	typeName:  "Lone Worker Reminder Time (S)",
-	max:       1,
-	bitOffset: 648,
-	bitSize:   8,
-	valueType: VtSpan,
+	fType:        FtGsLoneWorkerReminderTime,
+	typeName:     "Lone Worker Reminder Time (S)",
+	max:          1,
+	bitOffset:    648,
+	bitSize:      8,
+	valueType:    VtSpan,
+	defaultValue: "10",
 	span: &Span{
 		min: 1,
 		max: 255,
@@ -2514,12 +2588,13 @@ var fiGsLoneWorkerReminderTime = fieldInfo{
 }
 
 var fiGsLoneWorkerResponseTime = fieldInfo{
-	fType:     FtGsLoneWorkerResponseTime,
-	typeName:  "Lone Worker Response Time (min)",
-	max:       1,
-	bitOffset: 640,
-	bitSize:   8,
-	valueType: VtSpan,
+	fType:        FtGsLoneWorkerResponseTime,
+	typeName:     "Lone Worker Response Time (min)",
+	max:          1,
+	bitOffset:    640,
+	bitSize:      8,
+	valueType:    VtSpan,
+	defaultValue: "1",
 	span: &Span{
 		min: 1,
 		max: 255,
@@ -2527,12 +2602,13 @@ var fiGsLoneWorkerResponseTime = fieldInfo{
 }
 
 var fiGsMicLevel = fieldInfo{
-	fType:     FtGsMicLevel,
-	typeName:  "MIC Level",
-	max:       1,
-	bitOffset: 1282,
-	bitSize:   3,
-	valueType: VtIStrings,
+	fType:        FtGsMicLevel,
+	typeName:     "MIC Level",
+	max:          1,
+	bitOffset:    1282,
+	bitSize:      3,
+	valueType:    VtIStrings,
+	defaultValue: "3",
 	strings: &[]string{
 		"1",
 		"2",
@@ -2544,12 +2620,13 @@ var fiGsMicLevel = fieldInfo{
 }
 
 var fiGsModeSelect = fieldInfo{
-	fType:     FtGsModeSelect,
-	typeName:  "Mode Select",
-	max:       1,
-	bitOffset: 541,
-	bitSize:   1,
-	valueType: VtIStrings,
+	fType:        FtGsModeSelect,
+	typeName:     "Mode Select",
+	max:          1,
+	bitOffset:    541,
+	bitSize:      1,
+	valueType:    VtIStrings,
+	defaultValue: "Memory",
 	strings: &[]string{
 		"VFO",
 		"Memory",
@@ -2558,12 +2635,13 @@ var fiGsModeSelect = fieldInfo{
 }
 
 var fiGsModeSelectA = fieldInfo{
-	fType:     FtGsModeSelectA,
-	typeName:  "Mode Select A",
-	max:       1,
-	bitOffset: 541,
-	bitSize:   1,
-	valueType: VtIStrings,
+	fType:        FtGsModeSelectA,
+	typeName:     "Mode Select A",
+	max:          1,
+	bitOffset:    541,
+	bitSize:      1,
+	valueType:    VtIStrings,
+	defaultValue: "Memory",
 	strings: &[]string{
 		"VFO",
 		"Memory",
@@ -2572,12 +2650,13 @@ var fiGsModeSelectA = fieldInfo{
 }
 
 var fiGsModeSelectB = fieldInfo{
-	fType:     FtGsModeSelectB,
-	typeName:  "Mode Select B",
-	max:       1,
-	bitOffset: 536,
-	bitSize:   1,
-	valueType: VtIStrings,
+	fType:        FtGsModeSelectB,
+	typeName:     "Mode Select B",
+	max:          1,
+	bitOffset:    536,
+	bitSize:      1,
+	valueType:    VtIStrings,
+	defaultValue: "Memory",
 	strings: &[]string{
 		"VFO",
 		"Memory",
@@ -2586,12 +2665,13 @@ var fiGsModeSelectB = fieldInfo{
 }
 
 var fiGsMonitorType = fieldInfo{
-	fType:     FtGsMonitorType,
-	typeName:  "Monitor Type",
-	max:       1,
-	bitOffset: 515,
-	bitSize:   1,
-	valueType: VtIStrings,
+	fType:        FtGsMonitorType,
+	typeName:     "Monitor Type",
+	max:          1,
+	bitOffset:    515,
+	bitSize:      1,
+	valueType:    VtIStrings,
+	defaultValue: "Open Squelch",
 	strings: &[]string{
 		"Silent",
 		"Open Squelch",
@@ -2619,12 +2699,13 @@ var fiGsPowerOnPassword = fieldInfo{
 }
 
 var fiGsPrivateCallHangTime = fieldInfo{
-	fType:     FtGsPrivateCallHangTime,
-	typeName:  "Private Call Hang Time (mS)",
-	max:       1,
-	bitOffset: 592,
-	bitSize:   8,
-	valueType: VtSpan,
+	fType:        FtGsPrivateCallHangTime,
+	typeName:     "Private Call Hang Time (mS)",
+	max:          1,
+	bitOffset:    592,
+	bitSize:      8,
+	valueType:    VtSpan,
+	defaultValue: "4000",
 	span: &Span{
 		min:      0,
 		max:      70,
@@ -2634,21 +2715,23 @@ var fiGsPrivateCallHangTime = fieldInfo{
 }
 
 var fiGsPrivateCallMatch = fieldInfo{
-	fType:     FtGsPrivateCallMatch,
-	typeName:  "Private Call Match",
-	max:       1,
-	bitOffset: 862,
-	bitSize:   1,
-	valueType: VtOffOn,
+	fType:        FtGsPrivateCallMatch,
+	typeName:     "Private Call Match",
+	max:          1,
+	bitOffset:    862,
+	bitSize:      1,
+	valueType:    VtOffOn,
+	defaultValue: "On",
 }
 
 var fiGsPublicZone = fieldInfo{
-	fType:     FtGsPublicZone,
-	typeName:  "Public Zone",
-	max:       1,
-	bitOffset: 1173,
-	bitSize:   1,
-	valueType: VtOffOn,
+	fType:        FtGsPublicZone,
+	typeName:     "Public Zone",
+	max:          1,
+	bitOffset:    1173,
+	bitSize:      1,
+	valueType:    VtOffOn,
+	defaultValue: "On",
 }
 
 var fiGsPwAndLockEnable = fieldInfo{
@@ -2658,43 +2741,48 @@ var fiGsPwAndLockEnable = fieldInfo{
 	bitOffset:     522,
 	bitSize:       1,
 	valueType:     VtOnOff,
+	defaultValue:  "Off",
 	enablingValue: "On",
 }
 
 var fiGsRadioID = fieldInfo{
-	fType:     FtGsRadioID,
-	typeName:  "Radio ID",
-	max:       1,
-	bitOffset: 544,
-	bitSize:   24,
-	valueType: VtCallID,
+	fType:        FtGsRadioID,
+	typeName:     "Radio ID",
+	max:          1,
+	bitOffset:    544,
+	bitSize:      24,
+	valueType:    VtCallID,
+	defaultValue: "1234",
 }
 
 var fiGsRadioID1 = fieldInfo{
-	fType:     FtGsRadioID1,
-	typeName:  "Radio ID 1",
-	max:       1,
-	bitOffset: 1184,
-	bitSize:   24,
-	valueType: VtCallID,
+	fType:        FtGsRadioID1,
+	typeName:     "Radio ID 1",
+	max:          1,
+	bitOffset:    1184,
+	bitSize:      24,
+	valueType:    VtCallID,
+	defaultValue: "1",
 }
 
 var fiGsRadioID2 = fieldInfo{
-	fType:     FtGsRadioID2,
-	typeName:  "Radio ID 2",
-	max:       1,
-	bitOffset: 1216,
-	bitSize:   24,
-	valueType: VtCallID,
+	fType:        FtGsRadioID2,
+	typeName:     "Radio ID 2",
+	max:          1,
+	bitOffset:    1216,
+	bitSize:      24,
+	valueType:    VtCallID,
+	defaultValue: "2",
 }
 
 var fiGsRadioID3 = fieldInfo{
-	fType:     FtGsRadioID3,
-	typeName:  "Radio ID 3",
-	max:       1,
-	bitOffset: 1248,
-	bitSize:   24,
-	valueType: VtCallID,
+	fType:        FtGsRadioID3,
+	typeName:     "Radio ID 3",
+	max:          1,
+	bitOffset:    1248,
+	bitSize:      24,
+	valueType:    VtCallID,
+	defaultValue: "3",
 }
 
 var fiGsRadioName = fieldInfo{
@@ -2716,12 +2804,13 @@ var fiGsRadioProgPassword = fieldInfo{
 }
 
 var fiGsRxLowBatteryInterval = fieldInfo{
-	fType:     FtGsRxLowBatteryInterval,
-	typeName:  "Rx Low Battery Interval (S)",
-	max:       1,
-	bitOffset: 624,
-	bitSize:   8,
-	valueType: VtSpan,
+	fType:        FtGsRxLowBatteryInterval,
+	typeName:     "Rx Low Battery Interval (S)",
+	max:          1,
+	bitOffset:    624,
+	bitSize:      8,
+	valueType:    VtSpan,
+	defaultValue: "3",
 	span: &Span{
 		min:   0,
 		max:   127,
@@ -2730,30 +2819,33 @@ var fiGsRxLowBatteryInterval = fieldInfo{
 }
 
 var fiGsSaveModeReceive = fieldInfo{
-	fType:     FtGsSaveModeReceive,
-	typeName:  "Save Mode Receive",
-	max:       1,
-	bitOffset: 526,
-	bitSize:   1,
-	valueType: VtOffOn,
+	fType:        FtGsSaveModeReceive,
+	typeName:     "Save Mode Receive",
+	max:          1,
+	bitOffset:    526,
+	bitSize:      1,
+	valueType:    VtOffOn,
+	defaultValue: "On",
 }
 
 var fiGsSavePreamble = fieldInfo{
-	fType:     FtGsSavePreamble,
-	typeName:  "Save Preamble",
-	max:       1,
-	bitOffset: 527,
-	bitSize:   1,
-	valueType: VtOffOn,
+	fType:        FtGsSavePreamble,
+	typeName:     "Save Preamble",
+	max:          1,
+	bitOffset:    527,
+	bitSize:      1,
+	valueType:    VtOffOn,
+	defaultValue: "On",
 }
 
 var fiGsScanAnalogHangTime = fieldInfo{
-	fType:     FtGsScanAnalogHangTime,
-	typeName:  "Scan Analog Hang Time (mS)",
-	max:       1,
-	bitOffset: 672,
-	bitSize:   8,
-	valueType: VtSpan,
+	fType:        FtGsScanAnalogHangTime,
+	typeName:     "Scan Analog Hang Time (mS)",
+	max:          1,
+	bitOffset:    672,
+	bitSize:      8,
+	valueType:    VtSpan,
+	defaultValue: "1000",
 	span: &Span{
 		min:      5,
 		max:      100,
@@ -2763,12 +2855,13 @@ var fiGsScanAnalogHangTime = fieldInfo{
 }
 
 var fiGsScanDigitalHangTime = fieldInfo{
-	fType:     FtGsScanDigitalHangTime,
-	typeName:  "Scan Digital Hang Time (mS)",
-	max:       1,
-	bitOffset: 664,
-	bitSize:   8,
-	valueType: VtSpan,
+	fType:        FtGsScanDigitalHangTime,
+	typeName:     "Scan Digital Hang Time (mS)",
+	max:          1,
+	bitOffset:    664,
+	bitSize:      8,
+	valueType:    VtSpan,
+	defaultValue: "1000",
 	span: &Span{
 		min:      5,
 		max:      100,
@@ -2778,12 +2871,13 @@ var fiGsScanDigitalHangTime = fieldInfo{
 }
 
 var fiGsSetKeypadLockTime = fieldInfo{
-	fType:     FtGsSetKeypadLockTime,
-	typeName:  "Set Keypad Lock Time (S)",
-	max:       1,
-	bitOffset: 688,
-	bitSize:   8,
-	valueType: VtIndexedStrings,
+	fType:        FtGsSetKeypadLockTime,
+	typeName:     "Set Keypad Lock Time (S)",
+	max:          1,
+	bitOffset:    688,
+	bitSize:      8,
+	valueType:    VtIndexedStrings,
+	defaultValue: "Manual",
 	indexedStrings: &[]IndexedString{
 		IndexedString{255, "Manual"},
 		IndexedString{5, "5"},
@@ -2793,12 +2887,13 @@ var fiGsSetKeypadLockTime = fieldInfo{
 }
 
 var fiGsTalkPermitTone = fieldInfo{
-	fType:     FtGsTalkPermitTone,
-	typeName:  "Talk Permit Tone",
-	max:       1,
-	bitOffset: 520,
-	bitSize:   2,
-	valueType: VtIStrings,
+	fType:        FtGsTalkPermitTone,
+	typeName:     "Talk Permit Tone",
+	max:          1,
+	bitOffset:    520,
+	bitSize:      2,
+	valueType:    VtIStrings,
+	defaultValue: "None",
 	strings: &[]string{
 		"None",
 		"Digital",
@@ -2808,12 +2903,13 @@ var fiGsTalkPermitTone = fieldInfo{
 }
 
 var fiGsTimeZone = fieldInfo{
-	fType:     FtGsTimeZone,
-	typeName:  "Time Zone",
-	max:       1,
-	bitOffset: 856,
-	bitSize:   5,
-	valueType: VtIStrings,
+	fType:        FtGsTimeZone,
+	typeName:     "Time Zone",
+	max:          1,
+	bitOffset:    856,
+	bitSize:      5,
+	valueType:    VtIStrings,
+	defaultValue: "UTC+8:00",
 	strings: &[]string{
 		"UTC-12:00",
 		"UTC-11:00",
@@ -2844,27 +2940,29 @@ var fiGsTimeZone = fieldInfo{
 }
 
 var fiGsTxMode = fieldInfo{
-	fType:     FtGsTxMode,
-	typeName:  "Tx Mode",
-	max:       1,
-	bitOffset: 512,
-	bitSize:   2,
-	valueType: VtIStrings,
+	fType:        FtGsTxMode,
+	typeName:     "Tx Mode",
+	max:          1,
+	bitOffset:    512,
+	bitSize:      2,
+	valueType:    VtIStrings,
+	defaultValue: "Designated CH + Hand CH",
 	strings: &[]string{
 		"Last Call CH",
 		"Last Call + Hand CH",
-		"Designed CH",
-		"Designed CH + Hand CH",
+		"Designated CH",
+		"Designated CH + Hand CH",
 	},
 }
 
 var fiGsTxPreambleDuration = fieldInfo{
-	fType:     FtGsTxPreambleDuration,
-	typeName:  "Tx Preamble Duration (mS)",
-	max:       1,
-	bitOffset: 576,
-	bitSize:   8,
-	valueType: VtSpan,
+	fType:        FtGsTxPreambleDuration,
+	typeName:     "Tx Preamble Duration (mS)",
+	max:          1,
+	bitOffset:    576,
+	bitSize:      8,
+	valueType:    VtSpan,
+	defaultValue: "600",
 	span: &Span{
 		min:   0,
 		max:   144,
@@ -2873,12 +2971,13 @@ var fiGsTxPreambleDuration = fieldInfo{
 }
 
 var fiGsVoxSensitivity = fieldInfo{
-	fType:     FtGsVoxSensitivity,
-	typeName:  "VOX Sensitivity",
-	max:       1,
-	bitOffset: 600,
-	bitSize:   8,
-	valueType: VtSpan,
+	fType:        FtGsVoxSensitivity,
+	typeName:     "VOX Sensitivity",
+	max:          1,
+	bitOffset:    600,
+	bitSize:      8,
+	valueType:    VtSpan,
+	defaultValue: "3",
 	span: &Span{
 		min: 1,
 		max: 10,
@@ -2886,75 +2985,83 @@ var fiGsVoxSensitivity = fieldInfo{
 }
 
 var fiMiAnswered = fieldInfo{
-	fType:     FtMiAnswered,
-	typeName:  "Answered",
-	max:       1,
-	bitOffset: 19,
-	bitSize:   1,
-	valueType: VtOffOn,
+	fType:        FtMiAnswered,
+	typeName:     "Answered",
+	max:          1,
+	bitOffset:    19,
+	bitSize:      1,
+	valueType:    VtOffOn,
+	defaultValue: "On",
 }
 
 var fiMiBacklight = fieldInfo{
-	fType:     FtMiBacklight,
-	typeName:  "Backlight",
-	max:       1,
-	bitOffset: 30,
-	bitSize:   1,
-	valueType: VtOffOn,
+	fType:        FtMiBacklight,
+	typeName:     "Backlight",
+	max:          1,
+	bitOffset:    30,
+	bitSize:      1,
+	valueType:    VtOffOn,
+	defaultValue: "On",
 }
 
 var fiMiCallAlert = fieldInfo{
-	fType:     FtMiCallAlert,
-	typeName:  "Call Alert",
-	max:       1,
-	bitOffset: 14,
-	bitSize:   1,
-	valueType: VtOffOn,
+	fType:        FtMiCallAlert,
+	typeName:     "Call Alert",
+	max:          1,
+	bitOffset:    14,
+	bitSize:      1,
+	valueType:    VtOffOn,
+	defaultValue: "On",
 }
 
 var fiMiDisplayMode = fieldInfo{
-	fType:     FtMiDisplayMode,
-	typeName:  "Display Mode",
-	max:       1,
-	bitOffset: 38,
-	bitSize:   1,
-	valueType: VtOffOn,
+	fType:        FtMiDisplayMode,
+	typeName:     "Display Mode",
+	max:          1,
+	bitOffset:    38,
+	bitSize:      1,
+	valueType:    VtOffOn,
+	defaultValue: "On",
 }
 
 var fiMiEdit = fieldInfo{
-	fType:     FtMiEdit,
-	typeName:  "Edit",
-	max:       1,
-	bitOffset: 13,
-	bitSize:   1,
-	valueType: VtOffOn,
+	fType:        FtMiEdit,
+	typeName:     "Edit",
+	max:          1,
+	bitOffset:    13,
+	bitSize:      1,
+	valueType:    VtOffOn,
+	defaultValue: "On",
 }
 
 var fiMiEditList = fieldInfo{
-	fType:     FtMiEditList,
-	typeName:  "Edit List",
-	max:       1,
-	bitOffset: 21,
-	bitSize:   1,
-	valueType: VtOffOn,
+	fType:        FtMiEditList,
+	typeName:     "Edit List",
+	max:          1,
+	bitOffset:    21,
+	bitSize:      1,
+	valueType:    VtOffOn,
+	defaultValue: "On",
 }
 
 var fiMiGps = fieldInfo{
-	fType:     FtMiGps,
-	typeName:  "GPS",
-	max:       1,
-	bitOffset: 36,
-	bitSize:   1,
-	valueType: VtOnOff,
+	fType:        FtMiGps,
+	typeName:     "GPS",
+	max:          1,
+	bitOffset:    36,
+	bitSize:      1,
+	valueType:    VtOnOff,
+	defaultValue: "Off",
 }
 
 var fiMiHangTime = fieldInfo{
-	fType:     FtMiHangTime,
-	typeName:  "Hang Time",
-	max:       1,
-	bitOffset: 0,
-	bitSize:   8,
-	valueType: VtSpan,
+	fType:        FtMiHangTime,
+	typeName:     "Hang Time",
+	max:          1,
+	bitOffset:    0,
+	bitSize:      8,
+	valueType:    VtSpan,
+	defaultValue: "10",
 	span: &Span{
 		min:       0,
 		max:       30,
@@ -2963,201 +3070,223 @@ var fiMiHangTime = fieldInfo{
 }
 
 var fiMiIntroScreen = fieldInfo{
-	fType:     FtMiIntroScreen,
-	typeName:  "Intro Screen",
-	max:       1,
-	bitOffset: 29,
-	bitSize:   1,
-	valueType: VtOffOn,
+	fType:        FtMiIntroScreen,
+	typeName:     "Intro Screen",
+	max:          1,
+	bitOffset:    29,
+	bitSize:      1,
+	valueType:    VtOffOn,
+	defaultValue: "On",
 }
 
 var fiMiKeyboardLock = fieldInfo{
-	fType:     FtMiKeyboardLock,
-	typeName:  "Keyboard Lock",
-	max:       1,
-	bitOffset: 28,
-	bitSize:   1,
-	valueType: VtOffOn,
+	fType:        FtMiKeyboardLock,
+	typeName:     "Keyboard Lock",
+	max:          1,
+	bitOffset:    28,
+	bitSize:      1,
+	valueType:    VtOffOn,
+	defaultValue: "On",
 }
 
 var fiMiLedIndicator = fieldInfo{
-	fType:     FtMiLedIndicator,
-	typeName:  "LED Indicator",
-	max:       1,
-	bitOffset: 27,
-	bitSize:   1,
-	valueType: VtOffOn,
+	fType:        FtMiLedIndicator,
+	typeName:     "LED Indicator",
+	max:          1,
+	bitOffset:    27,
+	bitSize:      1,
+	valueType:    VtOffOn,
+	defaultValue: "On",
 }
 
 var fiMiManualDial = fieldInfo{
-	fType:     FtMiManualDial,
-	typeName:  "Manual Dial",
-	max:       1,
-	bitOffset: 12,
-	bitSize:   1,
-	valueType: VtOffOn,
+	fType:        FtMiManualDial,
+	typeName:     "Manual Dial",
+	max:          1,
+	bitOffset:    12,
+	bitSize:      1,
+	valueType:    VtOffOn,
+	defaultValue: "On",
 }
 
 var fiMiMissed = fieldInfo{
-	fType:     FtMiMissed,
-	typeName:  "Missed",
-	max:       1,
-	bitOffset: 20,
-	bitSize:   1,
-	valueType: VtOffOn,
+	fType:        FtMiMissed,
+	typeName:     "Missed",
+	max:          1,
+	bitOffset:    20,
+	bitSize:      1,
+	valueType:    VtOffOn,
+	defaultValue: "On",
 }
 
 var fiMiOutgoingRadio = fieldInfo{
-	fType:     FtMiOutgoingRadio,
-	typeName:  "Outgoing Radio",
-	max:       1,
-	bitOffset: 18,
-	bitSize:   1,
-	valueType: VtOffOn,
+	fType:        FtMiOutgoingRadio,
+	typeName:     "Outgoing Radio",
+	max:          1,
+	bitOffset:    18,
+	bitSize:      1,
+	valueType:    VtOffOn,
+	defaultValue: "On",
 }
 
 var fiMiPasswordAndLock = fieldInfo{
-	fType:     FtMiPasswordAndLock,
-	typeName:  "Password And Lock",
-	max:       1,
-	bitOffset: 39,
-	bitSize:   1,
-	valueType: VtOffOn,
+	fType:        FtMiPasswordAndLock,
+	typeName:     "Password And Lock",
+	max:          1,
+	bitOffset:    39,
+	bitSize:      1,
+	valueType:    VtOffOn,
+	defaultValue: "On",
 }
 
 var fiMiPower = fieldInfo{
-	fType:     FtMiPower,
-	typeName:  "Power",
-	max:       1,
-	bitOffset: 31,
-	bitSize:   1,
-	valueType: VtOffOn,
+	fType:        FtMiPower,
+	typeName:     "Power",
+	max:          1,
+	bitOffset:    31,
+	bitSize:      1,
+	valueType:    VtOffOn,
+	defaultValue: "On",
 }
 
 var fiMiProgramKey = fieldInfo{
-	fType:     FtMiProgramKey,
-	typeName:  "Program Key",
-	max:       1,
-	bitOffset: 23,
-	bitSize:   1,
-	valueType: VtOffOn,
+	fType:        FtMiProgramKey,
+	typeName:     "Program Key",
+	max:          1,
+	bitOffset:    23,
+	bitSize:      1,
+	valueType:    VtOffOn,
+	defaultValue: "On",
 }
 
 var fiMiProgramRadio = fieldInfo{
-	fType:     FtMiProgramRadio,
-	typeName:  "Program Radio",
-	max:       1,
-	bitOffset: 37,
-	bitSize:   1,
-	valueType: VtOnOff,
+	fType:        FtMiProgramRadio,
+	typeName:     "Program Radio",
+	max:          1,
+	bitOffset:    37,
+	bitSize:      1,
+	valueType:    VtOnOff,
+	defaultValue: "Off",
 }
 
 var fiMiRadioCheck = fieldInfo{
-	fType:     FtMiRadioCheck,
-	typeName:  "Radio Check",
-	max:       1,
-	bitOffset: 11,
-	bitSize:   1,
-	valueType: VtOffOn,
+	fType:        FtMiRadioCheck,
+	typeName:     "Radio Check",
+	max:          1,
+	bitOffset:    11,
+	bitSize:      1,
+	valueType:    VtOffOn,
+	defaultValue: "Off",
 }
 
 var fiMiRadioDisable = fieldInfo{
-	fType:     FtMiRadioDisable,
-	typeName:  "Radio Disable",
-	max:       1,
-	bitOffset: 8,
-	bitSize:   1,
-	valueType: VtOffOn,
+	fType:        FtMiRadioDisable,
+	typeName:     "Radio Disable",
+	max:          1,
+	bitOffset:    8,
+	bitSize:      1,
+	valueType:    VtOffOn,
+	defaultValue: "Off",
 }
 
 var fiMiRadioEnable = fieldInfo{
-	fType:     FtMiRadioEnable,
-	typeName:  "Radio Enable",
-	max:       1,
-	bitOffset: 9,
-	bitSize:   1,
-	valueType: VtOffOn,
+	fType:        FtMiRadioEnable,
+	typeName:     "Radio Enable",
+	max:          1,
+	bitOffset:    9,
+	bitSize:      1,
+	valueType:    VtOffOn,
+	defaultValue: "Off",
 }
 
 var fiMiRemoteMonitor = fieldInfo{
-	fType:     FtMiRemoteMonitor,
-	typeName:  "Remote Monitor",
-	max:       1,
-	bitOffset: 10,
-	bitSize:   1,
-	valueType: VtOffOn,
+	fType:        FtMiRemoteMonitor,
+	typeName:     "Remote Monitor",
+	max:          1,
+	bitOffset:    10,
+	bitSize:      1,
+	valueType:    VtOffOn,
+	defaultValue: "Off",
 }
 
 var fiMiScan = fieldInfo{
-	fType:     FtMiScan,
-	typeName:  "Scan",
-	max:       1,
-	bitOffset: 22,
-	bitSize:   1,
-	valueType: VtOffOn,
+	fType:        FtMiScan,
+	typeName:     "Scan",
+	max:          1,
+	bitOffset:    22,
+	bitSize:      1,
+	valueType:    VtOffOn,
+	defaultValue: "On",
 }
 
 var fiMiSquelch = fieldInfo{
-	fType:     FtMiSquelch,
-	typeName:  "Squelch",
-	max:       1,
-	bitOffset: 26,
-	bitSize:   1,
-	valueType: VtOffOn,
+	fType:        FtMiSquelch,
+	typeName:     "Squelch",
+	max:          1,
+	bitOffset:    26,
+	bitSize:      1,
+	valueType:    VtOffOn,
+	defaultValue: "On",
 }
 
 var fiMiTalkaround = fieldInfo{
-	fType:     FtMiTalkaround,
-	typeName:  "Talkaround",
-	max:       1,
-	bitOffset: 17,
-	bitSize:   1,
-	valueType: VtOffOn,
+	fType:        FtMiTalkaround,
+	typeName:     "Talkaround",
+	max:          1,
+	bitOffset:    17,
+	bitSize:      1,
+	valueType:    VtOffOn,
+	defaultValue: "On",
 }
 
 var fiMiTextMessage = fieldInfo{
-	fType:     FtMiTextMessage,
-	typeName:  "Text Messsage",
-	max:       1,
-	bitOffset: 15,
-	bitSize:   1,
-	valueType: VtOffOn,
+	fType:        FtMiTextMessage,
+	typeName:     "Text Messsage",
+	max:          1,
+	bitOffset:    15,
+	bitSize:      1,
+	valueType:    VtOffOn,
+	defaultValue: "On",
 }
 
 var fiMiToneOrAlert = fieldInfo{
-	fType:     FtMiToneOrAlert,
-	typeName:  "Tone Or Alert",
-	max:       1,
-	bitOffset: 16,
-	bitSize:   1,
-	valueType: VtOffOn,
+	fType:        FtMiToneOrAlert,
+	typeName:     "Tone Or Alert",
+	max:          1,
+	bitOffset:    16,
+	bitSize:      1,
+	valueType:    VtOffOn,
+	defaultValue: "On",
 }
 
 var fiMiVox = fieldInfo{
-	fType:     FtMiVox,
-	typeName:  "VOX",
-	max:       1,
-	bitOffset: 24,
-	bitSize:   1,
-	valueType: VtOffOn,
+	fType:        FtMiVox,
+	typeName:     "VOX",
+	max:          1,
+	bitOffset:    24,
+	bitSize:      1,
+	valueType:    VtOffOn,
+	defaultValue: "Off",
 }
 
 var fiPsBasicKey = fieldInfo{
-	fType:     FtPsBasicKey,
-	typeName:  "Key Value (Basic)",
-	max:       16,
-	bitOffset: 1152,
-	bitSize:   16,
-	valueType: VtHexadecimal,
+	fType:        FtPsBasicKey,
+	typeName:     "Key Value (Basic)",
+	max:          16,
+	bitOffset:    1152,
+	bitSize:      16,
+	valueType:    VtHexadecimal4,
+	defaultValue: "ffff",
 }
 
 var fiPsEnhancedKey = fieldInfo{
-	fType:     FtPsEnhancedKey,
-	typeName:  "Key Value (Enhanced)",
-	max:       8,
-	bitOffset: 0,
-	bitSize:   128,
-	valueType: VtHexadecimal,
+	fType:        FtPsEnhancedKey,
+	typeName:     "Key Value (Enhanced)",
+	max:          8,
+	bitOffset:    0,
+	bitSize:      128,
+	valueType:    VtHexadecimal32,
+	defaultValue: "ffffffffffffffffffffffffffffffff",
 }
 
 var fiSlChannel_md380 = fieldInfo{
@@ -3181,21 +3310,23 @@ var fiSlChannel_md40 = fieldInfo{
 }
 
 var fiSlName = fieldInfo{
-	fType:     FtSlName,
-	typeName:  "Scan List Name",
-	max:       1,
-	bitOffset: 0,
-	bitSize:   256,
-	valueType: VtUniqueName,
+	fType:        FtSlName,
+	typeName:     "Scan List Name",
+	max:          1,
+	bitOffset:    0,
+	bitSize:      256,
+	valueType:    VtUniqueName,
+	defaultValue: "ScanList1",
 }
 
 var fiSlPriorityChannel1_md380 = fieldInfo{
-	fType:     FtSlPriorityChannel1_md380,
-	typeName:  "Priority Channel 1",
-	max:       1,
-	bitOffset: 256,
-	bitSize:   16,
-	valueType: VtMemberListIndex,
+	fType:        FtSlPriorityChannel1_md380,
+	typeName:     "Priority Channel 1",
+	max:          1,
+	bitOffset:    256,
+	bitSize:      16,
+	valueType:    VtMemberListIndex,
+	defaultValue: "None",
 	indexedStrings: &[]IndexedString{
 		IndexedString{0, "Selected"},
 		IndexedString{65535, "None"},
@@ -3205,12 +3336,13 @@ var fiSlPriorityChannel1_md380 = fieldInfo{
 }
 
 var fiSlPriorityChannel1_md40 = fieldInfo{
-	fType:     FtSlPriorityChannel1_md40,
-	typeName:  "Priority Channel 1",
-	max:       1,
-	bitOffset: 256,
-	bitSize:   16,
-	valueType: VtMemberListIndex,
+	fType:        FtSlPriorityChannel1_md40,
+	typeName:     "Priority Channel 1",
+	max:          1,
+	bitOffset:    256,
+	bitSize:      16,
+	valueType:    VtMemberListIndex,
+	defaultValue: "None",
 	indexedStrings: &[]IndexedString{
 		IndexedString{0, "Selected"},
 		IndexedString{65535, "None"},
@@ -3252,12 +3384,13 @@ var fiSlPriorityChannel2_md40 = fieldInfo{
 }
 
 var fiSlPrioritySampleTime = fieldInfo{
-	fType:     FtSlPrioritySampleTime,
-	typeName:  "Priority Sample Time (mS)",
-	max:       1,
-	bitOffset: 320,
-	bitSize:   8,
-	valueType: VtSpan,
+	fType:        FtSlPrioritySampleTime,
+	typeName:     "Priority Sample Time (mS)",
+	max:          1,
+	bitOffset:    320,
+	bitSize:      8,
+	valueType:    VtSpan,
+	defaultValue: "2000",
 	span: &Span{
 		min:   3,
 		max:   31,
@@ -3266,12 +3399,13 @@ var fiSlPrioritySampleTime = fieldInfo{
 }
 
 var fiSlSignallingHoldTime = fieldInfo{
-	fType:     FtSlSignallingHoldTime,
-	typeName:  "Signalling Hold Time (mS)",
-	max:       1,
-	bitOffset: 312,
-	bitSize:   8,
-	valueType: VtSpan,
+	fType:        FtSlSignallingHoldTime,
+	typeName:     "Signalling Hold Time (mS)",
+	max:          1,
+	bitOffset:    312,
+	bitSize:      8,
+	valueType:    VtSpan,
+	defaultValue: "500",
 	span: &Span{
 		min:   2,
 		max:   255,
@@ -3280,12 +3414,13 @@ var fiSlSignallingHoldTime = fieldInfo{
 }
 
 var fiSlTxDesignatedChannel_md380 = fieldInfo{
-	fType:     FtSlTxDesignatedChannel_md380,
-	typeName:  "Tx Designated Channel",
-	max:       1,
-	bitOffset: 288,
-	bitSize:   16,
-	valueType: VtListIndex,
+	fType:        FtSlTxDesignatedChannel_md380,
+	typeName:     "Tx Designated Channel",
+	max:          1,
+	bitOffset:    288,
+	bitSize:      16,
+	valueType:    VtListIndex,
+	defaultValue: "Last Active Channel",
 	indexedStrings: &[]IndexedString{
 		IndexedString{0, "Selected"},
 		IndexedString{65535, "Last Active Channel"},
@@ -3294,12 +3429,13 @@ var fiSlTxDesignatedChannel_md380 = fieldInfo{
 }
 
 var fiSlTxDesignatedChannel_md40 = fieldInfo{
-	fType:     FtSlTxDesignatedChannel_md40,
-	typeName:  "Tx Designated Channel",
-	max:       1,
-	bitOffset: 288,
-	bitSize:   16,
-	valueType: VtListIndex,
+	fType:        FtSlTxDesignatedChannel_md40,
+	typeName:     "Tx Designated Channel",
+	max:          1,
+	bitOffset:    288,
+	bitSize:      16,
+	valueType:    VtListIndex,
+	defaultValue: "Last Active Channel",
 	indexedStrings: &[]IndexedString{
 		IndexedString{0, "Selected"},
 		IndexedString{65535, "Last Active Channel"},
@@ -3369,12 +3505,13 @@ var fiZiChannel_md40 = fieldInfo{
 }
 
 var fiZiName = fieldInfo{
-	fType:     FtZiName,
-	typeName:  "Zone Name",
-	max:       1,
-	bitOffset: 0,
-	bitSize:   256,
-	valueType: VtUniqueName,
+	fType:        FtZiName,
+	typeName:     "Zone Name",
+	max:          1,
+	bitOffset:    0,
+	bitSize:      256,
+	valueType:    VtUniqueName,
+	defaultValue: "Zone1",
 }
 
 //go:generate genCodeplugInfo

@@ -909,7 +909,7 @@ func setEnabled(w *Widget) {
 	f := w.field
 	enabled := f.IsEnabled()
 	if enabled && !f.IsValid() {
-		setFieldString(f, f.DefaultValue())
+		f.SetDefault()
 	}
 
 	w.SetEnabled(enabled)
@@ -1316,7 +1316,8 @@ var newFieldWidget = map[codeplug.ValueType]func(*codeplug.Field) *Widget{
 	codeplug.VtFrequency:         newFieldLineEdit,
 	codeplug.VtFrequencyOffset:   newFieldLineEdit,
 	codeplug.VtGpsReportInterval: newFieldSpinbox,
-	codeplug.VtHexadecimal:       newFieldLineEdit,
+	codeplug.VtHexadecimal32:     newFieldLineEdit,
+	codeplug.VtHexadecimal4:      newFieldLineEdit,
 	codeplug.VtIndexedStrings:    newFieldCombobox,
 	codeplug.VtIntroLine:         newFieldLineEdit,
 	codeplug.VtIStrings:          newFieldCombobox,

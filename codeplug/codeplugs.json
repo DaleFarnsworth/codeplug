@@ -1119,6 +1119,7 @@
       "type": "BiCpsVersion",
       "bitOffset": 69992,
       "bitSize": 32,
+      "defaultValue": "1001",
       "valueType": "cpsVersion"
     },
     {
@@ -1140,12 +1141,13 @@
       "type": "GsTxMode",
       "bitOffset": 512,
       "bitSize": 2,
+      "defaultValue": "Designated CH + Hand CH",
       "valueType": "iStrings",
       "strings": [
         "Last Call CH",
         "Last Call + Hand CH",
-        "Designed CH",
-        "Designed CH + Hand CH"
+        "Designated CH",
+        "Designated CH + Hand CH"
       ]
     },
     {
@@ -1153,6 +1155,7 @@
       "type": "GsMonitorType",
       "bitOffset": 515,
       "bitSize": 1,
+      "defaultValue": "Open Squelch",
       "valueType": "iStrings",
       "strings": [
         "Silent",
@@ -1164,6 +1167,7 @@
       "type": "GsDisableAllLeds",
       "bitOffset": 517,
       "bitSize": 1,
+      "defaultValue": "Off",
       "valueType": "onOff"
     },
     {
@@ -1171,6 +1175,7 @@
       "type": "GsTalkPermitTone",
       "bitOffset": 520,
       "bitSize": 2,
+      "defaultValue": "None",
       "valueType": "iStrings",
       "strings": [
         "None",
@@ -1184,6 +1189,7 @@
       "type": "GsPwAndLockEnable",
       "bitOffset": 522,
       "bitSize": 1,
+      "defaultValue": "Off",
       "valueType": "onOff",
       "enabling": {
         "value": "On",
@@ -1197,6 +1203,7 @@
       "type": "GsChFreeIndicationTone",
       "bitOffset": 523,
       "bitSize": 1,
+      "defaultValue": "Off",
       "valueType": "onOff"
     },
     {
@@ -1204,6 +1211,7 @@
       "type": "GsDisableAllTones",
       "bitOffset": 525,
       "bitSize": 1,
+      "defaultValue": "Off",
       "valueType": "onOff"
     },
     {
@@ -1211,6 +1219,7 @@
       "type": "GsSaveModeReceive",
       "bitOffset": 526,
       "bitSize": 1,
+      "defaultValue": "On",
       "valueType": "offOn"
     },
     {
@@ -1218,6 +1227,7 @@
       "type": "GsSavePreamble",
       "bitOffset": 527,
       "bitSize": 1,
+      "defaultValue": "On",
       "valueType": "offOn"
     },
     {
@@ -1225,6 +1235,7 @@
       "type": "GsCHVoiceAnnouncement",
       "bitOffset": 534,
       "bitSize": 1,
+      "defaultValue": "On",
       "valueType": "offOn"
     },
     {
@@ -1232,6 +1243,7 @@
       "type": "GsKeypadTones",
       "bitOffset": 530,
       "bitSize": 1,
+      "defaultValue": "On",
       "valueType": "offOn"
     },
     {
@@ -1239,6 +1251,7 @@
       "type": "GsIntroScreen",
       "bitOffset": 531,
       "bitSize": 1,
+      "defaultValue": "Character String",
       "valueType": "iStrings",
       "strings": [
         "Character String",
@@ -1250,6 +1263,7 @@
       "type": "GsLockUnlock",
       "bitOffset": 539,
       "bitSize": 1,
+      "defaultValue": "Unlock",
       "valueType": "iStrings",
       "strings": [
         "Unlock",
@@ -1261,6 +1275,7 @@
       "type": "GsFreqChannelMode",
       "bitOffset": 540,
       "bitSize": 1,
+      "defaultValue": "Channel",
       "valueType": "iStrings",
       "strings": [
         "Frequency",
@@ -1281,6 +1296,7 @@
       "type": "GsModeSelect",
       "bitOffset": 541,
       "bitSize": 1,
+      "defaultValue": "Memory",
       "valueType": "iStrings",
       "strings": [
         "VFO",
@@ -1292,6 +1308,7 @@
       "type": "GsModeSelectA",
       "bitOffset": 541,
       "bitSize": 1,
+      "defaultValue": "Memory",
       "valueType": "iStrings",
       "strings": [
         "VFO",
@@ -1303,6 +1320,7 @@
       "type": "GsModeSelectB",
       "bitOffset": 536,
       "bitSize": 1,
+      "defaultValue": "Memory",
       "valueType": "iStrings",
       "strings": [
         "VFO",
@@ -1314,6 +1332,7 @@
       "type": "GsBacklightColor",
       "bitOffset": 542,
       "bitSize": 2,
+      "defaultValue": "White",
       "valueType": "iStrings",
       "strings": [
         "Off",
@@ -1327,6 +1346,7 @@
       "type": "GsRadioID",
       "bitOffset": 544,
       "bitSize": 24,
+      "defaultValue": "1234",
       "valueType": "callID"
     },
     {
@@ -1334,6 +1354,7 @@
       "type": "GsTxPreambleDuration",
       "bitOffset": 576,
       "bitSize": 8,
+      "defaultValue": "600",
       "valueType": "span",
       "span": {
         "min": 0,
@@ -1346,6 +1367,7 @@
       "type": "GsGroupCallHangTime",
       "bitOffset": 584,
       "bitSize": 8,
+      "defaultValue": "3000",
       "valueType": "span",
       "span": {
         "min": 0,
@@ -1359,6 +1381,7 @@
       "type": "GsPrivateCallHangTime",
       "bitOffset": 592,
       "bitSize": 8,
+      "defaultValue": "4000",
       "valueType": "span",
       "span": {
         "min": 0,
@@ -1372,6 +1395,7 @@
       "type": "GsVoxSensitivity",
       "bitOffset": 600,
       "bitSize": 8,
+      "defaultValue": "3",
       "valueType": "span",
       "span": {
         "min": 1,
@@ -1383,6 +1407,7 @@
       "type": "GsRxLowBatteryInterval",
       "bitOffset": 624,
       "bitSize": 8,
+      "defaultValue": "3",
       "valueType": "span",
       "span": {
         "min": 0,
@@ -1395,6 +1420,7 @@
       "type": "GsCallAlertToneDuration",
       "bitOffset": 632,
       "bitSize": 8,
+      "defaultValue": "Continue",
       "valueType": "span",
       "span": {
         "min": 0,
@@ -1408,6 +1434,7 @@
       "type": "GsLoneWorkerResponseTime",
       "bitOffset": 640,
       "bitSize": 8,
+      "defaultValue": "1",
       "valueType": "span",
       "span": {
         "min": 1,
@@ -1419,6 +1446,7 @@
       "type": "GsLoneWorkerReminderTime",
       "bitOffset": 648,
       "bitSize": 8,
+      "defaultValue": "10",
       "valueType": "span",
       "span": {
         "min": 1,
@@ -1430,6 +1458,7 @@
       "type": "GsScanDigitalHangTime",
       "bitOffset": 664,
       "bitSize": 8,
+      "defaultValue": "1000",
       "valueType": "span",
       "span": {
         "min": 5,
@@ -1443,6 +1472,7 @@
       "type": "GsScanAnalogHangTime",
       "bitOffset": 672,
       "bitSize": 8,
+      "defaultValue": "1000",
       "valueType": "span",
       "span": {
         "min": 5,
@@ -1456,6 +1486,7 @@
       "type": "GsBacklightTime",
       "bitOffset": 686,
       "bitSize": 2,
+      "defaultValue": "Always",
       "valueType": "iStrings",
       "strings": [
         "Always",
@@ -1470,6 +1501,7 @@
       "bitOffset": 688,
       "bitSize": 8,
       "valueType": "indexedStrings",
+      "defaultValue": "Manual",
       "indexedStrings": [
         {
           "index": 255,
@@ -1494,6 +1526,7 @@
       "type": "GsFreqChannelMode_uv380",
       "bitOffset": 696,
       "bitSize": 8,
+      "defaultValue": "Channel",
       "valueType": "indexedStrings",
       "indexedStrings": [
         {
@@ -1521,14 +1554,15 @@
       "type": "GsPowerOnPassword",
       "bitOffset": 704,
       "bitSize": 32,
-      "valueType": "radioPassword",
-      "defaultValue": "00000000"
+      "defaultValue": "00000000",
+      "valueType": "radioPassword"
     },
     {
       "typeName": "Radio Programming Password",
       "type": "GsRadioProgPassword",
       "bitOffset": 736,
       "bitSize": 32,
+      "defaultValue": "",
       "valueType": "radioProgPassword"
     },
     {
@@ -1536,6 +1570,7 @@
       "type": "GsPcProgPassword",
       "bitOffset": 768,
       "bitSize": 64,
+      "defaultValue": "",
       "valueType": "pcPassword"
     },
     {
@@ -1543,6 +1578,7 @@
       "type": "GsTimeZone",
       "bitOffset": 856,
       "bitSize": 5,
+      "defaultValue": "UTC+8:00",
       "valueType": "iStrings",
       "strings": [
         "UTC-12:00",
@@ -1577,6 +1613,7 @@
       "type": "GsPrivateCallMatch",
       "bitOffset": 862,
       "bitSize": 1,
+      "defaultValue": "On",
       "valueType": "offOn"
     },
     {
@@ -1584,6 +1621,7 @@
       "type": "GsGroupCallMatch",
       "bitOffset": 863,
       "bitSize": 1,
+      "defaultValue": "On",
       "valueType": "offOn"
     },
     {
@@ -1591,6 +1629,7 @@
       "type": "GsRadioName",
       "bitOffset": 896,
       "bitSize": 256,
+      "defaultValue": "",
       "valueType": "radioName"
     },
     {
@@ -1598,6 +1637,7 @@
       "type": "GsChannelsHangTime",
       "bitOffset": 1152,
       "bitSize": 8,
+      "defaultValue": "3000",
       "valueType": "span",
       "span": {
         "min": 0,
@@ -1611,6 +1651,7 @@
       "type": "GsPublicZone",
       "bitOffset": 1173,
       "bitSize": 1,
+      "defaultValue": "On",
       "valueType": "offOn"
     },
     {
@@ -1618,6 +1659,7 @@
       "type": "GsRadioID1",
       "bitOffset": 1184,
       "bitSize": 24,
+      "defaultValue": "1",
       "valueType": "callID"
     },
     {
@@ -1625,6 +1667,7 @@
       "type": "GsRadioID2",
       "bitOffset": 1216,
       "bitSize": 24,
+      "defaultValue": "2",
       "valueType": "callID"
     },
     {
@@ -1632,6 +1675,7 @@
       "type": "GsRadioID3",
       "bitOffset": 1248,
       "bitSize": 24,
+      "defaultValue": "3",
       "valueType": "callID"
     },
     {
@@ -1639,6 +1683,7 @@
       "type": "GsEditRadioID",
       "bitOffset": 1281,
       "bitSize": 1,
+      "defaultValue": "Off",
       "valueType": "onOff"
     },
     {
@@ -1646,6 +1691,7 @@
       "type": "GsMicLevel",
       "bitOffset": 1282,
       "bitSize": 3,
+      "defaultValue": "3",
       "valueType": "iStrings",
       "strings": [
         "1",
@@ -1661,6 +1707,7 @@
       "type": "MiHangTime",
       "bitOffset": 0,
       "bitSize": 8,
+      "defaultValue": "10",
       "valueType": "span",
       "span": {
         "min": 0,
@@ -1673,6 +1720,7 @@
       "type": "MiRadioDisable",
       "bitOffset": 8,
       "bitSize": 1,
+      "defaultValue": "Off",
       "valueType": "offOn"
     },
     {
@@ -1680,6 +1728,7 @@
       "type": "MiRadioEnable",
       "bitOffset": 9,
       "bitSize": 1,
+      "defaultValue": "Off",
       "valueType": "offOn"
     },
     {
@@ -1687,6 +1736,7 @@
       "type": "MiRemoteMonitor",
       "bitOffset": 10,
       "bitSize": 1,
+      "defaultValue": "Off",
       "valueType": "offOn"
     },
     {
@@ -1694,6 +1744,7 @@
       "type": "MiRadioCheck",
       "bitOffset": 11,
       "bitSize": 1,
+      "defaultValue": "Off",
       "valueType": "offOn"
     },
     {
@@ -1701,6 +1752,7 @@
       "type": "MiManualDial",
       "bitOffset": 12,
       "bitSize": 1,
+      "defaultValue": "On",
       "valueType": "offOn"
     },
     {
@@ -1708,6 +1760,7 @@
       "type": "MiEdit",
       "bitOffset": 13,
       "bitSize": 1,
+      "defaultValue": "On",
       "valueType": "offOn"
     },
     {
@@ -1715,6 +1768,7 @@
       "type": "MiCallAlert",
       "bitOffset": 14,
       "bitSize": 1,
+      "defaultValue": "On",
       "valueType": "offOn"
     },
     {
@@ -1722,6 +1776,7 @@
       "type": "MiTextMessage",
       "bitOffset": 15,
       "bitSize": 1,
+      "defaultValue": "On",
       "valueType": "offOn"
     },
     {
@@ -1729,6 +1784,7 @@
       "type": "MiToneOrAlert",
       "bitOffset": 16,
       "bitSize": 1,
+      "defaultValue": "On",
       "valueType": "offOn"
     },
     {
@@ -1736,6 +1792,7 @@
       "type": "MiTalkaround",
       "bitOffset": 17,
       "bitSize": 1,
+      "defaultValue": "On",
       "valueType": "offOn"
     },
     {
@@ -1743,6 +1800,7 @@
       "type": "MiOutgoingRadio",
       "bitOffset": 18,
       "bitSize": 1,
+      "defaultValue": "On",
       "valueType": "offOn"
     },
     {
@@ -1750,6 +1808,7 @@
       "type": "MiAnswered",
       "bitOffset": 19,
       "bitSize": 1,
+      "defaultValue": "On",
       "valueType": "offOn"
     },
     {
@@ -1757,6 +1816,7 @@
       "type": "MiMissed",
       "bitOffset": 20,
       "bitSize": 1,
+      "defaultValue": "On",
       "valueType": "offOn"
     },
     {
@@ -1764,6 +1824,7 @@
       "type": "MiEditList",
       "bitOffset": 21,
       "bitSize": 1,
+      "defaultValue": "On",
       "valueType": "offOn"
     },
     {
@@ -1771,6 +1832,7 @@
       "type": "MiScan",
       "bitOffset": 22,
       "bitSize": 1,
+      "defaultValue": "On",
       "valueType": "offOn"
     },
     {
@@ -1778,6 +1840,7 @@
       "type": "MiProgramKey",
       "bitOffset": 23,
       "bitSize": 1,
+      "defaultValue": "On",
       "valueType": "offOn"
     },
     {
@@ -1785,6 +1848,7 @@
       "type": "MiVox",
       "bitOffset": 24,
       "bitSize": 1,
+      "defaultValue": "Off",
       "valueType": "offOn"
     },
     {
@@ -1792,6 +1856,7 @@
       "type": "MiSquelch",
       "bitOffset": 26,
       "bitSize": 1,
+      "defaultValue": "On",
       "valueType": "offOn"
     },
     {
@@ -1799,6 +1864,7 @@
       "type": "MiLedIndicator",
       "bitOffset": 27,
       "bitSize": 1,
+      "defaultValue": "On",
       "valueType": "offOn"
     },
     {
@@ -1806,6 +1872,7 @@
       "type": "MiKeyboardLock",
       "bitOffset": 28,
       "bitSize": 1,
+      "defaultValue": "On",
       "valueType": "offOn"
     },
     {
@@ -1813,6 +1880,7 @@
       "type": "MiIntroScreen",
       "bitOffset": 29,
       "bitSize": 1,
+      "defaultValue": "On",
       "valueType": "offOn"
     },
     {
@@ -1820,6 +1888,7 @@
       "type": "MiBacklight",
       "bitOffset": 30,
       "bitSize": 1,
+      "defaultValue": "On",
       "valueType": "offOn"
     },
     {
@@ -1827,6 +1896,7 @@
       "type": "MiPower",
       "bitOffset": 31,
       "bitSize": 1,
+      "defaultValue": "On",
       "valueType": "offOn"
     },
     {
@@ -1834,6 +1904,7 @@
       "type": "MiGps",
       "bitOffset": 36,
       "bitSize": 1,
+      "defaultValue": "Off",
       "valueType": "onOff"
     },
     {
@@ -1841,6 +1912,7 @@
       "type": "MiProgramRadio",
       "bitOffset": 37,
       "bitSize": 1,
+      "defaultValue": "Off",
       "valueType": "onOff"
     },
     {
@@ -1848,6 +1920,7 @@
       "type": "MiDisplayMode",
       "bitOffset": 38,
       "bitSize": 1,
+      "defaultValue": "On",
       "valueType": "offOn"
     },
     {
@@ -1855,6 +1928,7 @@
       "type": "MiPasswordAndLock",
       "bitOffset": 39,
       "bitSize": 1,
+      "defaultValue": "On",
       "valueType": "offOn"
     },
     {
@@ -1862,6 +1936,7 @@
       "type": "TmTextMessage",
       "bitOffset": 0,
       "bitSize": 2304,
+      "defaultValue": "",
       "valueType": "textMessage"
     },
     {
@@ -1870,7 +1945,8 @@
       "bitOffset": 0,
       "bitSize": 128,
       "max": 8,
-      "valueType": "hexadecimal"
+      "defaultValue": "ffffffffffffffffffffffffffffffff",
+      "valueType": "hexadecimal32"
     },
     {
       "typeName": "Key Value (Basic)",
@@ -1878,13 +1954,15 @@
       "bitOffset": 1152,
       "bitSize": 16,
       "max": 16,
-      "valueType": "hexadecimal"
+      "defaultValue": "ffff",
+      "valueType": "hexadecimal4"
     },
     {
       "typeName": "Call ID",
       "type": "DcCallID",
       "bitOffset": 0,
       "bitSize": 24,
+      "defaultValue": "1",
       "valueType": "callID"
     },
     {
@@ -1892,6 +1970,7 @@
       "type": "DcCallReceiveTone",
       "bitOffset": 26,
       "bitSize": 1,
+      "defaultValue": "No",
       "valueType": "iStrings",
       "strings": [
         "No",
@@ -1903,6 +1982,7 @@
       "type": "DcCallType",
       "bitOffset": 30,
       "bitSize": 2,
+      "defaultValue": "Group",
       "valueType": "callType",
       "strings": [
         "",
@@ -1916,6 +1996,7 @@
       "type": "DcName",
       "bitOffset": 32,
       "bitSize": 256,
+      "defaultValue": "Contact1",
       "valueType": "name"
     },
     {
@@ -1923,6 +2004,7 @@
       "type": "GlName",
       "bitOffset": 0,
       "bitSize": 256,
+      "defaultValue": "GroupList1",
       "valueType": "uniqueName"
     },
     {
@@ -1939,6 +2021,7 @@
       "type": "ZiName",
       "bitOffset": 0,
       "bitSize": 256,
+      "defaultValue": "Zone1",
       "valueType": "uniqueName"
     },
     {
@@ -1993,6 +2076,7 @@
       "type": "SlName",
       "bitOffset": 0,
       "bitSize": 256,
+      "defaultValue": "ScanList1",
       "valueType": "uniqueName"
     },
     {
@@ -2000,6 +2084,7 @@
       "type": "SlPriorityChannel1_md380",
       "bitOffset": 256,
       "bitSize": 16,
+      "defaultValue": "None",
       "valueType": "memberListIndex",
       "listType": "Channels_md380",
       "indexedStrings": [
@@ -2024,6 +2109,7 @@
       "type": "SlPriorityChannel1_md40",
       "bitOffset": 256,
       "bitSize": 16,
+      "defaultValue": "None",
       "valueType": "memberListIndex",
       "listType": "Channels_md40",
       "indexedStrings": [
@@ -2048,8 +2134,8 @@
       "type": "SlPriorityChannel2_md380",
       "bitOffset": 272,
       "bitSize": 16,
-      "valueType": "memberListIndex",
       "defaultValue": "None",
+      "valueType": "memberListIndex",
       "listType": "Channels_md380",
       "indexedStrings": [
         {
@@ -2067,8 +2153,8 @@
       "type": "SlPriorityChannel2_md40",
       "bitOffset": 272,
       "bitSize": 16,
-      "valueType": "memberListIndex",
       "defaultValue": "None",
+      "valueType": "memberListIndex",
       "listType": "Channels_md40",
       "indexedStrings": [
         {
@@ -2086,6 +2172,7 @@
       "type": "SlTxDesignatedChannel_md380",
       "bitOffset": 288,
       "bitSize": 16,
+      "defaultValue": "Last Active Channel",
       "valueType": "listIndex",
       "listType": "Channels_md380",
       "indexedStrings": [
@@ -2104,6 +2191,7 @@
       "type": "SlTxDesignatedChannel_md40",
       "bitOffset": 288,
       "bitSize": 16,
+      "defaultValue": "Last Active Channel",
       "valueType": "listIndex",
       "listType": "Channels_md40",
       "indexedStrings": [
@@ -2122,6 +2210,7 @@
       "type": "SlSignallingHoldTime",
       "bitOffset": 312,
       "bitSize": 8,
+      "defaultValue": "500",
       "valueType": "span",
       "span": {
         "min": 2,
@@ -2134,6 +2223,7 @@
       "type": "SlPrioritySampleTime",
       "bitOffset": 320,
       "bitSize": 8,
+      "defaultValue": "2000",
       "valueType": "span",
       "span": {
         "min": 3,
@@ -2164,6 +2254,7 @@
       "type": "CiLoneWorker",
       "bitOffset": 0,
       "bitSize": 1,
+      "defaultValue": "Off",
       "valueType": "offOn"
     },
     {
@@ -2171,6 +2262,7 @@
       "type": "CiSquelch",
       "bitOffset": 2,
       "bitSize": 1,
+      "defaultValue": "Normal",
       "valueType": "iStrings",
       "strings": [
         "Tight",
@@ -2182,6 +2274,7 @@
       "type": "CiSquelch_uv380",
       "bitOffset": 124,
       "bitSize": 4,
+      "defaultValue": "1",
       "valueType": "span",
       "span": {
         "min": 0,
@@ -2193,6 +2286,7 @@
       "type": "CiAutoscan",
       "bitOffset": 3,
       "bitSize": 1,
+      "defaultValue": "Off",
       "valueType": "offOn"
     },
     {
@@ -2200,6 +2294,7 @@
       "type": "CiBandwidth",
       "bitOffset": 4,
       "bitSize": 2,
+      "defaultValue": "12.5",
       "valueType": "iStrings",
       "strings": [
         "12.5",
@@ -2212,6 +2307,7 @@
       "type": "CiChannelMode",
       "bitOffset": 6,
       "bitSize": 2,
+      "defaultValue": "Analog",
       "valueType": "iStrings",
       "strings": [
         "",
@@ -2248,6 +2344,7 @@
       "type": "CiColorCode",
       "bitOffset": 8,
       "bitSize": 4,
+      "defaultValue": "1",
       "valueType": "span",
       "span": {
         "min": 0,
@@ -2259,8 +2356,8 @@
       "type": "CiRepeaterSlot",
       "bitOffset": 12,
       "bitSize": 2,
-      "valueType": "iStrings",
       "defaultValue": "1",
+      "valueType": "iStrings",
       "strings": [
         "",
         "1",
@@ -2272,6 +2369,7 @@
       "type": "CiRxOnly",
       "bitOffset": 14,
       "bitSize": 1,
+      "defaultValue": "Off",
       "valueType": "offOn"
     },
     {
@@ -2279,6 +2377,7 @@
       "type": "CiAllowTalkaround",
       "bitOffset": 15,
       "bitSize": 1,
+      "defaultValue": "Off",
       "valueType": "offOn"
     },
     {
@@ -2286,6 +2385,7 @@
       "type": "CiDataCallConfirmed",
       "bitOffset": 16,
       "bitSize": 1,
+      "defaultValue": "Off",
       "valueType": "offOn"
     },
     {
@@ -2293,6 +2393,7 @@
       "type": "CiPrivateCallConfirmed",
       "bitOffset": 17,
       "bitSize": 1,
+      "defaultValue": "Off",
       "valueType": "offOn"
     },
     {
@@ -2300,8 +2401,8 @@
       "type": "CiPrivacy",
       "bitOffset": 18,
       "bitSize": 2,
-      "valueType": "iStrings",
       "defaultValue": "None",
+      "valueType": "iStrings",
       "strings": [
         "None",
         "Basic",
@@ -2319,6 +2420,7 @@
       "type": "CiPrivacyNumber",
       "bitOffset": 20,
       "bitSize": 4,
+      "defaultValue": "1",
       "valueType": "privacyNumber",
       "strings": [
         "1",
@@ -2344,6 +2446,7 @@
       "type": "CiDisplayPTTID",
       "bitOffset": 24,
       "bitSize": 1,
+      "defaultValue": "Off",
       "valueType": "onOff"
     },
     {
@@ -2351,6 +2454,7 @@
       "type": "CiCompressedUdpDataHeader",
       "bitOffset": 25,
       "bitSize": 1,
+      "defaultValue": "On",
       "valueType": "offOn"
     },
     {
@@ -2358,6 +2462,7 @@
       "type": "CiEmergencyAlarmAck",
       "bitOffset": 28,
       "bitSize": 1,
+      "defaultValue": "Off",
       "valueType": "offOn"
     },
     {
@@ -2365,6 +2470,7 @@
       "type": "CiRxRefFrequency",
       "bitOffset": 30,
       "bitSize": 2,
+      "defaultValue": "Low",
       "valueType": "iStrings",
       "strings": [
         "Low",
@@ -2377,6 +2483,7 @@
       "type": "CiAdmitCriteria",
       "bitOffset": 32,
       "bitSize": 2,
+      "defaultValue": "Always",
       "valueType": "iStrings",
       "strings": [
         "Always",
@@ -2390,6 +2497,7 @@
       "type": "CiPower",
       "bitOffset": 34,
       "bitSize": 1,
+      "defaultValue": "High",
       "valueType": "iStrings",
       "strings": [
         "Low",
@@ -2401,6 +2509,7 @@
       "type": "CiVox",
       "bitOffset": 35,
       "bitSize": 1,
+      "defaultValue": "Off",
       "valueType": "offOn"
     },
     {
@@ -2408,6 +2517,7 @@
       "type": "CiQtReverse",
       "bitOffset": 36,
       "bitSize": 1,
+      "defaultValue": "180",
       "valueType": "iStrings",
       "strings": [
         "180",
@@ -2419,6 +2529,7 @@
       "type": "CiReverseBurst",
       "bitOffset": 37,
       "bitSize": 1,
+      "defaultValue": "On",
       "valueType": "offOn"
     },
     {
@@ -2426,6 +2537,7 @@
       "type": "CiTxRefFrequency",
       "bitOffset": 38,
       "bitSize": 2,
+      "defaultValue": "Low",
       "valueType": "iStrings",
       "strings": [
         "Low",
@@ -2438,6 +2550,7 @@
       "type": "CiDQTTurnoffFreq",
       "bitOffset": 40,
       "bitSize": 2,
+      "defaultValue": "None",
       "valueType": "indexedStrings",
       "indexedStrings": [
         {
@@ -2459,6 +2572,7 @@
       "type": "CiInCallCriteria",
       "bitOffset": 43,
       "bitSize": 1,
+      "defaultValue": "Always",
       "valueType": "iStrings",
       "strings": [
         "Always",
@@ -2470,8 +2584,8 @@
       "type": "CiContactName",
       "bitOffset": 48,
       "bitSize": 16,
-      "valueType": "listIndex",
       "defaultValue": "None",
+      "valueType": "listIndex",
       "listType": "Contacts",
       "indexedStrings": [
         {
@@ -2485,6 +2599,7 @@
       "type": "CiTot",
       "bitOffset": 64,
       "bitSize": 8,
+      "defaultValue": "60",
       "valueType": "span",
       "span": {
         "min": 0,
@@ -2498,6 +2613,7 @@
       "type": "CiTotRekeyDelay",
       "bitOffset": 72,
       "bitSize": 8,
+      "defaultValue": "0",
       "valueType": "span",
       "span": {
         "min": 0,
@@ -2509,6 +2625,7 @@
       "type": "CiEmergencySystem",
       "bitOffset": 80,
       "bitSize": 8,
+      "defaultValue": "None",
       "valueType": "span",
       "span": {
         "min": 0,
@@ -2521,6 +2638,7 @@
       "type": "CiScanList_md380",
       "bitOffset": 88,
       "bitSize": 8,
+      "defaultValue": "None",
       "valueType": "listIndex",
       "listType": "ScanLists_md380",
       "indexedStrings": [
@@ -2535,6 +2653,7 @@
       "type": "CiScanList_md40",
       "bitOffset": 88,
       "bitSize": 8,
+      "defaultValue": "None",
       "valueType": "listIndex",
       "listType": "ScanLists_md40",
       "indexedStrings": [
@@ -2549,8 +2668,8 @@
       "type": "CiGroupList",
       "bitOffset": 96,
       "bitSize": 8,
-      "valueType": "listIndex",
       "defaultValue": "None",
+      "valueType": "listIndex",
       "listType": "GroupLists",
       "indexedStrings": [
         {
@@ -2564,6 +2683,7 @@
       "type": "CiGPSSystem",
       "bitOffset": 107,
       "bitSize": 5,
+      "defaultValue": "None",
       "valueType": "span",
       "span": {
         "min": 0,
@@ -2576,6 +2696,7 @@
       "type": "CiDecode1",
       "bitOffset": 112,
       "bitSize": 1,
+      "defaultValue": "Off",
       "valueType": "offOn"
     },
     {
@@ -2583,6 +2704,7 @@
       "type": "CiDecode2",
       "bitOffset": 113,
       "bitSize": 1,
+      "defaultValue": "Off",
       "valueType": "offOn"
     },
     {
@@ -2590,6 +2712,7 @@
       "type": "CiDecode3",
       "bitOffset": 114,
       "bitSize": 1,
+      "defaultValue": "Off",
       "valueType": "offOn"
     },
     {
@@ -2597,6 +2720,7 @@
       "type": "CiDecode4",
       "bitOffset": 115,
       "bitSize": 1,
+      "defaultValue": "Off",
       "valueType": "offOn"
     },
     {
@@ -2604,6 +2728,7 @@
       "type": "CiDecode5",
       "bitOffset": 116,
       "bitSize": 1,
+      "defaultValue": "Off",
       "valueType": "offOn"
     },
     {
@@ -2611,6 +2736,7 @@
       "type": "CiDecode6",
       "bitOffset": 117,
       "bitSize": 1,
+      "defaultValue": "Off",
       "valueType": "offOn"
     },
     {
@@ -2618,6 +2744,7 @@
       "type": "CiDecode7",
       "bitOffset": 118,
       "bitSize": 1,
+      "defaultValue": "Off",
       "valueType": "offOn"
     },
     {
@@ -2625,6 +2752,7 @@
       "type": "CiDecode8",
       "bitOffset": 119,
       "bitSize": 1,
+      "defaultValue": "Off",
       "valueType": "offOn"
     },
     {
@@ -2632,6 +2760,7 @@
       "type": "CiRxFrequency",
       "bitOffset": 128,
       "bitSize": 32,
+      "defaultValue": "0",
       "valueType": "frequency"
     },
     {
@@ -2639,6 +2768,7 @@
       "type": "CiTxFrequencyOffset",
       "bitOffset": 160,
       "bitSize": 32,
+      "defaultValue": "0",
       "valueType": "frequencyOffset",
       "enabling": {
         "value": "+0.00000",
@@ -2652,16 +2782,16 @@
       "type": "CiCtcssDecode",
       "bitOffset": 192,
       "bitSize": 16,
-      "valueType": "ctcssDcs",
-      "defaultValue": "None"
+      "defaultValue": "None",
+      "valueType": "ctcssDcs"
     },
     {
       "typeName": "CTCSS/DCS Encode",
       "type": "CiCtcssEncode",
       "bitOffset": 208,
       "bitSize": 16,
-      "valueType": "ctcssDcs",
       "defaultValue": "None",
+      "valueType": "ctcssDcs",
       "enabling": {
         "value": "None",
         "disables": [
@@ -2675,8 +2805,8 @@
       "type": "CiRxSignallingSystem",
       "bitOffset": 224,
       "bitSize": 8,
-      "valueType": "iStrings",
       "defaultValue": "Off",
+      "valueType": "iStrings",
       "strings": [
         "Off",
         "DTMF-1",
@@ -2703,8 +2833,8 @@
       "type": "CiTxSignallingSystem",
       "bitOffset": 232,
       "bitSize": 8,
-      "valueType": "iStrings",
       "defaultValue": "Off",
+      "valueType": "iStrings",
       "strings": [
         "Off",
         "DTMF-1",
@@ -2718,6 +2848,7 @@
       "type": "CiPower_uv380",
       "bitOffset": 246,
       "bitSize": 2,
+      "defaultValue": "High",
       "valueType": "indexedStrings",
       "indexedStrings": [
         {
@@ -2739,6 +2870,7 @@
       "type": "CiLeaderMS",
       "bitOffset": 252,
       "bitSize": 1,
+      "defaultValue": "Off",
       "valueType": "onOff"
     },
     {
@@ -2746,6 +2878,7 @@
       "type": "CiDCDMSwitch",
       "bitOffset": 253,
       "bitSize": 1,
+      "defaultValue": "Off",
       "valueType": "onOff",
       "enabling": {
         "value": "On",
@@ -2759,6 +2892,7 @@
       "type": "CiReceiveGPSInfo",
       "bitOffset": 254,
       "bitSize": 1,
+      "defaultValue": "Off",
       "valueType": "onOff"
     },
     {
@@ -2766,6 +2900,7 @@
       "type": "CiSendGPSInfo",
       "bitOffset": 255,
       "bitSize": 1,
+      "defaultValue": "Off",
       "valueType": "onOff"
     },
     {
@@ -2773,6 +2908,7 @@
       "type": "CiName",
       "bitOffset": 256,
       "bitSize": 256,
+      "defaultValue": "Channel1",
       "valueType": "uniqueName"
     },
     {
@@ -2780,6 +2916,7 @@
       "type": "GpGPSRevertChannel",
       "bitOffset": 0,
       "bitSize": 16,
+      "defaultValue": "Current Channel",
       "valueType": "gpsListIndex",
       "listType": "Channels_md380",
       "indexedStrings": [
@@ -2794,6 +2931,7 @@
       "type": "GpGPSDefaultReportInterval",
       "bitOffset": 16,
       "bitSize": 8,
+      "defaultValue": "Off",
       "valueType": "gpsReportInterval",
       "span": {
         "min": 0,
@@ -2807,8 +2945,8 @@
       "type": "GpDestinationID",
       "bitOffset": 32,
       "bitSize": 16,
-      "valueType": "gpsListIndex",
       "defaultValue": "None",
+      "valueType": "gpsListIndex",
       "listType": "Contacts",
       "indexedStrings": [
         {
