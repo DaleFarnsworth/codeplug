@@ -1367,6 +1367,10 @@ type Action struct {
 	qAction *widgets.QAction
 }
 
+func (action *Action) SetVisible(b bool) {
+	action.qAction.SetVisible(b)
+}
+
 func (menu *Menu) AddAction(name string, fn func()) *Action {
 	action := new(Action)
 	action.qAction = menu.qMenu.AddAction(name)
