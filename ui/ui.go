@@ -285,7 +285,12 @@ func (w *Window) EnableWidgets() {
 	widgets := w.widgets
 	for senderType, subs := range w.subscriptions {
 		for _, receiverType := range subs {
-			widgets[receiverType].receive(widgets[senderType])
+			sender := widgets[senderType]
+			receiver := widgets[receiverType]
+			if sender == nil || receiver == nil {
+				continue
+			}
+			receiver.receive(sender)
 		}
 	}
 }
