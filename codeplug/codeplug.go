@@ -212,15 +212,7 @@ func (cp *Codeplug) Load(typ string, freqRange string) error {
 
 	switch cp.fileType {
 	case FileTypeText, FileTypeJSON, FileTypeXLSX:
-		for _, rType := range cp.RecordTypes() {
-			if cp.MaxRecords(rType) == 1 {
-				continue
-			}
-			records := cp.records(rType)
-			for i := len(records) - 1; i >= 0; i-- {
-				cp.RemoveRecord(records[i])
-			}
-		}
+		cp.RemoveAllRecords()
 
 		var err error
 		switch cp.fileType {
@@ -228,13 +220,16 @@ func (cp *Codeplug) Load(typ string, freqRange string) error {
 			file, err := os.Open(cp.importFilename)
 			if err == nil {
 				defer file.Close()
-				err = cp.ImportText(file)
+				err = cp.importText(file)
 			}
 		case FileTypeJSON:
 			err = cp.importJSON(cp.importFilename)
 		case FileTypeXLSX:
 			err = cp.importXLSX(cp.importFilename)
 		}
+
+		cp.AddMissingFields()
+
 		if _, warning := err.(Warning); warning {
 			err = nil
 		}
@@ -836,6 +831,38 @@ func (cp *Codeplug) RemoveRecord(r *Record) {
 	cp.rDesc[rType].records = records
 }
 
+func (cp *Codeplug) RemoveAllRecords() {
+	for _, rType := range cp.RecordTypes() {
+		if cp.MaxRecords(rType) == 1 {
+			continue
+		}
+		records := cp.records(rType)
+		for i := len(records) - 1; i >= 0; i-- {
+			cp.RemoveRecord(records[i])
+		}
+	}
+}
+
+func (cp *Codeplug) AddMissingFields() {
+	for _, rType := range cp.RecordTypes() {
+		for _, r := range cp.Records(rType) {
+			for _, fType := range r.AllFieldTypes() {
+				nf := r.NewField(fType)
+				if nf.MaxFields() > 1 {
+					continue
+				}
+
+				f := r.Field(fType)
+				if f != nil {
+					continue
+				}
+
+				r.addField(nf)
+			}
+		}
+	}
+}
+
 // ConnectChange will cause the given function to be called passing
 // the given change.
 func (cp *Codeplug) ConnectChange(fn func(*Change)) {
@@ -1140,6 +1167,7 @@ func printRecord(w io.Writer, r *Record, rFmt string, fFmt string) {
 		}
 	}
 }
+
 func (cp *Codeplug) nameToRt(rTypeName string) (RecordType, error) {
 	if len(cp.cachedNameToRt) == 0 {
 		cp.cachedNameToRt = make(map[string]RecordType)
@@ -1157,6 +1185,14 @@ func (cp *Codeplug) nameToRt(rTypeName string) (RecordType, error) {
 	}
 
 	return rType, nil
+}
+
+func aName(name string) string {
+	alt := name + "A"
+	if strings.HasSuffix(name, "A") {
+		alt = name[0 : len(name)-1]
+	}
+	return alt
 }
 
 func (cp *Codeplug) nameToFt(rType RecordType, fTypeName string) (FieldType, error) {
@@ -1178,7 +1214,10 @@ func (cp *Codeplug) nameToFt(rType RecordType, fTypeName string) (FieldType, err
 
 	fType, ok = cp.cachedNameToFt[rType][fTypeName]
 	if !ok {
-		return "", fmt.Errorf("unknown field type: %s", fTypeName)
+		fType, ok = cp.cachedNameToFt[rType][aName(fTypeName)]
+		if !ok {
+			return "", fmt.Errorf("unknown field type: %s", fTypeName)
+		}
 	}
 
 	return fType, nil
@@ -1697,7 +1736,7 @@ func (cp *Codeplug) ExportText(filename string) (err error) {
 	return nil
 }
 
-func (cp *Codeplug) ImportText(reader io.Reader) error {
+func (cp *Codeplug) importText(reader io.Reader) error {
 	records, err := cp.ParseRecords(reader)
 	err = cp.storeParsedRecords(records)
 	if err != nil {
@@ -1705,6 +1744,12 @@ func (cp *Codeplug) ImportText(reader io.Reader) error {
 	}
 
 	return nil
+}
+
+func (cp *Codeplug) ImportText(reader io.Reader) error {
+	err := cp.importText(reader)
+	cp.AddMissingFields()
+	return err
 }
 
 func (cp *Codeplug) ExportJSON(filename string) error {

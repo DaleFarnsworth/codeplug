@@ -257,6 +257,15 @@ func (r *Record) FieldTypes() []FieldType {
 	return fTypes
 }
 
+func (r *Record) AllFieldTypes() []FieldType {
+	fTypes := make([]FieldType, 0)
+	for _, fi := range r.rDesc.fieldInfos {
+		fTypes = append(fTypes, fi.fType)
+	}
+
+	return fTypes
+}
+
 // Fields returns a slice of all fields of the given type in the record.
 func (r *Record) Fields(fType FieldType) []*Field {
 	fDesc := (*r.fDesc)[fType]
