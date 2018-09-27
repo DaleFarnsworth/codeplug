@@ -223,19 +223,31 @@ func (dfu *Dfu) setAddress(address int) error {
 	return nil
 }
 
-func (dfu *Dfu) eraseBlocks(addr int, size int) error {
+func (dfu *Dfu) eraseFlashBlocks(addr int, size int) error {
 	count := (size + dfu.eraseBlockSize - 1) / dfu.eraseBlockSize
+
+	dfu.setMaxProgressCount(count)
+
 	for i := 0; i < count; i++ {
+		err := dfu.progressFunc()
+		if err != nil {
+			return err
+		}
+
 		adjustedAddr := addr
 		if addr >= 0x40000 && addr < 0x200000-0xd0000 {
 			adjustedAddr += 0xd0000
 		}
-		err := dfu.eraseBlock(adjustedAddr)
+
+		err = dfu.eraseBlock(adjustedAddr)
 		if err != nil {
 			return err
 		}
+
 		addr += dfu.eraseBlockSize
 	}
+
+	dfu.finalProgress()
 
 	return nil
 }
@@ -250,10 +262,12 @@ func (dfu *Dfu) eraseSPIFlashBlocks(addr int, size int) error {
 		if err != nil {
 			return err
 		}
+
 		err = dfu.eraseSPIFlashBlock(addr)
 		if err != nil {
 			return err
 		}
+
 		addr += dfu.eraseBlockSize
 	}
 
@@ -844,14 +858,37 @@ func (dfu *Dfu) readFlashTo(address, size int, iWriter io.Writer) error {
 	if size%dfu.blockSize != 0 {
 		return fmt.Errorf("readFlashTo: data size is not a multiple of blockSize")
 	}
+	if address%dfu.blockSize != 0 {
+		return fmt.Errorf("readFlashTo: address is not a multiple of blockSize")
+	}
+	dfu.setMaxProgressCount(620)
 
-	blockNumber := 0
+	_, err := dfu.init()
+	if err != nil {
+		return wrapError("ReadCodeplug", err)
+	}
+
+	err = dfu.md380Cmd([]md380Cmd{
+		md380Cmd{0x91, 0x01}, // Programming Mode
+		md380Cmd{0xa2, 0x02},
+		md380Cmd{0xa2, 0x02},
+		md380Cmd{0xa2, 0x03},
+		md380Cmd{0xa2, 0x04},
+		md380Cmd{0xa2, 0x07},
+	})
+	if err != nil {
+		return wrapError("ReadCodeplug", err)
+	}
+
+	dfu.finalProgress()
+
+	blockNumber := address / dfu.blockSize
 	blockCount := size / dfu.blockSize
 
 	writer := bufio.NewWriter(iWriter)
 	bytes := make([]byte, dfu.blockSize)
 
-	err := dfu.setAddress(address)
+	err = dfu.setAddress(0x00000000)
 	if err != nil {
 		return wrapError("readFlashTo", err)
 	}
@@ -895,14 +932,39 @@ func (dfu *Dfu) readFlashTo(address, size int, iWriter io.Writer) error {
 }
 
 func (dfu *Dfu) writeFlashFrom(address, size int, iRdr io.Reader) error {
-	blockNumber := 0
+	if address%dfu.blockSize != 0 {
+		return fmt.Errorf("writeFlashFrom: address is not a multiple of blockSize")
+	}
+	if size%dfu.blockSize != 0 {
+		return fmt.Errorf("WriteFlashFrom: codeplug data size is not a multiple of blocksize %d", dfu.blockSize)
+	}
+
+	dfu.setMaxProgressCount(2750)
+
+	err := dfu.md380Cmd([]md380Cmd{
+		md380Cmd{0x91, 0x01}, // Programming Mode
+		md380Cmd{0x91, 0x01}, // Programming Mode
+		md380Cmd{0xa2, 0x02},
+		md380Cmd{CmdSleep, 2000},
+		md380Cmd{0xa2, 0x02},
+		md380Cmd{0xa2, 0x03},
+		md380Cmd{0xa2, 0x04},
+		md380Cmd{0xa2, 0x07},
+	})
+	if err != nil {
+		return wrapError("writeFlashFrom", err)
+	}
+
+	dfu.finalProgress()
+
+	blockNumber := address / dfu.blockSize
 	blockCount := (size + dfu.blockSize - 1) / dfu.blockSize
 	size = blockCount * dfu.blockSize
 
 	rdr := bufio.NewReader(iRdr)
 	buf := make([]byte, dfu.blockSize)
 
-	err := dfu.eraseBlocks(0x00000000, size)
+	err = dfu.eraseFlashBlocks(address, size)
 	if err != nil {
 		return wrapError("writeFlashFrom", err)
 	}
@@ -1145,31 +1207,10 @@ func (dfu *Dfu) finalProgress() {
 }
 
 func (dfu *Dfu) ReadCodeplug(data []byte) error {
-	dfu.setMaxProgressCount(620)
-
-	_, err := dfu.init()
-	if err != nil {
-		return wrapError("ReadCodeplug", err)
-	}
-
 	size := len(data)
 	buffer := bytes.NewBuffer(data[:0])
 
-	err = dfu.md380Cmd([]md380Cmd{
-		md380Cmd{0x91, 0x01}, // Programming Mode
-		md380Cmd{0xa2, 0x02},
-		md380Cmd{0xa2, 0x02},
-		md380Cmd{0xa2, 0x03},
-		md380Cmd{0xa2, 0x04},
-		md380Cmd{0xa2, 0x07},
-	})
-	if err != nil {
-		return wrapError("ReadCodeplug", err)
-	}
-
-	dfu.finalProgress()
-
-	err = dfu.readFlashTo(0, size, buffer)
+	err := dfu.readFlashTo(0, size, buffer)
 	if err != nil {
 		return wrapError("ReadCodeplug", err)
 	}
@@ -1183,36 +1224,9 @@ func (dfu *Dfu) ReadCodeplug(data []byte) error {
 }
 
 func (dfu *Dfu) WriteCodeplug(data []byte) error {
-	dfu.setMaxProgressCount(2750)
-
-	_, err := dfu.init()
-	if err != nil {
-		return wrapError("WriteCodeplug", err)
-	}
-
-	if len(data)%dfu.blockSize != 0 {
-		return fmt.Errorf("WriteCodeplug: codeplug data size is not a multiple of blocksize %d", dfu.blockSize)
-	}
-
 	buffer := bytes.NewBuffer(data)
 
-	err = dfu.md380Cmd([]md380Cmd{
-		md380Cmd{0x91, 0x01}, // Programming Mode
-		md380Cmd{0x91, 0x01}, // Programming Mode
-		md380Cmd{0xa2, 0x02},
-		md380Cmd{CmdSleep, 2000},
-		md380Cmd{0xa2, 0x02},
-		md380Cmd{0xa2, 0x03},
-		md380Cmd{0xa2, 0x04},
-		md380Cmd{0xa2, 0x07},
-	})
-	if err != nil {
-		return wrapError("WriteCodeplug", err)
-	}
-
-	dfu.finalProgress()
-
-	err = dfu.writeFlashFrom(0, len(data), buffer)
+	err := dfu.writeFlashFrom(0, len(data), buffer)
 	if err != nil {
 		return wrapError("WriteCodeplug", err)
 	}
@@ -1405,7 +1419,7 @@ func (dfu *Dfu) WriteMD2017Users(users [][]string) error {
 		return wrapError("WriteMD2017Users", err)
 	}
 
-	err = dfu.writeSPIFlashFrom(0x200000, len(image), imageReader)
+	err = dfu.writeFlashFrom(0x200000, len(image), imageReader)
 	if err != nil {
 		return wrapError("WriteMD2017Users", err)
 	}
