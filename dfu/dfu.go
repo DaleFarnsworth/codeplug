@@ -226,7 +226,11 @@ func (dfu *Dfu) setAddress(address int) error {
 func (dfu *Dfu) eraseBlocks(addr int, size int) error {
 	count := (size + dfu.eraseBlockSize - 1) / dfu.eraseBlockSize
 	for i := 0; i < count; i++ {
-		err := dfu.eraseBlock(addr)
+		adjustedAddr := addr
+		if addr >= 0x40000 && addr < 0x200000-0xd0000 {
+			adjustedAddr += 0xd0000
+		}
+		err := dfu.eraseBlock(adjustedAddr)
 		if err != nil {
 			return err
 		}
@@ -836,16 +840,12 @@ func (dfu *Dfu) setMaxProgressCount(max int) {
 	}
 }
 
-func (dfu *Dfu) readFlashTo(address, offset int, size int, iWriter io.Writer) error {
-	if offset%dfu.blockSize != 0 {
-		return fmt.Errorf("readFlashTo: offset is not a multiple of blockSize")
-	}
-
+func (dfu *Dfu) readFlashTo(address, size int, iWriter io.Writer) error {
 	if size%dfu.blockSize != 0 {
 		return fmt.Errorf("readFlashTo: data size is not a multiple of blockSize")
 	}
 
-	blockNumber := offset / dfu.blockSize
+	blockNumber := 0
 	blockCount := size / dfu.blockSize
 
 	writer := bufio.NewWriter(iWriter)
@@ -866,7 +866,12 @@ func (dfu *Dfu) readFlashTo(address, offset int, size int, iWriter io.Writer) er
 			return err
 		}
 
-		err = stDfu.Upload(blockNumber, bytes)
+		adjustedBlockNumber := blockNumber + 2
+		if blockNumber >= 256 && blockNumber < 2048-832 {
+			adjustedBlockNumber += 832
+		}
+
+		err = stDfu.Upload(adjustedBlockNumber, bytes)
 		if err != nil {
 			return wrapError("readFlashTo", err)
 		}
@@ -889,8 +894,8 @@ func (dfu *Dfu) readFlashTo(address, offset int, size int, iWriter io.Writer) er
 	return nil
 }
 
-func (dfu *Dfu) writeFlashFrom(address, offset int, size int, iRdr io.Reader) error {
-	blockNumber := offset / dfu.blockSize
+func (dfu *Dfu) writeFlashFrom(address, size int, iRdr io.Reader) error {
+	blockNumber := 0
 	blockCount := (size + dfu.blockSize - 1) / dfu.blockSize
 	size = blockCount * dfu.blockSize
 
@@ -933,7 +938,12 @@ func (dfu *Dfu) writeFlashFrom(address, offset int, size int, iRdr io.Reader) er
 			copy(buf[n:], padding)
 		}
 
-		err = stDfu.Dnload(blockNumber, buf)
+		adjustedBlockNumber := blockNumber + 2
+		if blockNumber >= 256 && blockNumber < 2048-832 {
+			adjustedBlockNumber += 832
+		}
+
+		err = stDfu.Dnload(adjustedBlockNumber, buf)
 		if err != nil {
 			return wrapError("writeFlashFrom", err)
 		}
@@ -1159,7 +1169,7 @@ func (dfu *Dfu) ReadCodeplug(data []byte) error {
 
 	dfu.finalProgress()
 
-	err = dfu.readFlashTo(0, 2048, size, buffer)
+	err = dfu.readFlashTo(0, size, buffer)
 	if err != nil {
 		return wrapError("ReadCodeplug", err)
 	}
@@ -1202,7 +1212,7 @@ func (dfu *Dfu) WriteCodeplug(data []byte) error {
 
 	dfu.finalProgress()
 
-	err = dfu.writeFlashFrom(0, 2048, len(data), buffer)
+	err = dfu.writeFlashFrom(0, len(data), buffer)
 	if err != nil {
 		return wrapError("WriteCodeplug", err)
 	}
