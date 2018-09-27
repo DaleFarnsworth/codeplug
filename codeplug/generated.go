@@ -1368,7 +1368,7 @@ var fiBiCpsVersion = fieldInfo{
 	bitOffset:    69992,
 	bitSize:      32,
 	valueType:    VtCpsVersion,
-	defaultValue: "    ",
+	defaultValue: "0101",
 }
 
 var fiBiFrequencyRangeA = fieldInfo{

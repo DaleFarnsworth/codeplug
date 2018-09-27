@@ -1755,7 +1755,7 @@ func (v *cpsVersion) setString(f *Field, s string) error {
 		return fmt.Errorf("bad string length")
 	}
 
-	*v = cpsVersion(s)
+	*v = cpsVersion(s[0:4])
 
 	return nil
 }
@@ -1774,6 +1774,9 @@ func (v *cpsVersion) valid(f *Field) error {
 func (v *cpsVersion) load(f *Field) {
 	s := ""
 	for _, b := range f.bytes() {
+		if b > 9 {
+			b = 0
+		}
 		s += string(int('0') + int(b))
 	}
 	*v = cpsVersion(s)
@@ -1783,6 +1786,9 @@ func (v *cpsVersion) load(f *Field) {
 func (v *cpsVersion) store(f *Field) {
 	bytes := make([]byte, len(*v))
 	for i, r := range *v {
+		if r < '0' || r > '9' {
+			r = '0'
+		}
 		bytes[i] = byte(int(r) - int('0'))
 	}
 	f.storeBytes(bytes)

@@ -1049,17 +1049,6 @@ func (cp *Codeplug) publishChange(change *Change) {
 // codeplugs contains the list of open codeplugs.
 var codeplugs []*Codeplug
 
-func filterField(rType RecordType, fType FieldType) bool {
-	switch rType {
-	case RtBasicInformation_md380:
-		switch fType {
-		case FtBiCpsVersion:
-			return true
-		}
-	}
-	return false
-}
-
 func PrintRecord(w io.Writer, r *Record) {
 	rType := r.Type()
 
@@ -1071,10 +1060,6 @@ func PrintRecord(w io.Writer, r *Record) {
 	fmt.Fprintf(w, "%s%s:\n", string(rType), ind)
 
 	for _, fType := range r.FieldTypes() {
-		if filterField(rType, fType) {
-			continue
-		}
-
 		name := string(fType)
 		for _, f := range r.Fields(fType) {
 			value := quoteString(f.String())
@@ -1096,10 +1081,6 @@ func PrintRecordWithIndex(w io.Writer, r *Record) {
 	fmt.Fprintf(w, "%s%s:", string(rType), ind)
 
 	for _, fType := range r.FieldTypes() {
-		if filterField(rType, fType) {
-			continue
-		}
-
 		name := string(fType)
 		for _, f := range r.Fields(fType) {
 			value := quoteString(f.String())
@@ -1774,9 +1755,6 @@ func (cp *Codeplug) ExportJSON(filename string) error {
 			fieldTypes := r.FieldTypes()
 			fieldMap := make(map[string]interface{})
 			for _, fType := range fieldTypes {
-				if filterField(rType, fType) {
-					continue
-				}
 				fields := r.Fields(fType)
 
 				fieldSlice := make([]string, len(fields))
@@ -1953,10 +1931,6 @@ func (cp *Codeplug) ExportXLSX(filename string) error {
 		headerRow := sheet.AddRow()
 		r := records[0]
 		for _, fType := range r.FieldTypes() {
-			if filterField(rType, fType) {
-				continue
-			}
-
 			for i := 0; i < (*r.fDesc)[fType].max; i++ {
 				cell = headerRow.AddCell()
 				cell.Value = string(fType)
@@ -1966,10 +1940,6 @@ func (cp *Codeplug) ExportXLSX(filename string) error {
 		for _, r := range records {
 			row = sheet.AddRow()
 			for _, fType := range r.FieldTypes() {
-				if filterField(rType, fType) {
-					continue
-				}
-
 				fields := r.Fields(fType)
 				for _, f := range fields {
 					cell = row.AddCell()
