@@ -67,14 +67,14 @@ func New() (*StDfu, error) {
 	}
 	if dev == nil {
 		stDfu.Close()
-		return nil, fmt.Errorf("No Radio found on USB")
+		return nil, fmt.Errorf("No Radio was found on USB")
 	}
 	stDfu.dev = dev
 
 	iface, ifaceDone, err := dev.DefaultInterface()
 	if err != nil {
 		stDfu.Close()
-		return nil, fmt.Errorf("%s: DefaultInterface failed: %v", dev, err)
+		return nil, fmt.Errorf("The radio was found on USB, but is not accessible.  Is the radio's USB interface already in use?  Possibly by a Virtual Machine?")
 	}
 	stDfu.iface = iface
 	stDfu.ifaceDone = ifaceDone
