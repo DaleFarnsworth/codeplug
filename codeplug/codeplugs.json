@@ -2297,7 +2297,7 @@
       "bitOffset": 4,
       "bitSize": 2,
       "defaultValue": "12.5",
-      "valueType": "iStrings",
+      "valueType": "bandwidth",
       "strings": [
         "12.5",
         "20",

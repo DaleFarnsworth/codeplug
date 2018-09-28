@@ -150,6 +150,9 @@ func (f *Field) SetString(str string) error {
 		change := f.Change(previousString)
 		change.Complete()
 	}
+	// Some fields may be dependent on this field's value
+	// Set them based on valid
+	f.record.valid()
 	return err
 }
 
@@ -242,7 +245,7 @@ func (f *Field) Strings() []string {
 	case VtCtcssDcs:
 		strs = ctcssDcsStrings()
 
-	case VtIStrings, VtCallType:
+	case VtIStrings, VtCallType, VtBandwidth:
 		strs = *f.strings
 
 	case VtPrivacyNumber:
@@ -791,6 +794,20 @@ func (v *iStrings) load(f *Field) {
 // store stores the iStrings' value into its bits in cp.bytes.
 func (v *iStrings) store(f *Field) {
 	f.storeBytes([]byte{byte(*v)})
+}
+
+type bandwidth struct {
+	iStrings
+}
+
+// valid returns nil if the iStrings' value is valid.
+func (v *bandwidth) valid(f *Field) error {
+	ss := f.sibling(FtCiChannelMode).String()
+	if ss == "Digital" {
+		return v.iStrings.setString(f, "12.5")
+	}
+
+	return v.iStrings.valid(f)
 }
 
 // span is a field value representing a range of integer values

@@ -1314,6 +1314,7 @@ func newFieldTextEdit(f *codeplug.Field) *Widget {
 
 var newFieldWidget = map[codeplug.ValueType]func(*codeplug.Field) *Widget{
 	codeplug.VtAscii:             newFieldLineEdit,
+	codeplug.VtBandwidth:         newFieldCombobox,
 	codeplug.VtBiFrequency:       newFieldLineEdit,
 	codeplug.VtCallID:            newFieldLineEdit,
 	codeplug.VtCallType:          newFieldCombobox,

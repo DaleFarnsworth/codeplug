@@ -235,6 +235,7 @@ const (
 // The value types a field may contain
 const (
 	VtAscii             ValueType = "ascii"
+	VtBandwidth         ValueType = "bandwidth"
 	VtBiFrequency       ValueType = "biFrequency"
 	VtCallID            ValueType = "callID"
 	VtCallType          ValueType = "callType"
@@ -270,6 +271,8 @@ func newValue(vt ValueType) value {
 	switch vt {
 	case VtAscii:
 		return new(ascii)
+	case VtBandwidth:
+		return new(bandwidth)
 	case VtBiFrequency:
 		return new(biFrequency)
 	case VtCallID:
@@ -1563,7 +1566,7 @@ var fiCiBandwidth = fieldInfo{
 	max:          1,
 	bitOffset:    4,
 	bitSize:      2,
-	valueType:    VtIStrings,
+	valueType:    VtBandwidth,
 	defaultValue: "12.5",
 	strings: &[]string{
 		"12.5",
