@@ -1980,8 +1980,8 @@
     {
       "typeName": "Call Type",
       "type": "DcCallType",
-      "bitOffset": 30,
-      "bitSize": 2,
+      "bitOffset": 27,
+      "bitSize": 5,
       "defaultValue": "Group",
       "valueType": "callType",
       "strings": [

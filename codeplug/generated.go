@@ -1368,7 +1368,7 @@ var fiBiCpsVersion = fieldInfo{
 	bitOffset:    69992,
 	bitSize:      32,
 	valueType:    VtCpsVersion,
-	defaultValue: "0101",
+	defaultValue: "1001",
 }
 
 var fiBiFrequencyRangeA = fieldInfo{
@@ -2260,8 +2260,8 @@ var fiDcCallType = fieldInfo{
 	fType:        FtDcCallType,
 	typeName:     "Call Type",
 	max:          1,
-	bitOffset:    30,
-	bitSize:      2,
+	bitOffset:    27,
+	bitSize:      5,
 	valueType:    VtCallType,
 	defaultValue: "Group",
 	strings: &[]string{
