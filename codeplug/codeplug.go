@@ -279,7 +279,7 @@ func (cp *Codeplug) TextLines() []string {
 	for _, rType := range cp.RecordTypes() {
 		for _, r := range cp.records(rType) {
 			var w bytes.Buffer
-			PrintRecordWithIndex(&w, r)
+			PrintOneLineRecord(&w, r)
 			lines = append(lines, w.String())
 		}
 	}
@@ -1052,22 +1052,13 @@ var codeplugs []*Codeplug
 func PrintRecord(w io.Writer, r *Record) {
 	rType := r.Type()
 
-	ind := ""
-	if r.max > 1 {
-		ind = fmt.Sprintf("[%d]", r.rIndex+1)
-	}
-
-	fmt.Fprintf(w, "%s%s:\n", string(rType), ind)
+	fmt.Fprintf(w, "%s:\n", string(rType))
 
 	for _, fType := range r.FieldTypes() {
 		name := string(fType)
 		for _, f := range r.Fields(fType) {
 			value := quoteString(f.String())
-			ind := ""
-			if f.max > 1 {
-				ind = fmt.Sprintf("[%d]", f.fIndex+1)
-			}
-			fmt.Fprintf(w, "\t%s%s: %s\n", name, ind, value)
+			fmt.Fprintf(w, "\t%s: %s\n", name, value)
 		}
 	}
 }
@@ -1089,6 +1080,21 @@ func PrintRecordWithIndex(w io.Writer, r *Record) {
 				ind = fmt.Sprintf("[%d]", f.fIndex+1)
 			}
 			fmt.Fprintf(w, " %s%s:%s", name, ind, value)
+		}
+	}
+	fmt.Fprintln(w)
+}
+
+func PrintOneLineRecord(w io.Writer, r *Record) {
+	rType := r.Type()
+
+	fmt.Fprintf(w, "%s:", string(rType))
+
+	for _, fType := range r.FieldTypes() {
+		name := string(fType)
+		for _, f := range r.Fields(fType) {
+			value := quoteString(f.String())
+			fmt.Fprintf(w, "\t%s: %s", name, value)
 		}
 	}
 	fmt.Fprintln(w)
@@ -1690,7 +1696,7 @@ func (cp *Codeplug) rNameToRecord(name string, index int) (*Record, error) {
 	return nil, fmt.Errorf("codeplug has no record: %s", string(rType))
 }
 
-func (cp *Codeplug) ExportText(filename string) (err error) {
+func (cp *Codeplug) exportText(filename string, pr func(io.Writer, *Record)) (err error) {
 	file, err := os.Create(filename)
 	if err != nil {
 		return err
@@ -1709,12 +1715,20 @@ func (cp *Codeplug) ExportText(filename string) (err error) {
 			if i != 0 || j != 0 {
 				fmt.Fprintln(w)
 			}
-			PrintRecord(w, r)
+			pr(w, r)
 		}
 	}
 	w.Flush()
 
 	return nil
+}
+
+func (cp *Codeplug) ExportText(filename string) (err error) {
+	return cp.exportText(filename, PrintRecord)
+}
+
+func (cp *Codeplug) ExportTextOneLineRecords(filename string) (err error) {
+	return cp.exportText(filename, PrintOneLineRecord)
 }
 
 func (cp *Codeplug) importText(reader io.Reader) error {
