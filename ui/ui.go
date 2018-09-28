@@ -895,9 +895,14 @@ func (parent *Form) AddReadOnlyFieldRow(labelFunc func(*codeplug.Field) string, 
 	parent.layout.AddRow(w.label, w.qWidget)
 }
 
-func setFieldString(f *codeplug.Field, s string) {
-	f.SetString(s)
+func setFieldString(f *codeplug.Field, s string) error {
+	err := f.SetString(s)
+	if err != nil {
+		return err
+	}
 	ResetWindows(f.Codeplug())
+
+	return nil
 }
 
 func setEnabled(w *Widget) {
@@ -1083,7 +1088,7 @@ func newFieldCheckbox(f *codeplug.Field) *Widget {
 		if checked {
 			str = "On"
 		}
-		err := f.SetString(str)
+		err := setFieldString(f, str)
 		if err != nil {
 			logFatal(err.Error())
 		}
@@ -1103,7 +1108,7 @@ func newFieldLineEdit(f *codeplug.Field) *Widget {
 
 	var finished func()
 	finished = func() {
-		err := f.SetString(strings.TrimSpace(qw.Text()))
+		err := setFieldString(f, strings.TrimSpace(qw.Text()))
 		if err != nil {
 			msg := f.TypeName() + " " + err.Error()
 			qw.DisconnectEditingFinished()
@@ -1141,7 +1146,7 @@ func newFieldCombobox(f *codeplug.Field) *Widget {
 	}
 
 	qw.ConnectActivated2(func(str string) {
-		err := f.SetString(str)
+		err := setFieldString(f, str)
 		if err != nil {
 			msg := f.TypeName() + " " + err.Error()
 			ErrorPopup("Value error", msg)
@@ -1280,14 +1285,14 @@ func newFieldSpinbox(f *codeplug.Field) *Widget {
 		qw.SetSpecialValueText(" ")
 		qw.SetValue(span.Minimum())
 		qw.ConnectFocusInEvent(func(event *gui.QFocusEvent) {
-			f.SetString(strconv.Itoa(span.Minimum()))
+			setFieldString(f, strconv.Itoa(span.Minimum()))
 			qw.SetSpecialValueText(span.MinString())
 			qw.DisconnectFocusInEvent()
 		})
 	}
 
 	qw.ConnectValueChanged2(func(str string) {
-		err := f.SetString(str)
+		err := setFieldString(f, str)
 		if err != nil {
 			msg := f.TypeName() + " " + err.Error()
 			ErrorPopup("Value error", msg)
