@@ -37,7 +37,7 @@ import (
 	"unicode/utf8"
 )
 
-const invalidValueString = "*INVALID*"
+const invalidValueString = "=INVALID="
 
 // A Field represents a field within a Record.
 type Field struct {
