@@ -432,7 +432,8 @@
         "GsMicLevel",
         "GsTxMode",
         "GsEditRadioID",
-        "GsPublicZone"
+        "GsPublicZone",
+        "GsEnableContactsCSV"
       ]
     },
     {
@@ -458,12 +459,12 @@
         "GsLoneWorkerReminderTime",
         "GsPwAndLockEnable",
         "GsPowerOnPassword",
-	"GsCHVoiceAnnouncement",
+        "GsCHVoiceAnnouncement",
         "GsMonitorType",
         "GsVoxSensitivity",
         "GsTxPreambleDuration",
         "GsRxLowBatteryInterval",
-	"GsChannelsHangTime",
+        "GsChannelsHangTime",
         "GsPcProgPassword",
         "GsRadioProgPassword",
         "GsBacklightTime",
@@ -476,7 +477,8 @@
         "GsGroupCallMatch",
         "GsPrivateCallMatch",
         "GsGroupCallHangTime",
-        "GsPrivateCallHangTime"
+        "GsPrivateCallHangTime",
+        "GsEnableContactsCSV"
       ]
     },
     {
@@ -1231,6 +1233,14 @@
       "bitSize": 1,
       "defaultValue": "On",
       "valueType": "offOn"
+    },
+    {
+      "typeName": "Enable Contacts CSV",
+      "type": "GsEnableContactsCSV",
+      "bitOffset": 529,
+      "bitSize": 1,
+      "defaultValue": "Off",
+      "valueType": "onOff"
     },
     {
       "typeName": "CH Voice Announcement",

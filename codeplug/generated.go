@@ -144,6 +144,7 @@ const (
 	FtGsDisableAllLeds            FieldType = "DisableAllLeds"
 	FtGsDisableAllTones           FieldType = "DisableAllTones"
 	FtGsEditRadioID               FieldType = "EditRadioID"
+	FtGsEnableContactsCSV         FieldType = "EnableContactsCSV"
 	FtGsFreqChannelMode           FieldType = "FreqChannelMode"
 	FtGsFreqChannelMode_uv380     FieldType = "FreqChannelMode"
 	FtGsGroupCallHangTime         FieldType = "GroupCallHangTime"
@@ -1012,6 +1013,7 @@ var riGeneralSettings_md2017 = recordInfo{
 		&fiGsPrivateCallMatch,
 		&fiGsGroupCallHangTime,
 		&fiGsPrivateCallHangTime,
+		&fiGsEnableContactsCSV,
 	},
 }
 
@@ -1146,6 +1148,7 @@ var riGeneralSettings_uv380 = recordInfo{
 		&fiGsTxMode,
 		&fiGsEditRadioID,
 		&fiGsPublicZone,
+		&fiGsEnableContactsCSV,
 	},
 }
 
@@ -2460,6 +2463,16 @@ var fiGsEditRadioID = fieldInfo{
 	typeName:     "Edit Radio ID",
 	max:          1,
 	bitOffset:    1281,
+	bitSize:      1,
+	valueType:    VtOnOff,
+	defaultValue: "Off",
+}
+
+var fiGsEnableContactsCSV = fieldInfo{
+	fType:        FtGsEnableContactsCSV,
+	typeName:     "Enable Contacts CSV",
+	max:          1,
+	bitOffset:    529,
 	bitSize:      1,
 	valueType:    VtOnOff,
 	defaultValue: "Off",
