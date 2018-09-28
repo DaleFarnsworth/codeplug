@@ -352,8 +352,8 @@ func writeMD2017Users() error {
 		return err
 	}
 
-	users := dfu.ParseUsers(file)
-	return df.WriteMD2017Users(users)
+	users := dfu.ParseUV380Users(file)
+	return df.WriteUV380Users(users)
 }
 
 func writeUV380Users() error {
@@ -376,9 +376,9 @@ func writeUV380Users() error {
 		return err
 	}
 
-	users := dfu.ParseUsers(file)
+	users := dfu.ParseUV380Users(file)
 
-	return df.WriteMD2017Users(users)
+	return df.WriteUV380Users(users)
 }
 
 func getUsers() error {

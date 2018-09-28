@@ -26,13 +26,11 @@ package userdb
 var countryAbbreviations = map[string]string{
 	"Andorra":                "AD",
 	"Argentina":              "AR",
-	"Argentina Republic":     "AR",
 	"Australia":              "AU",
 	"Austria":                "AT",
 	"Barbados":               "BB",
 	"Belgium":                "BE",
 	"Belize":                 "BZ",
-	"Bosnia and Hercegovi":   "BA",
 	"Bosnia and Hercegovina": "BA",
 	"Brazil":                 "BR",
 	"Bulgaria":               "BG",
@@ -64,12 +62,10 @@ var countryAbbreviations = map[string]string{
 	"Italy":                  "IT",
 	"Japan":                  "JP",
 	"Korea":                  "KR",
-	"Korea S":                "KR",
 	"Kuwait":                 "KW",
 	"Latvia":                 "LV",
 	"Liechtenstein":          "LI",
 	"Luxembourg":             "LU",
-	"Luxemburg":              "LU",
 	"Macedonia":              "MK",
 	"Malaysia":               "MY",
 	"Malta":                  "MT",
@@ -105,6 +101,13 @@ var countryAbbreviations = map[string]string{
 	"United States":          "US",
 	"Uruguay":                "UY",
 	"Venezuela":              "VE",
+}
+
+var extraCountryAbbreviations = map[string]string{
+	"Argentina Republic":   "AR",
+	"Bosnia and Hercegovi": "BA",
+	"Korea S":              "KR",
+	"Luxemburg":            "LU",
 }
 
 var stateAbbreviationsByCountry = map[string]map[string]string{
@@ -186,7 +189,6 @@ var stateAbbreviationsByCountry = map[string]map[string]string{
 	},
 	"Germany": {
 		"Baden-Wuerttemberg":     "BW",
-		"Baden-Wurttemberg":      "BW",
 		"Bavaria":                "BY",
 		"Berlin":                 "BE",
 		"Brandenburg":            "BB",
@@ -210,8 +212,6 @@ var stateAbbreviationsByCountry = map[string]map[string]string{
 		"Gelderland":      "GE",
 		"Groningen":       "GR",
 		"Limburg":         "LI",
-		"Noord-Brabant":   "N-B",
-		"Noord-Holland":   "N-H",
 		"North Brabant":   "N-B",
 		"North Holland":   "N-H",
 		"Oost-Vlaanderen": "O-V",
@@ -219,25 +219,37 @@ var stateAbbreviationsByCountry = map[string]map[string]string{
 		"South Holland":   "ZH",
 		"Utrecht":         "UTR",
 		"Zeeland":         "ZE",
-		"Zuid-Holland":    "ZH",
 	},
 	"Belgium": {
-		"Antwerpen":       "VAN",
 		"Antwerp":         "VAN",
 		"East Flanders":   "VOV",
 		"Flemish Brabant": "VBR",
 		"Hainaut":         "WHT",
-		"Henegouwen":      "WHT",
 		"Ile-de-France":   "IF",
-		"le-de-France":    "IF",
 		"Liege":           "WLG",
 		"Limburg":         "VLI",
 		"Luxembourg":      "WLX",
-		"Namen":           "WNA",
 		"Namur":           "WNA",
-		"Vlaams-Brabant":  "VBR",
 		"Walloon Brabant": "WBR",
 		"West Flanders":   "VWV",
+	},
+}
+
+var extraStateAbbreviationsByCountry = map[string]map[string]string{
+	"Germany": {
+		"Baden-Wurttemberg": "BW",
+	},
+	"Netherlands": {
+		"Noord-Brabant": "N-B",
+		"Noord-Holland": "N-H",
+		"Zuid-Holland":  "ZH",
+	},
+	"Belgium": {
+		"Antwerpen":       "VAN",
+		"Henegouwen":      "WHT",
+		"le-de-France":    "IF",
+		"Namen":           "WNA",
+		"Vlaams-Brabant":  "VBR",
 		"West-Vlaanderen": "VWV",
 	},
 }

@@ -39,6 +39,7 @@ import (
 	"time"
 
 	"github.com/dalefarnsworth/codeplug/stdfu"
+	"github.com/dalefarnsworth/codeplug/userdb"
 )
 
 const (
@@ -1271,14 +1272,14 @@ func (dfu *Dfu) WriteUsers(filename string) error {
 	return nil
 }
 
-type md2017User struct {
+type uv380User struct {
 	id   int
 	call string
 	rest string
 }
 
 const (
-	MaxMD2017Users = 122197
+	MaxUV380Users = 122197
 )
 
 const (
@@ -1291,7 +1292,7 @@ const (
 	countryField = 6
 )
 
-func ParseUsers(reader io.Reader) [][]string {
+func ParseUV380Users(reader io.Reader) [][]string {
 	users := make([][]string, 0)
 	scanner := bufio.NewScanner(reader)
 	for scanner.Scan() {
@@ -1299,6 +1300,8 @@ func ParseUsers(reader io.Reader) [][]string {
 		if len(fields) != 7 {
 			continue
 		}
+		fields[countryField] = userdb.UnAbbreviateCountry(fields[countryField])
+		fields[stateField] = userdb.UnAbbreviateState(fields[stateField])
 		users = append(users, fields)
 	}
 	if err := scanner.Err(); err != nil {
@@ -1328,15 +1331,15 @@ func FilterUsers(users [][]string, countryMap map[string]bool) [][]string {
 	return filteredUsers
 }
 
-func md2017UserImage(userSlice [][]string) []byte {
-	users := make([]md2017User, 0)
+func uv380UserImage(userSlice [][]string) []byte {
+	users := make([]uv380User, 0)
 	for _, fields := range userSlice {
 		i64, err := strconv.ParseInt(fields[idField], 10, 64)
 		if err != nil {
 			continue
 		}
 
-		var user md2017User
+		var user uv380User
 
 		user.id = int(i64)
 
@@ -1354,8 +1357,8 @@ func md2017UserImage(userSlice [][]string) []byte {
 		users = append(users, user)
 	}
 
-	if len(users) > MaxMD2017Users {
-		users = users[:MaxMD2017Users]
+	if len(users) > MaxUV380Users {
+		users = users[:MaxUV380Users]
 	}
 	nUsers := len(users)
 
@@ -1410,23 +1413,23 @@ func md2017UserImage(userSlice [][]string) []byte {
 	return image[:end]
 }
 
-func (dfu *Dfu) WriteMD2017Users(users [][]string) error {
-	image := md2017UserImage(users)
+func (dfu *Dfu) WriteUV380Users(users [][]string) error {
+	image := uv380UserImage(users)
 	imageReader := bytes.NewReader(image)
 
 	_, err := dfu.init()
 	if err != nil {
-		return wrapError("WriteMD2017Users", err)
+		return wrapError("WriteUV380Users", err)
 	}
 
 	err = dfu.writeFlashFrom(0x200000, len(image), imageReader)
 	if err != nil {
-		return wrapError("WriteMD2017Users", err)
+		return wrapError("WriteUV380Users", err)
 	}
 
 	err = dfu.md380Reboot()
 	if err != nil {
-		return wrapError("WriteMD2017Users", err)
+		return wrapError("WriteUV380Users", err)
 	}
 
 	return nil

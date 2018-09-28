@@ -96,7 +96,7 @@ type UsersDB struct {
 	progressCounter   int
 }
 
-var defaultOptions = &Options{
+var DefaultOptions = &Options{
 	AbbrevCountries:    true,
 	AbbrevDirections:   true,
 	AbbrevStates:       true,
@@ -118,13 +118,64 @@ var nonCuratedGetUsersFuncs = []func() ([]*User, error){
 	getReflectorUsers,
 }
 
+var stateAbbreviations map[string]string
+var titleCaseMap map[string]string
+var reverseCountryAbbrevs map[string]string
+var reverseStateAbbrevs map[string]string
+
+func init() {
+	stateAbbreviations = make(map[string]string)
+	titleCaseMap = make(map[string]string)
+	reverseCountryAbbrevs = make(map[string]string)
+	reverseStateAbbrevs = make(map[string]string)
+
+	for c, ac := range countryAbbreviations {
+		existing := reverseCountryAbbrevs[ac]
+		if existing != "" {
+			logFatalf("%s has abbreviations %s & %s", c, existing, ac)
+
+		}
+		reverseCountryAbbrevs[ac] = c
+	}
+
+	for _, stateAbbreviations := range stateAbbreviationsByCountry {
+		for s, as := range stateAbbreviations {
+			existing := reverseStateAbbrevs[as]
+			if existing != "" {
+				logFatalf("%s has abbreviations %s & %s", as, existing, s)
+			}
+			reverseStateAbbrevs[as] = s
+		}
+	}
+
+	for c, ac := range extraCountryAbbreviations {
+		countryAbbreviations[c] = ac
+	}
+
+	for c, cMap := range extraStateAbbreviationsByCountry {
+		for s, sa := range cMap {
+			stateAbbreviationsByCountry[c][s] = sa
+		}
+	}
+
+	for _, stateAbbrevs := range stateAbbreviationsByCountry {
+		for state, abbrev := range stateAbbrevs {
+			stateAbbreviations[state] = abbrev
+		}
+	}
+
+	for _, word := range titleCaseWords {
+		titleCaseMap[word] = strings.Title(word)
+	}
+}
+
 // New - Instantiate and initialize a new users db and return a pointer to it.
 func New() *UsersDB {
 	db := &UsersDB{
 		progressFunc: func() error { return nil },
 	}
 
-	db.SetOptions(defaultOptions)
+	db.SetOptions(DefaultOptions)
 	db.getUsersFuncs = nonCuratedGetUsersFuncs
 	db.getUsersFuncs = append(db.getUsersFuncs, getCuratedUsers)
 
@@ -172,6 +223,42 @@ const (
 	MaxProgress = 1000000
 )
 
+func AbbreviateCountry(country string) string {
+	abbrev, ok := countryAbbreviations[country]
+	if !ok {
+		abbrev = country
+	}
+
+	return abbrev
+}
+
+func UnAbbreviateCountry(abbrev string) string {
+	country, ok := reverseCountryAbbrevs[abbrev]
+	if !ok {
+		country = abbrev
+	}
+
+	return country
+}
+
+func AbbreviateState(state string) string {
+	abbrev, ok := stateAbbreviations[state]
+	if !ok {
+		abbrev = state
+	}
+
+	return abbrev
+}
+
+func UnAbbreviateState(abbrev string) string {
+	state, ok := reverseStateAbbrevs[abbrev]
+	if !ok {
+		state = abbrev
+	}
+
+	return state
+}
+
 func (u *User) amend(options *Options) {
 	u.fixCallsigns()
 
@@ -200,16 +287,14 @@ func (u *User) amend(options *Options) {
 		u.fixStateCountries()
 	}
 	if options.AbbrevCountries {
-		abbrev, ok := countryAbbreviations[u.Country]
-		if ok {
-			u.Country = abbrev
-		}
+		u.Country = AbbreviateCountry(u.Country)
+	} else {
+		u.Country = UnAbbreviateCountry(u.Country)
 	}
 	if options.AbbrevStates {
-		abbrev, ok := stateAbbreviations[u.State]
-		if ok {
-			u.State = abbrev
-		}
+		u.State = AbbreviateState(u.State)
+	} else {
+		u.State = UnAbbreviateState(u.State)
 	}
 	if options.AbbrevDirections {
 		u.City = abbreviateDirections(u.City)
@@ -275,24 +360,6 @@ func (u *User) fixCallsigns() {
 	u.Callsign = strings.Replace(u.Callsign, " ", "", -1)
 	u.Callsign = strings.Replace(u.Callsign, ".", "", -1)
 }
-
-var stateAbbreviations = func() map[string]string {
-	abbrevs := make(map[string]string)
-	for _, stateAbbreviations := range stateAbbreviationsByCountry {
-		for state, abbrev := range stateAbbreviations {
-			abbrevs[state] = abbrev
-		}
-	}
-	return abbrevs
-}()
-
-var titleCaseMap = func() map[string]string {
-	m := make(map[string]string)
-	for _, word := range titleCaseWords {
-		m[word] = strings.Title(word)
-	}
-	return m
-}()
 
 func abbreviateDirections(field string) string {
 	words := strings.Split(field, " ")
