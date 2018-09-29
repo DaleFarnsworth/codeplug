@@ -1181,7 +1181,9 @@ func NewSpinboxWidget(value, min, max int, changedFunc func(int)) *Widget {
 	qw.SetRange(min, max)
 	qw.SetValue(value)
 
-	qw.ConnectValueChanged(changedFunc)
+	qw.ConnectEditingFinished(func() {
+		changedFunc(qw.Value())
+	})
 
 	return widget
 }
@@ -1296,7 +1298,12 @@ func newFieldSpinbox(f *codeplug.Field) *Widget {
 		})
 	}
 
-	qw.ConnectValueChanged2(func(str string) {
+	qw.ConnectEditingFinished(func() {
+		val := qw.Value()
+		str := span.MinString()
+		if str == "" || val != span.Minimum() {
+			str = qw.TextFromValue(val)
+		}
 		err := setFieldString(f, str)
 		if err != nil {
 			msg := f.TypeName() + " " + err.Error()
