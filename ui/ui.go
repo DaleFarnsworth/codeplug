@@ -135,6 +135,17 @@ func (as *AppSettings) SetArrayIndex(i int) {
 	as.qSettings.SetArrayIndex(i)
 }
 
+type DelayedCall struct {
+	core.QObject
+	_ func() `slot:"create"`
+}
+
+func delayedCall(f func()) {
+	delayedCall := NewDelayedCall(nil)
+	delayedCall.ConnectCreate(f)
+	go delayedCall.Create() // go routine, so it's called in event loop
+}
+
 type MainWindow struct {
 	qMainWindow   widgets.QMainWindow
 	codeplug      *codeplug.Codeplug
@@ -363,19 +374,20 @@ func (mw *MainWindow) RecordWindows() map[codeplug.RecordType]*Window {
 }
 
 type Window struct {
-	qWidget       widgets.QWidget
-	layout        *widgets.QHBoxLayout
-	menuBar       *MenuBar
-	window        *Window
-	mainWindow    *MainWindow
-	recordType    codeplug.RecordType
-	recordFunc    func()
-	widgets       map[codeplug.FieldType]*Widget
-	subscriptions map[codeplug.FieldType][]codeplug.FieldType
-	recordModel   *core.QAbstractListModel
-	recordList    *RecordList
-	connectClose  func() bool
-	handleChange  func(*codeplug.Change)
+	qWidget         widgets.QWidget
+	layout          *widgets.QHBoxLayout
+	menuBar         *MenuBar
+	window          *Window
+	mainWindow      *MainWindow
+	recordType      codeplug.RecordType
+	recordFunc      func()
+	widgets         map[codeplug.FieldType]*Widget
+	subscriptions   map[codeplug.FieldType][]codeplug.FieldType
+	recordModel     *core.QAbstractListModel
+	recordList      *RecordList
+	connectClose    func() bool
+	handleChange    func(*codeplug.Change)
+	settingMultiple bool
 }
 
 func (mw *MainWindow) NewWindow() *Window {
@@ -436,18 +448,22 @@ func (mw *MainWindow) NewRecordWindow(rType codeplug.RecordType, writable bool) 
 		switch changeType {
 		case codeplug.FieldChange:
 			f := change.Field()
-			for _, mw := range mainWindows {
-				w := mw.recordWindows[w.recordType]
-				if w != nil {
-					widget := w.widgets[f.Type()]
-					if widget != nil {
-						widget.receive(widget)
-					}
+			w := recordWindow(f.Record())
+			if w != nil {
+				widget := w.widgets[f.Type()]
+				if widget != nil {
+					widget.receive(widget)
 				}
 			}
 
 			if f.Type() == f.Record().NameFieldType() {
 				updateRecordList = true
+			}
+
+		case codeplug.RecordsFieldChange:
+			changes := change.Changes()
+			for _, change := range changes {
+				w.handleChange(change)
 			}
 
 		case codeplug.MoveRecordsChange, codeplug.InsertRecordsChange:
@@ -464,7 +480,7 @@ func (mw *MainWindow) NewRecordWindow(rType codeplug.RecordType, writable bool) 
 			updateRecord = true
 
 		default:
-			logFatal("Unknown change type", changeType)
+			logFatal("Unknown change type ", changeType)
 		}
 
 		if updateRecordList {
@@ -901,13 +917,76 @@ func (parent *Form) AddReadOnlyFieldRow(labelFunc func(*codeplug.Field) string, 
 }
 
 func setFieldString(f *codeplug.Field, s string) error {
-	err := f.SetString(s)
+	err := f.TestSetString(s)
 	if err != nil {
 		return err
 	}
-	ResetWindows(f.Codeplug())
-
+	delayedCall(func() {
+		if !setMultipleRecords(f, s) {
+			f.SetString(s)
+		}
+		ResetWindows(f.Codeplug(), f.Record())
+	})
 	return nil
+}
+
+func setMultipleRecords(f *codeplug.Field, str string) bool {
+	if f.MaxFields() > 1 {
+		return false
+	}
+	r := f.Record()
+	if r.MaxRecords() <= 1 {
+		return false
+	}
+
+	recs := selectedRecords(r)
+	if len(recs) <= 1 {
+		return false
+	}
+	found := false
+	for _, rec := range recs {
+		if rec == r {
+			found = true
+			break
+		}
+	}
+	if !found {
+		return false
+	}
+
+	rw := recordWindow(r)
+	if rw.settingMultiple {
+		return false
+	}
+	rw.settingMultiple = true
+
+	cp := r.Codeplug()
+	howmany := "all"
+	if len(recs) < len(cp.Records(r.Type())) {
+		howmany = fmt.Sprintf("%d selected", len(recs))
+	}
+
+	recordName := f.Record().TypeName()
+
+	msg := fmt.Sprintf(`Set "%s" to "%s" in %s %s?`, f.TypeName(), str, howmany, recordName)
+	ans := YesNoPopup(fmt.Sprintf("Change multiple %s", recordName), msg)
+	if ans != PopupYes {
+		rw.settingMultiple = false
+		return false
+	}
+
+	pd := NewProgressDialog("Updating " + recordName)
+	pd.SetRange(0, len(recs))
+	progFunc := func(i int) {
+		pd.SetValue(i)
+	}
+
+	cp.SetRecordsField(recs, f.Type(), str, progFunc)
+
+	pd.Close()
+	rw.settingMultiple = false
+
+	return true
 }
 
 func setEnabled(w *Widget) {
@@ -1492,6 +1571,46 @@ func (w *Window) RecordFunc() func() {
 	return w.recordFunc
 }
 
+const slowChangeCount = 5
+
+func UndoChange(cp *codeplug.Codeplug) {
+	progFunc := func(i int) {}
+
+	typeName, changeCount := cp.UndoNameChangeCount()
+	if changeCount < slowChangeCount {
+		cp.UndoChange(progFunc)
+		return
+	}
+
+	pd := NewProgressDialog("Updating " + typeName)
+	pd.SetRange(0, changeCount)
+	progFunc = func(i int) {
+		pd.SetValue(i)
+	}
+	cp.UndoChange(progFunc)
+	pd.Close()
+
+}
+
+func RedoChange(cp *codeplug.Codeplug) {
+	progFunc := func(i int) {}
+
+	typeName, changeCount := cp.RedoNameChangeCount()
+	if changeCount < slowChangeCount {
+		cp.RedoChange(progFunc)
+		return
+	}
+
+	pd := NewProgressDialog("Updating " + typeName)
+	pd.SetRange(0, changeCount)
+	progFunc = func(i int) {
+		pd.SetValue(i)
+	}
+	cp.RedoChange(progFunc)
+	pd.Close()
+
+}
+
 func InfoPopup(title string, msg string) {
 	button := widgets.QMessageBox__Ok
 	defaultButton := widgets.QMessageBox__Ok
@@ -1681,22 +1800,51 @@ func SaveFilename(title string, dir string, extension string) string {
 	return widgets.QFileDialog_GetSaveFileName(nil, title, dir, filter, selF, 0)
 }
 
-func ResetWindows(cp *codeplug.Codeplug) {
+func mainWindow(cp *codeplug.Codeplug) *MainWindow {
 	for _, mw := range mainWindows {
-		if mw.codeplug != cp {
-			continue
+		if mw.codeplug == cp {
+			return mw
 		}
+	}
+	return nil
+}
 
-		for _, w := range mw.RecordWindows() {
+func ResetWindows(cp *codeplug.Codeplug, r *codeplug.Record) {
+	rType := r.Type()
+	mw := mainWindow(cp)
+	for _, w := range mw.RecordWindows() {
+		if w.recordType != rType {
 			rl := w.RecordList()
 			if rl != nil {
 				rl.SetCurrent(0)
 				rl.Update()
 			}
+		}
 
-			w.recordFunc()
+		w.recordFunc()
+	}
+}
+
+func recordWindow(r *codeplug.Record) *Window {
+	cp := r.Codeplug()
+	mw := mainWindow(cp)
+	rType := r.Type()
+	for _, w := range mw.RecordWindows() {
+		if w.recordType == rType {
+			return w
 		}
 	}
+	return nil
+}
+
+func recordList(r *codeplug.Record) *RecordList {
+	w := recordWindow(r)
+	return w.recordList
+}
+
+func selectedRecords(r *codeplug.Record) []*codeplug.Record {
+	rl := recordList(r)
+	return rl.SelectedRecords()
 }
 
 func randomString(size int) (string, error) {

@@ -150,9 +150,7 @@ func (f *Field) SetString(str string) error {
 		change := f.Change(previousString)
 		change.Complete()
 	}
-	// Some fields may be dependent on this field's value
-	// Set them based on valid
-	f.record.valid()
+
 	return err
 }
 
@@ -176,7 +174,22 @@ func (f *Field) setString(s string) error {
 		f.record.rDesc.cachedListNames = nil
 	}
 
+	// Some fields may be dependent on this field's value
+	// Set them based on valid
+	f.record.valid()
+
 	return err
+}
+
+func (f *Field) TestSetString(str string) error {
+	previousString := f.String()
+	err := f.setString(str)
+	if err != nil {
+		return err
+	}
+
+	f.setString(previousString)
+	return nil
 }
 
 // listNames returns a slice of the names of all the records in the

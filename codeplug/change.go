@@ -164,6 +164,7 @@ const (
 	InsertFieldsChange  ChangeType = "InsertFieldsChange"
 	RemoveFieldsChange  ChangeType = "RemoveFieldsChange"
 	ListIndexChange     ChangeType = "ListIndexChange"
+	RecordsFieldChange  ChangeType = "RecordsFieldChange"
 )
 
 func fieldChange(f *Field, previousValue string) *Change {
@@ -184,6 +185,15 @@ func fieldsChange(t ChangeType, r *Record, fields []*Field) *Change {
 		fields:  fields,
 	}
 	change.strings = change.refStrings()
+
+	return &change
+}
+
+func recordsFieldChange(recs []*Record) *Change {
+	change := Change{
+		cType:   RecordsFieldChange,
+		records: recs,
+	}
 
 	return &change
 }
@@ -262,6 +272,10 @@ func (cp *Codeplug) RemoveRecordsChange(records []*Record) *Change {
 	change.changes = cp.listIndexChanges(change)
 
 	return change
+}
+
+func (cp *Codeplug) RecordsFieldChange(recs []*Record) *Change {
+	return recordsFieldChange(recs)
 }
 
 func (cp *Codeplug) listIndexChanges(change *Change) []*Change {
@@ -476,6 +490,19 @@ func (cp *Codeplug) UndoString() string {
 		str = fmt.Sprintf("%s.%s: %s: '%s' -> '%s'",
 			rTypeName, rName, fTypeName, prevVal, value)
 
+	case RecordsFieldChange:
+		rCount := len(change.records)
+		fChange := change.changes[0]
+		f := fChange.Field()
+		fTypeName := f.TypeName()
+		value := f.String()
+		howMany := "all"
+		if rCount != len(f.record.records) {
+			howMany = fmt.Sprintf("%d", rCount)
+		}
+		str = fmt.Sprintf("Set '%s' to '%s' in %s %s",
+			fTypeName, value, howMany, rTypeName)
+
 	case MoveRecordsChange:
 		names := maxNamesString(recordNames(change.records), 5)
 		ref := change.undoReference()
@@ -541,11 +568,24 @@ func (cp *Codeplug) RedoString() string {
 	switch cType {
 	case FieldChange:
 		f := change.Field()
-		fName := f.TypeName()
+		fTypeName := f.TypeName()
 		value := f.String()
-		prevVal := change.previousValue()
+		prevValue := change.previousValue()
 		str = fmt.Sprintf("%s.%s: %s: '%s' -> '%s'",
-			rTypeName, rName, fName, value, prevVal)
+			rTypeName, rName, fTypeName, value, prevValue)
+
+	case RecordsFieldChange:
+		rCount := len(change.records)
+		fChange := change.changes[0]
+		f := fChange.Field()
+		fTypeName := f.TypeName()
+		prevValue := fChange.previousValue()
+		howMany := "all"
+		if rCount != len(f.record.records) {
+			howMany = fmt.Sprintf("%d", rCount)
+		}
+		str = fmt.Sprintf("Set '%s' to '%s' in %s %s",
+			fTypeName, prevValue, howMany, rTypeName)
 
 	case MoveRecordsChange:
 		names := maxNamesString(recordNames(change.records), 5)
@@ -584,7 +624,24 @@ func (cp *Codeplug) RedoString() string {
 	return str
 }
 
-func (cp *Codeplug) UndoChange() {
+func (cp *Codeplug) UndoNameChangeCount() (string, int) {
+	changeList := cp.changeList
+	index := cp.changeIndex
+
+	if len(changeList) == 1 {
+		return "", 0
+	}
+
+	if index == 0 || index >= len(changeList) {
+		logFatal("Undo: bad changeIndex")
+	}
+
+	change := changeList[index]
+
+	return change.Record().TypeName(), len(change.changes)
+}
+
+func (cp *Codeplug) UndoChange(progFunc func(int)) {
 	changeList := cp.changeList
 	index := cp.changeIndex
 
@@ -600,11 +657,11 @@ func (cp *Codeplug) UndoChange() {
 	cp.changed = true
 
 	change := changeList[index]
-	change = cp.undoChange(change)
+	change = cp.undoChange(change, progFunc)
 	cp.publishChange(change)
 }
 
-func (cp *Codeplug) undoChange(change *Change) *Change {
+func (cp *Codeplug) undoChange(change *Change, progFunc func(int)) *Change {
 	cType := change.cType
 
 	switch cType {
@@ -617,6 +674,12 @@ func (cp *Codeplug) undoChange(change *Change) *Change {
 		}
 
 		*change = *fieldChange(f, previousValue)
+
+	case RecordsFieldChange:
+		for i, change := range change.changes {
+			cp.undoChange(change, nil)
+			progFunc(i)
+		}
 
 	case MoveRecordsChange:
 		strings := change.refStrings()
@@ -718,7 +781,24 @@ func (cp *Codeplug) undoChange(change *Change) *Change {
 	return change
 }
 
-func (cp *Codeplug) RedoChange() {
+func (cp *Codeplug) RedoNameChangeCount() (string, int) {
+	changeList := cp.changeList
+	index := cp.changeIndex
+
+	if len(changeList) <= index+1 {
+		return "", 0
+	}
+
+	if index < 0 {
+		logFatal("Redo: bad changeIndex")
+	}
+
+	change := changeList[index+1]
+
+	return change.Record().TypeName(), len(change.changes)
+}
+
+func (cp *Codeplug) RedoChange(progFunc func(int)) {
 	changeList := cp.changeList
 	index := cp.changeIndex
 
@@ -735,11 +815,11 @@ func (cp *Codeplug) RedoChange() {
 	cp.changed = true
 
 	change := changeList[index]
-	change = cp.redoChange(change)
+	change = cp.redoChange(change, progFunc)
 	cp.publishChange(change)
 }
 
-func (cp *Codeplug) redoChange(change *Change) *Change {
+func (cp *Codeplug) redoChange(change *Change, progFunc func(int)) *Change {
 	cType := change.cType
 
 	switch cType {
@@ -752,6 +832,12 @@ func (cp *Codeplug) redoChange(change *Change) *Change {
 		}
 
 		*change = *fieldChange(f, previousValue)
+
+	case RecordsFieldChange:
+		for i, change := range change.changes {
+			cp.redoChange(change, nil)
+			progFunc(i)
+		}
 
 	case MoveRecordsChange:
 		strings := change.refStrings()
@@ -844,12 +930,12 @@ func (cp *Codeplug) redoChange(change *Change) *Change {
 
 func (cp *Codeplug) undoListIndexChanges(change *Change) {
 	for _, change = range change.changes {
-		cp.undoChange(change)
+		cp.undoChange(change, nil)
 	}
 }
 
 func (cp *Codeplug) redoListIndexChanges(change *Change) {
 	for _, change = range change.changes {
-		cp.redoChange(change)
+		cp.redoChange(change, nil)
 	}
 }

@@ -759,6 +759,23 @@ func (cp *Codeplug) RecordTypes() []RecordType {
 	return rTypes
 }
 
+func (cp *Codeplug) SetRecordsField(recs []*Record, fType FieldType, str string, progFunc func(int)) error {
+	change := cp.RecordsFieldChange(recs)
+	for i, r := range recs {
+		f := r.Field(fType)
+		pValue := f.String()
+		change.changes = append(change.changes, fieldChange(f, pValue))
+		err := f.setString(str)
+		if err != nil {
+			return err
+		}
+		progFunc(i)
+	}
+	change.Complete()
+
+	return nil
+}
+
 // ID returns a string unique to the codeplug.
 func (cp *Codeplug) ID() string {
 	return cp.id
