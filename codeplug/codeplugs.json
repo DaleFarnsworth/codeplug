@@ -2338,7 +2338,10 @@
           "CiGroupList",
           "CiColorCode",
           "CiRepeaterSlot",
-          "CiPrivacy"
+          "CiPrivacy",
+	  "CiDCDMSwitch",
+	  "CiInCallCriteria",
+	  "CiGPSSystem"
         ],
         "disables": [
           "CiCtcssDecode",

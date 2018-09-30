@@ -1668,6 +1668,7 @@ var fiCiDCDMSwitch = fieldInfo{
 	valueType:     VtOnOff,
 	defaultValue:  "Off",
 	enablingValue: "On",
+	enabler:       FtCiChannelMode,
 }
 
 var fiCiDQTTurnoffFreq = fieldInfo{
@@ -1836,6 +1837,7 @@ var fiCiGPSSystem = fieldInfo{
 		max:       16,
 		minString: "None",
 	},
+	enabler: FtCiChannelMode,
 }
 
 var fiCiGroupList = fieldInfo{
@@ -1865,6 +1867,7 @@ var fiCiInCallCriteria = fieldInfo{
 		"Always",
 		"Follow Admit Criteria",
 	},
+	enabler: FtCiChannelMode,
 }
 
 var fiCiLeaderMS = fieldInfo{
