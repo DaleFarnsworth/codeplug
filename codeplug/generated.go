@@ -1922,7 +1922,7 @@ var fiCiPower_uv380 = fieldInfo{
 	defaultValue: "High",
 	indexedStrings: &[]IndexedString{
 		IndexedString{0, "Low"},
-		IndexedString{2, "Middle"},
+		IndexedString{2, "Medium"},
 		IndexedString{3, "High"},
 	},
 }
