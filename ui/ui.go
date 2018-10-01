@@ -491,10 +491,10 @@ func (mw *MainWindow) NewRecordWindow(rType codeplug.RecordType, writable bool) 
 			rl.SetCurrent(newCurrentRecord)
 		}
 
-		if updateRecordList || updateRecord {
-			if w.recordList.Current() == change.Record().Index() {
-				w.recordFunc()
-			}
+		curChanged := w.recordList.Current() == change.Record().Index()
+
+		if updateRecordList || updateRecord && curChanged {
+			w.recordFunc()
 		}
 	}
 

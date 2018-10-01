@@ -421,6 +421,7 @@ func (w *Window) initRecordModel(writable bool) {
 
 		w.recordList.Update()
 		w.recordList.SetCurrent(dRow - 1)
+		w.recordFunc()
 
 		return rv
 	})

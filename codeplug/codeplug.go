@@ -846,6 +846,8 @@ func (cp *Codeplug) RemoveRecord(r *Record) {
 		r.rIndex = i
 	}
 	cp.rDesc[rType].records = records
+
+	records[0].cachedListNames = nil
 }
 
 func (cp *Codeplug) RemoveAllRecords() {
