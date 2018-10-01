@@ -930,6 +930,8 @@ func setFieldString(f *codeplug.Field, s string) error {
 	return nil
 }
 
+const slowChangeCount = 5
+
 func setMultipleRecords(f *codeplug.Field, str string) bool {
 	if f.MaxFields() > 1 {
 		return false
@@ -966,24 +968,31 @@ func setMultipleRecords(f *codeplug.Field, str string) bool {
 		howmany = fmt.Sprintf("%d selected", len(recs))
 	}
 
-	recordName := f.Record().TypeName()
+	typeName := f.Record().TypeName()
 
-	msg := fmt.Sprintf(`Set "%s" to "%s" in %s %s?`, f.TypeName(), str, howmany, recordName)
-	ans := YesNoPopup(fmt.Sprintf("Change multiple %s", recordName), msg)
+	msg := fmt.Sprintf(`Set "%s" to "%s" in %s %s?`, f.TypeName(), str, howmany, typeName)
+	ans := YesNoPopup(fmt.Sprintf("Change multiple %s", typeName), msg)
 	if ans != PopupYes {
 		rw.settingMultiple = false
 		return false
 	}
 
-	pd := NewProgressDialog("Updating " + recordName)
-	pd.SetRange(0, len(recs))
-	progFunc := func(i int) {
-		pd.SetValue(i)
+	rCount := len(recs)
+	if rCount < slowChangeCount {
+		cp.SetRecordsField(recs, f.Type(), str, func(int) {})
+	} else {
+		pd := NewProgressDialog("Updating " + typeName)
+		pd.SetRange(0, rCount)
+
+		progFunc := func(i int) {
+			pd.SetValue(i)
+		}
+
+		cp.SetRecordsField(recs, f.Type(), str, progFunc)
+
+		pd.Close()
 	}
 
-	cp.SetRecordsField(recs, f.Type(), str, progFunc)
-
-	pd.Close()
 	rw.settingMultiple = false
 
 	return true
@@ -1213,6 +1222,11 @@ func newFieldCombobox(f *codeplug.Field) *Widget {
 	widget.field = f
 
 	strings := f.Strings()
+	span := f.Span()
+	if span != nil {
+		strings = f.SpanStrings()
+	}
+
 	if len(strings) == 0 {
 		logFatal("Combobox has no Strings()")
 	}
@@ -1425,6 +1439,7 @@ var newFieldWidget = map[codeplug.ValueType]func(*codeplug.Field) *Widget{
 	codeplug.VtRadioPassword:     newFieldLineEdit,
 	codeplug.VtRadioProgPassword: newFieldLineEdit,
 	codeplug.VtSpan:              newFieldSpinbox,
+	codeplug.VtSpanList:          newFieldCombobox,
 	codeplug.VtTextMessage:       newFieldTextEdit,
 	codeplug.VtTimeStamp:         newFieldLineEdit,
 	codeplug.VtUniqueName:        newFieldLineEdit,
@@ -1571,8 +1586,6 @@ func (w *Window) RecordFunc() func() {
 	return w.recordFunc
 }
 
-const slowChangeCount = 5
-
 func UndoChange(cp *codeplug.Codeplug) {
 	progFunc := func(i int) {}
 
@@ -1589,7 +1602,6 @@ func UndoChange(cp *codeplug.Codeplug) {
 	}
 	cp.UndoChange(progFunc)
 	pd.Close()
-
 }
 
 func RedoChange(cp *codeplug.Codeplug) {
@@ -1608,7 +1620,6 @@ func RedoChange(cp *codeplug.Codeplug) {
 	}
 	cp.RedoChange(progFunc)
 	pd.Close()
-
 }
 
 func InfoPopup(title string, msg string) {

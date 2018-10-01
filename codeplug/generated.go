@@ -262,6 +262,7 @@ const (
 	VtRadioPassword     ValueType = "radioPassword"
 	VtRadioProgPassword ValueType = "radioProgPassword"
 	VtSpan              ValueType = "span"
+	VtSpanList          ValueType = "spanList"
 	VtTextMessage       ValueType = "textMessage"
 	VtTimeStamp         ValueType = "timeStamp"
 	VtUniqueName        ValueType = "uniqueName"
@@ -324,6 +325,8 @@ func newValue(vt ValueType) value {
 		return new(radioProgPassword)
 	case VtSpan:
 		return new(span)
+	case VtSpanList:
+		return new(spanList)
 	case VtTextMessage:
 		return new(textMessage)
 	case VtTimeStamp:
@@ -1601,7 +1604,7 @@ var fiCiColorCode = fieldInfo{
 	max:          1,
 	bitOffset:    8,
 	bitSize:      4,
-	valueType:    VtSpan,
+	valueType:    VtSpanList,
 	defaultValue: "1",
 	span: &Span{
 		min: 0,
@@ -1814,7 +1817,7 @@ var fiCiEmergencySystem = fieldInfo{
 	max:          1,
 	bitOffset:    80,
 	bitSize:      8,
-	valueType:    VtSpan,
+	valueType:    VtSpanList,
 	defaultValue: "None",
 	span: &Span{
 		min:       0,
@@ -1830,7 +1833,7 @@ var fiCiGPSSystem = fieldInfo{
 	max:          1,
 	bitOffset:    107,
 	bitSize:      5,
-	valueType:    VtSpan,
+	valueType:    VtSpanList,
 	defaultValue: "None",
 	span: &Span{
 		min:       0,
@@ -1969,7 +1972,6 @@ var fiCiPrivacyNumber = fieldInfo{
 		"11",
 		"12",
 		"13",
-		"14",
 		"15",
 		"16",
 	},
@@ -2151,7 +2153,7 @@ var fiCiSquelch_uv380 = fieldInfo{
 	max:          1,
 	bitOffset:    124,
 	bitSize:      4,
-	valueType:    VtSpan,
+	valueType:    VtSpanList,
 	defaultValue: "1",
 	span: &Span{
 		min: 0,
@@ -2431,7 +2433,7 @@ var fiGsChannelsHangTime = fieldInfo{
 	max:          1,
 	bitOffset:    1152,
 	bitSize:      8,
-	valueType:    VtSpan,
+	valueType:    VtSpanList,
 	defaultValue: "3000",
 	span: &Span{
 		min:      0,
@@ -2517,7 +2519,7 @@ var fiGsGroupCallHangTime = fieldInfo{
 	max:          1,
 	bitOffset:    584,
 	bitSize:      8,
-	valueType:    VtSpan,
+	valueType:    VtSpanList,
 	defaultValue: "3000",
 	span: &Span{
 		min:      0,
@@ -2725,7 +2727,7 @@ var fiGsPrivateCallHangTime = fieldInfo{
 	max:          1,
 	bitOffset:    592,
 	bitSize:      8,
-	valueType:    VtSpan,
+	valueType:    VtSpanList,
 	defaultValue: "4000",
 	span: &Span{
 		min:      0,
@@ -2865,7 +2867,7 @@ var fiGsScanAnalogHangTime = fieldInfo{
 	max:          1,
 	bitOffset:    672,
 	bitSize:      8,
-	valueType:    VtSpan,
+	valueType:    VtSpanList,
 	defaultValue: "1000",
 	span: &Span{
 		min:      5,
@@ -2881,7 +2883,7 @@ var fiGsScanDigitalHangTime = fieldInfo{
 	max:          1,
 	bitOffset:    664,
 	bitSize:      8,
-	valueType:    VtSpan,
+	valueType:    VtSpanList,
 	defaultValue: "1000",
 	span: &Span{
 		min:      5,
@@ -2982,7 +2984,7 @@ var fiGsTxPreambleDuration = fieldInfo{
 	max:          1,
 	bitOffset:    576,
 	bitSize:      8,
-	valueType:    VtSpan,
+	valueType:    VtSpanList,
 	defaultValue: "600",
 	span: &Span{
 		min:   0,
@@ -2997,7 +2999,7 @@ var fiGsVoxSensitivity = fieldInfo{
 	max:          1,
 	bitOffset:    600,
 	bitSize:      8,
-	valueType:    VtSpan,
+	valueType:    VtSpanList,
 	defaultValue: "3",
 	span: &Span{
 		min: 1,
@@ -3081,7 +3083,7 @@ var fiMiHangTime = fieldInfo{
 	max:          1,
 	bitOffset:    0,
 	bitSize:      8,
-	valueType:    VtSpan,
+	valueType:    VtSpanList,
 	defaultValue: "10",
 	span: &Span{
 		min:       0,
@@ -3410,7 +3412,7 @@ var fiSlPrioritySampleTime = fieldInfo{
 	max:          1,
 	bitOffset:    320,
 	bitSize:      8,
-	valueType:    VtSpan,
+	valueType:    VtSpanList,
 	defaultValue: "2000",
 	span: &Span{
 		min:   3,
@@ -3425,7 +3427,7 @@ var fiSlSignallingHoldTime = fieldInfo{
 	max:          1,
 	bitOffset:    312,
 	bitSize:      8,
-	valueType:    VtSpan,
+	valueType:    VtSpanList,
 	defaultValue: "500",
 	span: &Span{
 		min:   2,

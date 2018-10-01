@@ -94,10 +94,10 @@ type ValueType string
 
 // A Span represents a range of values.
 type Span struct {
-	min       uint8
-	max       uint8
-	scale     uint8
-	interval  uint8
+	min       int
+	max       int
+	scale     int
+	interval  int
 	minString string
 }
 
@@ -116,6 +116,14 @@ func (span *Span) Minimum() int {
 // Maximum returns the maximum value of a Span.
 func (span *Span) Maximum() int {
 	return int(span.max) * int(span.scale)
+}
+
+func (span *Span) Scale() int {
+	return int(span.scale)
+}
+
+func (span *Span) Interval() int {
+	return int(span.interval)
 }
 
 // Step returns the step (minimal increment) for a Span.
@@ -221,11 +229,8 @@ func (f *Field) memberListNames() []string {
 }
 
 // Span returns the fields Span struct, if any
-func (f *Field) Span() Span {
-	if f.span == nil {
-		return Span{}
-	}
-	return *f.span
+func (f *Field) Span() *Span {
+	return f.span
 }
 
 // Strings returns a slice of valid string values for the field.
@@ -277,8 +282,26 @@ func (f *Field) Strings() []string {
 			}
 		}
 
+	case VtSpanList:
+		strs = f.SpanStrings()
+
 	default:
 		logFatalf("f.Strings: unexpected f.valueType: %s", f.valueType)
+	}
+
+	return strs
+}
+
+func (f *Field) SpanStrings() []string {
+	span := f.span
+
+	strs := make([]string, 0)
+	for i := span.min; i < span.max; i += span.interval {
+		str := fmt.Sprintf("%d", i*span.scale)
+		if i == span.min && span.minString != "" {
+			str = span.minString
+		}
+		strs = append(strs, str)
 	}
 
 	return strs
@@ -824,12 +847,12 @@ func (v *bandwidth) valid(f *Field) error {
 }
 
 // span is a field value representing a range of integer values
-type span uint8
+type span int
 
 // getString returns the span's value as a string.
 func (v *span) getString(f *Field) string {
 	sp := *f.span
-	i := uint8(*v)
+	i := int(*v)
 	if sp.minString != "" && i == sp.min {
 		return sp.minString
 	}
@@ -902,8 +925,12 @@ func (v *span) store(f *Field) {
 	f.storeBytes([]byte{byte(*v)})
 }
 
-type gpsReportInterval struct {
+type spanList struct {
 	span
+}
+
+type gpsReportInterval struct {
+	spanList
 }
 
 func (v *gpsReportInterval) valid(f *Field) error {

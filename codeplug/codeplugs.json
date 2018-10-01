@@ -1367,7 +1367,7 @@
       "bitOffset": 576,
       "bitSize": 8,
       "defaultValue": "600",
-      "valueType": "span",
+      "valueType": "spanList",
       "span": {
         "min": 0,
         "max": 144,
@@ -1380,7 +1380,7 @@
       "bitOffset": 584,
       "bitSize": 8,
       "defaultValue": "3000",
-      "valueType": "span",
+      "valueType": "spanList",
       "span": {
         "min": 0,
         "max": 70,
@@ -1394,7 +1394,7 @@
       "bitOffset": 592,
       "bitSize": 8,
       "defaultValue": "4000",
-      "valueType": "span",
+      "valueType": "spanList",
       "span": {
         "min": 0,
         "max": 70,
@@ -1408,7 +1408,7 @@
       "bitOffset": 600,
       "bitSize": 8,
       "defaultValue": "3",
-      "valueType": "span",
+      "valueType": "spanList",
       "span": {
         "min": 1,
         "max": 10
@@ -1471,7 +1471,7 @@
       "bitOffset": 664,
       "bitSize": 8,
       "defaultValue": "1000",
-      "valueType": "span",
+      "valueType": "spanList",
       "span": {
         "min": 5,
         "max": 100,
@@ -1485,7 +1485,7 @@
       "bitOffset": 672,
       "bitSize": 8,
       "defaultValue": "1000",
-      "valueType": "span",
+      "valueType": "spanList",
       "span": {
         "min": 5,
         "max": 100,
@@ -1650,7 +1650,7 @@
       "bitOffset": 1152,
       "bitSize": 8,
       "defaultValue": "3000",
-      "valueType": "span",
+      "valueType": "spanList",
       "span": {
         "min": 0,
         "max": 70,
@@ -1720,7 +1720,7 @@
       "bitOffset": 0,
       "bitSize": 8,
       "defaultValue": "10",
-      "valueType": "span",
+      "valueType": "spanList",
       "span": {
         "min": 0,
         "max": 30,
@@ -2223,7 +2223,7 @@
       "bitOffset": 312,
       "bitSize": 8,
       "defaultValue": "500",
-      "valueType": "span",
+      "valueType": "spanList",
       "span": {
         "min": 2,
         "max": 255,
@@ -2236,7 +2236,7 @@
       "bitOffset": 320,
       "bitSize": 8,
       "defaultValue": "2000",
-      "valueType": "span",
+      "valueType": "spanList",
       "span": {
         "min": 3,
         "max": 31,
@@ -2287,7 +2287,7 @@
       "bitOffset": 124,
       "bitSize": 4,
       "defaultValue": "1",
-      "valueType": "span",
+      "valueType": "spanList",
       "span": {
         "min": 0,
         "max": 9
@@ -2339,9 +2339,9 @@
           "CiColorCode",
           "CiRepeaterSlot",
           "CiPrivacy",
-	  "CiDCDMSwitch",
-	  "CiInCallCriteria",
-	  "CiGPSSystem"
+          "CiDCDMSwitch",
+          "CiInCallCriteria",
+          "CiGPSSystem"
         ],
         "disables": [
           "CiCtcssDecode",
@@ -2360,7 +2360,7 @@
       "bitOffset": 8,
       "bitSize": 4,
       "defaultValue": "1",
-      "valueType": "span",
+      "valueType": "spanList",
       "span": {
         "min": 0,
         "max": 15
@@ -2451,7 +2451,6 @@
         "11",
         "12",
         "13",
-        "14",
         "15",
         "16"
       ]
@@ -2641,7 +2640,7 @@
       "bitOffset": 80,
       "bitSize": 8,
       "defaultValue": "None",
-      "valueType": "span",
+      "valueType": "spanList",
       "span": {
         "min": 0,
         "max": 32,
@@ -2699,7 +2698,7 @@
       "bitOffset": 107,
       "bitSize": 5,
       "defaultValue": "None",
-      "valueType": "span",
+      "valueType": "spanList",
       "span": {
         "min": 0,
         "max": 16,
