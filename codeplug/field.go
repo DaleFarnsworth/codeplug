@@ -673,12 +673,18 @@ func (v *frequencyOffset) setString(f *Field, s string) error {
 // valid returns nil if the frequencyOffset's value is valid.
 func (v *frequencyOffset) valid(f *Field) error {
 	freq := float64(*v)
+
+	rxFreq, err := rxFrequency(f)
+	if err != nil {
+		return err
+	}
+
 	if f.record.codeplug.frequencyValid(freq) == nil {
-		*v = frequencyOffset(freq - rxFrequency(f))
+		*v = frequencyOffset(freq - rxFreq)
 		return nil
 	}
 
-	return f.record.codeplug.frequencyValid(rxFrequency(f) + freq)
+	return f.record.codeplug.frequencyValid(rxFreq + freq)
 }
 
 // load sets the frequencyOffset's value from its bits in cp.bytes.
@@ -689,12 +695,18 @@ func (v *frequencyOffset) load(f *Field) {
 
 // store stores the frequencyOffset's value into its bits in cp.bytes.
 func (v *frequencyOffset) store(f *Field) {
-	f.storeBytes(frequencyToBytes(float64(*v) + rxFrequency(f)))
+	rxFreq, err := rxFrequency(f)
+	if err == nil {
+		f.storeBytes(frequencyToBytes(float64(*v) + rxFreq))
+	}
 }
 
-func rxFrequency(f *Field) float64 {
+func rxFrequency(f *Field) (float64, error) {
 	rxFrequency, _ := f.sibling(FtCiRxFrequency).value.(*frequency)
-	return float64(*rxFrequency)
+	if rxFrequency == nil {
+		return 0.0, errors.New("rxFrequency is invalid")
+	}
+	return float64(*rxFrequency), nil
 }
 
 // onOff is a field value representing a boolean value.
