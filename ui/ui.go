@@ -1586,40 +1586,39 @@ func (w *Window) RecordFunc() func() {
 	return w.recordFunc
 }
 
-func UndoChange(cp *codeplug.Codeplug) {
+func condWrapProgress(title string, f func(func(int)), changeCount int) {
 	progFunc := func(i int) {}
-
-	typeName, changeCount := cp.UndoNameChangeCount()
 	if changeCount < slowChangeCount {
-		cp.UndoChange(progFunc)
+		f(progFunc)
 		return
 	}
 
-	pd := NewProgressDialog("Updating " + typeName)
-	pd.SetRange(0, changeCount)
+	pd := NewProgressDialog(title)
 	progFunc = func(i int) {
 		pd.SetValue(i)
 	}
-	cp.UndoChange(progFunc)
+
+	pd.SetRange(0, changeCount)
+	f(progFunc)
 	pd.Close()
 }
 
+func UndoChange(cp *codeplug.Codeplug) {
+	change := cp.ChangeToUndo()
+	changeRecord := change.Record()
+	changeCount := len(change.Changes())
+	title := "Updating " + changeRecord.TypeName()
+
+	condWrapProgress(title, cp.UndoChange, changeCount)
+}
+
 func RedoChange(cp *codeplug.Codeplug) {
-	progFunc := func(i int) {}
+	change := cp.ChangeToRedo()
+	changeRecord := change.Record()
+	changeCount := len(change.Changes())
+	title := "Updating " + changeRecord.TypeName()
 
-	typeName, changeCount := cp.RedoNameChangeCount()
-	if changeCount < slowChangeCount {
-		cp.RedoChange(progFunc)
-		return
-	}
-
-	pd := NewProgressDialog("Updating " + typeName)
-	pd.SetRange(0, changeCount)
-	progFunc = func(i int) {
-		pd.SetValue(i)
-	}
-	cp.RedoChange(progFunc)
-	pd.Close()
+	condWrapProgress(title, cp.RedoChange, changeCount)
 }
 
 func InfoPopup(title string, msg string) {

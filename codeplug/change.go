@@ -624,21 +624,19 @@ func (cp *Codeplug) RedoString() string {
 	return str
 }
 
-func (cp *Codeplug) UndoNameChangeCount() (string, int) {
+func (cp *Codeplug) ChangeToUndo() *Change {
 	changeList := cp.changeList
 	index := cp.changeIndex
 
 	if len(changeList) == 1 {
-		return "", 0
+		return nil
 	}
 
 	if index == 0 || index >= len(changeList) {
-		logFatal("Undo: bad changeIndex")
+		logFatal("ChangeToUndo: bad changeIndex")
 	}
 
-	change := changeList[index]
-
-	return change.Record().TypeName(), len(change.changes)
+	return changeList[index]
 }
 
 func (cp *Codeplug) UndoChange(progFunc func(int)) {
@@ -781,21 +779,19 @@ func (cp *Codeplug) undoChange(change *Change, progFunc func(int)) *Change {
 	return change
 }
 
-func (cp *Codeplug) RedoNameChangeCount() (string, int) {
+func (cp *Codeplug) ChangeToRedo() *Change {
 	changeList := cp.changeList
 	index := cp.changeIndex
 
 	if len(changeList) <= index+1 {
-		return "", 0
+		return nil
 	}
 
 	if index < 0 {
-		logFatal("Redo: bad changeIndex")
+		logFatal("ChangeToRedo: bad changeIndex")
 	}
 
-	change := changeList[index+1]
-
-	return change.Record().TypeName(), len(change.changes)
+	return changeList[index+1]
 }
 
 func (cp *Codeplug) RedoChange(progFunc func(int)) {
