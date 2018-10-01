@@ -135,13 +135,13 @@ func (as *AppSettings) SetArrayIndex(i int) {
 	as.qSettings.SetArrayIndex(i)
 }
 
-type DelayedCall struct {
+type DelayedCallStruct struct {
 	core.QObject
 	_ func() `slot:"create"`
 }
 
-func delayedCall(f func()) {
-	delayedCall := NewDelayedCall(nil)
+func DelayedCall(f func()) {
+	delayedCall := NewDelayedCallStruct(nil)
 	delayedCall.ConnectCreate(f)
 	go delayedCall.Create() // go routine, so it's called in event loop
 }
@@ -202,11 +202,6 @@ func NewMainWindow() *MainWindow {
 				mainWindows = append(mainWindows[:i], mainWindows[i+1:]...)
 				break
 			}
-		}
-
-		objs := qmw.Children()
-		for _, obj := range objs {
-			obj.DeleteLater()
 		}
 
 		event.Accept()
@@ -921,7 +916,7 @@ func setFieldString(f *codeplug.Field, s string) error {
 	if err != nil {
 		return err
 	}
-	delayedCall(func() {
+	DelayedCall(func() {
 		if !setMultipleRecords(f, s) {
 			f.SetString(s)
 		}
@@ -1197,7 +1192,7 @@ func newFieldLineEdit(f *codeplug.Field) *Widget {
 	widget.qWidget = qw
 	widget.field = f
 	metrics := gui.NewQFontMetrics(widgets.QApplication_Font())
-	widget.SetMinimumWidth(metrics.Width(s, -1) + 12)
+	widget.SetMinimumWidth(metrics.HorizontalAdvance(s, -1) + 12)
 
 	var finished func()
 	finished = func() {
