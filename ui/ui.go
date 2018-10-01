@@ -437,7 +437,6 @@ func (mw *MainWindow) NewRecordWindow(rType codeplug.RecordType, writable bool) 
 
 		updateRecordList := false
 		updateRecord := false
-		newCurrentRecord := -1
 
 		changeType := change.Type()
 		switch changeType {
@@ -462,10 +461,12 @@ func (mw *MainWindow) NewRecordWindow(rType codeplug.RecordType, writable bool) 
 			}
 
 		case codeplug.MoveRecordsChange, codeplug.InsertRecordsChange:
-			newCurrentRecord = change.Record().Index()
+			rl.SetCurrent(change.Record().Index())
 			updateRecordList = true
+			rl.SelectRecords(change.Records())
 
 		case codeplug.RemoveRecordsChange:
+			rl.SetCurrent(change.Record().Index())
 			updateRecordList = true
 
 		case codeplug.MoveFieldsChange,
@@ -482,12 +483,7 @@ func (mw *MainWindow) NewRecordWindow(rType codeplug.RecordType, writable bool) 
 			rl.Update()
 		}
 
-		if newCurrentRecord >= 0 {
-			rl.SetCurrent(newCurrentRecord)
-		}
-
 		curChanged := w.recordList.Current() == change.Record().Index()
-
 		if updateRecordList || updateRecord && curChanged {
 			w.recordFunc()
 		}

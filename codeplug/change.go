@@ -853,10 +853,6 @@ func (cp *Codeplug) redoChange(change *Change, progFunc func(int)) *Change {
 
 		cp.redoListIndexChanges(change)
 
-		newChange := *change
-		change = &newChange
-		change.cType = RemoveRecordsChange
-
 	case RemoveRecordsChange:
 		records := change.records
 		for i := len(records) - 1; i >= 0; i-- {
@@ -864,10 +860,6 @@ func (cp *Codeplug) redoChange(change *Change, progFunc func(int)) *Change {
 		}
 
 		cp.redoListIndexChanges(change)
-
-		newChange := *change
-		change = &newChange
-		change.cType = InsertRecordsChange
 
 	case MoveFieldsChange:
 		fields := change.fields
@@ -886,10 +878,6 @@ func (cp *Codeplug) redoChange(change *Change, progFunc func(int)) *Change {
 			r.InsertField(f)
 		}
 
-		newChange := *change
-		change = &newChange
-		change.cType = RemoveFieldsChange
-
 	case RemoveFieldsChange:
 		r := change.Record()
 		fields := change.fields
@@ -898,10 +886,6 @@ func (cp *Codeplug) redoChange(change *Change, progFunc func(int)) *Change {
 		}
 
 		cp.redoListIndexChanges(change)
-
-		newChange := *change
-		change = &newChange
-		change.cType = InsertFieldsChange
 
 	case ListIndexChange:
 		fType := change.FieldType()

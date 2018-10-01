@@ -71,8 +71,16 @@ func (parent *HBox) AddRecordList(rType codeplug.RecordType) *RecordList {
 	return rl
 }
 
+func (rl *RecordList) Model() *core.QAbstractItemModel {
+	return rl.qListView.Model()
+}
+
+func (rl *RecordList) SelectionModel() *core.QItemSelectionModel {
+	return rl.qListView.SelectionModel()
+}
+
 func (rl *RecordList) SetCurrent(i int) {
-	index := rl.qListView.Model().CreateIndex(i, 0, nil)
+	index := rl.Model().CreateIndex(i, 0, nil)
 	rl.qListView.SetCurrentIndex(index)
 	rl.qListView.ScrollTo(index, widgets.QAbstractItemView__EnsureVisible)
 }
@@ -112,8 +120,8 @@ func (rl *RecordList) Update() {
 	} else if row >= rowCount {
 		rl.SetCurrent(rowCount - 1)
 	}
-	topLeft := rl.qListView.Model().CreateIndex(0, 0, nil)
-	bottomRight := rl.qListView.Model().CreateIndex(rowCount-1, 0, nil)
+	topLeft := rl.Model().CreateIndex(0, 0, nil)
+	bottomRight := rl.Model().CreateIndex(rowCount-1, 0, nil)
 	rl.qListView.DataChanged(topLeft, bottomRight, []int{})
 }
 
@@ -132,7 +140,7 @@ func (rl *RecordList) AddDupSelected(add bool) error {
 		return fmt.Errorf("too many records")
 	}
 
-	model := rl.qListView.Model()
+	model := rl.Model()
 	qModelIndex := core.NewQModelIndex()
 
 	row := records[len(records)-1].Index() + 1
@@ -184,7 +192,7 @@ func (rl *RecordList) RemoveSelected() error {
 		return fmt.Errorf("can't delete last record")
 	}
 
-	model := rl.qListView.Model()
+	model := rl.Model()
 	qModelIndex := core.NewQModelIndex()
 
 	change := cp.RemoveRecordsChange(records)
@@ -201,6 +209,14 @@ func (rl *RecordList) RemoveSelected() error {
 	w.recordFunc()
 
 	return nil
+}
+
+func (rl *RecordList) SelectRecords(records []*codeplug.Record) {
+	rl.ClearSelection()
+	for _, r := range records {
+		index := rl.Model().CreateIndex(r.Index(), 0, nil)
+		rl.SelectionModel().Select(index, core.QItemSelectionModel__Select)
+	}
 }
 
 func (w *Window) dataRecords(data *core.QMimeData) ([]*codeplug.Record, string, error) {
@@ -419,8 +435,11 @@ func (w *Window) initRecordModel(writable bool) {
 			change.Complete()
 		}
 
-		w.recordList.Update()
-		w.recordList.SetCurrent(dRow - 1)
+		rl := w.recordList
+		rl.SetCurrent(dRow - 1)
+		rl.SelectRecords(records)
+
+		rl.Update()
 		w.recordFunc()
 
 		return rv
