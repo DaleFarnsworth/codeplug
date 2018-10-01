@@ -1,4 +1,4 @@
-FROM therecipe/qt:linux-orig
+FROM therecipe/qt:linux
 
 MAINTAINER Dale Farnsworth
 
