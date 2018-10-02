@@ -463,7 +463,7 @@ func (mw *MainWindow) NewRecordWindow(rType codeplug.RecordType, writable bool) 
 		case codeplug.MoveRecordsChange, codeplug.InsertRecordsChange:
 			rl.SetCurrent(change.Record().Index())
 			updateRecordList = true
-			rl.SelectRecords(change.Records())
+			rl.SelectRecords(change.Records()...)
 
 		case codeplug.RemoveRecordsChange:
 			rl.SetCurrent(change.Record().Index())

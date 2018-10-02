@@ -198,12 +198,19 @@ func (rl *RecordList) RemoveSelected() error {
 	change := cp.RemoveRecordsChange(records)
 	for _, r := range records {
 		row := r.Index()
-
 		model.BeginRemoveRows(qModelIndex, row, row)
 		cp.RemoveRecord(r)
 		model.EndRemoveRows()
 	}
 	change.Complete()
+
+	allRecords = cp.Records(w.recordType)
+	row := records[len(records)-1].Index()
+	if row >= len(allRecords) {
+		row = len(allRecords) - 1
+	}
+	rl.SetCurrent(row)
+	rl.SelectRecords(allRecords[row])
 
 	rl.Update()
 	w.recordFunc()
@@ -211,7 +218,7 @@ func (rl *RecordList) RemoveSelected() error {
 	return nil
 }
 
-func (rl *RecordList) SelectRecords(records []*codeplug.Record) {
+func (rl *RecordList) SelectRecords(records ...*codeplug.Record) {
 	rl.ClearSelection()
 	for _, r := range records {
 		index := rl.Model().CreateIndex(r.Index(), 0, nil)
@@ -437,7 +444,7 @@ func (w *Window) initRecordModel(writable bool) {
 
 		rl := w.recordList
 		rl.SetCurrent(dRow - 1)
-		rl.SelectRecords(records)
+		rl.SelectRecords(records...)
 
 		rl.Update()
 		w.recordFunc()
