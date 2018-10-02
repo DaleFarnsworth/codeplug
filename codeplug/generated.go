@@ -366,6 +366,7 @@ var cpMD380 = CodeplugInfo{
 		&riBasicInformation_md380,
 		&riGeneralSettings_md380,
 		&riMenuItems,
+		&riTextMessages,
 		&riPrivacySettings,
 		&riContacts,
 		&riGroupLists,
@@ -390,6 +391,7 @@ var cpRT3 = CodeplugInfo{
 		&riBasicInformation_md380,
 		&riGeneralSettings_md380,
 		&riMenuItems,
+		&riTextMessages,
 		&riPrivacySettings,
 		&riContacts,
 		&riGroupLists,
@@ -414,6 +416,7 @@ var cpMD390 = CodeplugInfo{
 		&riBasicInformation_md390,
 		&riGeneralSettings_md380,
 		&riMenuItems,
+		&riTextMessages,
 		&riPrivacySettings,
 		&riContacts,
 		&riGroupLists,
@@ -438,6 +441,7 @@ var cpRT3G = CodeplugInfo{
 		&riBasicInformation_md390,
 		&riGeneralSettings_md380,
 		&riMenuItems,
+		&riTextMessages,
 		&riPrivacySettings,
 		&riContacts,
 		&riGroupLists,
@@ -462,6 +466,7 @@ var cpDJMD40 = CodeplugInfo{
 		&riBasicInformation_md40,
 		&riGeneralSettings_md40,
 		&riMenuItems,
+		&riTextMessages,
 		&riPrivacySettings,
 		&riContacts,
 		&riGroupLists,
@@ -485,6 +490,7 @@ var cpMDUV380 = CodeplugInfo{
 		&riBasicInformation_uv380,
 		&riGeneralSettings_uv380,
 		&riMenuItems,
+		&riTextMessages,
 		&riPrivacySettings,
 		&riContacts_uv380,
 		&riGroupLists,
@@ -509,6 +515,7 @@ var cpMDUV390 = CodeplugInfo{
 		&riBasicInformation_uv380,
 		&riGeneralSettings_uv380,
 		&riMenuItems,
+		&riTextMessages,
 		&riPrivacySettings,
 		&riContacts_uv380,
 		&riGroupLists,
@@ -533,6 +540,7 @@ var cpRT3S = CodeplugInfo{
 		&riBasicInformation_uv380,
 		&riGeneralSettings_uv380,
 		&riMenuItems,
+		&riTextMessages,
 		&riPrivacySettings,
 		&riContacts_uv380,
 		&riGroupLists,
@@ -557,6 +565,7 @@ var cpMD2017 = CodeplugInfo{
 		&riBasicInformation_uv380,
 		&riGeneralSettings_md2017,
 		&riMenuItems,
+		&riTextMessages,
 		&riPrivacySettings,
 		&riContacts_uv380,
 		&riGroupLists,
@@ -581,6 +590,7 @@ var cpRT82 = CodeplugInfo{
 		&riBasicInformation_uv380,
 		&riGeneralSettings_md2017,
 		&riMenuItems,
+		&riTextMessages,
 		&riPrivacySettings,
 		&riContacts_uv380,
 		&riGroupLists,
@@ -1297,11 +1307,12 @@ var riScanLists_uv380 = recordInfo{
 }
 
 var riTextMessages = recordInfo{
-	rType:    RtTextMessages,
-	typeName: "Text Messages",
-	max:      50,
-	offset:   9125,
-	size:     288,
+	rType:      RtTextMessages,
+	typeName:   "Text Messages",
+	max:        50,
+	offset:     9125,
+	size:       288,
+	namePrefix: "Message ",
 	delDescs: []delDesc{
 		delDesc{
 			offset: 0,
@@ -3467,12 +3478,13 @@ var fiSlTxDesignatedChannel_md40 = fieldInfo{
 }
 
 var fiTmTextMessage = fieldInfo{
-	fType:     FtTmTextMessage,
-	typeName:  "Message",
-	max:       1,
-	bitOffset: 0,
-	bitSize:   2304,
-	valueType: VtTextMessage,
+	fType:        FtTmTextMessage,
+	typeName:     "Message",
+	max:          1,
+	bitOffset:    0,
+	bitSize:      2304,
+	valueType:    VtTextMessage,
+	defaultValue: "Hello",
 }
 
 var fiZiChannelA_uv380 = fieldInfo{

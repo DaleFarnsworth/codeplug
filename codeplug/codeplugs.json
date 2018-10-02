@@ -31,6 +31,7 @@
         "BasicInformation_md380",
         "GeneralSettings_md380",
         "MenuItems",
+	"TextMessages",
         "PrivacySettings",
         "Contacts",
         "GroupLists",
@@ -54,6 +55,7 @@
         "BasicInformation_md380",
         "GeneralSettings_md380",
         "MenuItems",
+	"TextMessages",
         "PrivacySettings",
         "Contacts",
         "GroupLists",
@@ -77,6 +79,7 @@
         "BasicInformation_md390",
         "GeneralSettings_md380",
         "MenuItems",
+	"TextMessages",
         "PrivacySettings",
         "Contacts",
         "GroupLists",
@@ -100,6 +103,7 @@
         "BasicInformation_md390",
         "GeneralSettings_md380",
         "MenuItems",
+	"TextMessages",
         "PrivacySettings",
         "Contacts",
         "GroupLists",
@@ -123,6 +127,7 @@
         "BasicInformation_md40",
         "GeneralSettings_md40",
         "MenuItems",
+	"TextMessages",
         "PrivacySettings",
         "Contacts",
         "GroupLists",
@@ -145,6 +150,7 @@
         "BasicInformation_uv380",
         "GeneralSettings_uv380",
         "MenuItems",
+	"TextMessages",
         "PrivacySettings",
         "Contacts_uv380",
         "GroupLists",
@@ -168,6 +174,7 @@
         "BasicInformation_uv380",
         "GeneralSettings_uv380",
         "MenuItems",
+	"TextMessages",
         "PrivacySettings",
         "Contacts_uv380",
         "GroupLists",
@@ -191,6 +198,7 @@
         "BasicInformation_uv380",
         "GeneralSettings_uv380",
         "MenuItems",
+	"TextMessages",
         "PrivacySettings",
         "Contacts_uv380",
         "GroupLists",
@@ -214,6 +222,7 @@
         "BasicInformation_uv380",
         "GeneralSettings_md2017",
         "MenuItems",
+	"TextMessages",
         "PrivacySettings",
         "Contacts_uv380",
         "GroupLists",
@@ -237,6 +246,7 @@
         "BasicInformation_uv380",
         "GeneralSettings_md2017",
         "MenuItems",
+	"TextMessages",
         "PrivacySettings",
         "Contacts_uv380",
         "GroupLists",
@@ -530,6 +540,7 @@
           "value": 0
         }
       ],
+      "namePrefix": "Message ",
       "fieldTypes": [
         "TmTextMessage"
       ]
@@ -1948,7 +1959,7 @@
       "type": "TmTextMessage",
       "bitOffset": 0,
       "bitSize": 2304,
-      "defaultValue": "",
+      "defaultValue": "Hello",
       "valueType": "textMessage"
     },
     {

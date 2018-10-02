@@ -1431,7 +1431,7 @@ var newFieldWidget = map[codeplug.ValueType]func(*codeplug.Field) *Widget{
 	codeplug.VtRadioProgPassword: newFieldLineEdit,
 	codeplug.VtSpan:              newFieldSpinbox,
 	codeplug.VtSpanList:          newFieldCombobox,
-	codeplug.VtTextMessage:       newFieldTextEdit,
+	codeplug.VtTextMessage:       newFieldLineEdit,
 	codeplug.VtTimeStamp:         newFieldLineEdit,
 	codeplug.VtUniqueName:        newFieldLineEdit,
 }
