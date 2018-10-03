@@ -44,6 +44,7 @@ type Field struct {
 	*fDesc
 	fIndex int
 	value
+	noStore bool
 }
 
 // A value represents the value a Field Contains.
@@ -74,9 +75,8 @@ type fieldInfo struct {
 	span           *Span
 	strings        *[]string
 	indexedStrings *[]IndexedString
-	enablingValue  string
-	enabler        FieldType
-	disabler       FieldType
+	enablerType    FieldType
+	enables        []enable
 	listRecordType RecordType
 	recordInfo     *recordInfo
 	extOffset      int
@@ -84,6 +84,11 @@ type fieldInfo struct {
 	extIndex       int
 	extBitOffset   int
 	index          int
+}
+
+type enable struct {
+	value   string
+	enables bool
 }
 
 // A FieldType represents a field's type
@@ -248,6 +253,7 @@ func (f *Field) Strings() []string {
 		if f.indexedStrings != nil && len(*f.indexedStrings) > 1 {
 			strs = append(strs, (*f.indexedStrings)[1].String)
 		}
+
 	case VtMemberListIndex:
 		strs = []string{}
 		if f.indexedStrings != nil {
@@ -273,7 +279,7 @@ func (f *Field) Strings() []string {
 			strs = strs[:8]
 		}
 
-	case VtIndexedStrings:
+	case VtIndexedStrings, VtRadioButton:
 		strs = []string{}
 
 		if f.indexedStrings != nil {
@@ -347,7 +353,14 @@ func (f *Field) FullTypeName() string {
 	s := r.typeName
 
 	if r.max > 1 {
-		s += fmt.Sprintf("[%s]", r.Name())
+		name := r.Name()
+		if r.names != nil {
+			name = r.names[r.rIndex]
+		}
+		if name == "" {
+			name = fmt.Sprintf("%d", r.rIndex)
+		}
+		s += fmt.Sprintf("[%s]", name)
 	}
 
 	s += "." + f.typeName
@@ -400,6 +413,11 @@ func (f *Field) load() {
 
 // store inserts the field's value into the field's part of cp.bytes.
 func (f *Field) store() {
+	if f.noStore {
+		// some fields may overlap with other fields
+		return
+	}
+
 	if !f.IsEnabled() {
 		if _, invalid := f.value.(invalidValue); invalid {
 			// Leave invalid value in the codeplug as we loaded it.
@@ -408,6 +426,10 @@ func (f *Field) store() {
 	}
 
 	f.value.store(f)
+}
+
+func (f *Field) SetStore(store bool) {
+	f.noStore = !store
 }
 
 // bytes returns the field's part of cp.bytes.
@@ -455,49 +477,27 @@ func (f *Field) sibling(fType FieldType) *Field {
 
 // IsEnabled returns true if the field is enabled
 func (f *Field) IsEnabled() bool {
-	enablingField := f.enablingField()
-	if enablingField == nil {
-		return true
+	enabled := true
+
+	if f.enablerType == "" {
+		return enabled
 	}
 
-	if !enablingField.IsEnabled() {
-		return false
+	enabler := f.sibling(f.enablerType)
+	enablerValue := enabler.String()
+
+	for _, enable := range f.enables {
+		if enable.value == enablerValue {
+			enabled = enable.enables
+		}
 	}
 
-	if f.enabler != "" {
-		return enablingField.String() == enablingField.enablingValue
-	}
-
-	if f.disabler != "" {
-		return enablingField.String() != enablingField.enablingValue
-	}
-
-	return true
+	return enabled
 }
 
-func (f *Field) enablingField() *Field {
-	siblingType := f.EnablingFieldType()
-
-	if siblingType == "" {
-		return nil
-	}
-
-	return f.sibling(siblingType)
-}
-
-// EnablingFieldType returns the type of the field's enabling field.
-func (f *Field) EnablingFieldType() FieldType {
-	var siblingType FieldType
-
-	if f.enabler != "" {
-		siblingType = f.enabler
-	}
-
-	if f.disabler != "" {
-		siblingType = f.disabler
-	}
-
-	return siblingType
+// EnablerType returns the type of the field's enabling field.
+func (f *Field) EnablerType() FieldType {
+	return f.enablerType
 }
 
 // fieldDeleted returns true if the field at fIndex is deleted.
@@ -1008,6 +1008,42 @@ func (v *indexedStrings) load(f *Field) {
 // store stores the indexedStrings's value into its bits in cp.bytes.
 func (v *indexedStrings) store(f *Field) {
 	f.storeBytes([]byte{byte(*v)})
+}
+
+type radioButton struct {
+	indexedStrings
+}
+
+// getString returns the radioButton's value as a string.
+func (v *radioButton) getString(f *Field) string {
+	index := uint16(v.indexedStrings)
+	if index == 255 {
+		index = 0
+	}
+
+	for _, is := range *(*f.fDesc).indexedStrings {
+		if is.Index == index {
+			return is.String
+		}
+	}
+	return ""
+}
+
+// valid returns nil if the radioButton's value is valid.
+func (v *radioButton) valid(f *Field) error {
+	index := uint16(v.indexedStrings)
+	if index == 255 {
+		index = 0
+	}
+
+	fd := f.fDesc
+	for _, is := range *fd.indexedStrings {
+		if is.Index == index {
+			return nil
+		}
+	}
+
+	return fmt.Errorf("%d: invalid index", index)
 }
 
 // biFrequency is a field value representing a frequency in Hertz.

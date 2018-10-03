@@ -54,11 +54,12 @@ type recordInfo struct {
 	max           int
 	offset        int
 	size          int
-	delDescs      []delDesc
+	delDesc       *delDesc
 	fieldInfos    []*fieldInfo
 	nameFieldType FieldType
 	index         int
 	namePrefix    string
+	names         []string
 }
 
 // A RecordType represents a record's type
@@ -341,6 +342,10 @@ func (r *Record) NamePrefix() string {
 	return r.rDesc.recordInfo.namePrefix
 }
 
+func (r *Record) Names() []string {
+	return r.rDesc.recordInfo.names
+}
+
 func (r *Record) MaxRecords() int {
 	return r.rDesc.recordInfo.max
 }
@@ -465,29 +470,33 @@ func (rd *rDesc) MemberListNames(filter func(r *Record) bool) *[]string {
 
 // recordIsDeleted returns true if the record at rIndex is deleted.
 func (rd *rDesc) recordIsDeleted(cp *Codeplug, rIndex int) bool {
-nextDelDesc:
-	for _, dd := range rd.delDescs {
-		offset := rd.offset + rIndex*rd.size + int(dd.offset)
-
-		for i := 0; i < int(dd.size); i++ {
-			if cp.bytes[offset+i] != dd.value {
-				continue nextDelDesc
-			}
-		}
-		return true
+	dd := rd.delDesc
+	if dd == nil {
+		return false
 	}
 
-	return false
+	offset := rd.offset + rIndex*rd.size + int(dd.offset)
+
+	for i := 0; i < int(dd.size); i++ {
+		if cp.bytes[offset+i] != dd.value {
+			return false
+		}
+	}
+
+	return true
 }
 
 // deleteRecord marks the record at rIndex as deleted.
 func (rd *rDesc) deleteRecord(cp *Codeplug, rIndex int) {
-	for _, dd := range rd.delDescs {
-		offset := rd.offset + rIndex*rd.size + int(dd.offset)
+	dd := rd.delDesc
+	if dd == nil {
+		logFatal("can't delete record %s", rd.records[rIndex])
+	}
 
-		for i := 0; i < int(dd.size); i++ {
-			cp.bytes[offset+i] = dd.value
-		}
+	offset := rd.offset + rIndex*rd.size + int(dd.offset)
+
+	for i := 0; i < int(dd.size); i++ {
+		cp.bytes[offset+i] = dd.value
 	}
 }
 

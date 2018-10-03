@@ -71,15 +71,18 @@ var ri{{$r.Type}} = recordInfo{
 {{- if $r.NamePrefix}}
 	namePrefix: "{{$r.NamePrefix}}",
 {{- end}}
-{{- if $r.DelDescs}}
-	delDescs: []delDesc{
-	{{- range $d := $r.DelDescs}}
-		delDesc{
-			offset: {{$d.Offset}},
-			size: {{$d.Size}},
-			value: {{$d.Value}},
-		},
+{{- if $r.Names}}
+	names: []string{
+	{{- range $s := $r.Names}}
+		"{{$s}}",
 	{{- end}}
+	},
+{{- end}}
+{{- if $r.DelDesc}}{{$d := $r.DelDesc}}
+	delDesc: &delDesc{
+		offset: {{$d.Offset}},
+		size: {{$d.Size}},
+		value: {{$d.Value}},
 	},
 {{- end}}
 	fieldInfos: []*fieldInfo{
@@ -134,14 +137,18 @@ var fi{{$f.Type}} = fieldInfo{
 {{- if $f.ListType}}
 	listRecordType: Rt{{$f.ListType}},
 {{- end}}
-{{- if $f.EnablingValue}}
-	enablingValue: "{{$f.EnablingValue}}",
-{{- end}}
 {{- if $f.Enabler}}
-	enabler: Ft{{$f.Enabler}},
+	enablerType: Ft{{$f.Enabler}},
 {{- end}}
-{{- if $f.Disabler}}
-	disabler: Ft{{$f.Disabler}},
+{{- if $f.Enables}}
+	enables: []enable{
+	{{- range $i := $f.Enables}}
+		enable{
+			value: "{{$i.Value}}",
+			enables: {{$i.Enables}},
+		},
+	{{- end}}
+	},
 {{- end}}
 {{- if $f.ExtSize}}
 	extOffset: {{$f.ExtOffset}},
