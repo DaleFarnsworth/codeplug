@@ -33,6 +33,7 @@ const (
 	RtBasicInformation_md390 RecordType = "BasicInformation"
 	RtBasicInformation_md40  RecordType = "BasicInformation"
 	RtBasicInformation_uv380 RecordType = "BasicInformation"
+	RtButtonDefinitions      RecordType = "ButtonDefinitions"
 	RtChannels_md2017        RecordType = "Channels"
 	RtChannels_md380         RecordType = "Channels"
 	RtChannels_md40          RecordType = "Channels"
@@ -46,7 +47,14 @@ const (
 	RtGeneralSettings_uv380  RecordType = "GeneralSettings"
 	RtGroupLists             RecordType = "GroupLists"
 	RtMenuItems              RecordType = "MenuItems"
+	RtNumberKey              RecordType = "NumberKey"
+	RtOneTouch               RecordType = "OneTouch"
 	RtPrivacySettings        RecordType = "PrivacySettings"
+	RtRadioButtons           RecordType = "RadioButtons"
+	RtRadioButtons2          RecordType = "RadioButtons2"
+	RtRadioButtons_md2017    RecordType = "RadioButtons"
+	RtRadioButtons_md40      RecordType = "RadioButtons"
+	RtRadioButtons_uv380     RecordType = "RadioButtons"
 	RtScanLists_md380        RecordType = "ScanLists"
 	RtScanLists_md40         RecordType = "ScanLists"
 	RtScanLists_uv380        RecordType = "ScanLists"
@@ -58,6 +66,7 @@ const (
 
 // Field types
 const (
+	FtBdLongPressDuration         FieldType = "LongPressDuration"
 	FtBiCpsVersion                FieldType = "CpsVersion"
 	FtBiFrequencyRangeA           FieldType = "FrequencyRangeA"
 	FtBiFrequencyRangeB           FieldType = "FrequencyRangeB"
@@ -212,8 +221,19 @@ const (
 	FtMiTextMessage               FieldType = "TextMessage"
 	FtMiToneOrAlert               FieldType = "ToneOrAlert"
 	FtMiVox                       FieldType = "Vox"
+	FtNkContact                   FieldType = "Contact"
+	FtOtCall                      FieldType = "Call"
+	FtOtCallType                  FieldType = "CallType"
+	FtOtDTMF                      FieldType = "DTMF"
+	FtOtEncode                    FieldType = "Encode"
+	FtOtMode                      FieldType = "Mode"
+	FtOtTextMessage               FieldType = "TextMessage"
 	FtPsBasicKey                  FieldType = "BasicKey"
 	FtPsEnhancedKey               FieldType = "EnhancedKey"
+	FtRbButton                    FieldType = "Button"
+	FtRbButton_md2017             FieldType = "Button"
+	FtRbButton_md40               FieldType = "Button"
+	FtRbButton_uv380              FieldType = "Button"
 	FtSlChannel_md380             FieldType = "Channel"
 	FtSlChannel_md40              FieldType = "Channel"
 	FtSlName                      FieldType = "Name"
@@ -242,6 +262,7 @@ const (
 	VtCallType          ValueType = "callType"
 	VtCpsVersion        ValueType = "cpsVersion"
 	VtCtcssDcs          ValueType = "ctcssDcs"
+	VtDerefListIndex    ValueType = "derefListIndex"
 	VtFrequency         ValueType = "frequency"
 	VtFrequencyOffset   ValueType = "frequencyOffset"
 	VtGpsListIndex      ValueType = "gpsListIndex"
@@ -258,6 +279,7 @@ const (
 	VtOnOff             ValueType = "onOff"
 	VtPcPassword        ValueType = "pcPassword"
 	VtPrivacyNumber     ValueType = "privacyNumber"
+	VtRadioButton       ValueType = "radioButton"
 	VtRadioName         ValueType = "radioName"
 	VtRadioPassword     ValueType = "radioPassword"
 	VtRadioProgPassword ValueType = "radioProgPassword"
@@ -285,6 +307,8 @@ func newValue(vt ValueType) value {
 		return new(cpsVersion)
 	case VtCtcssDcs:
 		return new(ctcssDcs)
+	case VtDerefListIndex:
+		return new(derefListIndex)
 	case VtFrequency:
 		return new(frequency)
 	case VtFrequencyOffset:
@@ -317,6 +341,8 @@ func newValue(vt ValueType) value {
 		return new(pcPassword)
 	case VtPrivacyNumber:
 		return new(privacyNumber)
+	case VtRadioButton:
+		return new(radioButton)
 	case VtRadioName:
 		return new(radioName)
 	case VtRadioPassword:
@@ -366,6 +392,10 @@ var cpMD380 = CodeplugInfo{
 		&riBasicInformation_md380,
 		&riGeneralSettings_md380,
 		&riMenuItems,
+		&riRadioButtons,
+		&riButtonDefinitions,
+		&riOneTouch,
+		&riNumberKey,
 		&riTextMessages,
 		&riPrivacySettings,
 		&riContacts,
@@ -391,6 +421,10 @@ var cpRT3 = CodeplugInfo{
 		&riBasicInformation_md380,
 		&riGeneralSettings_md380,
 		&riMenuItems,
+		&riRadioButtons,
+		&riButtonDefinitions,
+		&riOneTouch,
+		&riNumberKey,
 		&riTextMessages,
 		&riPrivacySettings,
 		&riContacts,
@@ -416,6 +450,10 @@ var cpMD390 = CodeplugInfo{
 		&riBasicInformation_md390,
 		&riGeneralSettings_md380,
 		&riMenuItems,
+		&riRadioButtons,
+		&riButtonDefinitions,
+		&riOneTouch,
+		&riNumberKey,
 		&riTextMessages,
 		&riPrivacySettings,
 		&riContacts,
@@ -441,6 +479,10 @@ var cpRT3G = CodeplugInfo{
 		&riBasicInformation_md390,
 		&riGeneralSettings_md380,
 		&riMenuItems,
+		&riRadioButtons,
+		&riButtonDefinitions,
+		&riOneTouch,
+		&riNumberKey,
 		&riTextMessages,
 		&riPrivacySettings,
 		&riContacts,
@@ -466,6 +508,11 @@ var cpDJMD40 = CodeplugInfo{
 		&riBasicInformation_md40,
 		&riGeneralSettings_md40,
 		&riMenuItems,
+		&riRadioButtons_md40,
+		&riRadioButtons2,
+		&riButtonDefinitions,
+		&riOneTouch,
+		&riNumberKey,
 		&riTextMessages,
 		&riPrivacySettings,
 		&riContacts,
@@ -490,6 +537,10 @@ var cpMDUV380 = CodeplugInfo{
 		&riBasicInformation_uv380,
 		&riGeneralSettings_uv380,
 		&riMenuItems,
+		&riRadioButtons_uv380,
+		&riButtonDefinitions,
+		&riOneTouch,
+		&riNumberKey,
 		&riTextMessages,
 		&riPrivacySettings,
 		&riContacts_uv380,
@@ -515,6 +566,10 @@ var cpMDUV390 = CodeplugInfo{
 		&riBasicInformation_uv380,
 		&riGeneralSettings_uv380,
 		&riMenuItems,
+		&riRadioButtons_uv380,
+		&riButtonDefinitions,
+		&riOneTouch,
+		&riNumberKey,
 		&riTextMessages,
 		&riPrivacySettings,
 		&riContacts_uv380,
@@ -540,6 +595,10 @@ var cpRT3S = CodeplugInfo{
 		&riBasicInformation_uv380,
 		&riGeneralSettings_uv380,
 		&riMenuItems,
+		&riRadioButtons_uv380,
+		&riButtonDefinitions,
+		&riOneTouch,
+		&riNumberKey,
 		&riTextMessages,
 		&riPrivacySettings,
 		&riContacts_uv380,
@@ -565,6 +624,10 @@ var cpMD2017 = CodeplugInfo{
 		&riBasicInformation_uv380,
 		&riGeneralSettings_md2017,
 		&riMenuItems,
+		&riRadioButtons_md2017,
+		&riButtonDefinitions,
+		&riOneTouch,
+		&riNumberKey,
 		&riTextMessages,
 		&riPrivacySettings,
 		&riContacts_uv380,
@@ -590,6 +653,10 @@ var cpRT82 = CodeplugInfo{
 		&riBasicInformation_uv380,
 		&riGeneralSettings_md2017,
 		&riMenuItems,
+		&riRadioButtons_md2017,
+		&riButtonDefinitions,
+		&riOneTouch,
+		&riNumberKey,
 		&riTextMessages,
 		&riPrivacySettings,
 		&riContacts_uv380,
@@ -668,18 +735,27 @@ var riBasicInformation_uv380 = recordInfo{
 	},
 }
 
+var riButtonDefinitions = recordInfo{
+	rType:    RtButtonDefinitions,
+	typeName: "Button Definitions",
+	max:      1,
+	offset:   9014,
+	size:     1,
+	fieldInfos: []*fieldInfo{
+		&fiBdLongPressDuration,
+	},
+}
+
 var riChannels_md2017 = recordInfo{
 	rType:    RtChannels_md2017,
 	typeName: "Channels",
 	max:      3000,
 	offset:   262709,
 	size:     64,
-	delDescs: []delDesc{
-		delDesc{
-			offset: 16,
-			size:   1,
-			value:  255,
-		},
+	delDesc: &delDesc{
+		offset: 16,
+		size:   1,
+		value:  255,
 	},
 	fieldInfos: []*fieldInfo{
 		&fiCiName,
@@ -741,12 +817,10 @@ var riChannels_md380 = recordInfo{
 	max:      1000,
 	offset:   127013,
 	size:     64,
-	delDescs: []delDesc{
-		delDesc{
-			offset: 16,
-			size:   1,
-			value:  255,
-		},
+	delDesc: &delDesc{
+		offset: 16,
+		size:   1,
+		value:  255,
 	},
 	fieldInfos: []*fieldInfo{
 		&fiCiName,
@@ -806,12 +880,10 @@ var riChannels_md40 = recordInfo{
 	max:      1000,
 	offset:   127013,
 	size:     64,
-	delDescs: []delDesc{
-		delDesc{
-			offset: 16,
-			size:   1,
-			value:  255,
-		},
+	delDesc: &delDesc{
+		offset: 16,
+		size:   1,
+		value:  255,
 	},
 	fieldInfos: []*fieldInfo{
 		&fiCiName,
@@ -867,12 +939,10 @@ var riChannels_uv380 = recordInfo{
 	max:      3000,
 	offset:   262709,
 	size:     64,
-	delDescs: []delDesc{
-		delDesc{
-			offset: 16,
-			size:   1,
-			value:  255,
-		},
+	delDesc: &delDesc{
+		offset: 16,
+		size:   1,
+		value:  255,
 	},
 	fieldInfos: []*fieldInfo{
 		&fiCiName,
@@ -933,12 +1003,10 @@ var riContacts = recordInfo{
 	max:      1000,
 	offset:   24997,
 	size:     36,
-	delDescs: []delDesc{
-		delDesc{
-			offset: 3,
-			size:   1,
-			value:  192,
-		},
+	delDesc: &delDesc{
+		offset: 3,
+		size:   1,
+		value:  192,
 	},
 	fieldInfos: []*fieldInfo{
 		&fiDcName,
@@ -954,12 +1022,10 @@ var riContacts_uv380 = recordInfo{
 	max:      10000,
 	offset:   459317,
 	size:     36,
-	delDescs: []delDesc{
-		delDesc{
-			offset: 3,
-			size:   1,
-			value:  192,
-		},
+	delDesc: &delDesc{
+		offset: 3,
+		size:   1,
+		value:  192,
 	},
 	fieldInfos: []*fieldInfo{
 		&fiDcName,
@@ -1171,12 +1237,10 @@ var riGroupLists = recordInfo{
 	max:      250,
 	offset:   60997,
 	size:     96,
-	delDescs: []delDesc{
-		delDesc{
-			offset: 0,
-			size:   1,
-			value:  0,
-		},
+	delDesc: &delDesc{
+		offset: 0,
+		size:   1,
+		value:  0,
 	},
 	fieldInfos: []*fieldInfo{
 		&fiGlName,
@@ -1222,6 +1286,34 @@ var riMenuItems = recordInfo{
 	},
 }
 
+var riNumberKey = recordInfo{
+	rType:      RtNumberKey,
+	typeName:   "Number Key",
+	max:        10,
+	offset:     9041,
+	size:       2,
+	namePrefix: "Number Key ",
+	fieldInfos: []*fieldInfo{
+		&fiNkContact,
+	},
+}
+
+var riOneTouch = recordInfo{
+	rType:    RtOneTouch,
+	typeName: "One Touch",
+	max:      6,
+	offset:   9017,
+	size:     4,
+	fieldInfos: []*fieldInfo{
+		&fiOtMode,
+		&fiOtCallType,
+		&fiOtDTMF,
+		&fiOtTextMessage,
+		&fiOtEncode,
+		&fiOtCall,
+	},
+}
+
 var riPrivacySettings = recordInfo{
 	rType:    RtPrivacySettings,
 	typeName: "Privacy Settings",
@@ -1234,18 +1326,119 @@ var riPrivacySettings = recordInfo{
 	},
 }
 
+var riRadioButtons = recordInfo{
+	rType:    RtRadioButtons,
+	typeName: "Radio Buttons",
+	max:      4,
+	offset:   8999,
+	size:     1,
+	names: []string{
+		"Side Button 1 Short Press",
+		"Side Button 1 Long Press",
+		"Side Button 2 Short Press",
+		"Side Button 2 Long Press",
+	},
+	fieldInfos: []*fieldInfo{
+		&fiRbButton,
+	},
+}
+
+var riRadioButtons2 = recordInfo{
+	rType:    RtRadioButtons2,
+	typeName: "Radio Buttons",
+	max:      12,
+	offset:   9061,
+	size:     1,
+	names: []string{
+		"Func + Key 0",
+		"Func + Key 1",
+		"Func + Key 2",
+		"Func + Key 3",
+		"Func + Key 4",
+		"Func + Key 5",
+		"Func + Key 6",
+		"Func + Key 7",
+		"Func + Key 8",
+		"Func + Key 9",
+		"Func + Key #",
+		"Func + Key *",
+	},
+	fieldInfos: []*fieldInfo{
+		&fiRbButton_md40,
+	},
+}
+
+var riRadioButtons_md2017 = recordInfo{
+	rType:    RtRadioButtons_md2017,
+	typeName: "Radio Buttons",
+	max:      12,
+	offset:   8997,
+	size:     1,
+	names: []string{
+		"Top Button 1 Short Press",
+		"Top Button 1 Long Press",
+		"Side Button 1 Short Press",
+		"Side Button 1 Long Press",
+		"Side Button 2 Short Press",
+		"Side Button 2 Long Press",
+		"Side Button 3 Short Press",
+		"Side Button 3 Long Press",
+		"P1 Short Press",
+		"P1 Long Press",
+		"P2 Short Press",
+		"P2 Long Press",
+	},
+	fieldInfos: []*fieldInfo{
+		&fiRbButton_md2017,
+	},
+}
+
+var riRadioButtons_md40 = recordInfo{
+	rType:    RtRadioButtons_md40,
+	typeName: "Radio Buttons",
+	max:      6,
+	offset:   8997,
+	size:     1,
+	names: []string{
+		"Top Button 1 Short Press",
+		"Top Button 1 Long Press",
+		"Side Button 1 Short Press",
+		"Side Button 1 Long Press",
+		"Side Button 2 Short Press",
+		"Side Button 2 Long Press",
+	},
+	fieldInfos: []*fieldInfo{
+		&fiRbButton_md40,
+	},
+}
+
+var riRadioButtons_uv380 = recordInfo{
+	rType:    RtRadioButtons_uv380,
+	typeName: "Radio Buttons",
+	max:      4,
+	offset:   8999,
+	size:     1,
+	names: []string{
+		"Side Button 1 Short Press",
+		"Side Button 1 Long Press",
+		"Side Button 2 Short Press",
+		"Side Button 2 Long Press",
+	},
+	fieldInfos: []*fieldInfo{
+		&fiRbButton_uv380,
+	},
+}
+
 var riScanLists_md380 = recordInfo{
 	rType:    RtScanLists_md380,
 	typeName: "Scan Lists",
 	max:      250,
 	offset:   100997,
 	size:     104,
-	delDescs: []delDesc{
-		delDesc{
-			offset: 0,
-			size:   1,
-			value:  0,
-		},
+	delDesc: &delDesc{
+		offset: 0,
+		size:   1,
+		value:  0,
 	},
 	fieldInfos: []*fieldInfo{
 		&fiSlName,
@@ -1264,12 +1457,10 @@ var riScanLists_md40 = recordInfo{
 	max:      250,
 	offset:   100997,
 	size:     104,
-	delDescs: []delDesc{
-		delDesc{
-			offset: 0,
-			size:   1,
-			value:  0,
-		},
+	delDesc: &delDesc{
+		offset: 0,
+		size:   1,
+		value:  0,
 	},
 	fieldInfos: []*fieldInfo{
 		&fiSlName,
@@ -1288,12 +1479,10 @@ var riScanLists_uv380 = recordInfo{
 	max:      250,
 	offset:   100997,
 	size:     104,
-	delDescs: []delDesc{
-		delDesc{
-			offset: 0,
-			size:   1,
-			value:  0,
-		},
+	delDesc: &delDesc{
+		offset: 0,
+		size:   1,
+		value:  0,
 	},
 	fieldInfos: []*fieldInfo{
 		&fiSlName,
@@ -1313,12 +1502,10 @@ var riTextMessages = recordInfo{
 	offset:     9125,
 	size:       288,
 	namePrefix: "Message ",
-	delDescs: []delDesc{
-		delDesc{
-			offset: 0,
-			size:   8,
-			value:  0,
-		},
+	delDesc: &delDesc{
+		offset: 0,
+		size:   8,
+		value:  0,
 	},
 	fieldInfos: []*fieldInfo{
 		&fiTmTextMessage,
@@ -1331,12 +1518,10 @@ var riZones_md380 = recordInfo{
 	max:      250,
 	offset:   84997,
 	size:     64,
-	delDescs: []delDesc{
-		delDesc{
-			offset: 0,
-			size:   1,
-			value:  0,
-		},
+	delDesc: &delDesc{
+		offset: 0,
+		size:   1,
+		value:  0,
 	},
 	fieldInfos: []*fieldInfo{
 		&fiZiName,
@@ -1350,12 +1535,10 @@ var riZones_md40 = recordInfo{
 	max:      250,
 	offset:   84997,
 	size:     64,
-	delDescs: []delDesc{
-		delDesc{
-			offset: 0,
-			size:   1,
-			value:  0,
-		},
+	delDesc: &delDesc{
+		offset: 0,
+		size:   1,
+		value:  0,
 	},
 	fieldInfos: []*fieldInfo{
 		&fiZiName,
@@ -1369,17 +1552,30 @@ var riZones_uv380 = recordInfo{
 	max:      250,
 	offset:   84997,
 	size:     64,
-	delDescs: []delDesc{
-		delDesc{
-			offset: 0,
-			size:   1,
-			value:  0,
-		},
+	delDesc: &delDesc{
+		offset: 0,
+		size:   1,
+		value:  0,
 	},
 	fieldInfos: []*fieldInfo{
 		&fiZiName,
 		&fiZiChannelA_uv380,
 		&fiZiChannelB_uv380,
+	},
+}
+
+var fiBdLongPressDuration = fieldInfo{
+	fType:        FtBdLongPressDuration,
+	typeName:     "Long Press Duration (mS)",
+	max:          1,
+	bitOffset:    0,
+	bitSize:      8,
+	valueType:    VtSpan,
+	defaultValue: "1000",
+	span: &Span{
+		min:   4,
+		max:   15,
+		scale: 250,
 	},
 }
 
@@ -1564,7 +1760,13 @@ var fiCiAllowTalkaround = fieldInfo{
 	bitSize:      1,
 	valueType:    VtOffOn,
 	defaultValue: "Off",
-	disabler:     FtCiTxFrequencyOffset,
+	enablerType:  FtCiTxFrequencyOffset,
+	enables: []enable{
+		enable{
+			value:   "+0.00000",
+			enables: false,
+		},
+	},
 }
 
 var fiCiAutoscan = fieldInfo{
@@ -1590,7 +1792,13 @@ var fiCiBandwidth = fieldInfo{
 		"20",
 		"25",
 	},
-	disabler: FtCiChannelMode,
+	enablerType: FtCiChannelMode,
+	enables: []enable{
+		enable{
+			value:   "Digital",
+			enables: false,
+		},
+	},
 }
 
 var fiCiChannelMode = fieldInfo{
@@ -1606,7 +1814,6 @@ var fiCiChannelMode = fieldInfo{
 		"Analog",
 		"Digital",
 	},
-	enablingValue: "Digital",
 }
 
 var fiCiColorCode = fieldInfo{
@@ -1621,7 +1828,13 @@ var fiCiColorCode = fieldInfo{
 		min: 0,
 		max: 15,
 	},
-	enabler: FtCiChannelMode,
+	enablerType: FtCiChannelMode,
+	enables: []enable{
+		enable{
+			value:   "Digital",
+			enables: true,
+		},
+	},
 }
 
 var fiCiCompressedUdpDataHeader = fieldInfo{
@@ -1632,7 +1845,13 @@ var fiCiCompressedUdpDataHeader = fieldInfo{
 	bitSize:      1,
 	valueType:    VtOffOn,
 	defaultValue: "On",
-	enabler:      FtCiChannelMode,
+	enablerType:  FtCiChannelMode,
+	enables: []enable{
+		enable{
+			value:   "Digital",
+			enables: true,
+		},
+	},
 }
 
 var fiCiContactName = fieldInfo{
@@ -1647,7 +1866,13 @@ var fiCiContactName = fieldInfo{
 		IndexedString{0, "None"},
 	},
 	listRecordType: RtContacts,
-	enabler:        FtCiChannelMode,
+	enablerType:    FtCiChannelMode,
+	enables: []enable{
+		enable{
+			value:   "Digital",
+			enables: true,
+		},
+	},
 }
 
 var fiCiCtcssDecode = fieldInfo{
@@ -1658,31 +1883,47 @@ var fiCiCtcssDecode = fieldInfo{
 	bitSize:      16,
 	valueType:    VtCtcssDcs,
 	defaultValue: "None",
-	disabler:     FtCiChannelMode,
+	enablerType:  FtCiChannelMode,
+	enables: []enable{
+		enable{
+			value:   "Digital",
+			enables: false,
+		},
+	},
 }
 
 var fiCiCtcssEncode = fieldInfo{
-	fType:         FtCiCtcssEncode,
-	typeName:      "CTCSS/DCS Encode",
-	max:           1,
-	bitOffset:     208,
-	bitSize:       16,
-	valueType:     VtCtcssDcs,
-	defaultValue:  "None",
-	enablingValue: "None",
-	disabler:      FtCiChannelMode,
+	fType:        FtCiCtcssEncode,
+	typeName:     "CTCSS/DCS Encode",
+	max:          1,
+	bitOffset:    208,
+	bitSize:      16,
+	valueType:    VtCtcssDcs,
+	defaultValue: "None",
+	enablerType:  FtCiChannelMode,
+	enables: []enable{
+		enable{
+			value:   "Digital",
+			enables: false,
+		},
+	},
 }
 
 var fiCiDCDMSwitch = fieldInfo{
-	fType:         FtCiDCDMSwitch,
-	typeName:      "DCDM Switch",
-	max:           1,
-	bitOffset:     253,
-	bitSize:       1,
-	valueType:     VtOnOff,
-	defaultValue:  "Off",
-	enablingValue: "On",
-	enabler:       FtCiChannelMode,
+	fType:        FtCiDCDMSwitch,
+	typeName:     "DCDM Switch",
+	max:          1,
+	bitOffset:    253,
+	bitSize:      1,
+	valueType:    VtOnOff,
+	defaultValue: "Off",
+	enablerType:  FtCiChannelMode,
+	enables: []enable{
+		enable{
+			value:   "Digital",
+			enables: true,
+		},
+	},
 }
 
 var fiCiDQTTurnoffFreq = fieldInfo{
@@ -1698,7 +1939,13 @@ var fiCiDQTTurnoffFreq = fieldInfo{
 		IndexedString{2, "55.2 Hz"},
 		IndexedString{3, "None"},
 	},
-	disabler: FtCiChannelMode,
+	enablerType: FtCiChannelMode,
+	enables: []enable{
+		enable{
+			value:   "Digital",
+			enables: false,
+		},
+	},
 }
 
 var fiCiDataCallConfirmed = fieldInfo{
@@ -1709,7 +1956,13 @@ var fiCiDataCallConfirmed = fieldInfo{
 	bitSize:      1,
 	valueType:    VtOffOn,
 	defaultValue: "Off",
-	enabler:      FtCiChannelMode,
+	enablerType:  FtCiChannelMode,
+	enables: []enable{
+		enable{
+			value:   "Digital",
+			enables: true,
+		},
+	},
 }
 
 var fiCiDecode1 = fieldInfo{
@@ -1720,7 +1973,13 @@ var fiCiDecode1 = fieldInfo{
 	bitSize:      1,
 	valueType:    VtOffOn,
 	defaultValue: "Off",
-	disabler:     FtCiRxSignallingSystem,
+	enablerType:  FtCiRxSignallingSystem,
+	enables: []enable{
+		enable{
+			value:   "Off",
+			enables: false,
+		},
+	},
 }
 
 var fiCiDecode2 = fieldInfo{
@@ -1731,7 +1990,13 @@ var fiCiDecode2 = fieldInfo{
 	bitSize:      1,
 	valueType:    VtOffOn,
 	defaultValue: "Off",
-	disabler:     FtCiRxSignallingSystem,
+	enablerType:  FtCiRxSignallingSystem,
+	enables: []enable{
+		enable{
+			value:   "Off",
+			enables: false,
+		},
+	},
 }
 
 var fiCiDecode3 = fieldInfo{
@@ -1742,7 +2007,13 @@ var fiCiDecode3 = fieldInfo{
 	bitSize:      1,
 	valueType:    VtOffOn,
 	defaultValue: "Off",
-	disabler:     FtCiRxSignallingSystem,
+	enablerType:  FtCiRxSignallingSystem,
+	enables: []enable{
+		enable{
+			value:   "Off",
+			enables: false,
+		},
+	},
 }
 
 var fiCiDecode4 = fieldInfo{
@@ -1753,7 +2024,13 @@ var fiCiDecode4 = fieldInfo{
 	bitSize:      1,
 	valueType:    VtOffOn,
 	defaultValue: "Off",
-	disabler:     FtCiRxSignallingSystem,
+	enablerType:  FtCiRxSignallingSystem,
+	enables: []enable{
+		enable{
+			value:   "Off",
+			enables: false,
+		},
+	},
 }
 
 var fiCiDecode5 = fieldInfo{
@@ -1764,7 +2041,13 @@ var fiCiDecode5 = fieldInfo{
 	bitSize:      1,
 	valueType:    VtOffOn,
 	defaultValue: "Off",
-	disabler:     FtCiRxSignallingSystem,
+	enablerType:  FtCiRxSignallingSystem,
+	enables: []enable{
+		enable{
+			value:   "Off",
+			enables: false,
+		},
+	},
 }
 
 var fiCiDecode6 = fieldInfo{
@@ -1775,7 +2058,13 @@ var fiCiDecode6 = fieldInfo{
 	bitSize:      1,
 	valueType:    VtOffOn,
 	defaultValue: "Off",
-	disabler:     FtCiRxSignallingSystem,
+	enablerType:  FtCiRxSignallingSystem,
+	enables: []enable{
+		enable{
+			value:   "Off",
+			enables: false,
+		},
+	},
 }
 
 var fiCiDecode7 = fieldInfo{
@@ -1786,7 +2075,13 @@ var fiCiDecode7 = fieldInfo{
 	bitSize:      1,
 	valueType:    VtOffOn,
 	defaultValue: "Off",
-	disabler:     FtCiRxSignallingSystem,
+	enablerType:  FtCiRxSignallingSystem,
+	enables: []enable{
+		enable{
+			value:   "Off",
+			enables: false,
+		},
+	},
 }
 
 var fiCiDecode8 = fieldInfo{
@@ -1797,7 +2092,13 @@ var fiCiDecode8 = fieldInfo{
 	bitSize:      1,
 	valueType:    VtOffOn,
 	defaultValue: "Off",
-	disabler:     FtCiRxSignallingSystem,
+	enablerType:  FtCiRxSignallingSystem,
+	enables: []enable{
+		enable{
+			value:   "Off",
+			enables: false,
+		},
+	},
 }
 
 var fiCiDisplayPTTID = fieldInfo{
@@ -1808,7 +2109,13 @@ var fiCiDisplayPTTID = fieldInfo{
 	bitSize:      1,
 	valueType:    VtOnOff,
 	defaultValue: "Off",
-	disabler:     FtCiChannelMode,
+	enablerType:  FtCiChannelMode,
+	enables: []enable{
+		enable{
+			value:   "Digital",
+			enables: false,
+		},
+	},
 }
 
 var fiCiEmergencyAlarmAck = fieldInfo{
@@ -1819,7 +2126,13 @@ var fiCiEmergencyAlarmAck = fieldInfo{
 	bitSize:      1,
 	valueType:    VtOffOn,
 	defaultValue: "Off",
-	enabler:      FtCiChannelMode,
+	enablerType:  FtCiChannelMode,
+	enables: []enable{
+		enable{
+			value:   "Digital",
+			enables: true,
+		},
+	},
 }
 
 var fiCiEmergencySystem = fieldInfo{
@@ -1835,7 +2148,13 @@ var fiCiEmergencySystem = fieldInfo{
 		max:       32,
 		minString: "None",
 	},
-	enabler: FtCiChannelMode,
+	enablerType: FtCiChannelMode,
+	enables: []enable{
+		enable{
+			value:   "Digital",
+			enables: true,
+		},
+	},
 }
 
 var fiCiGPSSystem = fieldInfo{
@@ -1851,7 +2170,13 @@ var fiCiGPSSystem = fieldInfo{
 		max:       16,
 		minString: "None",
 	},
-	enabler: FtCiChannelMode,
+	enablerType: FtCiChannelMode,
+	enables: []enable{
+		enable{
+			value:   "Digital",
+			enables: true,
+		},
+	},
 }
 
 var fiCiGroupList = fieldInfo{
@@ -1866,7 +2191,13 @@ var fiCiGroupList = fieldInfo{
 		IndexedString{0, "None"},
 	},
 	listRecordType: RtGroupLists,
-	enabler:        FtCiChannelMode,
+	enablerType:    FtCiChannelMode,
+	enables: []enable{
+		enable{
+			value:   "Digital",
+			enables: true,
+		},
+	},
 }
 
 var fiCiInCallCriteria = fieldInfo{
@@ -1881,7 +2212,13 @@ var fiCiInCallCriteria = fieldInfo{
 		"Always",
 		"Follow Admit Criteria",
 	},
-	enabler: FtCiChannelMode,
+	enablerType: FtCiChannelMode,
+	enables: []enable{
+		enable{
+			value:   "Digital",
+			enables: true,
+		},
+	},
 }
 
 var fiCiLeaderMS = fieldInfo{
@@ -1892,7 +2229,13 @@ var fiCiLeaderMS = fieldInfo{
 	bitSize:      1,
 	valueType:    VtOnOff,
 	defaultValue: "Off",
-	enabler:      FtCiDCDMSwitch,
+	enablerType:  FtCiDCDMSwitch,
+	enables: []enable{
+		enable{
+			value:   "On",
+			enables: true,
+		},
+	},
 }
 
 var fiCiLoneWorker = fieldInfo{
@@ -1957,8 +2300,13 @@ var fiCiPrivacy = fieldInfo{
 		"Basic",
 		"Enhanced",
 	},
-	enablingValue: "None",
-	enabler:       FtCiChannelMode,
+	enablerType: FtCiChannelMode,
+	enables: []enable{
+		enable{
+			value:   "Digital",
+			enables: true,
+		},
+	},
 }
 
 var fiCiPrivacyNumber = fieldInfo{
@@ -1986,7 +2334,13 @@ var fiCiPrivacyNumber = fieldInfo{
 		"15",
 		"16",
 	},
-	disabler: FtCiPrivacy,
+	enablerType: FtCiPrivacy,
+	enables: []enable{
+		enable{
+			value:   "None",
+			enables: false,
+		},
+	},
 }
 
 var fiCiPrivateCallConfirmed = fieldInfo{
@@ -1997,7 +2351,13 @@ var fiCiPrivateCallConfirmed = fieldInfo{
 	bitSize:      1,
 	valueType:    VtOffOn,
 	defaultValue: "Off",
-	enabler:      FtCiChannelMode,
+	enablerType:  FtCiChannelMode,
+	enables: []enable{
+		enable{
+			value:   "Digital",
+			enables: true,
+		},
+	},
 }
 
 var fiCiQtReverse = fieldInfo{
@@ -2012,7 +2372,13 @@ var fiCiQtReverse = fieldInfo{
 		"180",
 		"120",
 	},
-	disabler: FtCiCtcssEncode,
+	enablerType: FtCiCtcssEncode,
+	enables: []enable{
+		enable{
+			value:   "None",
+			enables: false,
+		},
+	},
 }
 
 var fiCiReceiveGPSInfo = fieldInfo{
@@ -2038,7 +2404,13 @@ var fiCiRepeaterSlot = fieldInfo{
 		"1",
 		"2",
 	},
-	enabler: FtCiChannelMode,
+	enablerType: FtCiChannelMode,
+	enables: []enable{
+		enable{
+			value:   "Digital",
+			enables: true,
+		},
+	},
 }
 
 var fiCiReverseBurst = fieldInfo{
@@ -2049,7 +2421,13 @@ var fiCiReverseBurst = fieldInfo{
 	bitSize:      1,
 	valueType:    VtOffOn,
 	defaultValue: "On",
-	disabler:     FtCiCtcssEncode,
+	enablerType:  FtCiCtcssEncode,
+	enables: []enable{
+		enable{
+			value:   "None",
+			enables: false,
+		},
+	},
 }
 
 var fiCiRxFrequency = fieldInfo{
@@ -2102,8 +2480,13 @@ var fiCiRxSignallingSystem = fieldInfo{
 		"DTMF-3",
 		"DTMF-4",
 	},
-	enablingValue: "Off",
-	disabler:      FtCiChannelMode,
+	enablerType: FtCiChannelMode,
+	enables: []enable{
+		enable{
+			value:   "Digital",
+			enables: false,
+		},
+	},
 }
 
 var fiCiScanList_md380 = fieldInfo{
@@ -2203,14 +2586,13 @@ var fiCiTotRekeyDelay = fieldInfo{
 }
 
 var fiCiTxFrequencyOffset = fieldInfo{
-	fType:         FtCiTxFrequencyOffset,
-	typeName:      "Tx Offset (MHz)",
-	max:           1,
-	bitOffset:     160,
-	bitSize:       32,
-	valueType:     VtFrequencyOffset,
-	defaultValue:  "0",
-	enablingValue: "+0.00000",
+	fType:        FtCiTxFrequencyOffset,
+	typeName:     "Tx Offset (MHz)",
+	max:          1,
+	bitOffset:    160,
+	bitSize:      32,
+	valueType:    VtFrequencyOffset,
+	defaultValue: "0",
 }
 
 var fiCiTxRefFrequency = fieldInfo{
@@ -2243,7 +2625,13 @@ var fiCiTxSignallingSystem = fieldInfo{
 		"DTMF-3",
 		"DTMF-4",
 	},
-	disabler: FtCiChannelMode,
+	enablerType: FtCiChannelMode,
+	enables: []enable{
+		enable{
+			value:   "Digital",
+			enables: false,
+		},
+	},
 }
 
 var fiCiVox = fieldInfo{
@@ -2506,7 +2894,6 @@ var fiGsFreqChannelMode = fieldInfo{
 		"Frequency",
 		"Channel",
 	},
-	enablingValue: "Frequency",
 }
 
 var fiGsFreqChannelMode_uv380 = fieldInfo{
@@ -2521,7 +2908,6 @@ var fiGsFreqChannelMode_uv380 = fieldInfo{
 		IndexedString{0, "Frequency"},
 		IndexedString{255, "Channel"},
 	},
-	enablingValue: "VFO",
 }
 
 var fiGsGroupCallHangTime = fieldInfo{
@@ -2604,7 +2990,17 @@ var fiGsLockUnlock = fieldInfo{
 		"Unlock",
 		"Lock",
 	},
-	disabler: FtGsFreqChannelMode_uv380,
+	enablerType: FtGsFreqChannelMode_uv380,
+	enables: []enable{
+		enable{
+			value:   "Frequency",
+			enables: false,
+		},
+		enable{
+			value:   "VFO",
+			enables: false,
+		},
+	},
 }
 
 var fiGsLoneWorkerReminderTime = fieldInfo{
@@ -2665,7 +3061,13 @@ var fiGsModeSelect = fieldInfo{
 		"VFO",
 		"Memory",
 	},
-	enabler: FtGsFreqChannelMode,
+	enablerType: FtGsFreqChannelMode,
+	enables: []enable{
+		enable{
+			value:   "Frequency",
+			enables: true,
+		},
+	},
 }
 
 var fiGsModeSelectA = fieldInfo{
@@ -2680,7 +3082,13 @@ var fiGsModeSelectA = fieldInfo{
 		"VFO",
 		"Memory",
 	},
-	enabler: FtGsFreqChannelMode_uv380,
+	enablerType: FtGsFreqChannelMode_uv380,
+	enables: []enable{
+		enable{
+			value:   "VFO",
+			enables: true,
+		},
+	},
 }
 
 var fiGsModeSelectB = fieldInfo{
@@ -2695,7 +3103,13 @@ var fiGsModeSelectB = fieldInfo{
 		"VFO",
 		"Memory",
 	},
-	enabler: FtGsFreqChannelMode_uv380,
+	enablerType: FtGsFreqChannelMode_uv380,
+	enables: []enable{
+		enable{
+			value:   "VFO",
+			enables: true,
+		},
+	},
 }
 
 var fiGsMonitorType = fieldInfo{
@@ -2729,7 +3143,13 @@ var fiGsPowerOnPassword = fieldInfo{
 	bitSize:      32,
 	valueType:    VtRadioPassword,
 	defaultValue: "00000000",
-	enabler:      FtGsPwAndLockEnable,
+	enablerType:  FtGsPwAndLockEnable,
+	enables: []enable{
+		enable{
+			value:   "On",
+			enables: true,
+		},
+	},
 }
 
 var fiGsPrivateCallHangTime = fieldInfo{
@@ -2769,14 +3189,13 @@ var fiGsPublicZone = fieldInfo{
 }
 
 var fiGsPwAndLockEnable = fieldInfo{
-	fType:         FtGsPwAndLockEnable,
-	typeName:      "Password And Lock Enable",
-	max:           1,
-	bitOffset:     522,
-	bitSize:       1,
-	valueType:     VtOnOff,
-	defaultValue:  "Off",
-	enablingValue: "On",
+	fType:        FtGsPwAndLockEnable,
+	typeName:     "Password And Lock Enable",
+	max:          1,
+	bitOffset:    522,
+	bitSize:      1,
+	valueType:    VtOnOff,
+	defaultValue: "Off",
 }
 
 var fiGsRadioID = fieldInfo{
@@ -2913,10 +3332,10 @@ var fiGsSetKeypadLockTime = fieldInfo{
 	valueType:    VtIndexedStrings,
 	defaultValue: "Manual",
 	indexedStrings: &[]IndexedString{
-		IndexedString{255, "Manual"},
 		IndexedString{5, "5"},
 		IndexedString{10, "10"},
 		IndexedString{15, "15"},
+		IndexedString{255, "Manual"},
 	},
 }
 
@@ -3303,6 +3722,163 @@ var fiMiVox = fieldInfo{
 	defaultValue: "Off",
 }
 
+var fiNkContact = fieldInfo{
+	fType:     FtNkContact,
+	typeName:  "Contact",
+	max:       1,
+	bitOffset: 0,
+	bitSize:   16,
+	valueType: VtListIndex,
+	indexedStrings: &[]IndexedString{
+		IndexedString{0, "None"},
+	},
+	listRecordType: RtContacts,
+}
+
+var fiOtCall = fieldInfo{
+	fType:          FtOtCall,
+	typeName:       "Call",
+	max:            1,
+	bitOffset:      16,
+	bitSize:        16,
+	valueType:      VtListIndex,
+	listRecordType: RtContacts,
+	enablerType:    FtOtMode,
+	enables: []enable{
+		enable{
+			value:   "Analog",
+			enables: false,
+		},
+		enable{
+			value:   "Digital",
+			enables: true,
+		},
+		enable{
+			value:   "None",
+			enables: false,
+		},
+	},
+}
+
+var fiOtCallType = fieldInfo{
+	fType:        FtOtCallType,
+	typeName:     "Call Type",
+	max:          1,
+	bitOffset:    6,
+	bitSize:      2,
+	valueType:    VtIStrings,
+	defaultValue: "Call",
+	strings: &[]string{
+		"Call",
+		"Text Message",
+	},
+	enablerType: FtOtMode,
+	enables: []enable{
+		enable{
+			value:   "Analog",
+			enables: false,
+		},
+		enable{
+			value:   "Digital",
+			enables: true,
+		},
+		enable{
+			value:   "None",
+			enables: false,
+		},
+	},
+}
+
+var fiOtDTMF = fieldInfo{
+	fType:        FtOtDTMF,
+	typeName:     "DTMF",
+	max:          1,
+	bitOffset:    6,
+	bitSize:      2,
+	valueType:    VtIStrings,
+	defaultValue: "DTMF-1",
+	strings: &[]string{
+		"DTMF-1",
+		"DTMF-2",
+		"DTMF-3",
+		"DTMF-4",
+	},
+	enablerType: FtOtMode,
+	enables: []enable{
+		enable{
+			value:   "Analog",
+			enables: true,
+		},
+		enable{
+			value:   "Digital",
+			enables: false,
+		},
+		enable{
+			value:   "None",
+			enables: false,
+		},
+	},
+}
+
+var fiOtEncode = fieldInfo{
+	fType:     FtOtEncode,
+	typeName:  "Encode",
+	max:       1,
+	bitOffset: 8,
+	bitSize:   8,
+	valueType: VtIStrings,
+	strings: &[]string{
+		"To be implemented",
+	},
+	enablerType: FtOtMode,
+	enables: []enable{
+		enable{
+			value:   "Analog",
+			enables: true,
+		},
+		enable{
+			value:   "Digital",
+			enables: false,
+		},
+		enable{
+			value:   "None",
+			enables: false,
+		},
+	},
+}
+
+var fiOtMode = fieldInfo{
+	fType:        FtOtMode,
+	typeName:     "Mode",
+	max:          1,
+	bitOffset:    0,
+	bitSize:      6,
+	valueType:    VtIndexedStrings,
+	defaultValue: "Digital",
+	indexedStrings: &[]IndexedString{
+		IndexedString{48, "None"},
+		IndexedString{52, "Digital"},
+		IndexedString{58, "Analog"},
+	},
+}
+
+var fiOtTextMessage = fieldInfo{
+	fType:          FtOtTextMessage,
+	typeName:       "Text Message",
+	max:            1,
+	bitOffset:      8,
+	bitSize:        8,
+	valueType:      VtDerefListIndex,
+	listRecordType: RtTextMessages,
+	enablerType:    FtOtCallType,
+	enables: []enable{
+		enable{
+			value:   "Text Message",
+			enables: true,
+		},
+	},
+}
+
 var fiPsBasicKey = fieldInfo{
 	fType:        FtPsBasicKey,
 	typeName:     "Key Value (Basic)",
@@ -3321,6 +3897,151 @@ var fiPsEnhancedKey = fieldInfo{
 	bitSize:      128,
 	valueType:    VtHexadecimal32,
 	defaultValue: "ffffffffffffffffffffffffffffffff",
+}
+
+var fiRbButton = fieldInfo{
+	fType:     FtRbButton,
+	typeName:  "Button",
+	max:       1,
+	bitOffset: 0,
+	bitSize:   8,
+	valueType: VtRadioButton,
+	indexedStrings: &[]IndexedString{
+		IndexedString{0, "Unassigned (default)"},
+		IndexedString{1, "All alert Tones On/Off"},
+		IndexedString{2, "Emergency On"},
+		IndexedString{3, "Emergency Off"},
+		IndexedString{4, "High/Low Power"},
+		IndexedString{5, "Monitor"},
+		IndexedString{6, "Nuisance Delete"},
+		IndexedString{7, "One Touch Access 1"},
+		IndexedString{8, "One Touch Access 2"},
+		IndexedString{9, "One Touch Access 3"},
+		IndexedString{10, "One Touch Access 4"},
+		IndexedString{11, "One Touch Access 5"},
+		IndexedString{12, "One Touch Access 6"},
+		IndexedString{13, "Repeater/Talkaround"},
+		IndexedString{14, "Scan On/Off"},
+		IndexedString{21, "Squelch Tight/Normal"},
+		IndexedString{22, "Privacy On/Off"},
+		IndexedString{23, "VOX On/Off"},
+		IndexedString{25, "Zone Toggle"},
+		IndexedString{26, "Battery Indicator"},
+		IndexedString{30, "Manual Dial For Private"},
+		IndexedString{31, "Lone Work On/Off"},
+	},
+}
+
+var fiRbButton_md2017 = fieldInfo{
+	fType:     FtRbButton_md2017,
+	typeName:  "Button",
+	max:       1,
+	bitOffset: 0,
+	bitSize:   8,
+	valueType: VtRadioButton,
+	indexedStrings: &[]IndexedString{
+		IndexedString{0, "Unassigned (default)"},
+		IndexedString{1, "All alert Tones On/Off"},
+		IndexedString{2, "Emergency On"},
+		IndexedString{3, "Emergency Off"},
+		IndexedString{4, "Power Select"},
+		IndexedString{5, "Monitor"},
+		IndexedString{7, "One Touch Access 1"},
+		IndexedString{8, "One Touch Access 2"},
+		IndexedString{9, "One Touch Access 3"},
+		IndexedString{10, "One Touch Access 4"},
+		IndexedString{11, "One Touch Access 5"},
+		IndexedString{12, "One Touch Access 6"},
+		IndexedString{13, "Repeater/Talkaround"},
+		IndexedString{14, "Scan On/Off"},
+		IndexedString{21, "Squelch Tight/Normal"},
+		IndexedString{22, "Privacy On/Off"},
+		IndexedString{23, "VOX On/Off"},
+		IndexedString{25, "Zone Select"},
+		IndexedString{26, "Battery Indicator"},
+		IndexedString{31, "Lone Work On/Off"},
+		IndexedString{34, "Record On/Off (Firmware)"},
+		IndexedString{35, "Record Playback (Firmware)"},
+		IndexedString{36, "Delete All Recorded (Firmware)"},
+		IndexedString{38, "1750 Hz"},
+		IndexedString{47, "Toggle Up/Down"},
+		IndexedString{48, "Right Key"},
+		IndexedString{49, "Left Key"},
+	},
+}
+
+var fiRbButton_md40 = fieldInfo{
+	fType:     FtRbButton_md40,
+	typeName:  "Button",
+	max:       1,
+	bitOffset: 0,
+	bitSize:   8,
+	valueType: VtRadioButton,
+	indexedStrings: &[]IndexedString{
+		IndexedString{0, "Unassigned (default)"},
+		IndexedString{1, "All alert Tones On/Off"},
+		IndexedString{2, "Emergency On"},
+		IndexedString{3, "Emergency Off"},
+		IndexedString{4, "Power Select"},
+		IndexedString{5, "Monitor"},
+		IndexedString{7, "One Touch Access 1"},
+		IndexedString{8, "One Touch Access 2"},
+		IndexedString{9, "One Touch Access 3"},
+		IndexedString{10, "One Touch Access 4"},
+		IndexedString{11, "One Touch Access 5"},
+		IndexedString{12, "One Touch Access 6"},
+		IndexedString{13, "Repeater/Talkaround"},
+		IndexedString{14, "Scan On/Off"},
+		IndexedString{22, "Privacy On/Off"},
+		IndexedString{23, "VOX On/Off"},
+		IndexedString{30, "Manual Dial For Private"},
+		IndexedString{31, "Lone Work On/Off"},
+		IndexedString{34, "Record On/Off (Firmware)"},
+		IndexedString{35, "Record Playback (Firmware)"},
+		IndexedString{36, "Delete All Recorded (Firmware)"},
+	},
+}
+
+var fiRbButton_uv380 = fieldInfo{
+	fType:     FtRbButton_uv380,
+	typeName:  "Button",
+	max:       1,
+	bitOffset: 0,
+	bitSize:   8,
+	valueType: VtRadioButton,
+	indexedStrings: &[]IndexedString{
+		IndexedString{0, "Unassigned (default)"},
+		IndexedString{1, "All alert Tones On/Off"},
+		IndexedString{2, "Emergency On"},
+		IndexedString{3, "Emergency Off"},
+		IndexedString{4, "High/Low Power"},
+		IndexedString{5, "Monitor"},
+		IndexedString{6, "Nuisance Delete"},
+		IndexedString{7, "One Touch Access 1"},
+		IndexedString{8, "One Touch Access 2"},
+		IndexedString{9, "One Touch Access 3"},
+		IndexedString{10, "One Touch Access 4"},
+		IndexedString{11, "One Touch Access 5"},
+		IndexedString{12, "One Touch Access 6"},
+		IndexedString{13, "Repeater/Talkaround"},
+		IndexedString{14, "Scan On/Off"},
+		IndexedString{21, "Squelch Tight/Normal"},
+		IndexedString{22, "Privacy On/Off"},
+		IndexedString{23, "VOX On/Off"},
+		IndexedString{24, "Zone +"},
+		IndexedString{25, "Zone Toggle"},
+		IndexedString{26, "Battery Indicator"},
+		IndexedString{30, "Manual Dial For Private"},
+		IndexedString{31, "Lone Work On/Off"},
+		IndexedString{34, "Record On/Off (Firmware)"},
+		IndexedString{35, "Record Playback (Firmware)"},
+		IndexedString{36, "Delete All Recorded (Firmware)"},
+		IndexedString{38, "1750 Hz"},
+		IndexedString{47, "Toggle Up/Down"},
+		IndexedString{48, "Right Key"},
+		IndexedString{49, "Left Key"},
+		IndexedString{55, "Zone -"},
+	},
 }
 
 var fiSlChannel_md380 = fieldInfo{
@@ -3366,7 +4087,6 @@ var fiSlPriorityChannel1_md380 = fieldInfo{
 		IndexedString{65535, "None"},
 	},
 	listRecordType: RtChannels_md380,
-	enablingValue:  "None",
 }
 
 var fiSlPriorityChannel1_md40 = fieldInfo{
@@ -3382,7 +4102,6 @@ var fiSlPriorityChannel1_md40 = fieldInfo{
 		IndexedString{65535, "None"},
 	},
 	listRecordType: RtChannels_md40,
-	enablingValue:  "None",
 }
 
 var fiSlPriorityChannel2_md380 = fieldInfo{
@@ -3398,7 +4117,13 @@ var fiSlPriorityChannel2_md380 = fieldInfo{
 		IndexedString{65535, "None"},
 	},
 	listRecordType: RtChannels_md380,
-	disabler:       FtSlPriorityChannel1_md380,
+	enablerType:    FtSlPriorityChannel1_md380,
+	enables: []enable{
+		enable{
+			value:   "None",
+			enables: false,
+		},
+	},
 }
 
 var fiSlPriorityChannel2_md40 = fieldInfo{
@@ -3414,7 +4139,13 @@ var fiSlPriorityChannel2_md40 = fieldInfo{
 		IndexedString{65535, "None"},
 	},
 	listRecordType: RtChannels_md40,
-	disabler:       FtSlPriorityChannel1_md40,
+	enablerType:    FtSlPriorityChannel1_md40,
+	enables: []enable{
+		enable{
+			value:   "None",
+			enables: false,
+		},
+	},
 }
 
 var fiSlPrioritySampleTime = fieldInfo{

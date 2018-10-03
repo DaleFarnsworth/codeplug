@@ -295,7 +295,7 @@ func rDescChanges(rd *rDesc, rType RecordType, fType FieldType) []*Change {
 			continue
 		}
 		switch fi.valueType {
-		case VtListIndex, VtMemberListIndex:
+		case VtListIndex, VtMemberListIndex, VtGpsListIndex, VtDerefListIndex:
 			rChanges := recordChanges(rd.records, fi.fType)
 			changes = append(changes, rChanges...)
 		}

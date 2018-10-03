@@ -31,7 +31,11 @@
         "BasicInformation_md380",
         "GeneralSettings_md380",
         "MenuItems",
-	"TextMessages",
+        "RadioButtons",
+        "ButtonDefinitions",
+        "OneTouch",
+        "NumberKey",
+        "TextMessages",
         "PrivacySettings",
         "Contacts",
         "GroupLists",
@@ -55,7 +59,11 @@
         "BasicInformation_md380",
         "GeneralSettings_md380",
         "MenuItems",
-	"TextMessages",
+        "RadioButtons",
+        "ButtonDefinitions",
+        "OneTouch",
+        "NumberKey",
+        "TextMessages",
         "PrivacySettings",
         "Contacts",
         "GroupLists",
@@ -79,7 +87,11 @@
         "BasicInformation_md390",
         "GeneralSettings_md380",
         "MenuItems",
-	"TextMessages",
+        "RadioButtons",
+        "ButtonDefinitions",
+        "OneTouch",
+        "NumberKey",
+        "TextMessages",
         "PrivacySettings",
         "Contacts",
         "GroupLists",
@@ -103,7 +115,11 @@
         "BasicInformation_md390",
         "GeneralSettings_md380",
         "MenuItems",
-	"TextMessages",
+        "RadioButtons",
+        "ButtonDefinitions",
+        "OneTouch",
+        "NumberKey",
+        "TextMessages",
         "PrivacySettings",
         "Contacts",
         "GroupLists",
@@ -127,7 +143,12 @@
         "BasicInformation_md40",
         "GeneralSettings_md40",
         "MenuItems",
-	"TextMessages",
+        "RadioButtons_md40",
+        "RadioButtons2",
+        "ButtonDefinitions",
+        "OneTouch",
+        "NumberKey",
+        "TextMessages",
         "PrivacySettings",
         "Contacts",
         "GroupLists",
@@ -150,7 +171,11 @@
         "BasicInformation_uv380",
         "GeneralSettings_uv380",
         "MenuItems",
-	"TextMessages",
+        "RadioButtons_uv380",
+        "ButtonDefinitions",
+        "OneTouch",
+        "NumberKey",
+        "TextMessages",
         "PrivacySettings",
         "Contacts_uv380",
         "GroupLists",
@@ -174,7 +199,11 @@
         "BasicInformation_uv380",
         "GeneralSettings_uv380",
         "MenuItems",
-	"TextMessages",
+        "RadioButtons_uv380",
+        "ButtonDefinitions",
+        "OneTouch",
+        "NumberKey",
+        "TextMessages",
         "PrivacySettings",
         "Contacts_uv380",
         "GroupLists",
@@ -198,7 +227,11 @@
         "BasicInformation_uv380",
         "GeneralSettings_uv380",
         "MenuItems",
-	"TextMessages",
+        "RadioButtons_uv380",
+        "ButtonDefinitions",
+        "OneTouch",
+        "NumberKey",
+        "TextMessages",
         "PrivacySettings",
         "Contacts_uv380",
         "GroupLists",
@@ -222,7 +255,11 @@
         "BasicInformation_uv380",
         "GeneralSettings_md2017",
         "MenuItems",
-	"TextMessages",
+        "RadioButtons_md2017",
+        "ButtonDefinitions",
+        "OneTouch",
+        "NumberKey",
+        "TextMessages",
         "PrivacySettings",
         "Contacts_uv380",
         "GroupLists",
@@ -246,7 +283,11 @@
         "BasicInformation_uv380",
         "GeneralSettings_md2017",
         "MenuItems",
-	"TextMessages",
+        "RadioButtons_md2017",
+        "ButtonDefinitions",
+        "OneTouch",
+        "NumberKey",
+        "TextMessages",
         "PrivacySettings",
         "Contacts_uv380",
         "GroupLists",
@@ -528,18 +569,149 @@
       ]
     },
     {
+      "typeName": "Radio Buttons",
+      "type": "RadioButtons",
+      "offset": 8999,
+      "size": 1,
+      "max": 4,
+      "fieldTypes": [
+        "RbButton"
+      ],
+      "names": [
+        "Side Button 1 Short Press",
+        "Side Button 1 Long Press",
+        "Side Button 2 Short Press",
+        "Side Button 2 Long Press"
+      ]
+    },
+    {
+      "typeName": "Radio Buttons",
+      "type": "RadioButtons_md40",
+      "offset": 8997,
+      "size": 1,
+      "max": 6,
+      "fieldTypes": [
+        "RbButton_md40"
+      ],
+      "names": [
+        "Top Button 1 Short Press",
+        "Top Button 1 Long Press",
+        "Side Button 1 Short Press",
+        "Side Button 1 Long Press",
+        "Side Button 2 Short Press",
+        "Side Button 2 Long Press"
+      ]
+    },
+    {
+      "typeName": "Radio Buttons",
+      "type": "RadioButtons_uv380",
+      "offset": 8999,
+      "size": 1,
+      "max": 4,
+      "fieldTypes": [
+        "RbButton_uv380"
+      ],
+      "names": [
+        "Side Button 1 Short Press",
+        "Side Button 1 Long Press",
+        "Side Button 2 Short Press",
+        "Side Button 2 Long Press"
+      ]
+    },
+    {
+      "typeName": "Radio Buttons",
+      "type": "RadioButtons_md2017",
+      "offset": 8997,
+      "size": 1,
+      "max": 12,
+      "fieldTypes": [
+        "RbButton_md2017"
+      ],
+      "names": [
+        "Top Button 1 Short Press",
+        "Top Button 1 Long Press",
+        "Side Button 1 Short Press",
+        "Side Button 1 Long Press",
+        "Side Button 2 Short Press",
+        "Side Button 2 Long Press",
+        "Side Button 3 Short Press",
+        "Side Button 3 Long Press",
+        "P1 Short Press",
+        "P1 Long Press",
+        "P2 Short Press",
+        "P2 Long Press"
+      ]
+    },
+    {
+      "typeName": "Button Definitions",
+      "type": "ButtonDefinitions",
+      "offset": 9014,
+      "size": 1,
+      "fieldTypes": [
+        "BdLongPressDuration"
+      ]
+    },
+    {
+      "typeName": "One Touch",
+      "type": "OneTouch",
+      "offset": 9017,
+      "size": 4,
+      "max": 6,
+      "fieldTypes": [
+        "OtMode",
+        "OtCallType",
+        "OtDTMF",
+        "OtTextMessage",
+        "OtEncode",
+        "OtCall"
+      ]
+    },
+    {
+      "typeName": "Number Key",
+      "type": "NumberKey",
+      "offset": 9041,
+      "size": 2,
+      "max": 10,
+      "namePrefix": "Number Key ",
+      "fieldTypes": [
+        "NkContact"
+      ]
+    },
+    {
+      "typeName": "Radio Buttons",
+      "type": "RadioButtons2",
+      "offset": 9061,
+      "size": 1,
+      "max": 12,
+      "fieldTypes": [
+        "RbButton_md40"
+      ],
+      "names": [
+        "Func + Key 0",
+        "Func + Key 1",
+        "Func + Key 2",
+        "Func + Key 3",
+        "Func + Key 4",
+        "Func + Key 5",
+        "Func + Key 6",
+        "Func + Key 7",
+        "Func + Key 8",
+        "Func + Key 9",
+        "Func + Key #",
+        "Func + Key *"
+      ]
+    },
+    {
       "typeName": "Text Messages",
       "type": "TextMessages",
       "offset": 9125,
       "size": 288,
       "max": 50,
-      "delDescs": [
-        {
-          "offset": 0,
-          "size": 8,
-          "value": 0
-        }
-      ],
+      "delDesc": {
+        "offset": 0,
+        "size": 8,
+        "value": 0
+      },
       "namePrefix": "Message ",
       "fieldTypes": [
         "TmTextMessage"
@@ -550,7 +722,6 @@
       "type":"PrivacySettings",
       "offset": 23525,
       "size":176,
-      "max": 1,
       "fieldTypes": [
         "PsEnhancedKey",
         "PsBasicKey"
@@ -562,13 +733,11 @@
       "offset": 24997,
       "size": 36,
       "max": 1000,
-      "delDescs": [
-        {
-          "offset": 3,
-          "size": 1,
-          "value": 192
-        }
-      ],
+      "delDesc": {
+        "offset": 3,
+        "size": 1,
+        "value": 192
+      },
       "fieldTypes": [
         "DcName",
         "DcCallID",
@@ -582,13 +751,11 @@
       "offset": 459317,
       "size": 36,
       "max": 10000,
-      "delDescs": [
-        {
-          "offset": 3,
-          "size": 1,
-          "value": 192
-        }
-      ],
+      "delDesc": {
+        "offset": 3,
+        "size": 1,
+        "value": 192
+      },
       "fieldTypes": [
         "DcName",
         "DcCallID",
@@ -602,13 +769,11 @@
       "offset": 60997,
       "size": 96,
       "max": 250,
-      "delDescs": [
-        {
-          "offset": 0,
-          "size": 1,
-          "value": 0
-        }
-      ],
+      "delDesc": {
+        "offset": 0,
+        "size": 1,
+        "value": 0
+      },
       "fieldTypes": [
         "GlName",
         "GlContact"
@@ -620,13 +785,11 @@
       "offset": 84997,
       "size": 64,
       "max": 250,
-      "delDescs": [
-        {
-          "offset": 0,
-          "size": 1,
-          "value": 0
-        }
-      ],
+      "delDesc": {
+        "offset": 0,
+        "size": 1,
+        "value": 0
+      },
       "fieldTypes": [
         "ZiName",
         "ZiChannel_md380"
@@ -638,13 +801,11 @@
       "offset": 84997,
       "size": 64,
       "max": 250,
-      "delDescs": [
-        {
-          "offset": 0,
-          "size": 1,
-          "value": 0
-        }
-      ],
+      "delDesc": {
+        "offset": 0,
+        "size": 1,
+        "value": 0
+      },
       "fieldTypes": [
         "ZiName",
         "ZiChannel_md40"
@@ -656,13 +817,11 @@
       "offset": 84997,
       "size": 64,
       "max": 250,
-      "delDescs": [
-        {
-          "offset": 0,
-          "size": 1,
-          "value": 0
-        }
-      ],
+      "delDesc": {
+        "offset": 0,
+        "size": 1,
+        "value": 0
+      },
       "fieldTypes": [
         "ZiName",
         "ZiChannelA_uv380",
@@ -675,13 +834,11 @@
       "offset": 100997,
       "size": 104,
       "max": 250,
-      "delDescs": [
-        {
-          "offset": 0,
-          "size": 1,
-          "value": 0
-        }
-      ],
+      "delDesc": {
+        "offset": 0,
+        "size": 1,
+        "value": 0
+      },
       "fieldTypes": [
         "SlName",
         "SlPriorityChannel1_md380",
@@ -698,13 +855,11 @@
       "offset": 100997,
       "size": 104,
       "max": 250,
-      "delDescs": [
-        {
-          "offset": 0,
-          "size": 1,
-          "value": 0
-        }
-      ],
+      "delDesc": {
+        "offset": 0,
+        "size": 1,
+        "value": 0
+      },
       "fieldTypes": [
         "SlName",
         "SlPriorityChannel1_md40",
@@ -721,13 +876,11 @@
       "offset": 100997,
       "size": 104,
       "max": 250,
-      "delDescs": [
-        {
-          "offset": 0,
-          "size": 1,
-          "value": 0
-        }
-      ],
+      "delDesc": {
+        "offset": 0,
+        "size": 1,
+        "value": 0
+      },
       "fieldTypes": [
         "SlName",
         "SlPriorityChannel1_md40",
@@ -744,13 +897,11 @@
       "offset": 127013,
       "size": 64,
       "max": 1000,
-      "delDescs": [
-        {
-          "offset": 16,
-          "size": 1,
-          "value": 255
-        }
-      ],
+      "delDesc": {
+        "offset": 16,
+        "size": 1,
+        "value": 255
+      },
       "fieldTypes": [
         "CiName",
         "CiRxFrequency",
@@ -808,13 +959,11 @@
       "offset": 127013,
       "size": 64,
       "max": 1000,
-      "delDescs": [
-        {
-          "offset": 16,
-          "size": 1,
-          "value": 255
-        }
-      ],
+      "delDesc": {
+        "offset": 16,
+        "size": 1,
+        "value": 255
+      },
       "fieldTypes": [
         "CiName",
         "CiRxFrequency",
@@ -868,13 +1017,11 @@
       "offset": 262709,
       "size": 64,
       "max": 3000,
-      "delDescs": [
-        {
-          "offset": 16,
-          "size": 1,
-          "value": 255
-        }
-      ],
+      "delDesc": {
+        "offset": 16,
+        "size": 1,
+        "value": 255
+      },
       "fieldTypes": [
         "CiName",
         "CiRxFrequency",
@@ -933,13 +1080,11 @@
       "offset": 262709,
       "size": 64,
       "max": 3000,
-      "delDescs": [
-        {
-          "offset": 16,
-          "size": 1,
-          "value": 255
-        }
-      ],
+      "delDesc": {
+        "offset": 16,
+        "size": 1,
+        "value": 255
+      },
       "fieldTypes": [
         "CiName",
         "CiRxFrequency",
@@ -1206,7 +1351,7 @@
       "bitSize": 1,
       "defaultValue": "Off",
       "valueType": "onOff",
-      "enabling": {
+      "enabler": {
         "value": "On",
         "enables": [
           "GsPowerOnPassword"
@@ -1304,7 +1449,7 @@
         "Frequency",
         "Channel"
       ],
-      "enabling": {
+      "enabler": {
         "value": "Frequency",
         "enables": [
           "GsModeSelect"
@@ -1526,22 +1671,10 @@
       "valueType": "indexedStrings",
       "defaultValue": "Manual",
       "indexedStrings": [
-        {
-          "index": 255,
-          "string": "Manual"
-        },
-        {
-          "index": 5,
-          "string": "5"
-        },
-        {
-          "index": 10,
-          "string": "10"
-        },
-        {
-          "index": 15,
-          "string": "15"
-        }
+        { "index": 5, "string": "5" },
+        { "index": 10, "string": "10" },
+        { "index": 15, "string": "15" },
+        { "index": 255, "string": "Manual" }
       ]
     },
     {
@@ -1552,16 +1685,10 @@
       "defaultValue": "Channel",
       "valueType": "indexedStrings",
       "indexedStrings": [
-        {
-          "index": 0,
-          "string": "Frequency"
-        },
-        {
-          "index": 255,
-          "string": "Channel"
-        }
+        { "index": 0, "string": "Frequency" },
+        { "index": 255, "string": "Channel" }
       ],
-      "enabling": {
+      "enabler": {
         "value": "VFO",
         "enables": [
           "GsModeSelectA",
@@ -1963,6 +2090,287 @@
       "valueType": "textMessage"
     },
     {
+      "typeName": "Button",
+      "type": "RbButton",
+      "bitOffset": 0,
+      "bitSize": 8,
+      "valueType": "radioButton",
+      "indexedStrings": [
+        { "index": 0, "string": "Unassigned (default)" },
+        { "index": 1, "string": "All alert Tones On/Off" },
+        { "index": 2, "string": "Emergency On" },
+        { "index": 3, "string": "Emergency Off" },
+        { "index": 4, "string": "High/Low Power" },
+        { "index": 5, "string": "Monitor" },
+        { "index": 6, "string": "Nuisance Delete" },
+        { "index": 7, "string": "One Touch Access 1" },
+        { "index": 8, "string": "One Touch Access 2" },
+        { "index": 9, "string": "One Touch Access 3" },
+        { "index": 10, "string": "One Touch Access 4" },
+        { "index": 11, "string": "One Touch Access 5" },
+        { "index": 12, "string": "One Touch Access 6" },
+        { "index": 13, "string": "Repeater/Talkaround" },
+        { "index": 14, "string": "Scan On/Off" },
+        { "index": 21, "string": "Squelch Tight/Normal" },
+        { "index": 22, "string": "Privacy On/Off" },
+        { "index": 23, "string": "VOX On/Off" },
+        { "index": 25, "string": "Zone Toggle" },
+        { "index": 26, "string": "Battery Indicator" },
+        { "index": 30, "string": "Manual Dial For Private" },
+        { "index": 31, "string": "Lone Work On/Off" }
+      ]
+    },
+    {
+      "typeName": "Button",
+      "type": "RbButton_md40",
+      "bitOffset": 0,
+      "bitSize": 8,
+      "valueType": "radioButton",
+      "indexedStrings": [
+        { "index": 0, "string": "Unassigned (default)" },
+        { "index": 1, "string": "All alert Tones On/Off" },
+        { "index": 2, "string": "Emergency On" },
+        { "index": 3, "string": "Emergency Off" },
+        { "index": 4, "string": "Power Select" },
+        { "index": 5, "string": "Monitor" },
+        { "index": 7, "string": "One Touch Access 1" },
+        { "index": 8, "string": "One Touch Access 2" },
+        { "index": 9, "string": "One Touch Access 3" },
+        { "index": 10, "string": "One Touch Access 4" },
+        { "index": 11, "string": "One Touch Access 5" },
+        { "index": 12, "string": "One Touch Access 6" },
+        { "index": 13, "string": "Repeater/Talkaround" },
+        { "index": 14, "string": "Scan On/Off" },
+        { "index": 22, "string": "Privacy On/Off" },
+        { "index": 23, "string": "VOX On/Off" },
+        { "index": 30, "string": "Manual Dial For Private" },
+        { "index": 31, "string": "Lone Work On/Off" },
+        { "index": 34, "string": "Record On/Off (Firmware)" },
+        { "index": 35, "string": "Record Playback (Firmware)" },
+        { "index": 36, "string": "Delete All Recorded (Firmware)" }
+      ]
+    },
+    {
+      "typeName": "Button",
+      "type": "RbButton_uv380",
+      "bitOffset": 0,
+      "bitSize": 8,
+      "valueType": "radioButton",
+      "indexedStrings": [
+        { "index": 0, "string": "Unassigned (default)" },
+        { "index": 1, "string": "All alert Tones On/Off" },
+        { "index": 2, "string": "Emergency On" },
+        { "index": 3, "string": "Emergency Off" },
+        { "index": 4, "string": "High/Low Power" },
+        { "index": 5, "string": "Monitor" },
+        { "index": 6, "string": "Nuisance Delete" },
+        { "index": 7, "string": "One Touch Access 1" },
+        { "index": 8, "string": "One Touch Access 2" },
+        { "index": 9, "string": "One Touch Access 3" },
+        { "index": 10, "string": "One Touch Access 4" },
+        { "index": 11, "string": "One Touch Access 5" },
+        { "index": 12, "string": "One Touch Access 6" },
+        { "index": 13, "string": "Repeater/Talkaround" },
+        { "index": 14, "string": "Scan On/Off" },
+        { "index": 21, "string": "Squelch Tight/Normal" },
+        { "index": 22, "string": "Privacy On/Off" },
+        { "index": 23, "string": "VOX On/Off" },
+        { "index": 24, "string": "Zone +" },
+        { "index": 25, "string": "Zone Toggle" },
+        { "index": 26, "string": "Battery Indicator" },
+        { "index": 30, "string": "Manual Dial For Private" },
+        { "index": 31, "string": "Lone Work On/Off" },
+        { "index": 34, "string": "Record On/Off (Firmware)" },
+        { "index": 35, "string": "Record Playback (Firmware)" },
+        { "index": 36, "string": "Delete All Recorded (Firmware)" },
+        { "index": 38, "string": "1750 Hz" },
+        { "index": 47, "string": "Toggle Up/Down" },
+        { "index": 48, "string": "Right Key" },
+        { "index": 49, "string": "Left Key" },
+        { "index": 55, "string": "Zone -" }
+      ]
+    },
+    {
+      "typeName": "Button",
+      "type": "RbButton_md2017",
+      "bitOffset": 0,
+      "bitSize": 8,
+      "valueType": "radioButton",
+      "indexedStrings": [
+        { "index": 0, "string": "Unassigned (default)" },
+        { "index": 1, "string": "All alert Tones On/Off" },
+        { "index": 2, "string": "Emergency On" },
+        { "index": 3, "string": "Emergency Off" },
+        { "index": 4, "string": "Power Select" },
+        { "index": 5, "string": "Monitor" },
+        { "index": 7, "string": "One Touch Access 1" },
+        { "index": 8, "string": "One Touch Access 2" },
+        { "index": 9, "string": "One Touch Access 3" },
+        { "index": 10, "string": "One Touch Access 4" },
+        { "index": 11, "string": "One Touch Access 5" },
+        { "index": 12, "string": "One Touch Access 6" },
+        { "index": 13, "string": "Repeater/Talkaround" },
+        { "index": 14, "string": "Scan On/Off" },
+        { "index": 21, "string": "Squelch Tight/Normal" },
+        { "index": 22, "string": "Privacy On/Off" },
+        { "index": 23, "string": "VOX On/Off" },
+        { "index": 25, "string": "Zone Select" },
+        { "index": 26, "string": "Battery Indicator" },
+        { "index": 31, "string": "Lone Work On/Off" },
+        { "index": 34, "string": "Record On/Off (Firmware)" },
+        { "index": 35, "string": "Record Playback (Firmware)" },
+        { "index": 36, "string": "Delete All Recorded (Firmware)" },
+        { "index": 38, "string": "1750 Hz" },
+        { "index": 47, "string": "Toggle Up/Down" },
+        { "index": 48, "string": "Right Key" },
+        { "index": 49, "string": "Left Key" }
+      ]
+    },
+    {
+      "typeName": "Long Press Duration (mS)",
+      "type": "BdLongPressDuration",
+      "bitOffset": 0,
+      "bitSize": 8,
+      "defaultValue": "1000",
+      "valueType": "span",
+      "span": {
+        "min": 4,
+        "max": 15,
+        "scale": 250
+      }
+    },
+    {
+      "typeName": "Mode",
+      "type": "OtMode",
+      "bitOffset": 0,
+      "bitSize": 6,
+      "defaultValue": "Digital",
+      "valueType": "indexedStrings",
+      "indexedStrings": [
+        {
+          "index": 48,
+          "string": "None"
+        },
+        {
+          "index": 52,
+          "string": "Digital"
+        },
+        {
+          "index": 58,
+          "string": "Analog"
+        }
+      ],
+      "enablers": [
+        {
+          "value": "Digital",
+          "enables": [
+            "OtCall",
+            "OtCallType"
+          ],
+          "disables": [
+            "OtDTMF",
+            "OtEncode"
+          ]
+        },
+        {
+          "value": "Analog",
+          "enables": [
+            "OtDTMF",
+            "OtEncode"
+          ],
+          "disables": [
+            "OtCall",
+            "OtCallType"
+          ]
+        },
+        {
+          "value": "None",
+          "disables": [
+            "OtCall",
+            "OtCallType",
+            "OtDTMF",
+            "OtEncode",
+            "OtDTMF",
+            "OtEncode"
+          ]
+        }
+      ]
+    },
+    {
+      "typeName": "Call Type",
+      "type": "OtCallType",
+      "bitOffset": 6,
+      "bitSize": 2,
+      "defaultValue": "Call",
+      "valueType": "iStrings",
+      "strings": [
+        "Call",
+        "Text Message"
+      ],
+      "enablers": [
+        {
+          "value": "Text Message",
+          "enables": [
+            "OtTextMessage"
+          ]
+        }
+      ]
+    },
+    {
+      "typeName": "DTMF",
+      "type": "OtDTMF",
+      "bitOffset": 6,
+      "bitSize": 2,
+      "defaultValue": "DTMF-1",
+      "valueType": "iStrings",
+      "strings": [
+        "DTMF-1",
+        "DTMF-2",
+        "DTMF-3",
+        "DTMF-4"
+      ]
+    },
+    {
+      "typeName": "Text Message",
+      "type": "OtTextMessage",
+      "bitOffset": 8,
+      "bitSize": 8,
+      "valueType": "derefListIndex",
+      "listType": "TextMessages"
+    },
+    {
+      "typeName": "Encode",
+      "type": "OtEncode",
+      "bitOffset": 8,
+      "bitSize": 8,
+      "valueType": "iStrings",
+      "strings": [
+        "To be implemented"
+      ]
+    },
+    {
+      "typeName": "Call",
+      "type": "OtCall",
+      "bitOffset": 16,
+      "bitSize": 16,
+      "valueType": "listIndex",
+      "listType": "Contacts"
+    },
+    {
+      "typeName": "Contact",
+      "type": "NkContact",
+      "bitOffset": 0,
+      "bitSize": 16,
+      "valueType": "listIndex",
+      "listType": "Contacts",
+      "indexedStrings": [
+        {
+          "index": 0,
+          "string": "None"
+        }
+      ]
+    },
+    {
       "typeName": "Key Value (Enhanced)",
       "type": "PsEnhancedKey",
       "bitOffset": 0,
@@ -2120,7 +2528,7 @@
           "string": "None"
         }
       ],
-      "enabling": {
+      "enabler": {
         "value": "None",
         "disables": [
           "SlPriorityChannel2_md380"
@@ -2145,7 +2553,7 @@
           "string": "None"
         }
       ],
-      "enabling": {
+      "enabler": {
         "value": "None",
         "disables": [
           "SlPriorityChannel2_md40"
@@ -2337,7 +2745,7 @@
         "Analog",
         "Digital"
       ],
-      "enabling": {
+      "enabler": {
         "value": "Digital",
         "enables": [
           "CiPrivateCallConfirmed",
@@ -2434,7 +2842,7 @@
         "Basic",
         "Enhanced"
       ],
-      "enabling": {
+      "enabler": {
         "value": "None",
         "disables": [
           "CiPrivacyNumber"
@@ -2795,7 +3203,7 @@
       "bitSize": 32,
       "defaultValue": "0",
       "valueType": "frequencyOffset",
-      "enabling": {
+      "enabler": {
         "value": "+0.00000",
         "disables": [
           "CiAllowTalkaround"
@@ -2817,7 +3225,7 @@
       "bitSize": 16,
       "defaultValue": "None",
       "valueType": "ctcssDcs",
-      "enabling": {
+      "enabler": {
         "value": "None",
         "disables": [
           "CiReverseBurst",
@@ -2839,7 +3247,7 @@
         "DTMF-3",
         "DTMF-4"
       ],
-      "enabling": {
+      "enabler": {
         "value": "Off",
         "disables": [
           "CiDecode1",
@@ -2905,7 +3313,7 @@
       "bitSize": 1,
       "defaultValue": "Off",
       "valueType": "onOff",
-      "enabling": {
+      "enabler": {
         "value": "On",
         "enables": [
           "CiLeaderMS"
