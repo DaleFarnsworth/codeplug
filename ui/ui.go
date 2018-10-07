@@ -261,19 +261,15 @@ func MainWindows() []*MainWindow {
 
 func (parent *Window) AddHbox() *HBox {
 	box := NewHbox()
-
 	parent.layout.AddWidget(&box.qWidget, 0, 0)
-	box.window = parent
-
+	box.window = parent.window
 	return box
 }
 
 func (parent *Window) AddVbox() *VBox {
 	box := NewVbox()
-
 	parent.layout.AddWidget(&box.qWidget, 0, 0)
-	box.window = parent
-
+	box.window = parent.window
 	return box
 }
 
@@ -493,6 +489,22 @@ func (w *Window) qWidget_ITF() widgets.QWidget_ITF {
 	return &w.qWidget
 }
 
+func (w *Window) Window() *Window {
+	return w.window
+}
+
+func (w *Window) setWindow(window *Window) {
+	w.window = window
+}
+
+func (w *Window) AddWidget(widget Widget) {
+	logFatal("cannot add widget to Window")
+}
+
+func (w *Window) SetContentsMargins(left int, right int, top int, bottom int) {
+	logFatal("cannot set contents margin of Window")
+}
+
 func (w *Window) records() []*codeplug.Record {
 	return w.mainWindow.codeplug.Records(w.recordType)
 }
@@ -533,8 +545,12 @@ func (vBox *VBox) qWidget_ITF() widgets.QWidget_ITF {
 	return &vBox.qWidget
 }
 
-func (vBox *VBox) SetContentsMargins(left int, right int, top int, bottom int) {
-	vBox.layout.SetContentsMargins(left, right, top, bottom)
+func (vBox *VBox) Window() *Window {
+	return vBox.window
+}
+
+func (vBox *VBox) setWindow(window *Window) {
+	vBox.window = window
 }
 
 func (parent *VBox) AddGroupbox(label string) *HBox {
@@ -543,17 +559,12 @@ func (parent *VBox) AddGroupbox(label string) *HBox {
 	layout.SetContentsMargins(0, 0, 0, 0)
 
 	box := NewHbox()
-	box.layout.SetContentsMargins(0, 0, 0, 0)
 	layout.AddWidget(&box.qWidget, 0, 0)
-
+	box.layout.SetContentsMargins(0, 0, 0, 0)
 	parent.layout.AddWidget(qgb, 0, 0)
 	box.window = parent.window
 
 	return box
-}
-
-func (vBox *VBox) Window() *Window {
-	return vBox.window
 }
 
 func (parent *HBox) AddGroupbox(label string) *HBox {
@@ -571,51 +582,49 @@ func (parent *HBox) AddGroupbox(label string) *HBox {
 	return box
 }
 
-func (hBox *HBox) Window() *Window {
-	return hBox.window
-}
-
 func (parent *VBox) AddHbox() *HBox {
-	return parent.AddExistingHbox(NewHbox())
+	box := NewHbox()
+	parent.AddWidget(box)
+	return box
 }
 
 func (parent *VBox) AddExistingHbox(box *HBox) *HBox {
-	parent.layout.AddWidget(&box.qWidget, 0, 0)
-	box.window = parent.window
-
+	parent.AddWidget(box)
 	return box
 }
 
 func (parent *HBox) AddHbox() *HBox {
-	return parent.AddExistingHbox(NewHbox())
-}
-
-func (parent *HBox) AddExistingHbox(box *HBox) *HBox {
-	parent.layout.AddWidget(&box.qWidget, 0, 0)
-	box.window = parent.window
-
+	box := NewHbox()
+	parent.AddWidget(box)
 	return box
 }
 
-func (parent *VBox) AddWidget(widget *FieldWidget) {
-	parent.layout.AddWidget(widget.qWidget, 0, 0)
+func (parent *HBox) AddExistingHbox(box *HBox) *HBox {
+	parent.AddWidget(box)
+	return box
 }
 
-func (parent *HBox) AddWidget(widget *FieldWidget) {
-	parent.layout.AddWidget(widget.qWidget, 0, 0)
+func (parent *VBox) AddWidget(widget Widget) {
+	parent.layout.AddWidget(widget.qWidget_ITF(), 0, 0)
+	widget.setWindow(parent.Window())
+}
+
+func (parent *HBox) AddWidget(widget Widget) {
+	parent.layout.AddWidget(widget.qWidget_ITF(), 0, 0)
+	widget.setWindow(parent.Window())
+}
+
+func (vBox *VBox) SetContentsMargins(left int, right int, top int, bottom int) {
+	vBox.layout.SetContentsMargins(left, right, top, bottom)
+}
+
+func (hBox *HBox) SetContentsMargins(left int, right int, top int, bottom int) {
+	hBox.layout.SetContentsMargins(left, right, top, bottom)
 }
 
 func (parent *HBox) AddForm() *Form {
-	form := new(Form)
-
-	form.qWidget = *widgets.NewQWidget(nil, 0)
-	form.layout = widgets.NewQFormLayout(&form.qWidget)
-	form.layout.SetContentsMargins(0, 0, 0, 0)
-	//form.layout.SetLabelAlignment(core.Qt__AlignRight)
-
-	parent.layout.AddWidget(&form.qWidget, 0, 0)
-	form.window = parent.window
-
+	form := NewForm()
+	parent.AddWidget(form)
 	return form
 }
 
@@ -624,6 +633,7 @@ func NewForm() *Form {
 
 	form.qWidget = *widgets.NewQWidget(nil, 0)
 	form.layout = widgets.NewQFormLayout(&form.qWidget)
+	form.layout.SetContentsMargins(0, 0, 0, 0)
 	//form.layout.SetLabelAlignment(core.Qt__AlignRight)
 
 	return form
@@ -631,9 +641,7 @@ func NewForm() *Form {
 
 func (parent *VBox) AddForm() *Form {
 	form := NewForm()
-	parent.layout.AddWidget(&form.qWidget, 0, 0)
-	form.window = parent.window
-
+	parent.AddWidget(form)
 	return form
 }
 
@@ -663,43 +671,45 @@ func (hBox *HBox) qWidget_ITF() widgets.QWidget_ITF {
 	return &hBox.qWidget
 }
 
-func (hBox *HBox) SetContentsMargins(left int, right int, top int, bottom int) {
-	hBox.layout.SetContentsMargins(left, right, top, bottom)
+func (hBox *HBox) Window() *Window {
+	return hBox.window
+}
+
+func (hBox *HBox) setWindow(window *Window) {
+	hBox.window = window
 }
 
 func (parent *HBox) AddVbox() *VBox {
-	return parent.AddExistingVbox(NewVbox())
+	box := NewVbox()
+	parent.AddWidget(box)
+	return box
 }
 
 func (parent *HBox) AddExistingVbox(box *VBox) *VBox {
-	parent.layout.AddWidget(&box.qWidget, 0, 0)
-	box.window = parent.window
-
+	parent.AddWidget(box)
 	return box
 }
 
 func (parent *VBox) AddVbox() *VBox {
-	return parent.AddExistingVbox(NewVbox())
+	box := NewVbox()
+	parent.AddWidget(box)
+	return box
 }
 
 func (parent *VBox) AddExistingVbox(box *VBox) *VBox {
-	parent.layout.AddWidget(&box.qWidget, 0, 0)
-	box.window = parent.window
-
+	parent.AddWidget(box)
 	return box
 }
 
 func (parent *HBox) AddButton(text string) *Button {
 	b := NewButton(text)
 	parent.layout.AddWidget(&b.qWidget, 0, 0)
-
 	return b
 }
 
 func (parent *VBox) AddButton(text string) *Button {
 	b := NewButton(text)
 	parent.layout.AddWidget(&b.qWidget, 0, 0)
-
 	return b
 }
 
@@ -807,13 +817,35 @@ func (form *Form) qWidget_ITF() widgets.QWidget_ITF {
 	return &form.qWidget
 }
 
-func (parent *Form) AddWidget(w *FieldWidget) {
+func (form *Form) Window() *Window {
+	return form.window
+}
+
+func (form *Form) setWindow(window *Window) {
+	form.window = window
+}
+
+func (parent *Form) AddWidget(w Widget) {
+	switch v := w.(type) {
+	case *FieldWidget:
+		parent.AddFieldWidget(v)
+	default:
+		logFatalf("cannot add %T to form", v)
+	}
+}
+
+func (parent *Form) AddFieldWidget(w *FieldWidget) {
 	if w.label != nil {
-		parent.layout.AddRow(w.label, w.qWidget)
+		parent.layout.AddRow(w.label, w.qWidget_ITF())
 		return
 	}
 
 	parent.layout.AddWidget(w.qWidget)
+	w.window = parent.window
+}
+
+func (form *Form) SetContentsMargins(left int, right int, top int, bottom int) {
+	form.layout.SetContentsMargins(left, right, top, bottom)
 }
 
 func (form *Form) QWidget() widgets.QWidget {
@@ -962,6 +994,7 @@ func setFieldString(f *codeplug.Field, s string) error {
 
 type Table struct {
 	qWidget widgets.QTableWidget
+	window  *Window
 }
 
 func NewTable() *Table {
@@ -973,16 +1006,34 @@ func NewTable() *Table {
 
 func (parent *HBox) AddTable() *Table {
 	t := NewTable()
-	parent.layout.AddWidget(&t.qWidget, 0, 0)
-
+	parent.AddWidget(t)
 	return t
 }
 
 func (parent *VBox) AddTable() *Table {
 	t := NewTable()
-	parent.layout.AddWidget(&t.qWidget, 0, 0)
-
+	parent.AddWidget(t)
 	return t
+}
+
+func (t *Table) qWidget_ITF() widgets.QWidget_ITF {
+	return &t.qWidget
+}
+
+func (t *Table) AddWidget(w Widget) {
+	logFatal("cannot add widget directly to Table")
+}
+
+func (t *Table) SetContentsMargins(left int, right int, top int, bottom int) {
+	logFatal("cannot set contents margin of Table")
+}
+
+func (t *Table) setWindow(window *Window) {
+	t.window = window
+}
+
+func (t *Table) Window() *Window {
+	return t.window
 }
 
 func (t *Table) AddRow(cells ...Widget) {
@@ -1126,6 +1177,10 @@ func setMultipleRecords(f *codeplug.Field, str string) bool {
 
 type Widget interface {
 	qWidget_ITF() widgets.QWidget_ITF
+	AddWidget(Widget)
+	SetContentsMargins(left int, right int, top int, bottom int)
+	setWindow(*Window)
+	Window() *Window
 }
 
 func setEnabled(w *FieldWidget) {
@@ -1149,10 +1204,27 @@ type FieldWidget struct {
 	field   *codeplug.Field
 	receive func(sender *FieldWidget)
 	stacker *StackedWidget
+	window  *Window
 }
 
 func (w *FieldWidget) qWidget_ITF() widgets.QWidget_ITF {
 	return w.qWidget
+}
+
+func (w *FieldWidget) Window() *Window {
+	return w.window
+}
+
+func (w *FieldWidget) setWindow(window *Window) {
+	w.window = window
+}
+
+func (fw *FieldWidget) AddWidget(w Widget) {
+	logFatal("cannot add widget to FieldWidget")
+}
+
+func (fw *FieldWidget) SetContentsMargins(left int, right int, top int, bottom int) {
+	logFatal("cannot set contents margin of FieldWidget")
 }
 
 func (window *Window) subscribe(sender codeplug.FieldType, receiver codeplug.FieldType) {
@@ -1438,7 +1510,8 @@ func (widget *FieldWidget) SetChecked(checked bool) {
 
 type StackedWidget struct {
 	qStackedWidget widgets.QStackedWidget
-	widgets        []*FieldWidget
+	widgets        []Widget
+	window         *Window
 }
 
 func NewStackedWidget() *StackedWidget {
@@ -1451,17 +1524,34 @@ func (sw *StackedWidget) qWidget_ITF() widgets.QWidget_ITF {
 	return widgets.QWidget_ITF(&sw.qStackedWidget)
 }
 
-func (sw *StackedWidget) AddWidget(w *FieldWidget) {
-	w.stacker = sw
-	sw.qStackedWidget.AddWidget(w.qWidget)
+func (sw *StackedWidget) Window() *Window {
+	return sw.window
+}
+
+func (sw *StackedWidget) setWindow(window *Window) {
+	sw.window = window
+}
+
+func (sw *StackedWidget) SetContentsMargins(left int, right int, top int, bottom int) {
+	logFatal("cannot set contents margin of StackedWidget")
+}
+
+func (sw *StackedWidget) AddWidget(w Widget) {
+	sw.qStackedWidget.AddWidget(w.qWidget_ITF())
 	sw.widgets = append(sw.widgets, w)
+	w.setWindow(sw.window)
+
+	switch v := w.(type) {
+	case *FieldWidget:
+		v.stacker = sw
+	}
 }
 
 func (sw *StackedWidget) enableOverlappingWidget(w *FieldWidget) {
 	sw.qStackedWidget.SetCurrentWidget(w.qWidget)
 
 	for _, widget := range sw.widgets {
-		widget.field.SetStore(widget == w)
+		widget.(*FieldWidget).field.SetStore(widget == w)
 	}
 }
 
