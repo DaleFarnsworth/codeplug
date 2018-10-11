@@ -286,6 +286,16 @@ func (r *Record) Field(fType FieldType) *Field {
 	return fields[0]
 }
 
+func (r *Record) AllFields() []*Field {
+	fields := make([]*Field, 0)
+	for _, fType := range r.FieldTypes() {
+		for _, f := range r.Fields(fType) {
+			fields = append(fields, f)
+		}
+	}
+	return fields
+}
+
 // MaxFields returns the maximum number of fields of the given type for
 // record.
 func (r *Record) MaxFields(fType FieldType) int {
@@ -305,6 +315,23 @@ func (r *Record) TypeName() string {
 // Index returns the slice index of the record.
 func (r *Record) Index() int {
 	return r.rIndex
+}
+
+func (r *Record) FullTypeName() string {
+	s := r.typeName
+
+	if r.max > 1 {
+		name := r.Name()
+		if r.names != nil {
+			name = r.names[r.rIndex]
+		}
+		if name == "" {
+			name = fmt.Sprintf("%d", r.rIndex)
+		}
+		s += fmt.Sprintf("[%s]", name)
+	}
+
+	return s
 }
 
 // Index set the index of the record.
@@ -370,7 +397,8 @@ func (r *Record) hasUniqueNames() bool {
 
 // makeNameUnique renames the record to make it different than all of
 // the passed names.
-func (r *Record) makeNameUnique(namesp *[]string) error {
+func (r *Record) makeNameUnique() error {
+	namesp := r.ListNames()
 	if namesp == nil {
 		return nil
 	}
@@ -421,9 +449,9 @@ func (r *Record) makeNameUnique(namesp *[]string) error {
 // ListNames returns a slice of the names of all records in the rDesc.
 func (rd *rDesc) ListNames() *[]string {
 	lenCachedListNames := 0
-	if rd.cachedListNames != nil {
-		lenCachedListNames = len(*rd.cachedListNames)
-	}
+	//if rd.cachedListNames != nil {
+	//	lenCachedListNames = len(*rd.cachedListNames)
+	//}
 	recordsLen := len(rd.records)
 	if lenCachedListNames == 0 && recordsLen > 0 {
 		names := make([]string, recordsLen)
@@ -527,7 +555,8 @@ func (r *Record) NewFieldWithValue(fType FieldType, index int, str string) (*Fie
 	f := r.NewField(fType)
 	f.fIndex = index
 
-	if f.isDeferredValue(str) {
+	if f.mustDeferValue(str) {
+		f.deferValue(str)
 		return f, nil
 	}
 
@@ -612,8 +641,8 @@ func recordNames(records []*Record) []string {
 }
 
 func (r *Record) FindFieldByName(fType FieldType, name string) *Field {
-	allFields := (*r.fDesc)[fType].fields
-	for _, f := range allFields {
+	fields := (*r.fDesc)[fType].fields
+	for _, f := range fields {
 		if f.String() == name {
 			return f
 		}
@@ -623,4 +652,79 @@ func (r *Record) FindFieldByName(fType FieldType, name string) *Field {
 
 func (r *Record) HasFieldType(fType FieldType) bool {
 	return r.Field(fType) != nil
+}
+
+func DependentRecords(records []*Record) (newRecords []*Record, depRecords []*Record) {
+	dRecsMap := make(map[string]bool)
+
+	depRecords = make([]*Record, 0)
+	for _, r := range records {
+		depRecords = append(depRecords, r.dependentRecords(dRecsMap)...)
+	}
+
+	newRecords = make([]*Record, 0)
+	for _, r := range records {
+		if dRecsMap[r.FullTypeName()] {
+			continue
+		}
+		newRecords = append(newRecords, r)
+	}
+
+	return newRecords, depRecords
+}
+
+func (r *Record) dependentRecords(dRecsMap map[string]bool) []*Record {
+	dprint("dependentRecords", r.FullTypeName())
+	dRecs := make([]*Record, 0)
+	for _, fType := range r.FieldTypes() {
+		fields := r.Fields(fType)
+		if len(fields) == 0 {
+			continue
+		}
+
+		rType := fields[0].listRecordType
+		if rType == "" {
+			continue
+		}
+
+		for _, f := range fields {
+			dr := r.codeplug.FindRecordByName(rType, f.String())
+			if dr == nil {
+				continue
+			}
+
+			drTypeName := dr.FullTypeName()
+			if dRecsMap[drTypeName] {
+				continue
+			}
+			dRecsMap[drTypeName] = true
+
+			dRecs = append(dRecs, dr.dependentRecords(dRecsMap)...)
+			dRecs = append(dRecs, dr)
+		}
+	}
+
+	return dRecs
+}
+
+func (r *Record) InCodeplug() bool {
+	records := r.codeplug.records(r.rType)
+	for _, rec := range records {
+		if rec == r {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (r *Record) NameExists() bool {
+	nameField := r.NameField()
+	if nameField == nil {
+		return false
+	}
+	name := nameField.String()
+
+	rv := r.codeplug.FindRecordByName(r.rType, name) != nil
+	return rv
 }

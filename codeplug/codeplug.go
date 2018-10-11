@@ -274,6 +274,16 @@ func (cp *Codeplug) HasRecordType(rType RecordType) bool {
 	return cp.rDesc[rType] != nil
 }
 
+func (cp *Codeplug) RecordTypeName(rType RecordType) string {
+	var str string
+
+	rDesc := cp.rDesc[rType]
+	if rDesc != nil {
+		str = rDesc.typeName
+	}
+	return str
+}
+
 func (cp *Codeplug) TextLines() []string {
 	lines := make([]string, 0)
 	for _, rType := range cp.RecordTypes() {
@@ -454,6 +464,10 @@ func (cp *Codeplug) freqRanges() []string {
 
 func (cp *Codeplug) Type() string {
 	return cp.codeplugInfo.Type
+}
+
+func (cp *Codeplug) Models() []string {
+	return cp.codeplugInfo.Models
 }
 
 func (cp *Codeplug) Warnings() []string {
@@ -805,13 +819,16 @@ func (cp *Codeplug) InsertRecord(r *Record) error {
 	}
 
 	if r.hasUniqueNames() {
-		err := r.makeNameUnique(r.ListNames())
+		err := r.makeNameUnique()
 		if err != nil {
 			return err
 		}
 	}
 
 	i := r.rIndex
+	if i > len(records) {
+		i = len(records)
+	}
 	records = append(records[:i], append([]*Record{r}, records[i:]...)...)
 
 	for i, r := range records {
@@ -821,6 +838,11 @@ func (cp *Codeplug) InsertRecord(r *Record) error {
 
 	records[0].cachedListNames = nil
 	return nil
+}
+
+func (cp *Codeplug) AppendRecord(r *Record) error {
+	r.rIndex = len(cp.records(r.rType))
+	return cp.InsertRecord(r)
 }
 
 // RemoveRecord removes the given record from the codeplug.
@@ -938,7 +960,9 @@ func (cp *Codeplug) Valid() bool {
 
 	for _, f := range cp.deferredValueFields {
 		if err := f.valid(); err != nil {
-			cp.warnings = append(cp.warnings, err.Error())
+			if f.isDeferredValue() {
+				logFatal("Valid, deferred")
+			}
 		}
 	}
 	cp.deferredValueFields = nil
@@ -1080,13 +1104,27 @@ func PrintRecord(w io.Writer, r *Record) {
 	}
 }
 
+func PrintDependentRecordWithIndex(w io.Writer, r *Record) {
+	dep := true
+	PrintRecordWithIndexDep(w, r, dep)
+}
+
 func PrintRecordWithIndex(w io.Writer, r *Record) {
+	dep := false
+	PrintRecordWithIndexDep(w, r, dep)
+}
+
+func PrintRecordWithIndexDep(w io.Writer, r *Record, dep bool) {
 	rType := r.Type()
 	ind := ""
 	if r.max > 1 {
 		ind = fmt.Sprintf("[%d]", r.rIndex+1)
 	}
-	fmt.Fprintf(w, "%s%s:", string(rType), ind)
+	depStr := ""
+	if dep {
+		depStr = "]"
+	}
+	fmt.Fprintf(w, "%s%s%s:", string(rType), depStr, ind)
 
 	for _, fType := range r.FieldTypes() {
 		name := string(fType)
@@ -1419,6 +1457,7 @@ type parsedRecord struct {
 	err     error
 	pos     *position
 	pFields []*parsedField
+	dep     bool
 }
 
 func (cp *Codeplug) parseTextFile(iRdr io.Reader) []*parsedRecord {
@@ -1435,7 +1474,7 @@ func (cp *Codeplug) parseTextFile(iRdr io.Reader) []*parsedRecord {
 		pRecords = append(pRecords, &pRecord)
 		pos := rdr.pos
 		pRecord.pos = &pos
-		pRecord.name, index, err = parseName(rdr)
+		pRecord.name, index, pRecord.dep, err = parseName(rdr)
 		if err != nil {
 			if err == io.EOF {
 				err = nil
@@ -1462,7 +1501,7 @@ func (cp *Codeplug) parseTextFile(iRdr io.Reader) []*parsedRecord {
 			pos := rdr.pos
 			pField.pos = &pos
 
-			pField.name, index, err = parseName(rdr)
+			pField.name, index, _, err = parseName(rdr)
 			pField.index = index
 			if err != nil {
 				pField.err = err
@@ -1488,7 +1527,8 @@ func (cp *Codeplug) parseTextFile(iRdr io.Reader) []*parsedRecord {
 	return pRecords
 }
 
-func parseName(rdr *reader) (string, int, error) {
+func parseName(rdr *reader) (string, int, bool, error) {
+	dep := false
 	pos := rdr.pos
 	nType := "record"
 	if pos.column != 0 {
@@ -1502,17 +1542,17 @@ func parseName(rdr *reader) (string, int, error) {
 		return unicode.IsLetter(r) || unicode.IsDigit(r)
 	})
 
-	wrapError := func(err error) (string, int, error) {
+	wrapError := func(err error) (string, int, bool, error) {
 		pErr := PositionError{
 			position: &pos,
 			error:    err,
 		}
-		return name, 0, pErr
+		return name, 0, false, pErr
 	}
 
 	if err != nil {
 		if err == io.EOF {
-			return name, index, err
+			return name, index, dep, err
 		}
 
 		err = fmt.Errorf("bad %s name", nType)
@@ -1531,6 +1571,20 @@ func parseName(rdr *reader) (string, int, error) {
 	}
 	switch r {
 	case ':':
+	case ']':
+		dep = true
+		pos = rdr.pos
+		r, _, err = rdr.ReadRune()
+		if r != ':' && r != '[' {
+			err = fmt.Errorf("bad %s name", nType)
+			return wrapError(err)
+		}
+
+		if r != '[' {
+			break
+		}
+		fallthrough
+
 	case '[':
 		pos = rdr.pos
 		index, err = rdr.ReadInt()
@@ -1557,40 +1611,32 @@ func parseName(rdr *reader) (string, int, error) {
 	}
 	rdr.ReadWhile(unicode.IsSpace)
 
-	return name, index, nil
+	return name, index, dep, nil
 }
 
-func (cp *Codeplug) ParseRecords(rdr io.Reader) ([]*Record, error) {
+func (cp *Codeplug) ParseRecords(rdr io.Reader) (records []*Record, depRecords []*Record, err error) {
 	pRecs := cp.parseTextFile(rdr)
-	records, err := cp.parsedFileToRecs(pRecs)
-
-	return records, err
+	return cp.parsedFileToRecs(pRecs)
 }
 
-func (cp *Codeplug) parsedFileToRecs(pRecs []*parsedRecord) ([]*Record, error) {
+func (cp *Codeplug) parsedFileToRecs(pRecs []*parsedRecord) (records []*Record, depRecords []*Record, err error) {
 	var warning error
-	var err error
 	var pos *position
 
-	var records []*Record
 	appendWarning := func(pr *parsedRecord, pf *parsedField, err error) {
 		err = fmt.Errorf("%s.%s: %s", pr.name, pf.name, err.Error())
 		appendWarningMsgs(&warning, pf.pos, err)
 	}
 
-	wrapError := func(err error) ([]*Record, error) {
-		if err != nil {
-			pErr, ok := err.(PositionError)
-			if !ok {
-				pErr = PositionError{
-					position: pos,
-					error:    err,
-				}
+	wrapError := func(err error) ([]*Record, []*Record, error) {
+		pErr, ok := err.(PositionError)
+		if !ok {
+			pErr = PositionError{
+				position: pos,
+				error:    err,
 			}
-			return records, pErr
 		}
-
-		return records, err
+		return records, depRecords, pErr
 	}
 
 	for _, pr := range pRecs {
@@ -1625,8 +1671,7 @@ func (cp *Codeplug) parsedFileToRecs(pRecs []*parsedRecord) ([]*Record, error) {
 			if err != nil {
 				appendWarning(pr, pf, err)
 			}
-			dValue, ok := f.value.(deferredValue)
-			if ok {
+			if dValue, def := f.value.(deferredValue); def {
 				dValue.str = pf.value
 				if pf.pos != nil {
 					dValue.pos = pf.pos
@@ -1638,10 +1683,19 @@ func (cp *Codeplug) parsedFileToRecs(pRecs []*parsedRecord) ([]*Record, error) {
 				appendWarning(pr, pf, err)
 			}
 		}
+
+		if pr.dep {
+			if r.NameExists() {
+				continue
+			}
+			depRecords = append(depRecords, r)
+			continue
+		}
+
 		records = append(records, r)
 	}
 
-	return records, warning
+	return records, depRecords, warning
 }
 
 func appendWarningMsgs(pWarning *error, ppos *position, warning error) {
@@ -1749,7 +1803,7 @@ func (cp *Codeplug) ExportTextOneLineRecords(filename string) (err error) {
 }
 
 func (cp *Codeplug) importText(reader io.Reader) error {
-	records, err := cp.ParseRecords(reader)
+	records, _, err := cp.ParseRecords(reader)
 	err = cp.storeParsedRecords(records)
 	if err != nil {
 		return err
@@ -1828,7 +1882,7 @@ func (cp *Codeplug) importJSON(filename string) error {
 	defer file.Close()
 
 	pRecs := cp.parseJSONFile(file)
-	records, err := cp.parsedFileToRecs(pRecs)
+	records, _, err := cp.parsedFileToRecs(pRecs)
 	if err != nil {
 		return err
 	}
@@ -1995,7 +2049,7 @@ func (cp *Codeplug) importXLSX(filename string) error {
 	defer file.Close()
 
 	pRecs := cp.parseXLSXFile(file)
-	records, err := cp.parsedFileToRecs(pRecs)
+	records, _, err := cp.parsedFileToRecs(pRecs)
 	if err != nil {
 		return err
 	}
@@ -2073,7 +2127,7 @@ func (cp *Codeplug) storeParsedRecords(records []*Record) error {
 		cp.InsertRecord(r)
 	}
 
-	err := cp.resolveDeferredValueFields()
+	err := cp.ResolveDeferredValueFields()
 	if err != nil {
 		return err
 	}
@@ -2097,7 +2151,7 @@ func (cp *Codeplug) clearCachedListNames() {
 	}
 }
 
-func (cp *Codeplug) resolveDeferredValueFields() error {
+func (cp *Codeplug) ResolveDeferredValueFields() error {
 	var warning error
 	appendWarning := func(f *Field, pos *position, err error) {
 		rName := f.record.TypeName()
@@ -2106,33 +2160,23 @@ func (cp *Codeplug) resolveDeferredValueFields() error {
 		appendWarningMsgs(&warning, pos, err)
 	}
 
-	for i := 0; len(cp.deferredValueFields) > 0 && i < 10; i++ {
+	maxIters := 5
+	for i := 0; len(cp.deferredValueFields) > 0 && i < maxIters; i++ {
 		deferredValueFields := cp.deferredValueFields
 		cp.deferredValueFields = nil
 		for _, f := range deferredValueFields {
-			dValue, deferred := f.value.(deferredValue)
-			if !deferred {
-				logFatal("not deferred", f.FullTypeName())
-			}
-
-			if f.isDeferredValue(dValue.str) {
-				continue
-			}
-
-			f.value = dValue.value
-			pos := dValue.pos
-			err := f.setString(dValue.str)
+			err := f.resolveDeferredValue()
 			if err != nil {
-				appendWarning(f, pos, err)
+				f.queueDeferredValue()
 			}
 		}
 	}
 
 	for _, f := range cp.deferredValueFields {
-		err := fmt.Errorf("unresolved deferredValueField: %s", f.String())
+		err := f.resolveDeferredValue()
+		err = fmt.Errorf("unresolved deferredValueField: %s", err.Error())
 		dValue, _ := f.value.(deferredValue)
-		pos := dValue.pos
-		appendWarning(f, pos, err)
+		appendWarning(f, dValue.pos, err)
 	}
 
 	return warning
@@ -2219,5 +2263,15 @@ func (cp *Codeplug) WriteRadio(progress func(cur int) error) error {
 		return err
 	}
 
+	return nil
+}
+
+func (cp *Codeplug) FindRecordByName(rType RecordType, name string) *Record {
+	records := cp.rDesc[rType].records
+	for _, r := range records {
+		if r.Name() == name {
+			return r
+		}
+	}
 	return nil
 }

@@ -226,33 +226,66 @@ func (rl *RecordList) SelectRecords(records ...*codeplug.Record) {
 	}
 }
 
-func (w *Window) dataRecords(data *core.QMimeData) ([]*codeplug.Record, string, error) {
+func (w *Window) dataRecords(data *core.QMimeData, drop bool) (records []*codeplug.Record, depRecords []*codeplug.Record, id string, err error) {
 	str := data.Data("application/x.codeplug.record.list").Data()
 	reader := bufio.NewReader(strings.NewReader(str))
-	id, err := reader.ReadString('\n')
+
+	var line string
+	line, err = reader.ReadString('\n')
 	if err != nil {
 		err := fmt.Errorf("Data read error: %s", err.Error())
-		return nil, "", err
+		return nil, nil, "", err
 	}
+	id = strings.TrimSuffix(line, "\n")
 
-	id = strings.TrimSuffix(id, "\n")
-	records, err := w.mainWindow.codeplug.ParseRecords(reader)
+	line, err = reader.ReadString('\n')
 	if err != nil {
-		err := fmt.Errorf("data format error: %s", err.Error())
-		return nil, "", err
+		err := fmt.Errorf("Data read error: %s", err.Error())
+		return nil, nil, "", err
 	}
+	rType := codeplug.RecordType(strings.TrimSuffix(line, "\n"))
 
-	if len(records) == 0 {
-		err := fmt.Errorf("No records received")
-		return nil, "", err
-	}
-
-	if records[0].Type() != w.recordType {
+	if rType != w.recordType {
 		err := fmt.Errorf("Wrong data type")
-		return nil, "", err
+		return nil, nil, "", err
 	}
 
-	return records, id, nil
+	line, err = reader.ReadString('\n')
+	if err != nil {
+		err := fmt.Errorf("Data read error: %s", err.Error())
+		return nil, nil, "", err
+	}
+
+	strs := strings.Fields(strings.TrimSuffix(line, "\n"))
+	cpType := strs[0]
+	models := strs[1:]
+
+	cp := w.mainWindow.codeplug
+
+	if !drop && id != cp.ID() {
+		return nil, nil, id, nil
+	}
+
+	records, depRecords, err = w.mainWindow.codeplug.ParseRecords(reader)
+	if err != nil && drop {
+		for _, cpModel := range cp.Models() {
+			for _, model := range models {
+				if model != cpModel {
+					continue
+				}
+				err := fmt.Errorf("syntax error: %s", err.Error())
+				return nil, nil, "", err
+			}
+		}
+		err = fmt.Errorf("Cannot copy from model %s to model %s", cpType, cp.Type())
+	}
+
+	if len(records) == 0 && drop {
+		err := fmt.Errorf("no new %s", cp.RecordTypeName(rType))
+		return nil, nil, "", err
+	}
+
+	return records, depRecords, id, nil
 }
 
 func (w *Window) initRecordModel(writable bool) {
@@ -343,7 +376,8 @@ func (w *Window) initRecordModel(writable bool) {
 			return false
 		}
 
-		records, id, err := w.dataRecords(data)
+		drop := false
+		records, _, id, err := w.dataRecords(data, drop)
 		if err != nil {
 			return false
 		}
@@ -396,9 +430,10 @@ func (w *Window) initRecordModel(writable bool) {
 			dRow = model.RowCount(nil)
 		}
 
-		records, id, err := w.dataRecords(data)
+		drop := true
+		records, depRecords, id, err := w.dataRecords(data, drop)
 		if err != nil {
-			WarningPopup("Drop Error", err.Error())
+			InfoPopup("Data Drop", err.Error())
 			return false
 		}
 
@@ -429,7 +464,7 @@ func (w *Window) initRecordModel(writable bool) {
 			}
 			change.Complete()
 
-		default:
+		case action == core.Qt__CopyAction && id == cp.ID():
 			change := cp.InsertRecordsChange(records)
 			for _, r := range records {
 				w.recordList.recordToInsert = r
@@ -440,6 +475,66 @@ func (w *Window) initRecordModel(writable bool) {
 				dRow++
 			}
 			change.Complete()
+
+		case id != cp.ID():
+			rTypeString := "Records"
+			if len(records) > 0 {
+				rTypeString = string(records[0].Type())
+			}
+
+			if action == core.Qt__MoveAction {
+				newRecords := make([]*codeplug.Record, 0)
+				for _, r := range records {
+					if r.NameExists() {
+						continue
+					}
+					newRecords = append(newRecords, r)
+				}
+				records = newRecords
+			}
+
+			if len(records) == 0 {
+				msg := fmt.Sprintf("no new %s", rTypeString)
+				InfoPopup("Data Drop", msg)
+				return false
+			}
+
+			w.updating = true
+			change := cp.InsertRecordsChange(records)
+			for _, r := range depRecords {
+				if r.NameExists() {
+					continue
+				}
+				records := []*codeplug.Record{r}
+				subChange := cp.InsertRecordsChange(records)
+				change.AddChange(subChange)
+				cp.AppendRecord(r)
+			}
+			for _, r := range records {
+				if moveAction && r.NameExists() {
+					continue
+				}
+				w.recordList.recordToInsert = r
+				rv = model.InsertRows(dRow, 1, dParent)
+				if !rv {
+					break actionSwitch
+				}
+				dRow++
+			}
+
+			cp.ResolveDeferredValueFields()
+
+			change.Complete()
+			if !cp.Valid() {
+				fmtStr := `
+%d records with invalid field values were found in the codeplug.
+
+Select "Menu->Edit->Show Invalid Fields" to view them.`
+				msg := fmt.Sprintf(fmtStr, len(cp.Warnings()))
+				DelayedCall(func() {
+					InfoPopup("codeplug warning", msg)
+				})
+			}
 		}
 
 		rl := w.recordList
@@ -466,10 +561,29 @@ func (w *Window) initRecordModel(writable bool) {
 
 		cp := w.mainWindow.codeplug
 		fmt.Fprintln(writer, cp.ID())
+		fmt.Fprintln(writer, w.recordType)
+
+		fmt.Fprint(writer, cp.Type())
+		for _, model := range cp.Models() {
+			fmt.Fprintf(writer, " %s", model)
+		}
+		fmt.Fprintln(writer)
+
+		records := make([]*codeplug.Record, 0)
 		for _, index := range indexes {
 			r := cp.Records(w.recordType)[index.Row()]
+			records = append(records, r)
+		}
+
+		var depRecords []*codeplug.Record
+		records, depRecords = codeplug.DependentRecords(records)
+		for _, r := range depRecords {
+			codeplug.PrintDependentRecordWithIndex(writer, r)
+		}
+		for _, r := range records {
 			codeplug.PrintRecordWithIndex(writer, r)
 		}
+
 		writer.Flush()
 
 		str := buf.String()

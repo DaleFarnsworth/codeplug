@@ -38,6 +38,7 @@ import (
 )
 
 const invalidValueString = "=INVALID="
+const deferredValueString = "=DEFERRED="
 
 // A Field represents a field within a Record.
 type Field struct {
@@ -189,7 +190,15 @@ func (f *Field) setString(s string) error {
 
 	// Some fields may be dependent on this field's value
 	// Set them based on valid
-	f.record.valid()
+	for _, sf := range f.record.AllFields() {
+		if sf.enablerType != f.fType {
+			continue
+		}
+		if sf.isDeferredValue() {
+			continue
+		}
+		sf.valid()
+	}
 
 	return err
 }
@@ -364,24 +373,14 @@ func (f *Field) SetIndex(index int) {
 // and index as well as the field's type name and index. The index is omitted
 // if the MaxRecords or MaxFields is 1.
 func (f *Field) FullTypeName() string {
-	r := f.record
-	s := r.typeName
-
-	if r.max > 1 {
-		name := r.Name()
-		if r.names != nil {
-			name = r.names[r.rIndex]
-		}
-		if name == "" {
-			name = fmt.Sprintf("%d", r.rIndex)
-		}
-		s += fmt.Sprintf("[%s]", name)
-	}
-
-	s += "." + f.typeName
+	s := f.record.FullTypeName() + "." + f.typeName
 
 	if f.max > 1 {
-		s += fmt.Sprintf("[%s]", f.String())
+		str := f.String()
+		if str == "" {
+			str = fmt.Sprintf("%d", f.fIndex)
+		}
+		s += fmt.Sprintf("[%s]", str)
 	}
 
 	return s
@@ -1558,7 +1557,7 @@ func (v *privacyNumber) setString(f *Field, s string) error {
 func (v *privacyNumber) valid(f *Field) error {
 	sibling := f.sibling(FtCiPrivacy)
 	if sibling == nil {
-		f.setDeferredValue()
+		f.deferValue(deferredValueString)
 		return nil
 	}
 	ss := sibling.String()
@@ -1672,7 +1671,7 @@ func (v *memberListIndex) valid(f *Field) error {
 		}
 	}
 
-	if f.isDeferredValue("") {
+	if f.isDeferredValue() {
 		return nil
 	}
 
@@ -1736,7 +1735,6 @@ func (v *listIndex) getString(f *Field) string {
 // setString sets the listIndex's value from a string.
 func (v *listIndex) setString(f *Field, s string) error {
 	fd := f.fDesc
-
 	if fd.indexedStrings != nil {
 		for _, is := range *fd.indexedStrings {
 			if is.String == s {
@@ -1769,7 +1767,7 @@ func (v *listIndex) valid(f *Field) error {
 
 	listNames := fd.record.codeplug.rDesc[fd.listRecordType].ListNames()
 	if listNames == nil {
-		f.setDeferredValue()
+		f.deferValue(deferredValueString)
 		return nil
 	}
 
@@ -2218,40 +2216,76 @@ func fieldsToStrings(fields []*Field) []string {
 	return strings
 }
 
-func (f *Field) isDeferredValue(str string) bool {
+func (f *Field) resolveDeferredValue() error {
+	dValue, deferred := f.value.(deferredValue)
+	if !deferred {
+		return nil
+	}
+
+	var err error
+	if dValue.str != deferredValueString {
+		err = f.setString(dValue.str)
+	}
+	if err == nil {
+		f.value = dValue.value
+		f.valid()
+	}
+	return err
+}
+
+func (f *Field) isDeferredValue() bool {
+	_, deferred := f.value.(deferredValue)
+	return deferred
+}
+
+func (f *Field) mustDeferValue(str string) bool {
+	if f.isDeferredValue() {
+		logFatal("already deferred: ", f.FullTypeName())
+	}
+
 	switch f.valueType {
 	case VtMemberListIndex:
 		if str == "None" || str == "Selected" {
 			return false
 		}
-		listNames := f.memberListNames()
-		if len(listNames) > 0 && listNames[0] != "" {
-			return false
+		if !f.record.InCodeplug() {
+			return true
 		}
+		listNames := f.memberListNames()
+		return len(listNames) <= 0 || listNames[0] == ""
 
 	case VtListIndex, VtGpsListIndex, VtDerefListIndex:
 		if !f.record.InCodeplug() {
 			return true
 		}
 		listNames := f.listNames()
-		if len(listNames) > 0 {
-			return false
-		}
-
-	default:
-		return false
+		return len(listNames) <= 0
 	}
 
-	_, deferred := f.value.(deferredValue)
-	if !deferred {
-		f.value = deferredValue{value: f.value}
-	}
-
-	f.setDeferredValue()
-	return true
+	return false
 }
 
-func (f *Field) setDeferredValue() {
+func (f *Field) deferValue(str string) {
+	if f.isDeferredValue() {
+		logFatal("already deferred: ", f.FullTypeName())
+	}
+
+	f.value = deferredValue{value: f.value, str: str}
+	f.queueDeferredValue()
+}
+
+func (f *Field) queueDeferredValue() {
+	if !f.isDeferredValue() {
+		logFatal("not deferred: ", f.FullTypeName())
+	}
 	cp := f.record.codeplug
 	cp.deferredValueFields = append(cp.deferredValueFields, f)
+}
+
+func (f *Field) DeferredString() string {
+	dValue, def := f.value.(deferredValue)
+	if !def {
+		return "=not deferred="
+	}
+	return dValue.str
 }
