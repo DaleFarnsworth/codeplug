@@ -1100,8 +1100,6 @@ func (t *Table) ResizeToContents() {
 	qw.SetMaximumWidth(width)
 }
 
-const slowChangeCount = 5
-
 func setMultipleRecords(f *codeplug.Field, str string) bool {
 	if f.MaxFields() > 1 {
 		return false
@@ -1154,20 +1152,16 @@ func setMultipleRecords(f *codeplug.Field, str string) bool {
 		}
 
 		rCount := len(recs)
-		if rCount < slowChangeCount {
-			cp.SetRecordsField(recs, f.Type(), str, func(int) {})
-		} else {
-			pd := NewProgressDialog("Updating " + typeName)
-			pd.SetRange(0, rCount)
+		pd := NewProgressDialog("Updating " + typeName)
+		pd.SetRange(0, rCount)
 
-			progFunc := func(i int) {
-				pd.SetValue(i)
-			}
-
-			cp.SetRecordsField(recs, f.Type(), str, progFunc)
-
-			pd.Close()
+		progFunc := func(i int) {
+			pd.SetValue(i)
 		}
+
+		cp.SetRecordsField(recs, f.Type(), str, progFunc)
+
+		pd.Close()
 
 		rw.settingMultiple = false
 	})
@@ -1870,15 +1864,9 @@ func (w *Window) RecordFunc() func() {
 	return w.recordFunc
 }
 
-func condWrapProgress(title string, f func(func(int)), changeCount int) {
-	progFunc := func(i int) {}
-	if changeCount < slowChangeCount {
-		f(progFunc)
-		return
-	}
-
+func wrapProgress(title string, f func(func(int)), changeCount int) {
 	pd := NewProgressDialog(title)
-	progFunc = func(i int) {
+	progFunc := func(i int) {
 		pd.SetValue(i)
 	}
 
@@ -1888,21 +1876,25 @@ func condWrapProgress(title string, f func(func(int)), changeCount int) {
 }
 
 func UndoChange(cp *codeplug.Codeplug) {
-	change := cp.ChangeToUndo()
-	changeRecord := change.Record()
-	changeCount := len(change.Changes())
-	title := "Updating " + changeRecord.TypeName()
+	DelayedCall(func() {
+		change := cp.ChangeToUndo()
+		changeRecord := change.Record()
+		changeCount := len(change.Changes())
+		title := "Updating " + changeRecord.TypeName()
 
-	condWrapProgress(title, cp.UndoChange, changeCount)
+		wrapProgress(title, cp.UndoChange, changeCount)
+	})
 }
 
 func RedoChange(cp *codeplug.Codeplug) {
-	change := cp.ChangeToRedo()
-	changeRecord := change.Record()
-	changeCount := len(change.Changes())
-	title := "Updating " + changeRecord.TypeName()
+	DelayedCall(func() {
+		change := cp.ChangeToRedo()
+		changeRecord := change.Record()
+		changeCount := len(change.Changes())
+		title := "Updating " + changeRecord.TypeName()
 
-	condWrapProgress(title, cp.RedoChange, changeCount)
+		wrapProgress(title, cp.RedoChange, changeCount)
+	})
 }
 
 func InfoPopup(title string, msg string) {

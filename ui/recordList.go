@@ -30,6 +30,7 @@ import (
 	"math"
 	"strings"
 
+	"github.com/codeplug/ui"
 	"github.com/dalefarnsworth/codeplug/codeplug"
 	"github.com/therecipe/qt/core"
 	"github.com/therecipe/qt/widgets"
@@ -228,6 +229,7 @@ func (rl *RecordList) SelectRecords(records ...*codeplug.Record) {
 
 func (w *Window) dataRecords(data *core.QMimeData) ([]*codeplug.Record, string, error) {
 	str := data.Data("application/x.codeplug.record.list").Data()
+
 	reader := bufio.NewReader(strings.NewReader(str))
 	id, err := reader.ReadString('\n')
 	if err != nil {
@@ -247,7 +249,7 @@ func (w *Window) dataRecords(data *core.QMimeData) ([]*codeplug.Record, string, 
 		return nil, "", err
 	}
 
-	if records[0].Type() != w.recordType {
+	if records[len(records)-1].Type() != w.recordType {
 		err := fmt.Errorf("Wrong data type")
 		return nil, "", err
 	}
@@ -429,7 +431,7 @@ func (w *Window) initRecordModel(writable bool) {
 			}
 			change.Complete()
 
-		default:
+		case action == core.Qt__CopyAction && id == cp.ID():
 			change := cp.InsertRecordsChange(records)
 			for _, r := range records {
 				w.recordList.recordToInsert = r
@@ -440,6 +442,57 @@ func (w *Window) initRecordModel(writable bool) {
 				dRow++
 			}
 			change.Complete()
+
+		case id != cp.ID():
+			moveAction := action == core.Qt__MoveAction
+			depRecords := make([]*codeplug.Record, 0)
+			newRecords := make([]*codeplug.Record, 0)
+			for _, r := range records {
+				if moveAction && r.NameExists() {
+					continue
+				}
+				if r.Type() != w.recordType {
+					depRecords = append(depRecords, r)
+				} else {
+					newRecords = append(newRecords, r)
+				}
+			}
+			records = newRecords
+			if len(records) == 0 {
+				return false
+			}
+			change := cp.InsertRecordsChange(records)
+			for _, r := range depRecords {
+				if r.NameExists() {
+					continue
+				}
+				records := []*codeplug.Record{r}
+				subChange := cp.InsertRecordsChange(records)
+				change.AddChange(subChange)
+				cp.AppendRecord(r)
+			}
+			for _, r := range records {
+				w.recordList.recordToInsert = r
+				rv = model.InsertRows(dRow, 1, dParent)
+				if !rv {
+					break actionSwitch
+				}
+				dRow++
+			}
+
+			cp.ResolveDeferredValueFields()
+
+			change.Complete()
+			if !cp.Valid() {
+				fmtStr := `
+%d records with invalid field values were found in the codeplug.
+
+Select "Menu->Edit->Show Invalid Fields" to view them.`
+				msg := fmt.Sprintf(fmtStr, len(cp.Warnings()))
+				DelayedCall(func() {
+					ui.InfoPopup("codeplug warning", msg)
+				})
+			}
 		}
 
 		rl := w.recordList
@@ -468,6 +521,15 @@ func (w *Window) initRecordModel(writable bool) {
 		fmt.Fprintln(writer, cp.ID())
 		for _, index := range indexes {
 			r := cp.Records(w.recordType)[index.Row()]
+			depRecords := r.DependentRecords()
+			depRecMap := make(map[string]bool)
+			for _, dr := range depRecords {
+				if depRecMap[dr.FullTypeName()] {
+					continue
+				}
+				depRecMap[dr.FullTypeName()] = true
+				codeplug.PrintDependentRecordWithIndex(writer, dr)
+			}
 			codeplug.PrintRecordWithIndex(writer, r)
 		}
 		writer.Flush()

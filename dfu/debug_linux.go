@@ -62,10 +62,14 @@ func printStack() {
 }
 
 func logFatalf(s string, v ...interface{}) {
+	log.Printf(s, v...)
+	log.Print(string(debug.Stack()))
 	log.Fatalf(s, v...)
 }
 
 func logFatal(v ...interface{}) {
+	log.Print(v...)
+	log.Print(string(debug.Stack()))
 	log.Fatal(v...)
 }
 
