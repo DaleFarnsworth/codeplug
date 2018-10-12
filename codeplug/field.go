@@ -1071,13 +1071,13 @@ func (v *biFrequency) valid(f *Field) error {
 
 // load sets the biFrequency's value from its bits in cp.bytes.
 func (v *biFrequency) load(f *Field) {
-	*v = biFrequency(bcdToBinary(bytesToInt(f.bytes()))) / 10
+	*v = biFrequency(bcdToInt64(bytesToInt64(f.bytes()))) / 10
 }
 
 // store stores the biFrequency's value into its bits in cp.bytes.
 func (v *biFrequency) store(f *Field) {
-	i := binaryToBcd(int(*v) * 10)
-	f.storeBytes(intToBytes(i, f.size()))
+	i := int64ToBcd(int64(*v) * int64(10))
+	f.storeBytes(int64ToBytes(i, f.size()))
 }
 
 // introLine is a field value representing a introductory line of text
@@ -1194,12 +1194,12 @@ func (v *callID) valid(f *Field) error {
 
 // load sets the callID's value from its bits in cp.bytes.
 func (v *callID) load(f *Field) {
-	*v = callID(bytesToInt(f.bytes()))
+	*v = callID(bytesToInt64(f.bytes()))
 }
 
 // store stores the callID's value into its bits in cp.bytes.
 func (v *callID) store(f *Field) {
-	f.storeBytes(intToBytes(int(*v), f.size()))
+	f.storeBytes(int64ToBytes(int64(*v), f.size()))
 }
 
 // radioPassword is a field value representing password for the radio.
@@ -1232,18 +1232,18 @@ func (v *radioPassword) valid(f *Field) error {
 
 // load sets the radioPassword's value from its bits in cp.bytes.
 func (v *radioPassword) load(f *Field) {
-	intValue := bytesToInt(f.bytes())
+	intValue := bytesToInt64(f.bytes())
 	if uint(intValue) == 0xffffffff {
 		*v = radioPassword("00000000")
 		return
 	}
-	*v = radioPassword(fmt.Sprintf("%08d", revBcdToBinary(intValue)))
+	*v = radioPassword(fmt.Sprintf("%08d", uint(revBcdToInt64(intValue))))
 }
 
 // store stores the radioPassword's value into its bits in cp.bytes.
 func (v *radioPassword) store(f *Field) {
 	val, _ := strconv.ParseUint(string(*v), 10, 32)
-	bytes := intToBytes(binaryToRevBcd(int(val)), f.size())
+	bytes := int64ToBytes(int64ToRevBcd(int64(val)), f.size())
 	if val == 0 {
 		bytes = []byte{0xff, 0xff, 0xff, 0xff}
 	}
@@ -1280,18 +1280,18 @@ func (v *radioProgPassword) valid(f *Field) error {
 
 // load sets the radioProgPassword's value from its bits in cp.bytes.
 func (v *radioProgPassword) load(f *Field) {
-	intValue := bytesToInt(f.bytes())
+	intValue := bytesToInt64(f.bytes())
 	if uint(intValue) == 0xffffffff {
 		*v = radioProgPassword("")
 		return
 	}
-	*v = radioProgPassword(fmt.Sprintf("%08d", revBcdToBinary(intValue)))
+	*v = radioProgPassword(fmt.Sprintf("%08d", revBcdToInt64(intValue)))
 }
 
 // store stores the radioProgPassword's value into its bits in cp.bytes.
 func (v *radioProgPassword) store(f *Field) {
 	val, _ := strconv.ParseUint(string(*v), 10, 32)
-	bytes := intToBytes(binaryToRevBcd(int(val)), f.size())
+	bytes := int64ToBytes(int64ToRevBcd(int64(val)), f.size())
 	if *v == "" {
 		bytes = []byte{0xff, 0xff, 0xff, 0xff}
 	}
@@ -1574,12 +1574,12 @@ func (v *ctcssDcs) valid(f *Field) error {
 
 // load sets the ctcssDcs's value from its bits in cp.bytes.
 func (v *ctcssDcs) load(f *Field) {
-	*v = ctcssDcs(bytesToInt(f.bytes()))
+	*v = ctcssDcs(bytesToInt64(f.bytes()))
 }
 
 // store stores the ctcssDcs's value into its bits in cp.bytes.
 func (v *ctcssDcs) store(f *Field) {
-	f.storeBytes(intToBytes(int(*v), f.size()))
+	f.storeBytes(int64ToBytes(int64(*v), f.size()))
 }
 
 // memberListIndex is a field value representing an index into a slice
@@ -1753,12 +1753,12 @@ func (v *listIndex) valid(f *Field) error {
 
 // load sets the listIndex's value from its bits in cp.bytes.
 func (v *listIndex) load(f *Field) {
-	*v = listIndex(bytesToInt(f.bytes()))
+	*v = listIndex(bytesToInt64(f.bytes()))
 }
 
 // store stores the listIndex's value into its bits in cp.bytes.
 func (v *listIndex) store(f *Field) {
-	f.storeBytes(intToBytes(int(*v), f.size()))
+	f.storeBytes(int64ToBytes(int64(*v), f.size()))
 }
 
 // ascii is a field value representing a ASCII string.
@@ -2082,7 +2082,7 @@ func ctcssDcsCode(v int) (string, error) {
 
 	vType := v >> 14
 
-	v = bcdToBinary(v & 0x03fff)
+	v = int(bcdToInt64(int64(v & 0x03fff)))
 	if v < 0 {
 		return "", fmt.Errorf("only decimal digits are permitted")
 	}
@@ -2123,7 +2123,7 @@ func ctcssDcsStringToBinary(s string) int {
 		return 0xffff
 	}
 
-	value := 0
+	value := int64(0)
 	sType := 0
 
 	if s[0] == 'D' {
@@ -2143,21 +2143,21 @@ func ctcssDcsStringToBinary(s string) int {
 		}
 
 		v, err := strconv.ParseInt(s[1:4], 10, 16)
-		value = int(v)
-		if err != nil || !goodDcsCode(value) {
+		value = int64(v)
+		if err != nil || !goodDcsCode(int(value)) {
 			return -1
 		}
 	} else {
 		flt, err := strconv.ParseFloat(s, 16)
-		value = int(flt * 10)
-		if err != nil || !goodCtcssFrequency(value) {
+		value = int64(flt * 10)
+		if err != nil || !goodCtcssFrequency(int(value)) {
 			return -1
 		}
 	}
 
-	value = binaryToBcd(value) | sType<<14
+	value = int64ToBcd(value) | int64(sType<<14)
 
-	return value
+	return int(value)
 }
 
 func deleteField(fields *[]*Field, i int) {

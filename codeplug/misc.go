@@ -96,12 +96,12 @@ func mustBeNumericAscii(s string) error {
 
 // bytesToFrequency converts a byte slice to a floating point frequency.
 func bytesToFrequency(b []byte) float64 {
-	return float64(bcdToBinary(bytesToInt(b))) / 100000
+	return float64(bcdToInt64(bytesToInt64(b))) / 100000
 }
 
 // frequencyToBytes converts a floating point freqency to a byte slice.
 func frequencyToBytes(f float64) []byte {
-	return intToBytes(binaryToBcd(int(f*100000)), 4)
+	return int64ToBytes(int64ToBcd(int64(f*100000)), 4)
 }
 
 // frequencyToString produces a string from a floating point frequency.
@@ -124,19 +124,19 @@ func stringToFrequency(s string) (float64, error) {
 	return float64(freq), nil
 }
 
-// bytesToInt converts a byte slice into an integer.
-func bytesToInt(bytes []byte) int {
-	var i int
+// bytesToInt64 converts a byte slice into an integer.
+func bytesToInt64(bytes []byte) int64 {
+	var i int64
 
 	for j, b := range bytes {
-		i |= int(b) << (uint(j) * 8)
+		i |= int64(b) << (uint(j) * 8)
 	}
 
 	return i
 }
 
-// intToBytes converts an integer into a byte slice of length len.
-func intToBytes(i int, len int) []byte {
+// int64ToBytes converts an integer into a byte slice of length len.
+func int64ToBytes(i int64, len int) []byte {
 	bytes := make([]byte, len)
 
 	for j := range bytes {
@@ -149,20 +149,19 @@ func intToBytes(i int, len int) []byte {
 
 // reverse4Bytes returns an integer containing the low four bytes of
 // the input in reverse order.
-func reverse4Bytes(in int) int {
-	uin := uint64(in)
-	out := (uin & 0x000000ff) << 24
-	out |= (uin & 0x0000ff00) << 8
-	out |= (uin & 0x00ff0000) >> 8
-	out |= (uin & 0xff000000) >> 24
+func reverse4Bytes(in int64) int64 {
+	out := (in & 0x000000ff) << 24
+	out |= (in & 0x0000ff00) << 8
+	out |= (in & 0x00ff0000) >> 8
+	out |= (in & 0xff000000) >> 24
 
-	return int(out)
+	return out
 }
 
-// bcdToBinary converts an BCD integer (in standard order) to a binary integer.
-func bcdToBinary(bcd int) int {
-	binary := 0
-	mult := 1
+// bcdToInt64 converts an BCD integer (in standard order) to an int64
+func bcdToInt64(bcd int64) int64 {
+	var binary int64 = 0
+	mult := int64(1)
 
 	for i := 0; i < 8; i++ {
 		if (bcd & 0xf) > 9 {
@@ -176,15 +175,15 @@ func bcdToBinary(bcd int) int {
 	return binary
 }
 
-// revBcdToBinary converts an BCD integer (in reverse order) to a binary
+// revBcdToInt64 converts an BCD integer (in reverse order) to an int64
 // integer.
-func revBcdToBinary(bcd int) int {
-	return bcdToBinary(reverse4Bytes(bcd))
+func revBcdToInt64(bcd int64) int64 {
+	return bcdToInt64(reverse4Bytes(bcd))
 }
 
-// binaryToBcd converts an integer to BCD (in standard order).
-func binaryToBcd(binary int) int {
-	bcd := 0
+// int64ToBcd converts an integer to BCD (in standard order).
+func int64ToBcd(binary int64) int64 {
+	var bcd int64
 
 	for i := 0; i < 8; i++ {
 		bcd |= (binary % 10) << uint(4*i)
@@ -195,8 +194,8 @@ func binaryToBcd(binary int) int {
 }
 
 // binaryToRevBcd converts an integer to BCD (in reverse order).
-func binaryToRevBcd(binary int) int {
-	return reverse4Bytes(binaryToBcd(binary))
+func int64ToRevBcd(binary int64) int64 {
+	return reverse4Bytes(int64ToBcd(binary))
 }
 
 // bcdBytesToString converts a BCD-encodd byte slice to a decimal string
