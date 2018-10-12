@@ -30,7 +30,6 @@ import (
 	"math"
 	"strings"
 
-	"github.com/codeplug/ui"
 	"github.com/dalefarnsworth/codeplug/codeplug"
 	"github.com/therecipe/qt/core"
 	"github.com/therecipe/qt/widgets"
@@ -490,7 +489,7 @@ func (w *Window) initRecordModel(writable bool) {
 Select "Menu->Edit->Show Invalid Fields" to view them.`
 				msg := fmt.Sprintf(fmtStr, len(cp.Warnings()))
 				DelayedCall(func() {
-					ui.InfoPopup("codeplug warning", msg)
+					InfoPopup("codeplug warning", msg)
 				})
 			}
 		}

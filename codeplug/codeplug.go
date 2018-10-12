@@ -846,16 +846,14 @@ func (cp *Codeplug) RemoveRecord(r *Record) {
 		logFatal("removeRecord: bad record")
 	}
 
-	records[0].cachedListNames = nil
-
 	deleteRecord(&records, index)
 
 	for i, r := range records {
 		r.rIndex = i
 	}
-	cp.rDesc[rType].records = records
 
-	records[0].cachedListNames = nil
+	cp.rDesc[rType].records = records
+	cp.rDesc[rType].cachedListNames = nil
 }
 
 func (cp *Codeplug) RemoveAllRecords() {
