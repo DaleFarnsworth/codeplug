@@ -1867,10 +1867,10 @@ func (w *Window) RecordFunc() func() {
 func wrapProgress(title string, f func(func(int)), changeCount int) {
 	pd := NewProgressDialog(title)
 	progFunc := func(i int) {
+		pd.SetRange(0, changeCount)
 		pd.SetValue(i)
 	}
 
-	pd.SetRange(0, changeCount)
 	f(progFunc)
 	pd.Close()
 }
