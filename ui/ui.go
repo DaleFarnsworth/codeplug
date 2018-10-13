@@ -147,18 +147,16 @@ func DelayedCall(f func()) {
 }
 
 type MainWindow struct {
-	qMainWindow      widgets.QMainWindow
-	codeplug         *codeplug.Codeplug
-	recordWindows    map[codeplug.RecordType]*Window
-	altRecordWindows map[codeplug.RecordType]*Window
-	connectClose     func() bool
-	connectChange    func(*codeplug.Change)
+	qMainWindow   widgets.QMainWindow
+	codeplug      *codeplug.Codeplug
+	recordWindows map[codeplug.RecordType]*Window
+	connectClose  func() bool
+	connectChange func(*codeplug.Change)
 }
 
 func (mw *MainWindow) SetCodeplug(cp *codeplug.Codeplug) {
 	mw.codeplug = cp
 	mw.recordWindows = make(map[codeplug.RecordType]*Window)
-	mw.altRecordWindows = make(map[codeplug.RecordType]*Window)
 
 	mw.codeplug.ConnectChange(func(change *codeplug.Change) {
 		for _, mw := range mainWindows {
@@ -170,15 +168,6 @@ func (mw *MainWindow) SetCodeplug(cp *codeplug.Codeplug) {
 				w := mw.recordWindows[change.RecordType()]
 				if w != nil {
 					w.handleChange(change)
-					r := change.Record()
-					ResetWindows(r.Codeplug(), r)
-					continue
-				}
-				w = mw.altRecordWindows[change.RecordType()]
-				if w != nil {
-					w.handleChange(change)
-					r := change.Record()
-					ResetWindows(r.Codeplug(), r)
 				}
 			}
 
@@ -261,15 +250,19 @@ func MainWindows() []*MainWindow {
 
 func (parent *Window) AddHbox() *HBox {
 	box := NewHbox()
+
 	parent.layout.AddWidget(&box.qWidget, 0, 0)
-	box.window = parent.window
+	box.window = parent
+
 	return box
 }
 
 func (parent *Window) AddVbox() *VBox {
 	box := NewVbox()
+
 	parent.layout.AddWidget(&box.qWidget, 0, 0)
-	box.window = parent.window
+	box.window = parent
+
 	return box
 }
 
@@ -298,32 +291,23 @@ func (w *Window) EnableWidgets() {
 	widgets := w.widgets
 	for senderType, subs := range w.subscriptions {
 		for _, receiverType := range subs {
-			for s, sender := range widgets[senderType] {
-				for r, receiver := range widgets[receiverType] {
-					if r.Record() == s.Record() {
-						receiver.receive(sender)
-					}
-				}
+			sender := widgets[senderType]
+			receiver := widgets[receiverType]
+			if sender == nil || receiver == nil {
+				continue
 			}
+			receiver.receive(sender)
 		}
 	}
 }
-
 func (w *Window) Show() {
 	w.qWidget.Show()
 	w.qWidget.ActivateWindow()
 	w.qWidget.Raise()
-	w.EnableWidgets()
 }
 
-func Clear(w Widget) {
-	widget := w.qWidget_ITF().QWidget_PTR()
-	for _, obj := range widget.Children() {
-		if obj.Pointer() == widget.Layout().Pointer() {
-			continue
-		}
-		obj.DeleteLater()
-	}
+func (w *Window) Clear() {
+	clear(w.qWidget)
 }
 
 func (w *Window) DeleteLater() {
@@ -338,16 +322,17 @@ func (w *Window) RecordType() codeplug.RecordType {
 	return w.recordType
 }
 
-func (w *Window) Records(rType codeplug.RecordType) []*codeplug.Record {
-	mw := w.mainWindow
-	if mw.recordWindows[rType] == nil {
-		mw.altRecordWindows[rType] = w
-		w.altRecordTypes[rType] = true
-	}
-	return mw.codeplug.Records(rType)
+func (box *HBox) Clear() {
+	clear(box.qWidget)
+	//box.layout.Invalidate()
 }
 
-func (form *Form) RemoveWidget(widget *FieldWidget) {
+func (box *VBox) Clear() {
+	clear(box.qWidget)
+	//box.layout.Invalidate()
+}
+
+func (form *Form) RemoveWidget(widget *Widget) {
 	form.layout.RemoveRow2(widget.qWidget)
 }
 
@@ -357,6 +342,16 @@ func (box *HBox) SetEnabled(enable bool) {
 
 func (box *VBox) SetEnabled(enable bool) {
 	box.qWidget.SetEnabled(enable)
+}
+
+func clear(widget widgets.QWidget) {
+	objs := widget.Children()
+	for _, obj := range objs {
+		if obj.Pointer() == widget.Layout().Pointer() {
+			continue
+		}
+		obj.DeleteLater()
+	}
 }
 
 func (mw *MainWindow) Show() {
@@ -380,9 +375,8 @@ type Window struct {
 	window          *Window
 	mainWindow      *MainWindow
 	recordType      codeplug.RecordType
-	altRecordTypes  map[codeplug.RecordType]bool
 	recordFunc      func()
-	widgets         map[codeplug.FieldType]map[*codeplug.Field]*FieldWidget
+	widgets         map[codeplug.FieldType]*Widget
 	subscriptions   map[codeplug.FieldType][]codeplug.FieldType
 	recordModel     *core.QAbstractListModel
 	recordList      *RecordList
@@ -421,9 +415,8 @@ func (mw *MainWindow) NewRecordWindow(rType codeplug.RecordType, writable bool) 
 	w.mainWindow = mw
 	w.window = w
 	w.recordType = rType
-	w.altRecordTypes = make(map[codeplug.RecordType]bool)
 	w.subscriptions = make(map[codeplug.FieldType][]codeplug.FieldType)
-	w.widgets = make(map[codeplug.FieldType]map[*codeplug.Field]*FieldWidget)
+	w.widgets = make(map[codeplug.FieldType]*Widget)
 
 	w.initRecordModel(writable)
 
@@ -436,12 +429,14 @@ func (mw *MainWindow) NewRecordWindow(rType codeplug.RecordType, writable bool) 
 
 		}
 		delete(mw.recordWindows, rType)
-		delete(mw.altRecordWindows, rType)
 		event.Accept()
 	})
 
 	w.handleChange = func(change *codeplug.Change) {
 		rl := w.recordList
+
+		updateRecordList := false
+		updateRecord := false
 
 		changeType := change.Type()
 		switch changeType {
@@ -449,14 +444,14 @@ func (mw *MainWindow) NewRecordWindow(rType codeplug.RecordType, writable bool) 
 			f := change.Field()
 			w := recordWindow(f.Record())
 			if w != nil {
-				widgets := w.widgets[f.Type()]
-				if widgets == nil {
-					break
-				}
-				widget := widgets[f]
+				widget := w.widgets[f.Type()]
 				if widget != nil {
 					widget.receive(widget)
 				}
+			}
+
+			if f.Type() == f.Record().NameFieldType() {
+				updateRecordList = true
 			}
 
 		case codeplug.RecordsFieldChange:
@@ -467,42 +462,34 @@ func (mw *MainWindow) NewRecordWindow(rType codeplug.RecordType, writable bool) 
 
 		case codeplug.MoveRecordsChange, codeplug.InsertRecordsChange:
 			rl.SetCurrent(change.Record().Index())
+			updateRecordList = true
 			rl.SelectRecords(change.Records()...)
 
 		case codeplug.RemoveRecordsChange:
 			rl.SetCurrent(change.Record().Index())
+			updateRecordList = true
 
 		case codeplug.MoveFieldsChange,
 			codeplug.InsertFieldsChange,
 			codeplug.RemoveFieldsChange,
 			codeplug.ListIndexChange:
+			updateRecord = true
 
 		default:
 			logFatal("Unknown change type ", changeType)
 		}
+
+		if updateRecordList {
+			rl.Update()
+		}
+
+		curChanged := w.recordList.Current() == change.Record().Index()
+		if updateRecordList || updateRecord && curChanged {
+			w.recordFunc()
+		}
 	}
 
 	return w
-}
-
-func (w *Window) qWidget_ITF() widgets.QWidget_ITF {
-	return &w.qWidget
-}
-
-func (w *Window) Window() *Window {
-	return w.window
-}
-
-func (w *Window) setWindow(window *Window) {
-	w.window = window
-}
-
-func (w *Window) AddWidget(widget Widget) {
-	logFatal("cannot add widget to Window")
-}
-
-func (w *Window) SetContentsMargins(left int, right int, top int, bottom int) {
-	logFatal("cannot set contents margin of Window")
 }
 
 func (w *Window) records() []*codeplug.Record {
@@ -541,16 +528,8 @@ func NewVbox() *VBox {
 	return box
 }
 
-func (vBox *VBox) qWidget_ITF() widgets.QWidget_ITF {
-	return &vBox.qWidget
-}
-
-func (vBox *VBox) Window() *Window {
-	return vBox.window
-}
-
-func (vBox *VBox) setWindow(window *Window) {
-	vBox.window = window
+func (vBox *VBox) SetContentsMargins(left int, right int, top int, bottom int) {
+	vBox.layout.SetContentsMargins(left, right, top, bottom)
 }
 
 func (parent *VBox) AddGroupbox(label string) *HBox {
@@ -559,12 +538,17 @@ func (parent *VBox) AddGroupbox(label string) *HBox {
 	layout.SetContentsMargins(0, 0, 0, 0)
 
 	box := NewHbox()
-	layout.AddWidget(&box.qWidget, 0, 0)
 	box.layout.SetContentsMargins(0, 0, 0, 0)
+	layout.AddWidget(&box.qWidget, 0, 0)
+
 	parent.layout.AddWidget(qgb, 0, 0)
 	box.window = parent.window
 
 	return box
+}
+
+func (vBox *VBox) Window() *Window {
+	return vBox.window
 }
 
 func (parent *HBox) AddGroupbox(label string) *HBox {
@@ -582,53 +566,41 @@ func (parent *HBox) AddGroupbox(label string) *HBox {
 	return box
 }
 
+func (hBox *HBox) Window() *Window {
+	return hBox.window
+}
+
 func (parent *VBox) AddHbox() *HBox {
-	box := NewHbox()
-	parent.AddWidget(box)
-	return box
+	return parent.AddExistingHbox(NewHbox())
 }
 
 func (parent *VBox) AddExistingHbox(box *HBox) *HBox {
-	parent.AddWidget(box)
+	parent.layout.AddWidget(&box.qWidget, 0, 0)
+	box.window = parent.window
+
 	return box
 }
 
 func (parent *HBox) AddHbox() *HBox {
-	box := NewHbox()
-	parent.AddWidget(box)
-	return box
+	return parent.AddExistingHbox(NewHbox())
 }
 
 func (parent *HBox) AddExistingHbox(box *HBox) *HBox {
-	parent.AddWidget(box)
+	parent.layout.AddWidget(&box.qWidget, 0, 0)
+	box.window = parent.window
+
 	return box
 }
 
-func (parent *VBox) AddWidget(widget Widget) {
-	parent.layout.AddWidget(widget.qWidget_ITF(), 0, 0)
-	widget.setWindow(parent.Window())
+func (parent *VBox) AddWidget(widget *Widget) {
+	parent.layout.AddWidget(widget.qWidget, 0, 0)
 }
 
-func (parent *HBox) AddWidget(widget Widget) {
-	parent.layout.AddWidget(widget.qWidget_ITF(), 0, 0)
-	widget.setWindow(parent.Window())
-}
-
-func (vBox *VBox) SetContentsMargins(left int, right int, top int, bottom int) {
-	vBox.layout.SetContentsMargins(left, right, top, bottom)
-}
-
-func (hBox *HBox) SetContentsMargins(left int, right int, top int, bottom int) {
-	hBox.layout.SetContentsMargins(left, right, top, bottom)
+func (parent *HBox) AddWidget(widget *Widget) {
+	parent.layout.AddWidget(widget.qWidget, 0, 0)
 }
 
 func (parent *HBox) AddForm() *Form {
-	form := NewForm()
-	parent.AddWidget(form)
-	return form
-}
-
-func NewForm() *Form {
 	form := new(Form)
 
 	form.qWidget = *widgets.NewQWidget(nil, 0)
@@ -636,12 +608,22 @@ func NewForm() *Form {
 	form.layout.SetContentsMargins(0, 0, 0, 0)
 	//form.layout.SetLabelAlignment(core.Qt__AlignRight)
 
+	parent.layout.AddWidget(&form.qWidget, 0, 0)
+	form.window = parent.window
+
 	return form
 }
 
 func (parent *VBox) AddForm() *Form {
-	form := NewForm()
-	parent.AddWidget(form)
+	form := new(Form)
+
+	form.qWidget = *widgets.NewQWidget(nil, 0)
+	form.layout = widgets.NewQFormLayout(&form.qWidget)
+	//form.layout.SetLabelAlignment(core.Qt__AlignRight)
+
+	parent.layout.AddWidget(&form.qWidget, 0, 0)
+	form.window = parent.window
+
 	return form
 }
 
@@ -667,49 +649,43 @@ func NewHbox() *HBox {
 	return box
 }
 
-func (hBox *HBox) qWidget_ITF() widgets.QWidget_ITF {
-	return &hBox.qWidget
-}
-
-func (hBox *HBox) Window() *Window {
-	return hBox.window
-}
-
-func (hBox *HBox) setWindow(window *Window) {
-	hBox.window = window
+func (hBox *HBox) SetContentsMargins(left int, right int, top int, bottom int) {
+	hBox.layout.SetContentsMargins(left, right, top, bottom)
 }
 
 func (parent *HBox) AddVbox() *VBox {
-	box := NewVbox()
-	parent.AddWidget(box)
-	return box
+	return parent.AddExistingVbox(NewVbox())
 }
 
 func (parent *HBox) AddExistingVbox(box *VBox) *VBox {
-	parent.AddWidget(box)
+	parent.layout.AddWidget(&box.qWidget, 0, 0)
+	box.window = parent.window
+
 	return box
 }
 
 func (parent *VBox) AddVbox() *VBox {
-	box := NewVbox()
-	parent.AddWidget(box)
-	return box
+	return parent.AddExistingVbox(NewVbox())
 }
 
 func (parent *VBox) AddExistingVbox(box *VBox) *VBox {
-	parent.AddWidget(box)
+	parent.layout.AddWidget(&box.qWidget, 0, 0)
+	box.window = parent.window
+
 	return box
 }
 
 func (parent *HBox) AddButton(text string) *Button {
 	b := NewButton(text)
 	parent.layout.AddWidget(&b.qWidget, 0, 0)
+
 	return b
 }
 
 func (parent *VBox) AddButton(text string) *Button {
 	b := NewButton(text)
 	parent.layout.AddWidget(&b.qWidget, 0, 0)
+
 	return b
 }
 
@@ -813,46 +789,16 @@ func (button *Button) SetFixedWidth() {
 	button.qWidget.SetSizePolicy(sizePolicy)
 }
 
-func (form *Form) qWidget_ITF() widgets.QWidget_ITF {
-	return &form.qWidget
-}
-
-func (form *Form) Window() *Window {
-	return form.window
-}
-
-func (form *Form) setWindow(window *Window) {
-	form.window = window
-}
-
-func (parent *Form) AddWidget(w Widget) {
-	switch v := w.(type) {
-	case *FieldWidget:
-		parent.AddFieldWidget(v)
-	default:
-		logFatalf("cannot add %T to form", v)
-	}
-}
-
-func (parent *Form) AddFieldWidget(w *FieldWidget) {
+func (parent *Form) AddWidget(w *Widget) {
 	if w.label != nil {
-		parent.layout.AddRow(w.label, w.qWidget_ITF())
+		parent.layout.AddRow(w.label, w.qWidget)
 		return
 	}
 
 	parent.layout.AddWidget(w.qWidget)
-	w.window = parent.window
 }
 
-func (form *Form) SetContentsMargins(left int, right int, top int, bottom int) {
-	form.layout.SetContentsMargins(left, right, top, bottom)
-}
-
-func (form *Form) QWidget() widgets.QWidget {
-	return form.qWidget
-}
-
-func (parent *Form) AddRow(label string, w *FieldWidget) {
+func (parent *Form) AddRow(label string, w *Widget) {
 	w.SetLabel(label)
 	parent.AddWidget(w)
 }
@@ -865,12 +811,6 @@ func (parent *Form) AddFieldTypeRows(r *codeplug.Record, fTypes ...codeplug.Fiel
 	labelFunc := func(f *codeplug.Field) string {
 		return f.TypeName()
 	}
-	recordNames := r.Names()
-	if recordNames != nil {
-		labelFunc = func(f *codeplug.Field) string {
-			return recordNames[r.Index()]
-		}
-	}
 	parent.AddFieldRows(labelFunc, fields...)
 }
 
@@ -880,64 +820,6 @@ func (parent *Form) AddFieldRows(labelFunc func(*codeplug.Field) string, fields 
 	}
 }
 
-func (window *Window) NewFieldWidget(label string, f *codeplug.Field) *FieldWidget {
-	newFieldWidgetFunc := newFieldWidget[f.ValueType()]
-	if newFieldWidgetFunc == nil {
-		logFatalf("No %s entry in newFieldWidget slice", f.ValueType())
-	}
-
-	w := newFieldWidgetFunc(f)
-	w.label = widgets.NewQLabel2(label, nil, 0)
-
-	widgets := window.widgets
-	fType := f.Type()
-	if widgets[fType] == nil {
-		widgets[fType] = make(map[*codeplug.Field]*FieldWidget)
-	}
-	widgets[fType][f] = w
-
-	enablerType := f.EnablerType()
-
-	w.receive = func(sender *FieldWidget) {
-		if sender.field.Record().Type() != f.Record().Type() {
-			logFatal("sender record type", sender.field.Record().Type(), " receiver record type", f.Record().Type())
-		}
-		if sender.field.Record().Index() != f.Record().Index() {
-			logFatal("sender record index", sender.field.Record().Index(), " receiver record index", f.Record().Index())
-		}
-		if sender.field.Index() != f.Index() {
-			logFatal("sender field index", sender.field.Index(), " receiver field index", f.Index())
-		}
-		switch sender.field.Type() {
-		case "":
-			logFatal("receive(): invalid field type")
-
-		case fType:
-			w.update()
-			subs := window.subscriptions[fType]
-			for _, sub := range subs {
-				for f, receiver := range widgets[sub] {
-					if f.Record() == sender.field.Record() {
-						receiver.receive(w)
-					}
-				}
-			}
-
-		case enablerType:
-			setEnabled(w)
-
-		default:
-			logFatal("receive(): unexpected field type")
-		}
-	}
-
-	if enablerType != "" {
-		window.subscribe(enablerType, f.Type())
-	}
-
-	return w
-}
-
 func (parent *Form) AddFieldRow(labelFunc func(*codeplug.Field) string, f *codeplug.Field) {
 	if f == nil {
 		// This is not an error because some forms are used for
@@ -945,8 +827,53 @@ func (parent *Form) AddFieldRow(labelFunc func(*codeplug.Field) string, f *codep
 		// We just ignore non-existent fields.
 		return
 	}
-	w := parent.window.NewFieldWidget(labelFunc(f), f)
+	newFieldWidgetFunc := newFieldWidget[f.ValueType()]
+	if newFieldWidgetFunc == nil {
+		logFatalf("No %s entry in newFieldWidget slice", f.ValueType())
+	}
+	w := newFieldWidgetFunc(f)
+	w.label = widgets.NewQLabel2(labelFunc(f), nil, 0)
 	parent.layout.AddRow(w.label, w.qWidget)
+
+	widgets := parent.window.widgets
+	fType := f.Type()
+	widgets[fType] = w
+
+	enablingFieldType := f.EnablingFieldType()
+
+	w.receive = func(sender *Widget) {
+		if sender.field.Record().Type() != w.field.Record().Type() {
+			logFatal("sender record type", sender.field.Record().Type(), "receiver record type", w.field.Record().Type())
+		}
+		if sender.field.Record().Index() != w.field.Record().Index() {
+			logFatal("sender record index", sender.field.Record().Index(), "receiver record index", w.field.Record().Index())
+		}
+		if sender.field.Index() != w.field.Index() {
+			logFatal("sender field index", sender.field.Index(), "receiver field index", w.field.Index())
+		}
+		switch sender.field.Type() {
+		case "":
+			logFatal("receive(): invalid field type")
+
+		case fType:
+			w.update()
+			subs := parent.window.subscriptions[fType]
+			for _, sub := range subs {
+				widgets[sub].receive(w)
+			}
+
+		case enablingFieldType:
+			setEnabled(w)
+
+		default:
+			logFatal("receive(): unexpected field type")
+		}
+	}
+
+	if enablingFieldType != "" {
+		parent.subscribe(enablingFieldType, w.field.Type())
+	}
+
 }
 
 func (parent *Form) AddReadOnlyFieldTypeRows(r *codeplug.Record, fTypes ...codeplug.FieldType) {
@@ -985,120 +912,16 @@ func setFieldString(f *codeplug.Field, s string) error {
 	if err != nil {
 		return err
 	}
-
-	if !setMultipleRecords(f, s) {
-		f.SetString(s)
-	}
+	DelayedCall(func() {
+		if !setMultipleRecords(f, s) {
+			f.SetString(s)
+		}
+		ResetWindows(f.Codeplug(), f.Record())
+	})
 	return nil
 }
 
-type Table struct {
-	qWidget widgets.QTableWidget
-	window  *Window
-}
-
-func NewTable() *Table {
-	t := new(Table)
-	t.qWidget = *widgets.NewQTableWidget(nil)
-
-	return t
-}
-
-func (parent *HBox) AddTable() *Table {
-	t := NewTable()
-	parent.AddWidget(t)
-	return t
-}
-
-func (parent *VBox) AddTable() *Table {
-	t := NewTable()
-	parent.AddWidget(t)
-	return t
-}
-
-func (t *Table) qWidget_ITF() widgets.QWidget_ITF {
-	return &t.qWidget
-}
-
-func (t *Table) AddWidget(w Widget) {
-	logFatal("cannot add widget directly to Table")
-}
-
-func (t *Table) SetContentsMargins(left int, right int, top int, bottom int) {
-	logFatal("cannot set contents margin of Table")
-}
-
-func (t *Table) setWindow(window *Window) {
-	t.window = window
-}
-
-func (t *Table) Window() *Window {
-	return t.window
-}
-
-func (t *Table) AddRow(cells ...Widget) {
-	qw := t.qWidget
-
-	row := qw.RowCount()
-	qw.SetRowCount(row + 1)
-
-	if qw.ColumnCount() < len(cells) {
-		qw.SetColumnCount(len(cells))
-	}
-
-	for i, cell := range cells {
-		qw.SetCellWidget(row, i, cell.qWidget_ITF())
-	}
-}
-
-func (t *Table) RowCount() int {
-	return t.qWidget.RowCount()
-}
-
-func (t *Table) ColumnCount() int {
-	return t.qWidget.ColumnCount()
-}
-
-func (t *Table) AddTopLabels(labels []string) {
-	t.qWidget.SetHorizontalHeaderLabels(labels)
-}
-
-func (t *Table) AddLeftLabels(labels []string) {
-	t.qWidget.SetVerticalHeaderLabels(labels)
-}
-
-func (t *Table) SetFixedSize() {
-	sizePolicy := t.qWidget.SizePolicy()
-	sizePolicy.SetHorizontalPolicy(widgets.QSizePolicy__Fixed)
-	sizePolicy.SetVerticalPolicy(widgets.QSizePolicy__Fixed)
-	t.qWidget.SetSizePolicy(sizePolicy)
-}
-
-func (t *Table) ResizeToContents() {
-	qw := t.qWidget
-	hh := qw.HorizontalHeader()
-	vh := qw.VerticalHeader()
-
-	qw.ResizeColumnsToContents()
-	qw.ResizeRowsToContents()
-	hh.SetSectionResizeMode(widgets.QHeaderView__ResizeToContents)
-	vh.SetSectionResizeMode(widgets.QHeaderView__ResizeToContents)
-
-	width := 2 + vh.Width() + hh.Length()
-	// vh.Width() apparently isn't updated to account for the label
-	// We'll approximate it by the following.
-	label := qw.VerticalHeaderItem(qw.RowCount()-1).Text() + "M"
-	metrics := gui.NewQFontMetrics(widgets.QApplication_Font())
-	vhWidth := metrics.HorizontalAdvance(label, -1)
-
-	width = 2 + vhWidth + hh.Length()
-	height := 2 + hh.Height() + vh.Length()
-
-	qw.SetMinimumHeight(height)
-	qw.SetMaximumHeight(height)
-	qw.SetMinimumWidth(width)
-	qw.SetMaximumWidth(width)
-}
+const slowChangeCount = 5
 
 func setMultipleRecords(f *codeplug.Field, str string) bool {
 	if f.MaxFields() > 1 {
@@ -1110,10 +933,6 @@ func setMultipleRecords(f *codeplug.Field, str string) bool {
 	}
 
 	recs := selectedRecords(r)
-	if recs == nil {
-		return false
-	}
-
 	if len(recs) <= 1 {
 		return false
 	}
@@ -1134,24 +953,25 @@ func setMultipleRecords(f *codeplug.Field, str string) bool {
 	}
 	rw.settingMultiple = true
 
-	DelayedCall(func() {
-		cp := r.Codeplug()
-		howmany := "all"
-		if len(recs) < len(cp.Records(r.Type())) {
-			howmany = fmt.Sprintf("%d selected", len(recs))
-		}
+	cp := r.Codeplug()
+	howmany := "all"
+	if len(recs) < len(cp.Records(r.Type())) {
+		howmany = fmt.Sprintf("%d selected", len(recs))
+	}
 
-		typeName := f.Record().TypeName()
+	typeName := f.Record().TypeName()
 
-		msg := fmt.Sprintf(`Set "%s" to "%s" in %s %s?`, f.TypeName(), str, howmany, typeName)
-		ans := YesNoPopup(fmt.Sprintf("Change multiple %s", typeName), msg)
-		if ans != PopupYes {
-			rw.settingMultiple = false
-			f.SetString(str)
-			return
-		}
+	msg := fmt.Sprintf(`Set "%s" to "%s" in %s %s?`, f.TypeName(), str, howmany, typeName)
+	ans := YesNoPopup(fmt.Sprintf("Change multiple %s", typeName), msg)
+	if ans != PopupYes {
+		rw.settingMultiple = false
+		return false
+	}
 
-		rCount := len(recs)
+	rCount := len(recs)
+	if rCount < slowChangeCount {
+		cp.SetRecordsField(recs, f.Type(), str, func(int) {})
+	} else {
 		pd := NewProgressDialog("Updating " + typeName)
 		pd.SetRange(0, rCount)
 
@@ -1162,22 +982,14 @@ func setMultipleRecords(f *codeplug.Field, str string) bool {
 		cp.SetRecordsField(recs, f.Type(), str, progFunc)
 
 		pd.Close()
+	}
 
-		rw.settingMultiple = false
-	})
+	rw.settingMultiple = false
 
 	return true
 }
 
-type Widget interface {
-	qWidget_ITF() widgets.QWidget_ITF
-	AddWidget(Widget)
-	SetContentsMargins(left int, right int, top int, bottom int)
-	setWindow(*Window)
-	Window() *Window
-}
-
-func setEnabled(w *FieldWidget) {
+func setEnabled(w *Widget) {
 	f := w.field
 	enabled := f.IsEnabled()
 	if enabled && !f.IsValid() {
@@ -1187,49 +999,24 @@ func setEnabled(w *FieldWidget) {
 	w.SetEnabled(enabled)
 	w.label.SetEnabled(enabled)
 	w.receive(w)
-	if enabled && w.stacker != nil {
-		w.stacker.enableOverlappingWidget(w)
-	}
 }
 
-type FieldWidget struct {
+type Widget struct {
 	qWidget widgets.QWidget_ITF
 	label   *widgets.QLabel
 	field   *codeplug.Field
-	receive func(sender *FieldWidget)
-	stacker *StackedWidget
-	window  *Window
+	receive func(sender *Widget)
 }
 
-func (w *FieldWidget) qWidget_ITF() widgets.QWidget_ITF {
-	return w.qWidget
-}
-
-func (w *FieldWidget) Window() *Window {
-	return w.window
-}
-
-func (w *FieldWidget) setWindow(window *Window) {
-	w.window = window
-}
-
-func (fw *FieldWidget) AddWidget(w Widget) {
-	logFatal("cannot add widget to FieldWidget")
-}
-
-func (fw *FieldWidget) SetContentsMargins(left int, right int, top int, bottom int) {
-	logFatal("cannot set contents margin of FieldWidget")
-}
-
-func (window *Window) subscribe(sender codeplug.FieldType, receiver codeplug.FieldType) {
-	subs := window.subscriptions
+func (form *Form) subscribe(sender codeplug.FieldType, receiver codeplug.FieldType) {
+	subs := form.window.subscriptions
 	if subs[sender] == nil {
 		subs[sender] = []codeplug.FieldType{}
 	}
 	subs[sender] = append(subs[sender], receiver)
 }
 
-func (w *FieldWidget) SetLabel(text string) {
+func (w *Widget) SetLabel(text string) {
 	if w.label == nil {
 		w.label = widgets.NewQLabel2(text, nil, 0)
 		return
@@ -1237,7 +1024,7 @@ func (w *FieldWidget) SetLabel(text string) {
 	w.label.SetText(text)
 }
 
-func (w *FieldWidget) update() {
+func (w *Widget) update() {
 	f := w.field
 	qw := w.qWidget
 
@@ -1259,7 +1046,7 @@ func (w *FieldWidget) update() {
 	}
 }
 
-func (w *FieldWidget) SetEnabled(b bool) {
+func (w *Widget) SetEnabled(b bool) {
 	qw := w.qWidget
 
 	switch qw.(type) {
@@ -1287,7 +1074,7 @@ func (w *FieldWidget) SetEnabled(b bool) {
 	}
 }
 
-func (w *FieldWidget) SetReadOnly(b bool) {
+func (w *Widget) SetReadOnly(b bool) {
 	qw := w.qWidget
 
 	switch qw.(type) {
@@ -1302,7 +1089,7 @@ func (w *FieldWidget) SetReadOnly(b bool) {
 	}
 }
 
-func (w *FieldWidget) SetVisible(b bool) {
+func (w *Widget) SetVisible(b bool) {
 	qw := w.qWidget
 
 	switch qw.(type) {
@@ -1330,7 +1117,7 @@ func (w *FieldWidget) SetVisible(b bool) {
 	}
 }
 
-func (w *FieldWidget) Width() int {
+func (w *Widget) Width() int {
 	qw := w.qWidget
 
 	var width int
@@ -1349,7 +1136,7 @@ func (w *FieldWidget) Width() int {
 	return width
 }
 
-func (w *FieldWidget) SetMinimumWidth(width int) {
+func (w *Widget) SetMinimumWidth(width int) {
 	qw := w.qWidget
 
 	switch qw.(type) {
@@ -1372,9 +1159,9 @@ func setQCheckBox(cb *widgets.QCheckBox, f *codeplug.Field) {
 	cb.SetCheckState(checkState)
 }
 
-func newFieldCheckbox(f *codeplug.Field) *FieldWidget {
+func newFieldCheckbox(f *codeplug.Field) *Widget {
 	qw := widgets.NewQCheckBox(nil)
-	w := new(FieldWidget)
+	w := new(Widget)
 	w.qWidget = qw
 	w.field = f
 
@@ -1394,10 +1181,10 @@ func newFieldCheckbox(f *codeplug.Field) *FieldWidget {
 	return w
 }
 
-func newFieldLineEdit(f *codeplug.Field) *FieldWidget {
+func newFieldLineEdit(f *codeplug.Field) *Widget {
 	s := f.String()
 	qw := widgets.NewQLineEdit2(s, nil)
-	widget := new(FieldWidget)
+	widget := new(Widget)
 	widget.qWidget = qw
 	widget.field = f
 	metrics := gui.NewQFontMetrics(widgets.QApplication_Font())
@@ -1419,9 +1206,9 @@ func newFieldLineEdit(f *codeplug.Field) *FieldWidget {
 	return widget
 }
 
-func newFieldCombobox(f *codeplug.Field) *FieldWidget {
+func newFieldCombobox(f *codeplug.Field) *Widget {
 	qw := widgets.NewQComboBox(nil)
-	widget := new(FieldWidget)
+	widget := new(Widget)
 	widget.qWidget = qw
 	widget.field = f
 
@@ -1471,9 +1258,9 @@ func setQSpinBox(sb *widgets.QSpinBox, f *codeplug.Field) {
 	sb.SetValue(value)
 }
 
-func NewSpinboxWidget(value, min, max int, changedFunc func(int)) *FieldWidget {
+func NewSpinboxWidget(value, min, max int, changedFunc func(int)) *Widget {
 	qw := widgets.NewQSpinBox(nil)
-	widget := new(FieldWidget)
+	widget := new(Widget)
 	widget.qWidget = qw
 	qw.SetRange(min, max)
 	qw.SetValue(value)
@@ -1485,9 +1272,9 @@ func NewSpinboxWidget(value, min, max int, changedFunc func(int)) *FieldWidget {
 	return widget
 }
 
-func NewCheckboxWidget(checked bool, clickedFunc func(bool)) *FieldWidget {
+func NewCheckboxWidget(checked bool, clickedFunc func(bool)) *Widget {
 	qw := widgets.NewQCheckBox(nil)
-	widget := new(FieldWidget)
+	widget := new(Widget)
 	widget.qWidget = qw
 	qw.SetChecked(checked)
 	qw.ConnectClicked(clickedFunc)
@@ -1495,89 +1282,16 @@ func NewCheckboxWidget(checked bool, clickedFunc func(bool)) *FieldWidget {
 	return widget
 }
 
-func (widget *FieldWidget) SetChecked(checked bool) {
+func (widget *Widget) SetChecked(checked bool) {
 	checkbox, ok := widget.qWidget.(*widgets.QCheckBox)
 	if ok {
 		checkbox.SetChecked(checked)
 	}
 }
 
-type StackedWidget struct {
-	qStackedWidget widgets.QStackedWidget
-	widgets        []Widget
-	window         *Window
-}
-
-func NewStackedWidget() *StackedWidget {
-	sw := new(StackedWidget)
-	sw.qStackedWidget = *widgets.NewQStackedWidget(nil)
-	return sw
-}
-
-func (sw *StackedWidget) qWidget_ITF() widgets.QWidget_ITF {
-	return widgets.QWidget_ITF(&sw.qStackedWidget)
-}
-
-func (sw *StackedWidget) Window() *Window {
-	return sw.window
-}
-
-func (sw *StackedWidget) setWindow(window *Window) {
-	sw.window = window
-}
-
-func (sw *StackedWidget) SetContentsMargins(left int, right int, top int, bottom int) {
-	logFatal("cannot set contents margin of StackedWidget")
-}
-
-func (sw *StackedWidget) AddWidget(w Widget) {
-	sw.qStackedWidget.AddWidget(w.qWidget_ITF())
-	sw.widgets = append(sw.widgets, w)
-	w.setWindow(sw.window)
-
-	switch v := w.(type) {
-	case *FieldWidget:
-		v.stacker = sw
-	}
-}
-
-func (sw *StackedWidget) enableOverlappingWidget(w *FieldWidget) {
-	sw.qStackedWidget.SetCurrentWidget(w.qWidget)
-
-	for _, widget := range sw.widgets {
-		widget.(*FieldWidget).field.SetStore(widget == w)
-	}
-}
-
-func (sw *StackedWidget) setCurrentWidget(w *FieldWidget) {
-	sw.qStackedWidget.SetCurrentWidget(w.qWidget)
-}
-
-type TabWidget struct {
-	qTabWidget widgets.QTabWidget
-	widgets    []*FieldWidget
-}
-
-func NewTabWidget() *TabWidget {
-	tw := new(TabWidget)
-	tw.qTabWidget = *widgets.NewQTabWidget(nil)
-	return tw
-}
-
-func (tw *TabWidget) AddTab(w *FieldWidget, label string) {
-	tw.qTabWidget.AddTab(w.qWidget, label)
-	tw.widgets = append(tw.widgets, w)
-}
-
-func (tw *TabWidget) ConnectChange(f func(w *FieldWidget)) {
-	tw.qTabWidget.ConnectCurrentChanged(func(index int) {
-		f(tw.widgets[index])
-	})
-}
-
-func NewComboboxWidget(opt string, opts []string, changed func(string)) *FieldWidget {
+func NewComboboxWidget(opt string, opts []string, changed func(string)) *Widget {
 	qw := widgets.NewQComboBox(nil)
-	widget := new(FieldWidget)
+	widget := new(Widget)
 	widget.qWidget = qw
 	qw.InsertItems(0, opts)
 	qw.SetCurrentText(opt)
@@ -1587,15 +1301,15 @@ func NewComboboxWidget(opt string, opts []string, changed func(string)) *FieldWi
 	return widget
 }
 
-func UpdateComboboxWidget(widget *FieldWidget, opt string, opts []string) {
+func UpdateComboboxWidget(widget *Widget, opt string, opts []string) {
 	qcb := widget.qWidget.(*widgets.QComboBox)
 	qcb.Clear()
 	qcb.InsertItems(0, opts)
 	qcb.SetCurrentText(opt)
 }
 
-func NewButtonWidget(text string, clicked func()) *FieldWidget {
-	w := new(FieldWidget)
+func NewButtonWidget(text string, clicked func()) *Widget {
+	w := new(Widget)
 	b := widgets.NewQPushButton2(text, nil)
 	b.SetSizePolicy2(widgets.QSizePolicy__Fixed,
 		widgets.QSizePolicy__Preferred)
@@ -1644,9 +1358,9 @@ func (t *TextEdit) SetReadOnly(ro bool) {
 	t.qWidget.SetReadOnly(ro)
 }
 
-func newFieldSpinbox(f *codeplug.Field) *FieldWidget {
+func newFieldSpinbox(f *codeplug.Field) *Widget {
 	qw := widgets.NewQSpinBox(nil)
-	widget := new(FieldWidget)
+	widget := new(Widget)
 	widget.qWidget = qw
 	widget.field = f
 
@@ -1684,12 +1398,12 @@ func newFieldSpinbox(f *codeplug.Field) *FieldWidget {
 	return widget
 }
 
-func newFieldTextEdit(f *codeplug.Field) *FieldWidget {
+func newFieldTextEdit(f *codeplug.Field) *Widget {
 	logFatal("newTextEdit: not implemented")
 	return nil
 }
 
-var newFieldWidget = map[codeplug.ValueType]func(*codeplug.Field) *FieldWidget{
+var newFieldWidget = map[codeplug.ValueType]func(*codeplug.Field) *Widget{
 	codeplug.VtAscii:             newFieldLineEdit,
 	codeplug.VtBandwidth:         newFieldCombobox,
 	codeplug.VtBiFrequency:       newFieldLineEdit,
@@ -1698,7 +1412,6 @@ var newFieldWidget = map[codeplug.ValueType]func(*codeplug.Field) *FieldWidget{
 	codeplug.VtCtcssDcs:          newFieldCombobox,
 	codeplug.VtFrequency:         newFieldLineEdit,
 	codeplug.VtFrequencyOffset:   newFieldLineEdit,
-	codeplug.VtGpsListIndex:      newFieldCombobox,
 	codeplug.VtGpsReportInterval: newFieldSpinbox,
 	codeplug.VtHexadecimal32:     newFieldLineEdit,
 	codeplug.VtHexadecimal4:      newFieldLineEdit,
@@ -1706,18 +1419,18 @@ var newFieldWidget = map[codeplug.ValueType]func(*codeplug.Field) *FieldWidget{
 	codeplug.VtIntroLine:         newFieldLineEdit,
 	codeplug.VtIStrings:          newFieldCombobox,
 	codeplug.VtListIndex:         newFieldCombobox,
+	codeplug.VtGpsListIndex:      newFieldCombobox,
 	codeplug.VtMemberListIndex:   newFieldCombobox,
 	codeplug.VtName:              newFieldLineEdit,
 	codeplug.VtOffOn:             newFieldCheckbox,
 	codeplug.VtOnOff:             newFieldCheckbox,
 	codeplug.VtPcPassword:        newFieldLineEdit,
 	codeplug.VtPrivacyNumber:     newFieldCombobox,
-	codeplug.VtRadioButton:       newFieldCombobox,
 	codeplug.VtRadioName:         newFieldLineEdit,
 	codeplug.VtRadioPassword:     newFieldLineEdit,
 	codeplug.VtRadioProgPassword: newFieldLineEdit,
-	codeplug.VtSpanList:          newFieldCombobox,
 	codeplug.VtSpan:              newFieldSpinbox,
+	codeplug.VtSpanList:          newFieldCombobox,
 	codeplug.VtTextMessage:       newFieldLineEdit,
 	codeplug.VtTimeStamp:         newFieldLineEdit,
 	codeplug.VtUniqueName:        newFieldLineEdit,
@@ -1864,37 +1577,39 @@ func (w *Window) RecordFunc() func() {
 	return w.recordFunc
 }
 
-func wrapProgress(title string, f func(func(int)), changeCount int) {
+func condWrapProgress(title string, f func(func(int)), changeCount int) {
+	progFunc := func(i int) {}
+	if changeCount < slowChangeCount {
+		f(progFunc)
+		return
+	}
+
 	pd := NewProgressDialog(title)
-	progFunc := func(i int) {
-		pd.SetRange(0, changeCount)
+	progFunc = func(i int) {
 		pd.SetValue(i)
 	}
 
+	pd.SetRange(0, changeCount)
 	f(progFunc)
 	pd.Close()
 }
 
 func UndoChange(cp *codeplug.Codeplug) {
-	DelayedCall(func() {
-		change := cp.ChangeToUndo()
-		changeRecord := change.Record()
-		changeCount := len(change.Changes())
-		title := "Updating " + changeRecord.TypeName()
+	change := cp.ChangeToUndo()
+	changeRecord := change.Record()
+	changeCount := len(change.Changes())
+	title := "Updating " + changeRecord.TypeName()
 
-		wrapProgress(title, cp.UndoChange, changeCount)
-	})
+	condWrapProgress(title, cp.UndoChange, changeCount)
 }
 
 func RedoChange(cp *codeplug.Codeplug) {
-	DelayedCall(func() {
-		change := cp.ChangeToRedo()
-		changeRecord := change.Record()
-		changeCount := len(change.Changes())
-		title := "Updating " + changeRecord.TypeName()
+	change := cp.ChangeToRedo()
+	changeRecord := change.Record()
+	changeCount := len(change.Changes())
+	title := "Updating " + changeRecord.TypeName()
 
-		wrapProgress(title, cp.RedoChange, changeCount)
-	})
+	condWrapProgress(title, cp.RedoChange, changeCount)
 }
 
 func InfoPopup(title string, msg string) {
@@ -2098,10 +1813,7 @@ func mainWindow(cp *codeplug.Codeplug) *MainWindow {
 func ResetWindows(cp *codeplug.Codeplug, r *codeplug.Record) {
 	rType := r.Type()
 	mw := mainWindow(cp)
-	if mw == nil {
-		return
-	}
-	for _, w := range mw.recordWindows {
+	for _, w := range mw.RecordWindows() {
 		if w.recordType != rType {
 			rl := w.RecordList()
 			if rl != nil {
@@ -2118,13 +1830,8 @@ func recordWindow(r *codeplug.Record) *Window {
 	cp := r.Codeplug()
 	mw := mainWindow(cp)
 	rType := r.Type()
-	for _, w := range mw.recordWindows {
+	for _, w := range mw.RecordWindows() {
 		if w.recordType == rType {
-			return w
-		}
-	}
-	for _, w := range mw.altRecordWindows {
-		if w.altRecordTypes[rType] {
 			return w
 		}
 	}
@@ -2133,17 +1840,11 @@ func recordWindow(r *codeplug.Record) *Window {
 
 func recordList(r *codeplug.Record) *RecordList {
 	w := recordWindow(r)
-	if w == nil {
-		return nil
-	}
 	return w.recordList
 }
 
 func selectedRecords(r *codeplug.Record) []*codeplug.Record {
 	rl := recordList(r)
-	if rl == nil {
-		return nil
-	}
 	return rl.SelectedRecords()
 }
 

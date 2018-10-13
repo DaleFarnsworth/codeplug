@@ -94,13 +94,7 @@ func (change *Change) refStrings() []string {
 		for i, r := range records {
 			strings[i] = ""
 			if r.rIndex > 0 {
-				if len(allRecords) <= r.rIndex {
-					continue
-				}
-				record := allRecords[r.rIndex-1]
-				if record != nil {
-					strings[i] = record.Name()
-				}
+				strings[i] = allRecords[r.rIndex-1].Name()
 			}
 		}
 
@@ -324,8 +318,7 @@ func deleteChange(changes *[]*Change, i int) {
 	*changes = (*changes)[:len(*changes)-1]
 }
 
-func (cp *Codeplug) updateListIndexChanges(parentChange *Change) []*Change {
-	changes := parentChange.changes
+func (cp *Codeplug) updateListIndexChanges(changes []*Change) []*Change {
 	if changes == nil {
 		return changes
 	}
@@ -375,7 +368,7 @@ func (cp *Codeplug) addChange(change *Change) {
 	switch change.cType {
 	case MoveRecordsChange, InsertRecordsChange, RemoveRecordsChange,
 		RemoveFieldsChange:
-		change.changes = cp.updateListIndexChanges(change)
+		change.changes = cp.updateListIndexChanges(change.changes)
 	}
 
 	i := cp.changeIndex + 1
@@ -395,6 +388,16 @@ func (change *Change) Complete() {
 		cp.addChange(change)
 	}
 	cp.publishChange(change)
+}
+
+func (cp *Codeplug) FindRecordByName(rType RecordType, name string) *Record {
+	allRecords := cp.rDesc[rType].records
+	for _, r := range allRecords {
+		if r.Name() == name {
+			return r
+		}
+	}
+	return nil
 }
 
 func (cp *Codeplug) currentChange() *Change {
@@ -442,16 +445,6 @@ func (change *Change) undoReference() string {
 
 func (change *Change) Changes() []*Change {
 	return change.changes
-}
-
-func (change *Change) AddChange(newChange *Change) {
-	switch newChange.cType {
-	case MoveRecordsChange, InsertRecordsChange, RemoveRecordsChange,
-		RemoveFieldsChange:
-		cp := change.Codeplug()
-		newChange.changes = cp.updateListIndexChanges(newChange)
-	}
-	change.changes = append(change.changes, newChange)
 }
 
 func (change *Change) redoReference() string {

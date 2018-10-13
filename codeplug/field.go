@@ -38,14 +38,12 @@ import (
 )
 
 const invalidValueString = "=INVALID="
-const deferredValueString = "=DEFERRED="
 
 // A Field represents a field within a Record.
 type Field struct {
 	*fDesc
 	fIndex int
 	value
-	noStore bool
 }
 
 // A value represents the value a Field Contains.
@@ -76,8 +74,9 @@ type fieldInfo struct {
 	span           *Span
 	strings        *[]string
 	indexedStrings *[]IndexedString
-	enablerType    FieldType
-	enables        []enable
+	enablingValue  string
+	enabler        FieldType
+	disabler       FieldType
 	listRecordType RecordType
 	recordInfo     *recordInfo
 	extOffset      int
@@ -85,11 +84,6 @@ type fieldInfo struct {
 	extIndex       int
 	extBitOffset   int
 	index          int
-}
-
-type enable struct {
-	value   string
-	enables bool
 }
 
 // A FieldType represents a field's type
@@ -190,15 +184,7 @@ func (f *Field) setString(s string) error {
 
 	// Some fields may be dependent on this field's value
 	// Set them based on valid
-	for _, sf := range f.record.AllFields() {
-		if sf.enablerType != f.fType {
-			continue
-		}
-		if sf.isDeferredValue() {
-			continue
-		}
-		sf.valid()
-	}
+	f.record.valid()
 
 	return err
 }
@@ -262,7 +248,6 @@ func (f *Field) Strings() []string {
 		if f.indexedStrings != nil && len(*f.indexedStrings) > 1 {
 			strs = append(strs, (*f.indexedStrings)[1].String)
 		}
-
 	case VtMemberListIndex:
 		strs = []string{}
 		if f.indexedStrings != nil {
@@ -288,7 +273,7 @@ func (f *Field) Strings() []string {
 			strs = strs[:8]
 		}
 
-	case VtIndexedStrings, VtRadioButton:
+	case VtIndexedStrings:
 		strs = []string{}
 
 		if f.indexedStrings != nil {
@@ -358,14 +343,17 @@ func (f *Field) SetIndex(index int) {
 // and index as well as the field's type name and index. The index is omitted
 // if the MaxRecords or MaxFields is 1.
 func (f *Field) FullTypeName() string {
-	s := f.record.FullTypeName() + "." + f.typeName
+	r := f.record
+	s := r.typeName
+
+	if r.max > 1 {
+		s += fmt.Sprintf("[%s]", r.Name())
+	}
+
+	s += "." + f.typeName
 
 	if f.max > 1 {
-		str := f.String()
-		if str == "" {
-			str = fmt.Sprintf("%d", f.fIndex)
-		}
-		s += fmt.Sprintf("[%s]", str)
+		s += fmt.Sprintf("[%s]", f.String())
 	}
 
 	return s
@@ -412,11 +400,6 @@ func (f *Field) load() {
 
 // store inserts the field's value into the field's part of cp.bytes.
 func (f *Field) store() {
-	if f.noStore {
-		// some fields may overlap with other fields
-		return
-	}
-
 	if !f.IsEnabled() {
 		if _, invalid := f.value.(invalidValue); invalid {
 			// Leave invalid value in the codeplug as we loaded it.
@@ -425,10 +408,6 @@ func (f *Field) store() {
 	}
 
 	f.value.store(f)
-}
-
-func (f *Field) SetStore(store bool) {
-	f.noStore = !store
 }
 
 // bytes returns the field's part of cp.bytes.
@@ -476,27 +455,49 @@ func (f *Field) sibling(fType FieldType) *Field {
 
 // IsEnabled returns true if the field is enabled
 func (f *Field) IsEnabled() bool {
-	enabled := true
-
-	if f.enablerType == "" {
-		return enabled
+	enablingField := f.enablingField()
+	if enablingField == nil {
+		return true
 	}
 
-	enabler := f.sibling(f.enablerType)
-	enablerValue := enabler.String()
-
-	for _, enable := range f.enables {
-		if enable.value == enablerValue {
-			enabled = enable.enables
-		}
+	if !enablingField.IsEnabled() {
+		return false
 	}
 
-	return enabled
+	if f.enabler != "" {
+		return enablingField.String() == enablingField.enablingValue
+	}
+
+	if f.disabler != "" {
+		return enablingField.String() != enablingField.enablingValue
+	}
+
+	return true
 }
 
-// EnablerType returns the type of the field's enabling field.
-func (f *Field) EnablerType() FieldType {
-	return f.enablerType
+func (f *Field) enablingField() *Field {
+	siblingType := f.EnablingFieldType()
+
+	if siblingType == "" {
+		return nil
+	}
+
+	return f.sibling(siblingType)
+}
+
+// EnablingFieldType returns the type of the field's enabling field.
+func (f *Field) EnablingFieldType() FieldType {
+	var siblingType FieldType
+
+	if f.enabler != "" {
+		siblingType = f.enabler
+	}
+
+	if f.disabler != "" {
+		siblingType = f.disabler
+	}
+
+	return siblingType
 }
 
 // fieldDeleted returns true if the field at fIndex is deleted.
@@ -1009,42 +1010,6 @@ func (v *indexedStrings) store(f *Field) {
 	f.storeBytes([]byte{byte(*v)})
 }
 
-type radioButton struct {
-	indexedStrings
-}
-
-// getString returns the radioButton's value as a string.
-func (v *radioButton) getString(f *Field) string {
-	index := uint16(v.indexedStrings)
-	if index == 255 {
-		index = 0
-	}
-
-	for _, is := range *(*f.fDesc).indexedStrings {
-		if is.Index == index {
-			return is.String
-		}
-	}
-	return ""
-}
-
-// valid returns nil if the radioButton's value is valid.
-func (v *radioButton) valid(f *Field) error {
-	index := uint16(v.indexedStrings)
-	if index == 255 {
-		index = 0
-	}
-
-	fd := f.fDesc
-	for _, is := range *fd.indexedStrings {
-		if is.Index == index {
-			return nil
-		}
-	}
-
-	return fmt.Errorf("%d: invalid index", index)
-}
-
 // biFrequency is a field value representing a frequency in Hertz.
 type biFrequency float64
 
@@ -1530,7 +1495,7 @@ func (v *privacyNumber) setString(f *Field, s string) error {
 func (v *privacyNumber) valid(f *Field) error {
 	sibling := f.sibling(FtCiPrivacy)
 	if sibling == nil {
-		f.deferValue(deferredValueString)
+		f.setDeferredValue()
 		return nil
 	}
 	ss := sibling.String()
@@ -1644,7 +1609,7 @@ func (v *memberListIndex) valid(f *Field) error {
 		}
 	}
 
-	if f.isDeferredValue() {
+	if f.isDeferredValue("") {
 		return nil
 	}
 
@@ -1708,6 +1673,7 @@ func (v *listIndex) getString(f *Field) string {
 // setString sets the listIndex's value from a string.
 func (v *listIndex) setString(f *Field, s string) error {
 	fd := f.fDesc
+
 	if fd.indexedStrings != nil {
 		for _, is := range *fd.indexedStrings {
 			if is.String == s {
@@ -1740,7 +1706,7 @@ func (v *listIndex) valid(f *Field) error {
 
 	listNames := fd.record.codeplug.rDesc[fd.listRecordType].ListNames()
 	if listNames == nil {
-		f.deferValue(deferredValueString)
+		f.setDeferredValue()
 		return nil
 	}
 
@@ -2184,76 +2150,37 @@ func fieldsToStrings(fields []*Field) []string {
 	return strings
 }
 
-func (f *Field) resolveDeferredValue() error {
-	dValue, deferred := f.value.(deferredValue)
-	if !deferred {
-		return nil
-	}
-
-	var err error
-	if dValue.str != deferredValueString {
-		err = f.setString(dValue.str)
-	}
-	if err == nil {
-		f.value = dValue.value
-		f.valid()
-	}
-	return err
-}
-
-func (f *Field) isDeferredValue() bool {
-	_, deferred := f.value.(deferredValue)
-	return deferred
-}
-
-func (f *Field) mustDeferValue(str string) bool {
-	if f.isDeferredValue() {
-		logFatal("already deferred: ", f.FullTypeName())
-	}
-
+func (f *Field) isDeferredValue(str string) bool {
 	switch f.valueType {
 	case VtMemberListIndex:
 		if str == "None" || str == "Selected" {
 			return false
 		}
-		if !f.record.InCodeplug() {
-			return true
-		}
 		listNames := f.memberListNames()
-		return len(listNames) <= 0 || listNames[0] == ""
+		if len(listNames) > 0 && listNames[0] != "" {
+			return false
+		}
 
 	case VtListIndex, VtGpsListIndex:
-		if !f.record.InCodeplug() {
-			return true
-		}
 		listNames := f.listNames()
-		return len(listNames) <= 0
+		if len(listNames) > 0 {
+			return false
+		}
+
+	default:
+		return false
 	}
 
-	return false
+	_, deferred := f.value.(deferredValue)
+	if !deferred {
+		f.value = deferredValue{value: f.value}
+	}
+
+	f.setDeferredValue()
+	return true
 }
 
-func (f *Field) deferValue(str string) {
-	if f.isDeferredValue() {
-		logFatal("already deferred: ", f.FullTypeName())
-	}
-
-	f.value = deferredValue{value: f.value, str: str}
-	f.queueDeferredValue()
-}
-
-func (f *Field) queueDeferredValue() {
-	if !f.isDeferredValue() {
-		logFatal("not deferred: ", f.FullTypeName())
-	}
+func (f *Field) setDeferredValue() {
 	cp := f.record.codeplug
 	cp.deferredValueFields = append(cp.deferredValueFields, f)
-}
-
-func (f *Field) DeferredString() string {
-	dValue, def := f.value.(deferredValue)
-	if !def {
-		return "=not deferred="
-	}
-	return dValue.str
 }

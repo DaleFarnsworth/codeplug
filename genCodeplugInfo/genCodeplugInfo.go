@@ -56,15 +56,14 @@ type Codeplug struct {
 }
 
 type Record struct {
-	TypeName   string   `json:"typeName"`
-	Type       string   `json:"type"`
-	Offset     int      `json:"offset"`
-	Size       int      `json:"size"`
-	Max        int      `json:"max"`
-	DelDesc    *DelDesc `json:"delDesc"`
-	FieldTypes []string `json:"fieldTypes"`
-	NamePrefix string   `json:"namePrefix"`
-	Names      []string `json:"names"`
+	TypeName   string    `json:"typeName"`
+	Type       string    `json:"type"`
+	Offset     int       `json:"offset"`
+	Size       int       `json:"size"`
+	Max        int       `json:"max"`
+	DelDescs   []DelDesc `json:"delDescs"`
+	FieldTypes []string  `json:"fieldTypes"`
+	NamePrefix string    `json:"namePrefix"`
 }
 
 type DelDesc struct {
@@ -89,10 +88,10 @@ type Field struct {
 	ExtIndex       int             `json:"extIndex"`
 	ExtBitOffset   int             `json:"extBitOffset"`
 	ListType       *string         `json:"listType"`
-	Enablers       []*Enabler      `json:"enablers"`
-	Enable1        *Enabler        `json:"enabler"`
+	Enabling       *Enabling       `json:"enabling"`
+	EnablingValue  string
 	Enabler        string
-	Enables        []Enable
+	Disabler       string
 }
 
 type Strings []string
@@ -112,15 +111,10 @@ type Span struct {
 	MinString string `json:"minString"`
 }
 
-type Enabler struct {
+type Enabling struct {
 	Value    string   `json:"value"`
 	Enables  []string `json:"enables"`
 	Disables []string `json:"disables"`
-}
-
-type Enable struct {
-	Value   string
-	Enables bool
 }
 
 type ValueTypeMap map[string]int
@@ -157,96 +151,36 @@ func FieldTypeString(s string) string {
 	return s[2:]
 }
 
-var seenEnable = make(map[string]bool)
-
 func doEnables(r *Record, fieldMap map[string]*Field) {
-	fieldEnables := make(map[*Field]map[string]*Enable)
-
 	for _, fType := range r.FieldTypes {
 		f := fieldMap[fType]
 		if f == nil {
-			fmt.Fprintf(os.Stderr, "1 found no field type: %s\n", fType)
+			fmt.Fprintf(os.Stderr, "found no field type: %s\n", fType)
 			os.Exit(1)
 		}
 
-		enablers := f.Enablers
-		if f.Enable1 != nil {
-			if len(enablers) != 0 {
-				fmt.Fprintf(os.Stderr, "both f.enabler f.enablers found: %s\n", fType)
+		if f.Enabling == nil {
+			continue
+		}
+
+		f.EnablingValue = f.Enabling.Value
+
+		for _, fTypeEn := range f.Enabling.Enables {
+			f := fieldMap[fTypeEn]
+			if f == nil {
+				fmt.Fprintf(os.Stderr, "found no field type: %s\n", fType)
 				os.Exit(1)
 			}
-			enablers = []*Enabler{f.Enable1}
+			f.Enabler = fType
 		}
 
-		for _, enabler := range enablers {
-			for _, fTypeEn := range enabler.Enables {
-				f := fieldMap[fTypeEn]
-				if f == nil {
-					fmt.Fprintf(os.Stderr, "2 found no field type: %s\n", fTypeEn)
-					os.Exit(1)
-				}
-
-				f.Enabler = fType
-
-				fieldEnable := fieldEnables[f]
-				if fieldEnable == nil {
-					fieldEnable = make(map[string]*Enable)
-					fieldEnables[f] = fieldEnable
-				}
-				enable := fieldEnable[enabler.Value]
-				if enable == nil {
-					enable = new(Enable)
-				}
-				enable.Value = enabler.Value
-				enable.Enables = true
-				fieldEnable[enabler.Value] = enable
-				fieldEnables[f] = fieldEnable
+		for _, fTypeDis := range f.Enabling.Disables {
+			f := fieldMap[fTypeDis]
+			if f == nil {
+				fmt.Fprintf(os.Stderr, "found no field type: %s\n", fType)
+				os.Exit(1)
 			}
-
-			for _, fTypeDis := range enabler.Disables {
-				f := fieldMap[fTypeDis]
-				if f == nil {
-					fmt.Fprintf(os.Stderr, "3 found no field type: %s\n", fTypeDis)
-					os.Exit(1)
-				}
-
-				f.Enabler = fType
-
-				fieldEnable := fieldEnables[f]
-				if fieldEnable == nil {
-					fieldEnable = make(map[string]*Enable)
-					fieldEnables[f] = fieldEnable
-				}
-				enable := fieldEnable[enabler.Value]
-				if enable == nil {
-					enable = new(Enable)
-				}
-				enable.Value = enabler.Value
-				enable.Enables = false
-				fieldEnable[enabler.Value] = enable
-				fieldEnables[f] = fieldEnable
-			}
-		}
-	}
-
-	for f, enables := range fieldEnables {
-		if f.Enables == nil {
-			f.Enables = make([]Enable, 0)
-		}
-
-		values := make([]string, 0)
-		for value := range enables {
-			values = append(values, value)
-		}
-		sort.Strings(values)
-
-		for _, value := range values {
-			enable := enables[value]
-			seenKey := f.Type + ":" + value
-			if !seenEnable[seenKey] {
-				f.Enables = append(f.Enables, *enable)
-				seenEnable[seenKey] = true
-			}
+			f.Disabler = fType
 		}
 	}
 }
@@ -306,11 +240,6 @@ func readCodeplugJson(filename string) TemplateVars {
 			if span.MinString != "" {
 				span.Min = 0
 			}
-		}
-		existingField := fieldMap[f.Type]
-		if existingField != nil {
-			fmt.Fprintf(os.Stderr, "Duplicate field type %s\n", f.Type)
-			os.Exit(1)
 		}
 		fieldMap[f.Type] = f
 		valueTypeMap[f.ValueType]++
