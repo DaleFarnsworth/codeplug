@@ -1180,7 +1180,7 @@ type Widget interface {
 func setEnabled(w *FieldWidget) {
 	f := w.field
 	enabled := f.IsEnabled()
-	if enabled && !f.IsValid() {
+	if enabled && f.IsInvalidValue() {
 		f.SetDefault()
 	}
 
@@ -1438,9 +1438,10 @@ func newFieldCombobox(f *codeplug.Field) *FieldWidget {
 	qw.InsertItems(0, strings)
 	qw.SetCurrentText(f.String())
 
-	if !f.IsValid() {
-		qw.InsertItems(0, []string{" "})
-		qw.SetCurrentText(" ")
+	if f.IsInvalidValue() {
+		invalidValueString := f.String()
+		qw.InsertItems(0, []string{invalidValueString})
+		qw.SetCurrentText(invalidValueString)
 		qw.ConnectFocusInEvent(func(event *gui.QFocusEvent) {
 			qw.RemoveItem(0)
 			qw.DisconnectFocusInEvent()
@@ -1658,8 +1659,8 @@ func newFieldSpinbox(f *codeplug.Field) *FieldWidget {
 
 	setQSpinBox(qw, f)
 
-	if !f.IsValid() {
-		qw.SetSpecialValueText(" ")
+	if f.IsInvalidValue() {
+		qw.SetSpecialValueText(f.String())
 		qw.SetValue(span.Minimum())
 		qw.ConnectFocusInEvent(func(event *gui.QFocusEvent) {
 			setFieldString(f, strconv.Itoa(span.Minimum()))

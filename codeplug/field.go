@@ -146,9 +146,10 @@ func (span *Span) MinString() string {
 
 // String returns the fields value as a string.
 func (f Field) String() string {
-	if _, invalid := f.value.(invalidValue); invalid {
+	if f.IsInvalidValue() {
 		return invalidValueString
 	}
+
 	return f.value.getString(&f)
 }
 
@@ -402,7 +403,7 @@ func (f *Field) SetDefault() {
 func (f *Field) valid() error {
 	err := f.value.valid(f)
 	if err != nil {
-		if _, invalid := f.value.(invalidValue); !invalid {
+		if !f.IsInvalidValue() {
 			f.value = invalidValue{value: f.value}
 		}
 	}
@@ -412,12 +413,12 @@ func (f *Field) valid() error {
 	return err
 }
 
-// IsValid returns false if the field has previously been determined
+// IsInvalidValue returns true if the field has previously been determined
 // to be invalid. The field can only be invalid if the value read from
 // the codeplug file was invalid.
-func (f *Field) IsValid() bool {
+func (f *Field) IsInvalidValue() bool {
 	_, invalid := f.value.(invalidValue)
-	return !invalid
+	return invalid
 }
 
 // load sets the field's value from the field's part of cp.bytes.
@@ -433,7 +434,7 @@ func (f *Field) store() {
 	}
 
 	if !f.IsEnabled() {
-		if _, invalid := f.value.(invalidValue); invalid {
+		if f.IsInvalidValue() {
 			// Leave invalid value in the codeplug as we loaded it.
 			return
 		}
@@ -2239,6 +2240,9 @@ func (f *Field) isDeferredValue() bool {
 }
 
 func (f *Field) mustDeferValue(str string) bool {
+	if f.IsInvalidValue() {
+		return false
+	}
 	if f.isDeferredValue() {
 		logFatal("already deferred: ", f.FullTypeName())
 	}
