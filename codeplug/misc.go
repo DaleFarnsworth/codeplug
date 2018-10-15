@@ -30,6 +30,7 @@ import (
 	"bytes"
 	"crypto/rand"
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 	"unicode"
@@ -101,7 +102,7 @@ func bytesToFrequency(b []byte) float64 {
 
 // frequencyToBytes converts a floating point freqency to a byte slice.
 func frequencyToBytes(f float64) []byte {
-	return int64ToBytes(int64ToBcd(int64(f*100000)), 4)
+	return int64ToBytes(int64ToBcd(int64(math.Round(f*100000))), 4)
 }
 
 // frequencyToString produces a string from a floating point frequency.
