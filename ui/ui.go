@@ -153,6 +153,7 @@ type MainWindow struct {
 	altRecordWindows map[codeplug.RecordType]*Window
 	connectClose     func() bool
 	connectChange    func(*codeplug.Change)
+	changing         bool
 }
 
 func (mw *MainWindow) SetCodeplug(cp *codeplug.Codeplug) {
@@ -161,29 +162,24 @@ func (mw *MainWindow) SetCodeplug(cp *codeplug.Codeplug) {
 	mw.altRecordWindows = make(map[codeplug.RecordType]*Window)
 
 	mw.codeplug.ConnectChange(func(change *codeplug.Change) {
-		for _, mw := range mainWindows {
-			if mw.codeplug != change.Codeplug() {
-				continue
-			}
+		mw := mainWindow(change.Codeplug())
+		/*
 			changes := append(change.Changes(), change)
 			for _, change := range changes {
 				w := mw.recordWindows[change.RecordType()]
 				if w != nil {
 					w.handleChange(change)
-					r := change.Record()
-					ResetWindows(r.Codeplug(), r)
 					continue
 				}
 				w = mw.altRecordWindows[change.RecordType()]
 				if w != nil {
 					w.handleChange(change)
-					r := change.Record()
-					ResetWindows(r.Codeplug(), r)
 				}
 			}
+		*/
+		mw.CodeplugChanged(change)
 
-			mw.connectChange(change)
-		}
+		mw.connectChange(change)
 	})
 }
 
@@ -295,6 +291,7 @@ func (w *Window) MenuBar() *MenuBar {
 }
 
 func (w *Window) enableWidgets() {
+	dprint("window enableWidgets")
 	widgets := w.widgets
 	for senderType, subs := range w.subscriptions {
 		for _, receiverType := range subs {
@@ -310,6 +307,7 @@ func (w *Window) enableWidgets() {
 }
 
 func (w *Window) Show() {
+	dprint("window Show")
 	w.qWidget.Show()
 	w.qWidget.ActivateWindow()
 	w.qWidget.Raise()
@@ -369,6 +367,44 @@ func (mw *MainWindow) Close() {
 	mw.qMainWindow.Close()
 }
 
+func (mw *MainWindow) BeginChange(change *codeplug.Change) {
+	mw.changing = true
+}
+
+func (mw *MainWindow) EndChange(change *codeplug.Change) {
+	mw.changing = false
+	mw.CodeplugChanged(change)
+}
+
+func (mw *MainWindow) CodeplugChanged(change *codeplug.Change) {
+	if mw == nil {
+		dprint("mw == nil")
+		return
+	}
+
+	if mw.changing {
+		return
+	}
+
+	for _, w := range mw.recordWindows {
+		dprint("EndChange", w.recordType)
+
+		rl := w.RecordList()
+		if rl == nil {
+			return
+		}
+
+		/*
+			if w.recordType != change.RecordType() {
+				rl.SetCurrent(0)
+			}
+		*/
+
+		w.recordFunc()
+		rl.Update()
+	}
+}
+
 func (mw *MainWindow) RecordWindows() map[codeplug.RecordType]*Window {
 	return mw.recordWindows
 }
@@ -389,7 +425,6 @@ type Window struct {
 	connectClose    func() bool
 	handleChange    func(*codeplug.Change)
 	settingMultiple bool
-	updating        bool
 }
 
 func (mw *MainWindow) NewWindow() *Window {
@@ -1885,7 +1920,10 @@ func UndoChange(cp *codeplug.Codeplug) {
 		changeCount := len(change.Changes())
 		title := "Updating " + changeRecord.TypeName()
 
+		mw := mainWindow(cp)
+		mw.BeginChange(change)
 		wrapProgress(title, cp.UndoChange, changeCount)
+		mw.EndChange(change)
 	})
 }
 
@@ -1896,7 +1934,10 @@ func RedoChange(cp *codeplug.Codeplug) {
 		changeCount := len(change.Changes())
 		title := "Updating " + changeRecord.TypeName()
 
+		mw := mainWindow(cp)
+		mw.BeginChange(change)
 		wrapProgress(title, cp.RedoChange, changeCount)
+		mw.EndChange(change)
 	})
 }
 
@@ -2096,32 +2137,6 @@ func mainWindow(cp *codeplug.Codeplug) *MainWindow {
 		}
 	}
 	return nil
-}
-
-func ResetWindows(cp *codeplug.Codeplug, r *codeplug.Record) {
-	rType := r.Type()
-	mw := mainWindow(cp)
-	if mw == nil {
-		return
-	}
-	for _, w := range mw.recordWindows {
-		if w.updating {
-			continue
-		}
-		dprint("ResetWindow", w.recordType)
-
-		if w.recordType == rType {
-			w.recordFunc()
-			continue
-		}
-
-		rl := w.RecordList()
-		if rl != nil {
-			rl.SetCurrent(0)
-			rl.Update()
-			continue
-		}
-	}
 }
 
 func recordWindow(r *codeplug.Record) *Window {

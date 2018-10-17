@@ -653,24 +653,19 @@ func (r *Record) HasFieldType(fType FieldType) bool {
 func DependentRecords(records []*Record) (newRecords []*Record, depRecords []*Record) {
 	dRecsMap := make(map[string]bool)
 
+	for _, r := range records {
+		dRecsMap[r.FullTypeName()] = true
+	}
+
 	depRecords = make([]*Record, 0)
 	for _, r := range records {
 		depRecords = append(depRecords, r.dependentRecords(dRecsMap)...)
 	}
 
-	newRecords = make([]*Record, 0)
-	for _, r := range records {
-		if dRecsMap[r.FullTypeName()] {
-			continue
-		}
-		newRecords = append(newRecords, r)
-	}
-
-	return newRecords, depRecords
+	return records, depRecords
 }
 
 func (r *Record) dependentRecords(dRecsMap map[string]bool) []*Record {
-	dprint("dependentRecords", r.FullTypeName())
 	dRecs := make([]*Record, 0)
 	for _, fType := range r.FieldTypes() {
 		fields := r.Fields(fType)

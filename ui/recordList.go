@@ -62,7 +62,7 @@ func (parent *HBox) AddRecordList(rType codeplug.RecordType) *RecordList {
 
 	rl.qListView.ConnectCurrentChanged(func(selected *core.QModelIndex, deSelected *core.QModelIndex) {
 		w := rl.window
-		if w.recordFunc != nil && !w.updating {
+		if w.recordFunc != nil && !w.mainWindow.changing {
 			DelayedCall(func() {
 				dprint("ConnectCurrentChanged")
 				w.recordFunc()
@@ -438,10 +438,17 @@ func (w *Window) initRecordModel(writable bool) {
 			dRow = model.RowCount(nil)
 		}
 
+		rTypeString := "Drop Records"
 		drop := true
 		records, depRecords, id, err := w.dataRecords(data, drop)
+		if len(records) > 0 {
+			rTypeString = string(records[0].Type())
+		}
 		if err != nil {
-			InfoPopup("Data Drop", err.Error())
+			DelayedCall(func() {
+				title := fmt.Sprintf("Drop %s", rTypeString)
+				InfoPopup(title, err.Error())
+			})
 			return false
 		}
 
@@ -450,11 +457,15 @@ func (w *Window) initRecordModel(writable bool) {
 
 		cp := w.mainWindow.codeplug
 		rv := true
+
+		var change *codeplug.Change
+		mw := w.MainWindow()
+
 	actionSwitch:
 		switch {
 		case action == core.Qt__MoveAction && id == cp.ID():
-			w.updating = true
-			change := cp.MoveRecordsChange(records)
+			change = cp.MoveRecordsChange(records)
+			mw.BeginChange(change)
 			for i, r := range records {
 				r := cp.FindRecordByName(r.Type(), r.Name())
 				sRow := r.Index()
@@ -472,11 +483,10 @@ func (w *Window) initRecordModel(writable bool) {
 				dRow++
 			}
 			change.Complete()
-			w.updating = false
 
 		case action == core.Qt__CopyAction && id == cp.ID():
-			w.updating = true
-			change := cp.InsertRecordsChange(records)
+			change = cp.InsertRecordsChange(records)
+			mw.BeginChange(change)
 			for _, r := range records {
 				w.recordList.recordToInsert = r
 				rv = model.InsertRows(dRow, 1, dParent)
@@ -486,14 +496,8 @@ func (w *Window) initRecordModel(writable bool) {
 				dRow++
 			}
 			change.Complete()
-			w.updating = false
 
 		case id != cp.ID():
-			rTypeString := "Records"
-			if len(records) > 0 {
-				rTypeString = string(records[0].Type())
-			}
-
 			if action == core.Qt__MoveAction {
 				newRecords := make([]*codeplug.Record, 0)
 				for _, r := range records {
@@ -506,13 +510,15 @@ func (w *Window) initRecordModel(writable bool) {
 			}
 
 			if len(records) == 0 {
-				msg := fmt.Sprintf("no new %s", rTypeString)
-				InfoPopup("Data Drop", msg)
+				title := fmt.Sprintf("Drop %s", rTypeString)
+				body := fmt.Sprintf("no new %s", rTypeString)
+				dprint("infoPopup")
+				InfoPopup(title, body)
 				return false
 			}
 
-			w.updating = true
-			change := cp.InsertRecordsChange(records)
+			change = cp.InsertRecordsChange(records)
+			mw.BeginChange(change)
 			for _, r := range depRecords {
 				if r.NameExists() {
 					continue
@@ -534,16 +540,11 @@ func (w *Window) initRecordModel(writable bool) {
 
 			cp.ResolveDeferredValueFields()
 			change.Complete()
-			w.updating = false
 		}
 
 		rl := w.recordList
 		rl.SetCurrent(dRow - 1)
 		rl.SelectRecords(records...)
-
-		rl.Update()
-		dprint("ConnectDropMimeData")
-		w.recordFunc()
 
 		if id != cp.ID() && !cp.Valid() {
 			fmtStr := `
@@ -555,6 +556,8 @@ Select "Menu->Edit->Show Invalid Fields" to view them.`
 				InfoPopup("codeplug warning", msg)
 			})
 		}
+
+		mw.EndChange(change)
 
 		return rv
 	})
