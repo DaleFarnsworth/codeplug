@@ -63,8 +63,10 @@ func (parent *HBox) AddRecordList(rType codeplug.RecordType) *RecordList {
 	rl.qListView.ConnectCurrentChanged(func(selected *core.QModelIndex, deSelected *core.QModelIndex) {
 		w := rl.window
 		if w.recordFunc != nil && !w.updating {
-			dprint("ConnectCurrentChanged")
-			w.recordFunc()
+			DelayedCall(func() {
+				dprint("ConnectCurrentChanged")
+				w.recordFunc()
+			})
 		}
 	})
 
@@ -83,8 +85,8 @@ func (rl *RecordList) SelectionModel() *core.QItemSelectionModel {
 
 func (rl *RecordList) SetCurrent(i int) {
 	index := rl.Model().CreateIndex(i, 0, nil)
-	rl.qListView.SetCurrentIndex(index)
 	rl.qListView.ScrollTo(index, widgets.QAbstractItemView__EnsureVisible)
+	rl.qListView.SetCurrentIndex(index)
 }
 
 func (rl *RecordList) Current() int {
