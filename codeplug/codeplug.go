@@ -1614,12 +1614,12 @@ func parseName(rdr *reader) (string, int, bool, error) {
 	return name, index, dep, nil
 }
 
-func (cp *Codeplug) ParseRecords(rdr io.Reader) (records []*Record, depRecords []*Record, err error) {
+func (cp *Codeplug) ParseRecords(rdr io.Reader, deferValues bool) (records []*Record, depRecords []*Record, err error) {
 	pRecs := cp.parseTextFile(rdr)
-	return cp.parsedFileToRecs(pRecs)
+	return cp.parsedFileToRecs(pRecs, deferValues)
 }
 
-func (cp *Codeplug) parsedFileToRecs(pRecs []*parsedRecord) (records []*Record, depRecords []*Record, err error) {
+func (cp *Codeplug) parsedFileToRecs(pRecs []*parsedRecord, deferValues bool) (records []*Record, depRecords []*Record, err error) {
 	var warning error
 	var pos *position
 
@@ -1667,16 +1667,20 @@ func (cp *Codeplug) parsedFileToRecs(pRecs []*parsedRecord) (records []*Record, 
 			}
 
 			var f *Field
-			f, err = r.NewFieldWithValue(fType, pf.index, pf.value)
-			if err != nil {
-				appendWarning(pr, pf, err)
-			}
-			if dValue, def := f.value.(deferredValue); def {
-				dValue.str = pf.value
-				if pf.pos != nil {
-					dValue.pos = pf.pos
+			if deferValues {
+				f = r.NewFieldWithDeferredValue(fType, pf.index, pf.value)
+			} else {
+				f, err = r.NewFieldWithValue(fType, pf.index, pf.value)
+				if err != nil {
+					appendWarning(pr, pf, err)
 				}
-				f.value = dValue
+				if dValue, def := f.value.(deferredValue); def {
+					dValue.str = pf.value
+					if pf.pos != nil {
+						dValue.pos = pf.pos
+					}
+					f.value = dValue
+				}
 			}
 			err = r.addField(f)
 			if err != nil {
@@ -1803,7 +1807,8 @@ func (cp *Codeplug) ExportTextOneLineRecords(filename string) (err error) {
 }
 
 func (cp *Codeplug) importText(reader io.Reader) error {
-	records, _, err := cp.ParseRecords(reader)
+	deferValues := false
+	records, _, err := cp.ParseRecords(reader, deferValues)
 	err = cp.storeParsedRecords(records)
 	if err != nil {
 		return err
@@ -1882,7 +1887,8 @@ func (cp *Codeplug) importJSON(filename string) error {
 	defer file.Close()
 
 	pRecs := cp.parseJSONFile(file)
-	records, _, err := cp.parsedFileToRecs(pRecs)
+	deferValues := false
+	records, _, err := cp.parsedFileToRecs(pRecs, deferValues)
 	if err != nil {
 		return err
 	}
@@ -2049,7 +2055,8 @@ func (cp *Codeplug) importXLSX(filename string) error {
 	defer file.Close()
 
 	pRecs := cp.parseXLSXFile(file)
-	records, _, err := cp.parsedFileToRecs(pRecs)
+	deferValues := false
+	records, _, err := cp.parsedFileToRecs(pRecs, deferValues)
 	if err != nil {
 		return err
 	}

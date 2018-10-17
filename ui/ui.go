@@ -389,6 +389,7 @@ type Window struct {
 	connectClose    func() bool
 	handleChange    func(*codeplug.Change)
 	settingMultiple bool
+	updating        bool
 }
 
 func (mw *MainWindow) NewWindow() *Window {
@@ -2104,15 +2105,22 @@ func ResetWindows(cp *codeplug.Codeplug, r *codeplug.Record) {
 		return
 	}
 	for _, w := range mw.recordWindows {
-		if w.recordType != rType {
-			rl := w.RecordList()
-			if rl != nil {
-				rl.SetCurrent(0)
-				rl.Update()
-			}
+		if w.updating {
+			continue
+		}
+		dprint("ResetWindow", w.recordType)
+
+		if w.recordType == rType {
+			w.recordFunc()
+			continue
 		}
 
-		w.recordFunc()
+		rl := w.RecordList()
+		if rl != nil {
+			rl.SetCurrent(0)
+			rl.Update()
+			continue
+		}
 	}
 }
 

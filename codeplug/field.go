@@ -401,12 +401,18 @@ func (f *Field) SetDefault() {
 
 // valid returns nil if the field's value is valid.
 func (f *Field) valid() error {
+	if f.IsInvalidValue() {
+		if !f.IsEnabled() {
+			return nil
+		}
+		return errors.New("invalid value")
+	}
+
 	err := f.value.valid(f)
 	if err != nil {
-		if !f.IsInvalidValue() {
-			f.value = invalidValue{value: f.value}
-		}
+		f.value = invalidValue{value: f.value}
 	}
+
 	if !f.IsEnabled() {
 		return nil
 	}
@@ -1168,8 +1174,7 @@ func (v *callType) setString(f *Field, s string) error {
 		if field.String() != "All" {
 			continue
 		}
-		return fmt.Errorf("An \"All\" record already exists: %s",
-			r.NameField().String())
+		return fmt.Errorf("An \"All\" record already exists: %s", r.Name())
 	}
 
 	err := v.iStrings.setString(f, s)
@@ -2220,6 +2225,12 @@ func fieldsToStrings(fields []*Field) []string {
 func (f *Field) resolveDeferredValue() error {
 	dValue, deferred := f.value.(deferredValue)
 	if !deferred {
+		return nil
+	}
+
+	if dValue.str == invalidValueString {
+		f.value = invalidValue{value: f.value}
+		f.valid()
 		return nil
 	}
 

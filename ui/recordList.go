@@ -61,8 +61,10 @@ func (parent *HBox) AddRecordList(rType codeplug.RecordType) *RecordList {
 	view.SetSelectionBehavior(widgets.QAbstractItemView__SelectRows)
 
 	rl.qListView.ConnectCurrentChanged(func(selected *core.QModelIndex, deSelected *core.QModelIndex) {
-		if rl.window.recordFunc != nil {
-			rl.window.recordFunc()
+		w := rl.window
+		if w.recordFunc != nil && !w.updating {
+			dprint("ConnectCurrentChanged")
+			w.recordFunc()
 		}
 	})
 
@@ -266,7 +268,8 @@ func (w *Window) dataRecords(data *core.QMimeData, drop bool) (records []*codepl
 		return nil, nil, id, nil
 	}
 
-	records, depRecords, err = w.mainWindow.codeplug.ParseRecords(reader)
+	deferValues := true
+	records, depRecords, err = w.mainWindow.codeplug.ParseRecords(reader, deferValues)
 	if err != nil && drop {
 		for _, cpModel := range cp.Models() {
 			for _, model := range models {
@@ -391,7 +394,10 @@ func (w *Window) initRecordModel(writable bool) {
 		lastSRow := -1
 		for _, r := range records {
 			r := cp.FindRecordByName(r.Type(), r.Name())
-			sRow := r.Index()
+			sRow := 0
+			if r != nil {
+				sRow = r.Index()
+			}
 			if sRow < firstSRow {
 				firstSRow = sRow
 			}
@@ -445,6 +451,7 @@ func (w *Window) initRecordModel(writable bool) {
 	actionSwitch:
 		switch {
 		case action == core.Qt__MoveAction && id == cp.ID():
+			w.updating = true
 			change := cp.MoveRecordsChange(records)
 			for i, r := range records {
 				r := cp.FindRecordByName(r.Type(), r.Name())
@@ -463,8 +470,10 @@ func (w *Window) initRecordModel(writable bool) {
 				dRow++
 			}
 			change.Complete()
+			w.updating = false
 
 		case action == core.Qt__CopyAction && id == cp.ID():
+			w.updating = true
 			change := cp.InsertRecordsChange(records)
 			for _, r := range records {
 				w.recordList.recordToInsert = r
@@ -475,6 +484,7 @@ func (w *Window) initRecordModel(writable bool) {
 				dRow++
 			}
 			change.Complete()
+			w.updating = false
 
 		case id != cp.ID():
 			rTypeString := "Records"
@@ -510,10 +520,8 @@ func (w *Window) initRecordModel(writable bool) {
 				change.AddChange(subChange)
 				cp.AppendRecord(r)
 			}
+
 			for _, r := range records {
-				if moveAction && r.NameExists() {
-					continue
-				}
 				w.recordList.recordToInsert = r
 				rv = model.InsertRows(dRow, 1, dParent)
 				if !rv {
@@ -523,18 +531,8 @@ func (w *Window) initRecordModel(writable bool) {
 			}
 
 			cp.ResolveDeferredValueFields()
-
 			change.Complete()
-			if !cp.Valid() {
-				fmtStr := `
-%d records with invalid field values were found in the codeplug.
-
-Select "Menu->Edit->Show Invalid Fields" to view them.`
-				msg := fmt.Sprintf(fmtStr, len(cp.Warnings()))
-				DelayedCall(func() {
-					InfoPopup("codeplug warning", msg)
-				})
-			}
+			w.updating = false
 		}
 
 		rl := w.recordList
@@ -542,7 +540,19 @@ Select "Menu->Edit->Show Invalid Fields" to view them.`
 		rl.SelectRecords(records...)
 
 		rl.Update()
+		dprint("ConnectDropMimeData")
 		w.recordFunc()
+
+		if id != cp.ID() && !cp.Valid() {
+			fmtStr := `
+%d records with invalid field values were found in the codeplug.
+
+Select "Menu->Edit->Show Invalid Fields" to view them.`
+			msg := fmt.Sprintf(fmtStr, len(cp.Warnings()))
+			DelayedCall(func() {
+				InfoPopup("codeplug warning", msg)
+			})
+		}
 
 		return rv
 	})

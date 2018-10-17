@@ -359,7 +359,12 @@ func (r *Record) NameFieldType() FieldType {
 
 // Name returns the record's name.
 func (r *Record) Name() string {
-	if r.NameField() != nil {
+	f := r.NameField()
+	if f != nil {
+		dValue, deferred := f.value.(deferredValue)
+		if deferred {
+			return dValue.str
+		}
 		return r.NameField().String()
 	}
 	prefix := r.NamePrefix()
@@ -386,8 +391,7 @@ func (r *Record) MaxRecords() int {
 }
 
 func (r *Record) hasUniqueNames() bool {
-	nameField := r.NameField()
-	if nameField == nil {
+	if r.Name() == "" {
 		return false
 	}
 
@@ -408,8 +412,7 @@ func (r *Record) makeNameUnique() error {
 		return nil
 	}
 
-	nameField := r.NameField()
-	name := nameField.String()
+	name := r.Name()
 
 	if !stringInSlice(name, names) {
 		return nil
@@ -427,6 +430,7 @@ func (r *Record) makeNameUnique() error {
 	}
 	n := int(n64)
 
+	nameField := r.NameField()
 	maxNameLen := nameField.bitSize / 16
 
 	for len(baseName) > 0 {
@@ -536,21 +540,6 @@ func (rd *rDesc) deleteRecord(cp *Codeplug, rIndex int) {
 	}
 }
 
-func (r *Record) nameToField(name string, index int, value string) (*Field, error) {
-	rType := r.rType
-	fType, err := r.codeplug.nameToFt(rType, name)
-	if err != nil {
-		return nil, fmt.Errorf("bad field name: %s", name)
-	}
-
-	f, err := r.NewFieldWithValue(fType, index, value)
-	if err != nil {
-		return nil, err
-	}
-
-	return f, nil
-}
-
 func (r *Record) NewFieldWithValue(fType FieldType, index int, str string) (*Field, error) {
 	f := r.NewField(fType)
 	f.fIndex = index
@@ -566,6 +555,13 @@ func (r *Record) NewFieldWithValue(fType FieldType, index int, str string) (*Fie
 	}
 
 	return f, nil
+}
+
+func (r *Record) NewFieldWithDeferredValue(fType FieldType, index int, str string) *Field {
+	f := r.NewField(fType)
+	f.fIndex = index
+	f.deferValue(str)
+	return f
 }
 
 func (r *Record) MoveField(dIndex int, f *Field) {
@@ -719,12 +715,7 @@ func (r *Record) InCodeplug() bool {
 }
 
 func (r *Record) NameExists() bool {
-	nameField := r.NameField()
-	if nameField == nil {
-		return false
-	}
-	name := nameField.String()
-
+	name := r.Name()
 	rv := r.codeplug.FindRecordByName(r.rType, name) != nil
 	return rv
 }
