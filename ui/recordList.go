@@ -425,6 +425,8 @@ func (w *Window) initRecordModel(writable bool) {
 	})
 
 	model.ConnectDropMimeData(func(data *core.QMimeData, action core.Qt__DropAction, row int, column int, parent *core.QModelIndex) bool {
+		var err error
+
 		if action == core.Qt__IgnoreAction {
 			return true
 		}
@@ -454,7 +456,6 @@ func (w *Window) initRecordModel(writable bool) {
 
 		sParent := core.NewQModelIndex()
 		dParent := core.NewQModelIndex()
-
 		cp := w.mainWindow.codeplug
 		rv := true
 
@@ -552,9 +553,8 @@ func (w *Window) initRecordModel(writable bool) {
 
 Select "Menu->Edit->Show Invalid Fields" to view them.`
 			msg := fmt.Sprintf(fmtStr, len(cp.Warnings()))
-			DelayedCall(func() {
-				InfoPopup("codeplug warning", msg)
-			})
+			dprint("infoPopup")
+			InfoPopup("codeplug warning", msg)
 		}
 
 		mw.EndChange(change)
