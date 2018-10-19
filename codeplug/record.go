@@ -395,26 +395,20 @@ func (r *Record) hasUniqueNames() bool {
 		return false
 	}
 
-	_, unique := r.NameField().value.(*uniqueName)
-	return unique
+	return r.NameField().hasUniqueNameValue()
 }
 
 // makeNameUnique renames the record to make it different than all of
 // the passed names.
 func (r *Record) makeNameUnique() error {
-	namesp := r.ListNames()
-	if namesp == nil {
-		return nil
-	}
-
-	names := *namesp
-	if len(names) == 0 {
-		return nil
-	}
-
 	name := r.Name()
 
-	if !stringInSlice(name, names) {
+	existingRecordWithName := r.codeplug.FindRecordByName(r.rType, name)
+	if existingRecordWithName == nil {
+		return nil
+	}
+
+	if r == existingRecordWithName {
 		return nil
 	}
 
@@ -439,7 +433,7 @@ func (r *Record) makeNameUnique() error {
 			baseName = baseName[:len(baseName)-1]
 		}
 		newName := baseName + fmt.Sprintf("%d", n)
-		if !stringInSlice(newName, names) {
+		if r.codeplug.FindRecordByName(r.rType, newName) == nil {
 			nameField.value = newValue(nameField.ValueType())
 			nameField.value.setString(nameField, newName)
 			return nil

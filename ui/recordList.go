@@ -482,7 +482,6 @@ func (w *Window) initRecordModel(writable bool) {
 				if sRow < dRow {
 					dRow--
 				}
-				// publish the moved record
 				records[i] = r
 				dRow++
 			}
@@ -499,6 +498,7 @@ func (w *Window) initRecordModel(writable bool) {
 				}
 				dRow++
 			}
+			cp.ResolveDeferredValueFields()
 			change.Complete()
 
 		case id != cp.ID():

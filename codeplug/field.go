@@ -2222,6 +2222,11 @@ func fieldsToStrings(fields []*Field) []string {
 	return strings
 }
 
+func (f *Field) hasUniqueNameValue() bool {
+	_, unique := f.value.(*uniqueName)
+	return unique
+}
+
 func (f *Field) resolveDeferredValue() error {
 	dValue, deferred := f.value.(deferredValue)
 	if !deferred {
@@ -2240,6 +2245,9 @@ func (f *Field) resolveDeferredValue() error {
 	}
 	if err == nil {
 		f.value = dValue.value
+		if f.hasUniqueNameValue() {
+			f.record.makeNameUnique()
+		}
 		f.valid()
 	}
 	return err
