@@ -299,7 +299,6 @@ func (w *Window) MenuBar() *MenuBar {
 }
 
 func (w *Window) enableWidgets() {
-	dprint("window enableWidgets")
 	widgets := w.widgets
 	for senderType, subs := range w.subscriptions {
 		for _, receiverType := range subs {
@@ -315,7 +314,6 @@ func (w *Window) enableWidgets() {
 }
 
 func (w *Window) Show() {
-	dprint("window Show")
 	w.qWidget.Show()
 	w.qWidget.ActivateWindow()
 	w.qWidget.Raise()
@@ -386,7 +384,6 @@ func (mw *MainWindow) EndChange(change *codeplug.Change) {
 
 func (mw *MainWindow) CodeplugChanged(change *codeplug.Change) {
 	if mw == nil {
-		dprint("mw == nil")
 		return
 	}
 
@@ -395,8 +392,6 @@ func (mw *MainWindow) CodeplugChanged(change *codeplug.Change) {
 	}
 
 	for _, w := range mw.recordWindows {
-		dprint("EndChange", w.recordType)
-
 		rl := w.RecordList()
 		if rl == nil {
 			return

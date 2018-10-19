@@ -67,7 +67,6 @@ func (parent *HBox) AddRecordList(rType codeplug.RecordType) *RecordList {
 		w := rl.window
 		if w.recordFunc != nil && !w.mainWindow.changing {
 			DelayedCall(func() {
-				dprint("ConnectCurrentChanged")
 				w.recordFunc()
 			})
 		}
@@ -516,7 +515,6 @@ func (w *Window) initRecordModel(writable bool) {
 			if len(records) == 0 {
 				title := fmt.Sprintf("Drop %s", rTypeString)
 				body := fmt.Sprintf("no new %s", rTypeString)
-				dprint("infoPopup")
 				InfoPopup(title, body)
 				return false
 			}
@@ -556,7 +554,6 @@ func (w *Window) initRecordModel(writable bool) {
 
 Select "Menu->Edit->Show Invalid Fields" to view them.`
 			msg := fmt.Sprintf(fmtStr, len(cp.Warnings()))
-			dprint("infoPopup")
 			InfoPopup("codeplug warning", msg)
 		}
 
