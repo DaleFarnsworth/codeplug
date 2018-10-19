@@ -32,6 +32,7 @@ import (
 
 	"github.com/dalefarnsworth/codeplug/codeplug"
 	"github.com/therecipe/qt/core"
+	"github.com/therecipe/qt/gui"
 	"github.com/therecipe/qt/widgets"
 )
 
@@ -52,8 +53,10 @@ func (parent *HBox) AddRecordList(rType codeplug.RecordType) *RecordList {
 	view.Viewport().SetAcceptDrops(true)
 	view.SetDragDropMode(widgets.QAbstractItemView__DragDrop)
 	view.SetSelectionMode(widgets.QAbstractItemView__ExtendedSelection)
-	view.SetMinimumWidth(view.SizeHintForColumn(0) + 20)
-	view.SetMaximumWidth(view.SizeHintForColumn(0) + 20)
+	metrics := gui.NewQFontMetrics(widgets.QApplication_Font())
+	recordNameWidth := metrics.HorizontalAdvance("XXXXXXXXXXXXXXXXX", -1)
+	view.SetMinimumWidth(recordNameWidth)
+	view.SetMaximumWidth(recordNameWidth)
 	view.SetDefaultDropAction(core.Qt__MoveAction)
 	view.SetAcceptDrops(true)
 	view.SetDropIndicatorShown(true)
