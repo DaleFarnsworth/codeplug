@@ -204,6 +204,14 @@ func NewMainWindow() *MainWindow {
 			}
 
 		}
+
+		for _, w := range mw.recordWindows {
+			w.Close()
+		}
+		for _, w := range mw.altRecordWindows {
+			w.Close()
+		}
+
 		for i, mainWindow := range mainWindows {
 			if mainWindow == mw {
 				mainWindows = append(mainWindows[:i], mainWindows[i+1:]...)
