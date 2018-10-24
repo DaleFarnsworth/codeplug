@@ -514,6 +514,9 @@ func (f *Field) IsEnabled() bool {
 	}
 
 	enablerValue := enabler.String()
+	if enablerValue == invalidValueString {
+		return false
+	}
 
 	for i, enable := range f.enables {
 		if i == 0 {
