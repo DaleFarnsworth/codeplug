@@ -67,30 +67,29 @@ const (
 
 // A Codeplug represents a codeplug file.
 type Codeplug struct {
-	filename            string
-	importFilename      string
-	fileType            FileType
-	rdtSize             int
-	fileSize            int
-	fileOffset          int
-	id                  string
-	bytes               []byte
-	hash                [sha256.Size]byte
-	rDesc               map[RecordType]*rDesc
-	changed             bool
-	lowFrequency        float64
-	highFrequency       float64
-	lowFrequencyB       float64
-	highFrequencyB      float64
-	connectChange       func(*Change)
-	changeList          []*Change
-	changeIndex         int
-	codeplugInfo        *CodeplugInfo
-	loaded              bool
-	cachedNameToRt      map[string]RecordType
-	cachedNameToFt      map[RecordType]map[string]FieldType
-	deferredValueFields []*Field
-	warnings            []string
+	filename       string
+	importFilename string
+	fileType       FileType
+	rdtSize        int
+	fileSize       int
+	fileOffset     int
+	id             string
+	bytes          []byte
+	hash           [sha256.Size]byte
+	rDesc          map[RecordType]*rDesc
+	changed        bool
+	lowFrequency   float64
+	highFrequency  float64
+	lowFrequencyB  float64
+	highFrequencyB float64
+	connectChange  func(*Change)
+	changeList     []*Change
+	changeIndex    int
+	codeplugInfo   *CodeplugInfo
+	loaded         bool
+	cachedNameToRt map[string]RecordType
+	cachedNameToFt map[RecordType]map[string]FieldType
+	warnings       []string
 }
 
 type CodeplugInfo struct {
@@ -282,6 +281,21 @@ func (cp *Codeplug) RecordTypeName(rType RecordType) string {
 		str = rDesc.typeName
 	}
 	return str
+}
+
+func (cp *Codeplug) allFields() []*Field {
+	fields := make([]*Field, 0)
+	for _, rType := range cp.RecordTypes() {
+		for _, r := range cp.records(rType) {
+			for _, fType := range r.FieldTypes() {
+				for _, f := range r.Fields(fType) {
+					fields = append(fields, f)
+				}
+			}
+		}
+	}
+
+	return fields
 }
 
 func (cp *Codeplug) TextLines() []string {
@@ -577,7 +591,9 @@ func (cp *Codeplug) Revert() error {
 
 	cp.load()
 
-	cp.Valid()
+	cp.ResolveDeferredValueFields()
+
+	cp.valid()
 
 	cp.changed = false
 	cp.hash = sha256.Sum256(cp.bytes)
@@ -615,7 +631,7 @@ func (cp *Codeplug) SaveAs(filename string) error {
 // The state of the codeplug is not changed, so this
 // is useful for use by an autosave function.
 func (cp *Codeplug) SaveToFile(filename string) (err error) {
-	cp.Valid()
+	cp.valid()
 
 	cp.setLastProgrammedTime(time.Now())
 
@@ -948,30 +964,28 @@ func (cp *Codeplug) newRecord(rType RecordType, rIndex int) *Record {
 }
 
 // valid returns nil if all fields in the codeplug are valid.
-func (cp *Codeplug) Valid() bool {
+func (cp *Codeplug) Valid(gps bool) bool {
 	cp.warnings = make([]string, 0)
 	for _, rType := range cp.RecordTypes() {
 		for _, r := range cp.records(rType) {
+			if !gps && r.rType == RtGPSSystems {
+				continue
+			}
 			if err := r.valid(); err != nil {
 				cp.warnings = append(cp.warnings, err.Error())
 			}
 		}
 	}
 
-	for _, f := range cp.deferredValueFields {
-		if err := f.valid(); err != nil {
-			if f.isDeferredValue() {
-				logFatal("Valid, deferred")
-			}
-		}
-	}
-	cp.deferredValueFields = nil
-
 	if len(cp.warnings) != 0 {
 		return false
 	}
 
 	return true
+}
+
+func (cp *Codeplug) valid() bool {
+	return cp.Valid(true)
 }
 
 // findFileType sets the codeplug type based on file size
@@ -2134,10 +2148,7 @@ func (cp *Codeplug) storeParsedRecords(records []*Record) error {
 		cp.InsertRecord(r)
 	}
 
-	err := cp.ResolveDeferredValueFields()
-	if err != nil {
-		return err
-	}
+	cp.ResolveDeferredValueFields()
 
 	for _, rd := range cp.rDesc {
 		if len(rd.records) == 0 {
@@ -2158,35 +2169,23 @@ func (cp *Codeplug) clearCachedListNames() {
 	}
 }
 
-func (cp *Codeplug) ResolveDeferredValueFields() error {
-	var warning error
-	appendWarning := func(f *Field, pos *position, err error) {
-		rName := f.record.TypeName()
-		fName := f.TypeName()
-		err = fmt.Errorf("%s.%s: %s", rName, fName, err.Error())
-		appendWarningMsgs(&warning, pos, err)
-	}
-
+func (cp *Codeplug) ResolveDeferredValueFields() {
 	maxIters := 5
-	for i := 0; len(cp.deferredValueFields) > 0 && i < maxIters; i++ {
-		deferredValueFields := cp.deferredValueFields
-		cp.deferredValueFields = nil
-		for _, f := range deferredValueFields {
+	fields := cp.allFields()
+	for i := 0; len(fields) > 0 && i < maxIters; i++ {
+		unresolvedFields := make([]*Field, 0)
+		for _, f := range fields {
 			err := f.resolveDeferredValue()
 			if err != nil {
-				f.queueDeferredValue()
+				unresolvedFields = append(unresolvedFields, f)
 			}
 		}
+		fields = unresolvedFields
 	}
 
-	for _, f := range cp.deferredValueFields {
-		err := f.resolveDeferredValue()
-		err = fmt.Errorf("unresolved deferredValueField: %s", err.Error())
-		dValue, _ := f.value.(deferredValue)
-		appendWarning(f, dValue.pos, err)
+	for _, f := range fields {
+		f.undeferValue()
 	}
-
-	return warning
 }
 
 func RadioExists() error {

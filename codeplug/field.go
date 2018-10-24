@@ -1621,24 +1621,26 @@ type memberListIndex struct {
 	listIndex
 }
 
+/*
 // getString returns the memberListIndex's value as a string.
 func (v *memberListIndex) getString(f *Field) string {
-	name := v.listIndex.getString(f)
-	if v.listIndex > 0 && int(v.listIndex) <= len(f.fields) {
-		for _, str := range f.memberListNames() {
-			if str == name {
-				return name
-			}
+	name := string(v.listIndex)
+	for _, is := range *f.fDesc.indexedStrings {
+		if is.String == name {
+			return name
 		}
-		isSlice := *f.fDesc.indexedStrings
-		is := isSlice[len(isSlice)-1]
-		v.listIndex = listIndex(is.Index)
-		name = is.String
+	}
+	for _, str := range f.memberListNames() {
+		if str == name {
+			return name
+		}
 	}
 
-	return name
+	return invalidValueString
 }
+*/
 
+/*
 // setString sets the memberListIndex's value from a string.
 func (v *memberListIndex) setString(f *Field, s string) error {
 	fd := f.fDesc
@@ -1646,7 +1648,7 @@ func (v *memberListIndex) setString(f *Field, s string) error {
 	if fd.indexedStrings != nil {
 		for _, is := range *fd.indexedStrings {
 			if is.String == s {
-				v.listIndex = listIndex(is.Index)
+				v.listIndex = listIndex(s)
 				return nil
 			}
 		}
@@ -1654,44 +1656,38 @@ func (v *memberListIndex) setString(f *Field, s string) error {
 
 	for _, name := range f.memberListNames() {
 		if name == s {
-			for i, name := range f.listNames() {
-				if name == s {
-					v.listIndex = listIndex(i + 1)
-					return nil
-				}
-			}
+			v.listIndex = listIndex(s)
 		}
 	}
+
 	return fmt.Errorf("bad memberList record name '%s'", s)
 }
+*/
 
 // valid returns nil if the listIndex's value is valid.
 func (v *memberListIndex) valid(f *Field) error {
+	err := v.listIndex.valid(f)
+	if err != nil {
+		return fmt.Errorf("memberListIndex: invalid Value: %s", v.listIndex)
+	}
+
+	value := string(v.listIndex)
 	fd := f.fDesc
 
 	if fd.indexedStrings != nil {
 		for _, is := range *fd.indexedStrings {
-			if is.Index == uint16(v.listIndex) {
+			if is.String == value {
 				return nil
 			}
 		}
 	}
 
-	if f.isDeferredValue() {
-		return nil
-	}
-
-	for i, name := range f.listNames() {
-		if i == int(v.listIndex)-1 {
-			for _, mName := range f.memberListNames() {
-				if mName == name {
-					return nil
-				}
-			}
+	for _, mName := range f.memberListNames() {
+		if mName == value {
+			return nil
 		}
 	}
-
-	return fmt.Errorf("memberListIndex out of range: %d", v.listIndex)
+	return fmt.Errorf("memberListIndex: invalid Value: %s", v.listIndex)
 }
 
 type gpsListIndex struct {
@@ -1707,52 +1703,39 @@ func (v *gpsListIndex) setString(f *Field, s string) error {
 }
 
 func (v *gpsListIndex) valid(f *Field) error {
-	if (*v).listIndex == 0xffff {
-		return nil
+	if (*v).listIndex == listIndex("\00065536") {
+		(*v).listIndex = listIndex("\0000")
 	}
 
 	return v.listIndex.valid(f)
 }
 
 // listIndex is a field value representing an index into a slice of records
-type listIndex uint16
+type listIndex string
 
 // getString returns the listIndex's value as a string.
 func (v *listIndex) getString(f *Field) string {
-	fd := f.fDesc
+	value := string(*v)
 
-	if fd.indexedStrings != nil {
-		for _, is := range *fd.indexedStrings {
-			if is.Index == uint16(*v) {
-				return is.String
-			}
+	for _, str := range f.Strings() {
+		if str == value {
+			return value
 		}
 	}
 
-	ind := int(*v) - 1
-	names := f.listNames()
-	if ind < 0 || ind >= len(names) {
-		return ""
-	}
-
-	return names[ind]
+	return invalidValueString
 }
 
 // setString sets the listIndex's value from a string.
 func (v *listIndex) setString(f *Field, s string) error {
-	fd := f.fDesc
-	if fd.indexedStrings != nil {
-		for _, is := range *fd.indexedStrings {
-			if is.String == s {
-				*v = listIndex(is.Index)
-				return nil
-			}
-		}
+	if len(s) > 1 && s[0:1] == "\000" {
+		v.init(f, s)
+		s = string(*v)
 	}
 
-	for i, name := range f.listNames() {
-		if name == s {
-			*v = listIndex(i + 1)
+	for _, str := range f.Strings() {
+		if str == s {
+			*v = listIndex(s)
 			return nil
 		}
 	}
@@ -1761,37 +1744,81 @@ func (v *listIndex) setString(f *Field, s string) error {
 
 // valid returns nil if the listIndex's value is valid.
 func (v *listIndex) valid(f *Field) error {
+	value := string(*v)
+
+	for _, str := range f.Strings() {
+		if str == value {
+			return nil
+		}
+	}
+
+	return fmt.Errorf("listIndex: invalid value: %s", *v)
+}
+
+func (v *listIndex) init(f *Field, str string) {
+	if len(str) < 1 || str[0:1] != "\000" {
+		logFatal("listIndex.init() invalid value")
+	}
+	str = str[1:]
+
+	index64, err := strconv.ParseUint(str, 10, 16)
+	if err != nil {
+		logFatalf("listIndex ParseInt failure: %s", err.Error())
+	}
+	index := int(index64)
+
 	fd := f.fDesc
 
 	if fd.indexedStrings != nil {
 		for _, is := range *fd.indexedStrings {
-			if is.Index == uint16(*v) {
-				return nil
+			if is.Index == uint16(index) {
+				*v = listIndex(is.String)
+				return
 			}
 		}
 	}
 
-	listNames := fd.record.codeplug.rDesc[fd.listRecordType].ListNames()
-	if listNames == nil {
-		f.deferValue(deferredValueString)
-		return nil
+	index--
+	listNames := f.listNames()
+	if index < len(listNames) {
+		*v = listIndex(listNames[index])
+		return
 	}
 
-	if *v > 0 && int(*v) <= len(*listNames) {
-		return nil
-	}
-
-	return fmt.Errorf("listIndex out of range: %d", *v)
+	*v = listIndex(invalidValueString)
 }
 
 // load sets the listIndex's value from its bits in cp.bytes.
 func (v *listIndex) load(f *Field) {
-	*v = listIndex(bytesToInt64(f.bytes()))
+	f.deferValue(fmt.Sprintf("\000%d", bytesToInt64(f.bytes())))
 }
 
 // store stores the listIndex's value into its bits in cp.bytes.
 func (v *listIndex) store(f *Field) {
-	f.storeBytes(int64ToBytes(int64(*v), f.size()))
+	value := string(*v)
+	invalidIndex := uint16(65534)
+	index := invalidIndex
+	fd := f.fDesc
+
+	if fd.indexedStrings != nil {
+		for _, is := range *fd.indexedStrings {
+			if is.String == value {
+				index = is.Index
+				break
+			}
+		}
+	}
+
+	if index == invalidIndex {
+		for i, name := range f.listNames() {
+			if name == value {
+				index = uint16(i + 1)
+				break
+			}
+		}
+	}
+
+	f.storeBytes(int64ToBytes(int64(index), f.size()))
 }
 
 // listIndex is a field value representing an index into a slice of records
@@ -2233,24 +2260,28 @@ func (f *Field) resolveDeferredValue() error {
 		return nil
 	}
 
+	f.value = dValue.value
+
 	if dValue.str == invalidValueString {
 		f.value = invalidValue{value: f.value}
 		f.valid()
 		return nil
 	}
 
-	var err error
 	if dValue.str != deferredValueString {
-		err = f.setString(dValue.str)
-	}
-	if err == nil {
-		f.value = dValue.value
-		if f.hasUniqueNameValue() {
-			f.record.makeNameUnique()
+		err := f.setString(dValue.str)
+		if err != nil {
+			f.deferValue(dValue.str)
+			return err
 		}
-		f.valid()
 	}
-	return err
+
+	if f.hasUniqueNameValue() {
+		f.record.makeNameUnique()
+	}
+	f.valid()
+
+	return nil
 }
 
 func (f *Field) isDeferredValue() bool {
@@ -2294,15 +2325,15 @@ func (f *Field) deferValue(str string) {
 	}
 
 	f.value = deferredValue{value: f.value, str: str}
-	f.queueDeferredValue()
 }
 
-func (f *Field) queueDeferredValue() {
-	if !f.isDeferredValue() {
-		logFatal("not deferred: ", f.FullTypeName())
+func (f *Field) undeferValue() {
+	dValue, deferred := f.value.(deferredValue)
+	if !deferred {
+		logFatal("undeferValue: not deferred: ", f.FullTypeName())
 	}
-	cp := f.record.codeplug
-	cp.deferredValueFields = append(cp.deferredValueFields, f)
+
+	f.value = dValue.value
 }
 
 func (f *Field) DeferredString() string {

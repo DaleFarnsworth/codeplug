@@ -337,18 +337,24 @@ func (cp *Codeplug) updateListIndexChanges(parentChange *Change) []*Change {
 			i--
 			continue
 		}
+
 		r := change.Record()
 		fType := change.FieldType()
+		if fType == FieldType("") {
+			continue
+		}
 		fields := r.Fields(fType)
 		for i := len(fields) - 1; i >= 0; i-- {
 			r.RemoveField(fields[i])
 		}
+
 		for i, str := range changeStrings {
 			f, err := r.NewFieldWithValue(fType, i, str)
 			if err == nil {
 				r.addField(f)
 			}
 		}
+
 		if len(r.Fields(fType)) == 0 {
 			fd := (*r.fDesc)[fType]
 			indexedStrings := fd.indexedStrings
@@ -359,6 +365,7 @@ func (cp *Codeplug) updateListIndexChanges(parentChange *Change) []*Change {
 				r.addField(f)
 			}
 		}
+
 		fields = r.Fields(fType)
 		strings := make([]string, len(fields))
 		for i, f := range fields {
@@ -384,16 +391,17 @@ func (cp *Codeplug) addChange(change *Change) {
 }
 
 func (change *Change) Complete() {
+
 	switch change.cType {
 	case InsertRecordsChange, InsertFieldsChange:
 		change.strings = change.refStrings()
 	}
 
-	r := change.Record()
-	cp := r.codeplug
+	cp := change.Codeplug()
 	if change != cp.currentChange() {
 		cp.addChange(change)
 	}
+
 	cp.publishChange(change)
 }
 

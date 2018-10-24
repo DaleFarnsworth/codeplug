@@ -541,23 +541,38 @@ func (w *Window) initRecordModel(writable bool) {
 			}
 
 			cp.ResolveDeferredValueFields()
+
+			for _, r := range cp.Records(codeplug.RtContacts)[1:4] {
+				dprint(r.FullTypeName())
+				for _, f := range r.Fields(codeplug.FtDcName) {
+					dprint("drop 1", f.String())
+				}
+				dprint()
+			}
 			change.Complete()
+
+			for _, r := range cp.Records(codeplug.RtContacts)[1:4] {
+				dprint(r.FullTypeName())
+				for _, f := range r.Fields(codeplug.FtDcName) {
+					dprint("drop 2", f.String())
+				}
+				dprint()
+			}
 		}
 
 		rl := w.recordList
 		rl.SetCurrent(dRow - 1)
 		rl.SelectRecords(records...)
 
-		if id != cp.ID() && !cp.Valid() {
-			fmtStr := `
-%d records with invalid field values were found in the codeplug.
-
-Select "Menu->Edit->Show Invalid Fields" to view them.`
-			msg := fmt.Sprintf(fmtStr, len(cp.Warnings()))
-			InfoPopup("codeplug warning", msg)
-		}
-
 		mw.EndChange(change)
+
+		for _, r := range cp.Records(codeplug.RtContacts)[1:4] {
+			dprint(r.FullTypeName())
+			for _, f := range r.Fields(codeplug.FtDcName) {
+				dprint("5", f.String())
+			}
+			dprint()
+		}
 
 		return rv
 	})
