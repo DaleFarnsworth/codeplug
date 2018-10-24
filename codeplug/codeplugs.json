@@ -529,6 +529,13 @@
         "GsPrivateCallMatch",
         "GsGroupCallHangTime",
         "GsPrivateCallHangTime",
+        "GsRadioID1",
+        "GsRadioID2",
+        "GsRadioID3",
+        "GsMicLevel",
+        "GsTxMode",
+        "GsEditRadioID",
+        "GsPublicZone",
         "GsEnableContactsCSV"
       ]
     },

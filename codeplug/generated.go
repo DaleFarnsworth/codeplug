@@ -1092,6 +1092,13 @@ var riGeneralSettings_md2017 = recordInfo{
 		&fiGsPrivateCallMatch,
 		&fiGsGroupCallHangTime,
 		&fiGsPrivateCallHangTime,
+		&fiGsRadioID1,
+		&fiGsRadioID2,
+		&fiGsRadioID3,
+		&fiGsMicLevel,
+		&fiGsTxMode,
+		&fiGsEditRadioID,
+		&fiGsPublicZone,
 		&fiGsEnableContactsCSV,
 	},
 }
