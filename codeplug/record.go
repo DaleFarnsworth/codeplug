@@ -395,7 +395,12 @@ func (r *Record) hasUniqueNames() bool {
 		return false
 	}
 
-	return r.NameField().hasUniqueNameValue()
+	nameField := r.NameField()
+	if nameField == nil {
+		return false
+	}
+
+	return nameField.hasUniqueNameValue()
 }
 
 // makeNameUnique renames the record to make it different than all of
