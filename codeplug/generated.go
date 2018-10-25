@@ -260,6 +260,8 @@ const (
 	VtBiFrequency       ValueType = "biFrequency"
 	VtCallID            ValueType = "callID"
 	VtCallType          ValueType = "callType"
+	VtContactListIndex  ValueType = "contactListIndex"
+	VtContactName       ValueType = "contactName"
 	VtCpsVersion        ValueType = "cpsVersion"
 	VtCtcssDcs          ValueType = "ctcssDcs"
 	VtDerefListIndex    ValueType = "derefListIndex"
@@ -287,7 +289,6 @@ const (
 	VtSpanList          ValueType = "spanList"
 	VtTextMessage       ValueType = "textMessage"
 	VtTimeStamp         ValueType = "timeStamp"
-	VtUniqueName        ValueType = "uniqueName"
 )
 
 // newValue returns a new value of the given ValueType
@@ -303,6 +304,10 @@ func newValue(vt ValueType) value {
 		return new(callID)
 	case VtCallType:
 		return new(callType)
+	case VtContactListIndex:
+		return new(contactListIndex)
+	case VtContactName:
+		return new(contactName)
 	case VtCpsVersion:
 		return new(cpsVersion)
 	case VtCtcssDcs:
@@ -357,8 +362,6 @@ func newValue(vt ValueType) value {
 		return new(textMessage)
 	case VtTimeStamp:
 		return new(timeStamp)
-	case VtUniqueName:
-		return new(uniqueName)
 	}
 
 	return nil
@@ -1867,7 +1870,7 @@ var fiCiContactName = fieldInfo{
 	max:          1,
 	bitOffset:    48,
 	bitSize:      16,
-	valueType:    VtListIndex,
+	valueType:    VtContactListIndex,
 	defaultValue: "None",
 	indexedStrings: &[]IndexedString{
 		IndexedString{0, "None"},
@@ -2261,7 +2264,7 @@ var fiCiName = fieldInfo{
 	max:          1,
 	bitOffset:    256,
 	bitSize:      256,
-	valueType:    VtUniqueName,
+	valueType:    VtName,
 	defaultValue: "Channel1",
 }
 
@@ -2697,7 +2700,7 @@ var fiDcName = fieldInfo{
 	max:          1,
 	bitOffset:    32,
 	bitSize:      256,
-	valueType:    VtName,
+	valueType:    VtContactName,
 	defaultValue: "Contact1",
 }
 
@@ -2707,7 +2710,7 @@ var fiGlContact = fieldInfo{
 	max:            32,
 	bitOffset:      256,
 	bitSize:        16,
-	valueType:      VtListIndex,
+	valueType:      VtContactListIndex,
 	listRecordType: RtContacts,
 }
 
@@ -2717,7 +2720,7 @@ var fiGlName = fieldInfo{
 	max:          1,
 	bitOffset:    0,
 	bitSize:      256,
-	valueType:    VtUniqueName,
+	valueType:    VtName,
 	defaultValue: "GroupList1",
 }
 
@@ -3735,7 +3738,7 @@ var fiNkContact = fieldInfo{
 	max:       1,
 	bitOffset: 0,
 	bitSize:   16,
-	valueType: VtListIndex,
+	valueType: VtContactListIndex,
 	indexedStrings: &[]IndexedString{
 		IndexedString{0, "None"},
 	},
@@ -3748,7 +3751,7 @@ var fiOtCall = fieldInfo{
 	max:            1,
 	bitOffset:      16,
 	bitSize:        16,
-	valueType:      VtListIndex,
+	valueType:      VtContactListIndex,
 	listRecordType: RtContacts,
 	enablerType:    FtOtMode,
 	enables: []enable{
@@ -4077,7 +4080,7 @@ var fiSlName = fieldInfo{
 	max:          1,
 	bitOffset:    0,
 	bitSize:      256,
-	valueType:    VtUniqueName,
+	valueType:    VtName,
 	defaultValue: "ScanList1",
 }
 
@@ -4283,7 +4286,7 @@ var fiZiName = fieldInfo{
 	max:          1,
 	bitOffset:    0,
 	bitSize:      256,
-	valueType:    VtUniqueName,
+	valueType:    VtName,
 	defaultValue: "Zone1",
 }
 

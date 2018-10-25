@@ -521,14 +521,10 @@ type FieldMembers struct {
 }
 
 func (hBox *HBox) AddFieldMembers(r *codeplug.Record, memberType codeplug.FieldType, sortAvailable *bool) {
-	var err error
 	fm := new(FieldMembers)
 	fm.record = r
 	fm.fType = memberType
-	fm.id, err = randomString(64)
-	if err != nil {
-		logFatal("randomString failure")
-	}
+	fm.id = codeplug.RandomString(64)
 
 	listRecordType := r.NewField(memberType).ListRecordType()
 	record := r.Codeplug().Record(listRecordType)

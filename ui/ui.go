@@ -24,9 +24,6 @@
 package ui
 
 import (
-	"bufio"
-	"bytes"
-	"crypto/rand"
 	"fmt"
 	"os"
 	"strconv"
@@ -1288,10 +1285,12 @@ func (w *FieldWidget) update() {
 		setQSpinBox(qw.(*widgets.QSpinBox), f)
 
 	case *widgets.QLineEdit:
-		qw.(*widgets.QLineEdit).SetText(f.String())
+		str := f.String()
+		str = codeplug.RemoveSuffix(f, str)
+		qw.(*widgets.QLineEdit).SetText(str)
 
 	case *widgets.QComboBox:
-		qw.(*widgets.QComboBox).SetCurrentText(f.String())
+		qw.(*widgets.QComboBox).SetCurrentText(codeplug.RemoveSuffix(f, f.String()))
 
 	default:
 		logFatal("update(): unexpected widget type")
@@ -1306,7 +1305,8 @@ func (w *FieldWidget) SetEnabled(b bool) {
 		qw.(*widgets.QComboBox).SetEnabled(b)
 		f := w.field
 		if f != nil {
-			UpdateComboboxWidget(w, f.String(), f.Strings())
+			strings := codeplug.RemoveSuffixes(f.Strings())
+			UpdateComboboxWidget(w, codeplug.RemoveSuffix(f, f.String()), strings)
 		}
 
 	case *widgets.QPushButton:
@@ -1435,6 +1435,7 @@ func newFieldCheckbox(f *codeplug.Field) *FieldWidget {
 
 func newFieldLineEdit(f *codeplug.Field) *FieldWidget {
 	s := f.String()
+	s = codeplug.RemoveSuffix(f, s)
 	qw := widgets.NewQLineEdit2(s, nil)
 	widget := new(FieldWidget)
 	widget.qWidget = qw
@@ -1444,7 +1445,9 @@ func newFieldLineEdit(f *codeplug.Field) *FieldWidget {
 
 	var finished func()
 	finished = func() {
-		err := setFieldString(f, strings.TrimSpace(qw.Text()))
+		str := strings.TrimSpace(qw.Text())
+		str = codeplug.AddSuffix(f, str)
+		err := setFieldString(f, str)
 		if err != nil {
 			msg := f.TypeName() + " " + err.Error()
 			qw.DisconnectEditingFinished()
@@ -1474,8 +1477,8 @@ func newFieldCombobox(f *codeplug.Field) *FieldWidget {
 		logFatal("Combobox has no Strings()")
 	}
 
-	qw.InsertItems(0, strings)
-	qw.SetCurrentText(f.String())
+	qw.InsertItems(0, codeplug.RemoveSuffixes(strings))
+	qw.SetCurrentText(codeplug.RemoveSuffix(f, f.String()))
 
 	if f.IsInvalidValue() {
 		invalidValueString := f.String()
@@ -1487,7 +1490,8 @@ func newFieldCombobox(f *codeplug.Field) *FieldWidget {
 		})
 	}
 
-	qw.ConnectActivated2(func(str string) {
+	qw.ConnectActivated(func(index int) {
+		str := f.Strings()[index]
 		err := setFieldString(f, str)
 		if err != nil {
 			msg := f.TypeName() + " " + err.Error()
@@ -1735,6 +1739,8 @@ var newFieldWidget = map[codeplug.ValueType]func(*codeplug.Field) *FieldWidget{
 	codeplug.VtBiFrequency:       newFieldLineEdit,
 	codeplug.VtCallID:            newFieldLineEdit,
 	codeplug.VtCallType:          newFieldCombobox,
+	codeplug.VtContactListIndex:  newFieldCombobox,
+	codeplug.VtContactName:       newFieldLineEdit,
 	codeplug.VtCtcssDcs:          newFieldCombobox,
 	codeplug.VtDerefListIndex:    newFieldCombobox,
 	codeplug.VtFrequency:         newFieldLineEdit,
@@ -1761,7 +1767,6 @@ var newFieldWidget = map[codeplug.ValueType]func(*codeplug.Field) *FieldWidget{
 	codeplug.VtSpan:              newFieldSpinbox,
 	codeplug.VtTextMessage:       newFieldLineEdit,
 	codeplug.VtTimeStamp:         newFieldLineEdit,
-	codeplug.VtUniqueName:        newFieldLineEdit,
 }
 
 type MenuBar struct {
@@ -2173,21 +2178,4 @@ func selectedRecords(r *codeplug.Record) []*codeplug.Record {
 		return nil
 	}
 	return rl.SelectedRecords()
-}
-
-func randomString(size int) (string, error) {
-	rnd := make([]byte, size/2)
-	_, err := rand.Read(rnd)
-	if err != nil {
-		return "", err
-	}
-
-	buf := bytes.Buffer{}
-	writer := bufio.NewWriter(&buf)
-	for _, b := range rnd {
-		fmt.Fprintf(writer, "%02x", b)
-	}
-	writer.Flush()
-
-	return buf.String(), nil
 }

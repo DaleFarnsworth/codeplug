@@ -2360,7 +2360,7 @@
       "type": "OtCall",
       "bitOffset": 16,
       "bitSize": 16,
-      "valueType": "listIndex",
+      "valueType": "contactListIndex",
       "listType": "Contacts"
     },
     {
@@ -2368,7 +2368,7 @@
       "type": "NkContact",
       "bitOffset": 0,
       "bitSize": 16,
-      "valueType": "listIndex",
+      "valueType": "contactListIndex",
       "listType": "Contacts",
       "indexedStrings": [
         {
@@ -2435,7 +2435,7 @@
       "bitOffset": 32,
       "bitSize": 256,
       "defaultValue": "Contact1",
-      "valueType": "name"
+      "valueType": "contactName"
     },
     {
       "typeName": "RX Group List Name",
@@ -2443,7 +2443,7 @@
       "bitOffset": 0,
       "bitSize": 256,
       "defaultValue": "GroupList1",
-      "valueType": "uniqueName"
+      "valueType": "name"
     },
     {
       "typeName": "Contacts",
@@ -2451,7 +2451,7 @@
       "bitOffset": 256,
       "bitSize": 16,
       "max": 32,
-      "valueType": "listIndex",
+      "valueType": "contactListIndex",
       "listType": "Contacts"
     },
     {
@@ -2460,7 +2460,7 @@
       "bitOffset": 0,
       "bitSize": 256,
       "defaultValue": "Zone1",
-      "valueType": "uniqueName"
+      "valueType": "name"
     },
     {
       "typeName": "Channels",
@@ -2515,7 +2515,7 @@
       "bitOffset": 0,
       "bitSize": 256,
       "defaultValue": "ScanList1",
-      "valueType": "uniqueName"
+      "valueType": "name"
     },
     {
       "typeName": "Priority Channel 1",
@@ -3025,7 +3025,7 @@
       "bitOffset": 48,
       "bitSize": 16,
       "defaultValue": "None",
-      "valueType": "listIndex",
+      "valueType": "contactListIndex",
       "listType": "Contacts",
       "indexedStrings": [
         {
@@ -3349,7 +3349,7 @@
       "bitOffset": 256,
       "bitSize": 256,
       "defaultValue": "Channel1",
-      "valueType": "uniqueName"
+      "valueType": "name"
     },
     {
       "typeName": "GPS Revert Channel",

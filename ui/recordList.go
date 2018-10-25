@@ -312,6 +312,7 @@ func (w *Window) initRecordModel(writable bool) {
 		row := idx.Row()
 		if role == int(core.Qt__DisplayRole) && idx.IsValid() {
 			names := *record.ListNames()
+			names = codeplug.RemoveSuffixes(names)
 			if row >= 0 && row < len(names) {
 				return core.NewQVariant14(names[row])
 			}
@@ -542,22 +543,7 @@ func (w *Window) initRecordModel(writable bool) {
 
 			cp.ResolveDeferredValueFields()
 
-			for _, r := range cp.Records(codeplug.RtContacts)[1:4] {
-				dprint(r.FullTypeName())
-				for _, f := range r.Fields(codeplug.FtDcName) {
-					dprint("drop 1", f.String())
-				}
-				dprint()
-			}
 			change.Complete()
-
-			for _, r := range cp.Records(codeplug.RtContacts)[1:4] {
-				dprint(r.FullTypeName())
-				for _, f := range r.Fields(codeplug.FtDcName) {
-					dprint("drop 2", f.String())
-				}
-				dprint()
-			}
 		}
 
 		rl := w.recordList
@@ -565,14 +551,6 @@ func (w *Window) initRecordModel(writable bool) {
 		rl.SelectRecords(records...)
 
 		mw.EndChange(change)
-
-		for _, r := range cp.Records(codeplug.RtContacts)[1:4] {
-			dprint(r.FullTypeName())
-			for _, f := range r.Fields(codeplug.FtDcName) {
-				dprint("5", f.String())
-			}
-			dprint()
-		}
 
 		return rv
 	})

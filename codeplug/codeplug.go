@@ -161,11 +161,7 @@ func NewCodeplug(fType FileType, filename string) (*Codeplug, error) {
 	cp.changeList = []*Change{&Change{}}
 	cp.changeIndex = 0
 
-	var err error
-	cp.id, err = randomString(64)
-	if err != nil {
-		return nil, err
-	}
+	cp.id = RandomString(64)
 
 	return cp, nil
 }
@@ -834,11 +830,9 @@ func (cp *Codeplug) InsertRecord(r *Record) error {
 		return fmt.Errorf("too many records")
 	}
 
-	if r.hasUniqueNames() {
-		err := r.makeNameUnique()
-		if err != nil {
-			return err
-		}
+	err := r.makeNameUnique()
+	if err != nil {
+		return err
 	}
 
 	i := r.rIndex

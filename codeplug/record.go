@@ -163,7 +163,7 @@ func (r *Record) load() {
 		fi.recordInfo = ri
 		fd := &fDesc{fieldInfo: fi}
 		(*r.fDesc)[fi.fType] = fd
-		if fi.valueType == VtName || fi.valueType == VtUniqueName {
+		if fi.valueType == VtName || fi.valueType == VtContactName {
 			ri.nameFieldType = fi.fType
 		}
 		fd.record = r
@@ -390,22 +390,18 @@ func (r *Record) MaxRecords() int {
 	return r.rDesc.recordInfo.max
 }
 
-func (r *Record) hasUniqueNames() bool {
-	if r.Name() == "" {
-		return false
-	}
-
-	nameField := r.NameField()
-	if nameField == nil {
-		return false
-	}
-
-	return nameField.hasUniqueNameValue()
-}
-
 // makeNameUnique renames the record to make it different than all of
 // the passed names.
 func (r *Record) makeNameUnique() error {
+	nameField := r.NameField()
+	if nameField == nil {
+		return nil
+	}
+
+	if r.Name() == "" {
+		return nil
+	}
+
 	name := r.Name()
 
 	existingRecordWithName := r.codeplug.FindRecordByName(r.rType, name)
@@ -429,7 +425,6 @@ func (r *Record) makeNameUnique() error {
 	}
 	n := int(n64)
 
-	nameField := r.NameField()
 	maxNameLen := nameField.bitSize / 16
 
 	for len(baseName) > 0 {
@@ -452,9 +447,9 @@ func (r *Record) makeNameUnique() error {
 // ListNames returns a slice of the names of all records in the rDesc.
 func (rd *rDesc) ListNames() *[]string {
 	lenCachedListNames := 0
-	//if rd.cachedListNames != nil {
-	//	lenCachedListNames = len(*rd.cachedListNames)
-	//}
+	if rd.cachedListNames != nil {
+		lenCachedListNames = len(*rd.cachedListNames)
+	}
 	recordsLen := len(rd.records)
 	if lenCachedListNames == 0 && recordsLen > 0 {
 		names := make([]string, recordsLen)
@@ -500,7 +495,7 @@ func (rd *rDesc) MemberListNames(filter func(r *Record) bool) *[]string {
 		}
 		typeField := r.Field(FtDcCallType)
 		if typeField.String() == "Group" {
-			names = append(names, r.NameField().String())
+			names = append(names, r.Name())
 		}
 	}
 
@@ -618,7 +613,10 @@ func (or *Record) Copy() *Record {
 
 	for _, fType := range or.FieldTypes() {
 		for _, of := range or.Fields(fType) {
-			f, _ := r.NewFieldWithValue(of.fType, of.fIndex, of.String())
+			str := of.String()
+			str = removeSuffix(of, str)
+			str = AddSuffix(of, str)
+			f, _ := r.NewFieldWithValue(of.fType, of.fIndex, str)
 			r.addField(f)
 		}
 	}

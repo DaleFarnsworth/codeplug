@@ -267,7 +267,7 @@ func (f *Field) Span() *Span {
 func (f *Field) Strings() []string {
 	var strs []string
 	switch f.valueType {
-	case VtListIndex, VtGpsListIndex, VtDerefListIndex:
+	case VtListIndex, VtGpsListIndex, VtDerefListIndex, VtContactListIndex:
 		strs = []string{}
 		if f.indexedStrings != nil {
 			strs = append(strs, (*f.indexedStrings)[0].String)
@@ -1482,10 +1482,36 @@ func (v *textMessage) store(f *Field) {
 	f.storeBytes(ucs2)
 }
 
-// name is a field value representing a utf8 name that must be unique
-// among all records containing the field
-type uniqueName struct {
+type contactName struct {
 	name
+}
+
+// setString sets the name's value from a string.
+func (v *contactName) setString(f *Field, s string) error {
+	if utf8.RuneCountInString(removeSuffix(f, s)) > f.size()/2 {
+		return fmt.Errorf("name too long")
+	}
+
+	_, err := stringToUcs2Bytes(removeSuffix(f, string(v.name)), f.size())
+	if err != nil {
+		return err
+	}
+
+	v.name = name(s)
+
+	return nil
+}
+
+// load sets the name's value from its bits in cp.bytes.
+func (v *contactName) load(f *Field) {
+	v.name = name(AddSuffix(f, ucs2BytesToString(f.bytes())))
+}
+
+// store stores the name's value into its bits in cp.bytes.
+func (v *contactName) store(f *Field) {
+	name := removeSuffix(f, string(v.name))
+	ucs2, _ := stringToUcs2Bytes(name, f.size())
+	f.storeBytes(ucs2)
 }
 
 // name is a field value representing a utf8 name.
@@ -1713,6 +1739,18 @@ func (v *gpsListIndex) valid(f *Field) error {
 	return v.listIndex.valid(f)
 }
 
+type contactListIndex struct {
+	listIndex
+}
+
+func (v *contactListIndex) setString(f *Field, s string) error {
+	if s == "" {
+		s = f.IndexedStrings()[0].String
+	}
+
+	return v.listIndex.setString(f, s)
+}
+
 // listIndex is a field value representing an index into a slice of records
 type listIndex string
 
@@ -1762,7 +1800,7 @@ func (v *listIndex) init(f *Field, str string) {
 	if len(str) < 1 || str[0:1] != "\000" {
 		logFatal("listIndex.init() invalid value")
 	}
-	str = str[1:]
+	str = removeSuffix(f, str[1:])
 
 	index64, err := strconv.ParseUint(str, 10, 16)
 	if err != nil {
@@ -2252,11 +2290,6 @@ func fieldsToStrings(fields []*Field) []string {
 	return strings
 }
 
-func (f *Field) hasUniqueNameValue() bool {
-	_, unique := f.value.(*uniqueName)
-	return unique
-}
-
 func (f *Field) resolveDeferredValue() error {
 	dValue, deferred := f.value.(deferredValue)
 	if !deferred {
@@ -2279,9 +2312,7 @@ func (f *Field) resolveDeferredValue() error {
 		}
 	}
 
-	if f.hasUniqueNameValue() {
-		f.record.makeNameUnique()
-	}
+	f.record.makeNameUnique()
 	f.valid()
 
 	return nil
@@ -2311,7 +2342,7 @@ func (f *Field) mustDeferValue(str string) bool {
 		listNames := f.memberListNames()
 		return len(listNames) <= 0 || listNames[0] == ""
 
-	case VtListIndex, VtGpsListIndex, VtDerefListIndex:
+	case VtListIndex, VtGpsListIndex, VtDerefListIndex, VtContactListIndex:
 		if !f.record.InCodeplug() {
 			return true
 		}

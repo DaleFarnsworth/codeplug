@@ -26,34 +26,122 @@
 package codeplug
 
 import (
-	"bufio"
 	"bytes"
-	"crypto/rand"
 	"fmt"
 	"math"
+	"math/rand"
 	"strconv"
 	"strings"
+	"time"
 	"unicode"
 	"unicode/utf16"
 	"unicode/utf8"
 )
 
-// randomString returns a a random hex string of the given length.
-func randomString(size int) (string, error) {
-	rnd := make([]byte, size/2)
-	_, err := rand.Read(rnd)
-	if err != nil {
-		return "", err
+const displaySuffixes = true
+
+const contactSuffixLength = 40
+
+const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$@"
+const (
+	letterIdxBits = 6                    // 6 bits represent a letter index
+	letterIdxMask = 1<<letterIdxBits - 1 // All 1-bits
+	letterIdxMax  = 63 / letterIdxBits   // # of indices fitting in 63 bits
+)
+
+var src = rand.NewSource(time.Now().UnixNano())
+
+func RandomString(n int) string {
+	b := make([]byte, n)
+	// A src.Int63() generates 63 random bits,
+	// enough for letterIdxMax characters!
+	for i, cache, remain := n-1, src.Int63(), letterIdxMax; i >= 0; {
+		if remain == 0 {
+			cache, remain = src.Int63(), letterIdxMax
+		}
+		if idx := int(cache & letterIdxMask); idx < len(letterBytes) {
+			b[i] = letterBytes[idx]
+			i--
+		}
+		cache >>= letterIdxBits
+		remain--
 	}
 
-	buf := bytes.Buffer{}
-	writer := bufio.NewWriter(&buf)
-	for _, b := range rnd {
-		fmt.Fprintf(writer, "%02x", b)
-	}
-	writer.Flush()
+	return string(b)
+}
 
-	return buf.String(), nil
+func AddSuffix(f *Field, str string) string {
+	if f.fType != FtDcName {
+		return str
+	}
+
+	if f.record.rType != RtContacts {
+		return str
+	}
+
+	if str == "" {
+		return str
+	}
+
+	if len(str) > contactSuffixLength {
+		return str
+	}
+
+	str += "_" + RandomString(contactSuffixLength)
+
+	return str
+}
+
+func removeSuffix(f *Field, str string) string {
+	if f.fType != FtDcName {
+		return str
+	}
+
+	if f.record.rType != RtContacts {
+		return str
+	}
+
+	if len(str) < contactSuffixLength {
+		return str
+	}
+
+	sepIndex := len(str) - contactSuffixLength - 1
+	if str[sepIndex:sepIndex+1] != "_" {
+		return str
+	}
+
+	str = str[0 : len(str)-contactSuffixLength-1]
+
+	return str
+}
+
+func RemoveSuffix(f *Field, str string) string {
+	if displaySuffixes {
+		return str
+	}
+
+	return removeSuffix(f, str)
+}
+
+func RemoveSuffixes(strs []string) []string {
+	if displaySuffixes {
+		return strs
+	}
+
+	for i, str := range strs {
+		if len(str) < contactSuffixLength {
+			continue
+		}
+
+		sepIndex := len(str) - contactSuffixLength - 1
+		if str[sepIndex:sepIndex+1] != "_" {
+			continue
+		}
+
+		strs[i] = str[0 : len(str)-contactSuffixLength-1]
+	}
+
+	return strs
 }
 
 // stringInSlice returns true if the given string exists in the given
