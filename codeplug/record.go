@@ -103,7 +103,12 @@ func (rd *rDesc) loadRecords() {
 			length++
 		}
 	}
+
 	rd.records = records[:length]
+
+	for _, r := range rd.records {
+		r.makeNameUnique()
+	}
 }
 
 // newField creates and returns the address of a new field of the given type.

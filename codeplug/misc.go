@@ -71,6 +71,10 @@ func RandomString(n int) string {
 }
 
 func AddSuffix(f *Field, str string) string {
+	if f.Codeplug().uniqueContactNames {
+		return str
+	}
+
 	if f.fType != FtDcName {
 		return str
 	}
@@ -93,6 +97,10 @@ func AddSuffix(f *Field, str string) string {
 }
 
 func removeSuffix(f *Field, str string) string {
+	if f.Codeplug().uniqueContactNames {
+		return str
+	}
+
 	if f.fType != FtDcName {
 		return str
 	}
@@ -116,7 +124,7 @@ func removeSuffix(f *Field, str string) string {
 }
 
 func RemoveSuffix(f *Field, str string) string {
-	if displaySuffixes {
+	if f.Codeplug().uniqueContactNames || displaySuffixes {
 		return str
 	}
 

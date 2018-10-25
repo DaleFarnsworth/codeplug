@@ -67,29 +67,31 @@ const (
 
 // A Codeplug represents a codeplug file.
 type Codeplug struct {
-	filename       string
-	importFilename string
-	fileType       FileType
-	rdtSize        int
-	fileSize       int
-	fileOffset     int
-	id             string
-	bytes          []byte
-	hash           [sha256.Size]byte
-	rDesc          map[RecordType]*rDesc
-	changed        bool
-	lowFrequency   float64
-	highFrequency  float64
-	lowFrequencyB  float64
-	highFrequencyB float64
-	connectChange  func(*Change)
-	changeList     []*Change
-	changeIndex    int
-	codeplugInfo   *CodeplugInfo
-	loaded         bool
-	cachedNameToRt map[string]RecordType
-	cachedNameToFt map[RecordType]map[string]FieldType
-	warnings       []string
+	filename           string
+	importFilename     string
+	fileType           FileType
+	rdtSize            int
+	fileSize           int
+	fileOffset         int
+	id                 string
+	bytes              []byte
+	hash               [sha256.Size]byte
+	rDesc              map[RecordType]*rDesc
+	changed            bool
+	lowFrequency       float64
+	highFrequency      float64
+	lowFrequencyB      float64
+	highFrequencyB     float64
+	connectChange      func(*Change)
+	changeList         []*Change
+	changeIndex        int
+	codeplugInfo       *CodeplugInfo
+	loaded             bool
+	cachedNameToRt     map[string]RecordType
+	cachedNameToFt     map[RecordType]map[string]FieldType
+	uniqueContactNames bool
+
+	warnings []string
 }
 
 type CodeplugInfo struct {
@@ -263,6 +265,10 @@ func (cp *Codeplug) Ext() string {
 
 func (cp *Codeplug) CodeplugInfo() *CodeplugInfo {
 	return cp.codeplugInfo
+}
+
+func (cp *Codeplug) SetUniqueContactNames(b bool) {
+	cp.uniqueContactNames = b
 }
 
 func (cp *Codeplug) HasRecordType(rType RecordType) bool {
