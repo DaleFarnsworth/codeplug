@@ -551,7 +551,7 @@ func (w *Window) initRecordModel(writable bool) {
 		rl.SetCurrent(dRow - 1)
 		rl.SelectRecords(records...)
 
-		cp.valid()
+		cp.Valid()
 
 		mw.EndChange(change)
 

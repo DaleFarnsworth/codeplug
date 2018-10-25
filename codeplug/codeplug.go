@@ -89,6 +89,7 @@ type Codeplug struct {
 	loaded             bool
 	cachedNameToRt     map[string]RecordType
 	cachedNameToFt     map[RecordType]map[string]FieldType
+	gpsEnabled         bool
 	uniqueContactNames bool
 
 	warnings []string
@@ -265,6 +266,10 @@ func (cp *Codeplug) Ext() string {
 
 func (cp *Codeplug) CodeplugInfo() *CodeplugInfo {
 	return cp.codeplugInfo
+}
+
+func (cp *Codeplug) SetGPSEnabled(b bool) {
+	cp.gpsEnabled = b
 }
 
 func (cp *Codeplug) SetUniqueContactNames(b bool) {
@@ -595,7 +600,7 @@ func (cp *Codeplug) Revert() error {
 
 	cp.ResolveDeferredValueFields()
 
-	cp.valid()
+	cp.Valid()
 
 	cp.changed = false
 	cp.hash = sha256.Sum256(cp.bytes)
@@ -633,7 +638,7 @@ func (cp *Codeplug) SaveAs(filename string) error {
 // The state of the codeplug is not changed, so this
 // is useful for use by an autosave function.
 func (cp *Codeplug) SaveToFile(filename string) (err error) {
-	cp.valid()
+	cp.Valid()
 
 	cp.setLastProgrammedTime(time.Now())
 
@@ -964,11 +969,11 @@ func (cp *Codeplug) newRecord(rType RecordType, rIndex int) *Record {
 }
 
 // valid returns nil if all fields in the codeplug are valid.
-func (cp *Codeplug) Valid(gps bool) bool {
+func (cp *Codeplug) Valid() bool {
 	cp.warnings = make([]string, 0)
 	for _, rType := range cp.RecordTypes() {
 		for _, r := range cp.records(rType) {
-			if !gps && r.rType == RtGPSSystems {
+			if !cp.gpsEnabled && r.rType == RtGPSSystems {
 				continue
 			}
 			if err := r.valid(); err != nil {
@@ -982,10 +987,6 @@ func (cp *Codeplug) Valid(gps bool) bool {
 	}
 
 	return true
-}
-
-func (cp *Codeplug) valid() bool {
-	return cp.Valid(true)
 }
 
 // findFileType sets the codeplug type based on file size
