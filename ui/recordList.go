@@ -67,6 +67,7 @@ func (parent *HBox) AddRecordList(rType codeplug.RecordType) *RecordList {
 		w := rl.window
 		if w.recordFunc != nil && !w.mainWindow.changing {
 			DelayedCall(func() {
+				rl.qListView.ScrollTo(selected, widgets.QAbstractItemView__EnsureVisible)
 				w.recordFunc()
 			})
 		}
