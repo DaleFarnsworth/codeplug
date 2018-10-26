@@ -317,13 +317,14 @@ func (w *Window) Show() {
 	w.enableWidgets()
 }
 
-func Clear(w Widget) {
+func clear(w Widget) {
 	widget := w.qWidget_ITF().QWidget_PTR()
+
 	for _, obj := range widget.Children() {
 		if obj.Pointer() == widget.Layout().Pointer() {
 			continue
 		}
-		obj.DeleteLater()
+		obj.DestroyQObject()
 	}
 }
 
@@ -581,6 +582,10 @@ func (vBox *VBox) qWidget_ITF() widgets.QWidget_ITF {
 	return &vBox.qWidget
 }
 
+func (vBox *VBox) Clear() {
+	clear(vBox)
+}
+
 func (vBox *VBox) Window() *Window {
 	return vBox.window
 }
@@ -701,6 +706,10 @@ func NewHbox() *HBox {
 	box.layout.SetContentsMargins(0, 0, 0, 0)
 
 	return box
+}
+
+func (hBox *HBox) Clear() {
+	clear(hBox)
 }
 
 func (hBox *HBox) qWidget_ITF() widgets.QWidget_ITF {
