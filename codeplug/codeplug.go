@@ -83,8 +83,6 @@ type Codeplug struct {
 	lowFrequencyB      float64
 	highFrequencyB     float64
 	connectChange      func(*Change)
-	changeList         []*Change
-	changeIndex        int
 	codeplugInfo       *CodeplugInfo
 	loaded             bool
 	cachedNameToRt     map[string]RecordType
@@ -161,8 +159,6 @@ func NewCodeplug(fType FileType, filename string) (*Codeplug, error) {
 
 	cp.filename = filename
 	cp.rDesc = make(map[RecordType]*rDesc)
-	cp.changeList = []*Change{&Change{}}
-	cp.changeIndex = 0
 
 	cp.id = RandomString(64)
 
@@ -604,9 +600,6 @@ func (cp *Codeplug) Revert() error {
 
 	cp.changed = false
 	cp.hash = sha256.Sum256(cp.bytes)
-
-	cp.changeList = []*Change{&Change{}}
-	cp.changeIndex = 0
 
 	return nil
 }
@@ -2157,8 +2150,6 @@ func (cp *Codeplug) storeParsedRecords(records []*Record) error {
 		}
 	}
 	cp.store()
-	cp.changeList = []*Change{&Change{}}
-	cp.changeIndex = 0
 	cp.changed = true
 
 	return nil

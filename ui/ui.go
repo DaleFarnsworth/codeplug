@@ -1950,34 +1950,6 @@ func wrapProgress(title string, f func(func(int)), changeCount int) {
 	pd.Close()
 }
 
-func UndoChange(cp *codeplug.Codeplug) {
-	DelayedCall(func() {
-		change := cp.ChangeToUndo()
-		changeRecord := change.Record()
-		changeCount := len(change.Changes())
-		title := "Updating " + changeRecord.TypeName()
-
-		mw := mainWindow(cp)
-		mw.BeginChange(change)
-		wrapProgress(title, cp.UndoChange, changeCount)
-		mw.EndChange(change)
-	})
-}
-
-func RedoChange(cp *codeplug.Codeplug) {
-	DelayedCall(func() {
-		change := cp.ChangeToRedo()
-		changeRecord := change.Record()
-		changeCount := len(change.Changes())
-		title := "Updating " + changeRecord.TypeName()
-
-		mw := mainWindow(cp)
-		mw.BeginChange(change)
-		wrapProgress(title, cp.RedoChange, changeCount)
-		mw.EndChange(change)
-	})
-}
-
 func InfoPopup(title string, msg string) {
 	button := widgets.QMessageBox__Ok
 	defaultButton := widgets.QMessageBox__Ok
