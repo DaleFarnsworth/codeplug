@@ -527,8 +527,7 @@ func (mw *MainWindow) NewRecordWindow(rType codeplug.RecordType, writable bool) 
 
 			case codeplug.MoveFieldsChange,
 				codeplug.InsertFieldsChange,
-				codeplug.RemoveFieldsChange,
-				codeplug.ListIndexChange:
+				codeplug.RemoveFieldsChange:
 
 			default:
 				logFatal("Unknown change type ", changeType)

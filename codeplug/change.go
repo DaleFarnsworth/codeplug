@@ -169,7 +169,6 @@ const (
 	MoveFieldsChange    ChangeType = "MoveFieldsChange"
 	InsertFieldsChange  ChangeType = "InsertFieldsChange"
 	RemoveFieldsChange  ChangeType = "RemoveFieldsChange"
-	ListIndexChange     ChangeType = "ListIndexChange"
 	RecordsFieldChange  ChangeType = "RecordsFieldChange"
 )
 
@@ -210,17 +209,6 @@ func recordsChange(t ChangeType, records []*Record) *Change {
 		records: records,
 	}
 	change.strings = change.refStrings()
-
-	return &change
-}
-
-func listIndexChange(r *Record, fields []*Field) *Change {
-	change := Change{
-		cType:   ListIndexChange,
-		records: []*Record{r},
-		fields:  fields,
-	}
-	change.strings = change.fieldStrings()
 
 	return &change
 }
@@ -314,66 +302,8 @@ func deleteChange(changes *[]*Change, i int) {
 	*changes = (*changes)[:len(*changes)-1]
 }
 
-func (cp *Codeplug) updateListIndexChanges(parentChange *Change) []*Change {
-	changes := parentChange.changes
-	if changes == nil {
-		return changes
-	}
-	for i := 0; i < len(changes); i++ {
-		change := changes[i]
-		changeStrings := change.strings
-		if stringsEqual(change.fieldStrings(), changeStrings) {
-			deleteChange(&changes, i)
-			i--
-			continue
-		}
-
-		r := change.Record()
-		fType := change.FieldType()
-		if fType == FieldType("") {
-			continue
-		}
-		fields := r.Fields(fType)
-		for i := len(fields) - 1; i >= 0; i-- {
-			r.RemoveField(fields[i])
-		}
-
-		for i, str := range changeStrings {
-			f, err := r.NewFieldWithValue(fType, i, str)
-			if err == nil {
-				r.addField(f)
-			}
-		}
-
-		if len(r.Fields(fType)) == 0 {
-			fd := (*r.fDesc)[fType]
-			indexedStrings := fd.indexedStrings
-			if indexedStrings != nil {
-				iStrs := *indexedStrings
-				str := iStrs[len(iStrs)-1].String
-				f, _ := r.NewFieldWithValue(fType, 0, str)
-				r.addField(f)
-			}
-		}
-
-		fields = r.Fields(fType)
-		strings := make([]string, len(fields))
-		for i, f := range fields {
-			strings[i] = f.String()
-		}
-		change.afterStrings = strings
-	}
-	return changes
-}
-
 func (cp *Codeplug) addChange(change *Change) {
 	cp.changed = true
-
-	switch change.cType {
-	case MoveRecordsChange, InsertRecordsChange, RemoveRecordsChange,
-		RemoveFieldsChange:
-		change.changes = cp.updateListIndexChanges(change)
-	}
 
 	i := cp.changeIndex + 1
 	cp.changeList = append(cp.changeList[:i], change)
@@ -443,12 +373,6 @@ func (change *Change) Changes() []*Change {
 }
 
 func (change *Change) AddChange(newChange *Change) {
-	switch newChange.cType {
-	case MoveRecordsChange, InsertRecordsChange, RemoveRecordsChange,
-		RemoveFieldsChange:
-		cp := change.Codeplug()
-		newChange.changes = cp.updateListIndexChanges(newChange)
-	}
 	change.changes = append(change.changes, newChange)
 }
 
@@ -693,8 +617,6 @@ func (cp *Codeplug) undoChange(change *Change, progFunc func(int)) *Change {
 		}
 		change.strings = strings
 
-		cp.undoListIndexChanges(change)
-
 	case InsertRecordsChange:
 		records := change.records
 		rIndexes := make([]int, len(records))
@@ -707,8 +629,6 @@ func (cp *Codeplug) undoChange(change *Change, progFunc func(int)) *Change {
 			records[i].rIndex = rIndexes[i]
 		}
 
-		cp.undoListIndexChanges(change)
-
 		newChange := *change
 		change = &newChange
 		change.cType = RemoveRecordsChange
@@ -718,8 +638,6 @@ func (cp *Codeplug) undoChange(change *Change, progFunc func(int)) *Change {
 			r.rIndex = change.sIndex(i)
 			cp.InsertRecord(r)
 		}
-
-		cp.undoListIndexChanges(change)
 
 		newChange := *change
 		change = &newChange
@@ -754,28 +672,9 @@ func (cp *Codeplug) undoChange(change *Change, progFunc func(int)) *Change {
 			r.InsertField(f)
 		}
 
-		cp.undoListIndexChanges(change)
-
 		newChange := *change
 		change = &newChange
 		change.cType = InsertFieldsChange
-
-	case ListIndexChange:
-		fType := change.FieldType()
-		r := change.Record()
-		fields := r.Fields(fType)
-		for i := len(fields) - 1; i >= 0; i-- {
-			r.RemoveField(fields[i])
-		}
-		for i, str := range change.strings {
-			f, err := r.NewFieldWithValue(fType, i, str)
-			if err != nil {
-				logFatal("NewField error on ", str)
-			}
-			r.addField(f)
-		}
-		c := change
-		c.strings, c.afterStrings = c.afterStrings, c.strings
 
 	default:
 		logFatal("Undo: unexpected change type:", cType)
@@ -849,22 +748,16 @@ func (cp *Codeplug) redoChange(change *Change, progFunc func(int)) *Change {
 		}
 		change.strings = strings
 
-		cp.redoListIndexChanges(change)
-
 	case InsertRecordsChange:
 		for _, r := range change.records {
 			cp.InsertRecord(r)
 		}
-
-		cp.redoListIndexChanges(change)
 
 	case RemoveRecordsChange:
 		records := change.records
 		for i := len(records) - 1; i >= 0; i-- {
 			cp.RemoveRecord(records[i])
 		}
-
-		cp.redoListIndexChanges(change)
 
 	case MoveFieldsChange:
 		fields := change.fields
@@ -890,37 +783,9 @@ func (cp *Codeplug) redoChange(change *Change, progFunc func(int)) *Change {
 			r.RemoveField(fields[i])
 		}
 
-		cp.redoListIndexChanges(change)
-
-	case ListIndexChange:
-		fType := change.FieldType()
-		r := change.Record()
-		fields := r.Fields(fType)
-		for i := len(fields) - 1; i >= 0; i-- {
-			r.RemoveField(fields[i])
-		}
-		for i, str := range change.strings {
-			f, _ := r.NewFieldWithValue(fType, i, str)
-			r.addField(f)
-		}
-		c := change
-		c.strings, c.afterStrings = c.afterStrings, c.strings
-
 	default:
 		logFatal("Redo: unexpected change type:", cType)
 	}
 
 	return change
-}
-
-func (cp *Codeplug) undoListIndexChanges(change *Change) {
-	for _, change = range change.changes {
-		cp.undoChange(change, nil)
-	}
-}
-
-func (cp *Codeplug) redoListIndexChanges(change *Change) {
-	for _, change = range change.changes {
-		cp.redoChange(change, nil)
-	}
 }
