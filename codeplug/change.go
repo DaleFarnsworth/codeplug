@@ -226,16 +226,6 @@ func listIndexChange(r *Record, fields []*Field) *Change {
 }
 
 func (f *Field) Change(previousValue string) *Change {
-	cp := f.record.codeplug
-
-	change := cp.currentChange()
-	if change != nil && change.cType == FieldChange &&
-		change.Field() == f && f.String() != change.previousValue() &&
-		change.previousValue() != invalidValueString {
-
-		return change
-	}
-
 	return fieldChange(f, previousValue)
 }
 
@@ -541,12 +531,12 @@ func (cp *Codeplug) UndoString() string {
 	case InsertFieldsChange:
 		names := maxNamesString(fieldNames(change.fields), 5)
 		ref := change.undoReference()
-		str = fmt.Sprintf("%s.%sinsert %s %s",
+		str = fmt.Sprintf("%s.%s: insert %s %s",
 			rTypeName, rName, names, ref)
 
 	case RemoveFieldsChange:
 		names := maxNamesString(fieldNames(change.fields), 5)
-		str = fmt.Sprintf("%s.%sdelete %s", rTypeName, rName, names)
+		str = fmt.Sprintf("%s.%s: delete %s", rTypeName, rName, names)
 
 	default:
 		logFatal("undoString: unexpected change type:", cType)

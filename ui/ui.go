@@ -160,22 +160,21 @@ func (mw *MainWindow) SetCodeplug(cp *codeplug.Codeplug) {
 
 	mw.codeplug.ConnectChange(func(change *codeplug.Change) {
 		mw := mainWindow(change.Codeplug())
-		/*
-			changes := append(change.Changes(), change)
-			for _, change := range changes {
-				w := mw.recordWindows[change.RecordType()]
-				if w != nil {
-					w.handleChange(change)
-					continue
-				}
-				w = mw.altRecordWindows[change.RecordType()]
-				if w != nil {
-					w.handleChange(change)
-				}
-			}
-		*/
-		mw.CodeplugChanged(change)
+		changes := append(change.Changes(), change)
 
+		for _, change := range changes {
+			w := mw.recordWindows[change.RecordType()]
+			if w != nil {
+				w.handleChange(change)
+				continue
+			}
+			w = mw.altRecordWindows[change.RecordType()]
+			if w != nil {
+				w.handleChange(change)
+			}
+		}
+
+		mw.CodeplugChanged(change)
 		mw.connectChange(change)
 	})
 }
@@ -478,22 +477,12 @@ func (mw *MainWindow) NewRecordWindow(rType codeplug.RecordType, writable bool) 
 	})
 
 	w.handleChange = func(change *codeplug.Change) {
-		rl := w.recordList
-
 		changeType := change.Type()
 		switch changeType {
 		case codeplug.FieldChange:
 			f := change.Field()
-			w := recordWindow(f.Record())
-			if w != nil {
-				widgets := w.widgets[f.Type()]
-				if widgets == nil {
-					break
-				}
-				widget := widgets[f]
-				if widget != nil {
-					widget.receive(widget)
-				}
+			if f == f.Record().NameField() {
+				codeplug.NameFieldChanged(change)
 			}
 
 		case codeplug.RecordsFieldChange:
@@ -502,21 +491,49 @@ func (mw *MainWindow) NewRecordWindow(rType codeplug.RecordType, writable bool) 
 				w.handleChange(change)
 			}
 
-		case codeplug.MoveRecordsChange, codeplug.InsertRecordsChange:
-			rl.SetCurrent(change.Record().Index())
-			rl.SelectRecords(change.Records()...)
-
 		case codeplug.RemoveRecordsChange:
-			rl.SetCurrent(change.Record().Index())
-
-		case codeplug.MoveFieldsChange,
-			codeplug.InsertFieldsChange,
-			codeplug.RemoveFieldsChange,
-			codeplug.ListIndexChange:
-
-		default:
-			logFatal("Unknown change type ", changeType)
+			codeplug.RecordsRemoved(change)
 		}
+		/*
+			rl := w.recordList
+
+			changeType := change.Type()
+			switch changeType {
+			case codeplug.FieldChange:
+				w := recordWindow(f.Record())
+				if w != nil {
+					widgets := w.widgets[f.Type()]
+					if widgets == nil {
+						break
+					}
+					widget := widgets[f]
+					if widget != nil {
+						widget.receive(widget)
+					}
+				}
+
+			case codeplug.RecordsFieldChange:
+				changes := change.Changes()
+				for _, change := range changes {
+					w.handleChange(change)
+				}
+
+			case codeplug.MoveRecordsChange, codeplug.InsertRecordsChange:
+				rl.SetCurrent(change.Record().Index())
+				rl.SelectRecords(change.Records()...)
+
+			case codeplug.RemoveRecordsChange:
+				rl.SetCurrent(change.Record().Index())
+
+			case codeplug.MoveFieldsChange,
+				codeplug.InsertFieldsChange,
+				codeplug.RemoveFieldsChange,
+				codeplug.ListIndexChange:
+
+			default:
+				logFatal("Unknown change type ", changeType)
+			}
+		*/
 	}
 
 	return w

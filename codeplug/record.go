@@ -440,7 +440,7 @@ func (r *Record) makeNameUnique() error {
 		newName := baseName + fmt.Sprintf("%d", n)
 		if r.codeplug.FindRecordByName(r.rType, newName) == nil {
 			nameField.value = newValue(nameField.ValueType())
-			nameField.value.setString(nameField, newName)
+			nameField.value.setString(nameField, newName, false)
 			return nil
 		}
 		n += 1
@@ -715,4 +715,30 @@ func (r *Record) NameExists() bool {
 	name := r.Name()
 	rv := r.codeplug.FindRecordByName(r.rType, name) != nil
 	return rv
+}
+
+func RecordsRemoved(change *Change) {
+	for _, r := range change.records {
+		name := r.Name()
+		rType := r.rType
+		for _, f := range r.codeplug.allFields() {
+			if f.listRecordType != rType {
+				continue
+			}
+
+			if f.String() != name {
+				continue
+			}
+
+			if f.max > 1 {
+				r := f.record
+				change := r.RemoveFieldsChange([]*Field{f})
+				r.RemoveField(f)
+				change.Complete()
+				continue
+			}
+
+			f.SetString(f.defaultValue)
+		}
+	}
 }

@@ -447,7 +447,6 @@ func fieldNamesToFields(r *codeplug.Record, fieldNames []string, fType codeplug.
 	for i, name := range fieldNames {
 		f, err := r.NewFieldWithValue(fType, 0, name)
 		if err != nil {
-			err = fmt.Errorf("fieldNameToField:", err.Error())
 			return nil, err
 		}
 		fields[i] = r.FindFieldByName(fType, f.String())
