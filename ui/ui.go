@@ -185,7 +185,7 @@ func NewMainWindow() *MainWindow {
 
 	qmw := widgets.NewQMainWindow(nil, 0)
 
-	qmw.Resize2(600, 100)
+	qmw.Resize2(600, 50)
 	//var aGeometry = widgets.QApplication_Desktop().AvailableGeometry2(qmw)
 	//qmw.Move2((aGeometry.Width()-qmw.Width())/2,
 	//(aGeometry.Height()-qmw.Height())/2)
