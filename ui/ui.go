@@ -324,7 +324,7 @@ func clear(w Widget) {
 		if obj.Pointer() == widget.Layout().Pointer() {
 			continue
 		}
-		obj.DestroyQObject()
+		obj.DeleteLater()
 	}
 }
 
