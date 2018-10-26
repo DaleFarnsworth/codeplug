@@ -54,7 +54,7 @@ func (parent *HBox) AddRecordList(rType codeplug.RecordType) *RecordList {
 	view.SetDragDropMode(widgets.QAbstractItemView__DragDrop)
 	view.SetSelectionMode(widgets.QAbstractItemView__ExtendedSelection)
 	metrics := gui.NewQFontMetrics(widgets.QApplication_Font())
-	recordNameWidth := metrics.HorizontalAdvance("XXXXXXXXXXXXXXXXX", -1)
+	recordNameWidth := metrics.HorizontalAdvance("XXXXXXXXXXXXXXXXXXXX", -1)
 	view.SetMinimumWidth(recordNameWidth)
 	view.SetMaximumWidth(recordNameWidth)
 	view.SetDefaultDropAction(core.Qt__MoveAction)
