@@ -66,10 +66,8 @@ func (parent *HBox) AddRecordList(rType codeplug.RecordType) *RecordList {
 	rl.qListView.ConnectCurrentChanged(func(selected *core.QModelIndex, deSelected *core.QModelIndex) {
 		w := rl.window
 		if w.recordFunc != nil && !w.mainWindow.changing {
-			DelayedCall(func() {
-				rl.qListView.ScrollTo(selected, widgets.QAbstractItemView__EnsureVisible)
-				w.recordFunc()
-			})
+			rl.qListView.ScrollTo(selected, widgets.QAbstractItemView__EnsureVisible)
+			w.recordFunc()
 		}
 	})
 
@@ -97,7 +95,6 @@ func (rl *RecordList) Current() int {
 	records := rl.window.records()
 	if current >= len(records) {
 		current = len(records) - 1
-		rl.SetCurrent(current)
 	}
 
 	return current
@@ -296,6 +293,8 @@ func (w *Window) dataRecords(data *core.QMimeData, drop bool) (records []*codepl
 	return records, depRecords, id, nil
 }
 
+const extraRows = 1
+
 func (w *Window) initRecordModel(writable bool) {
 	record := w.record()
 	if record.MaxRecords() == 1 {
@@ -306,7 +305,7 @@ func (w *Window) initRecordModel(writable bool) {
 	w.recordModel = model
 
 	model.ConnectRowCount(func(parent *core.QModelIndex) int {
-		return len(*record.ListNames())
+		return len(*record.ListNames()) + extraRows
 	})
 
 	model.ConnectData(func(idx *core.QModelIndex, role int) *core.QVariant {
@@ -316,6 +315,9 @@ func (w *Window) initRecordModel(writable bool) {
 			names = codeplug.RemoveSuffixes(names)
 			if row >= 0 && row < len(names) {
 				return core.NewQVariant14(names[row])
+			}
+			if row < len(names)+extraRows {
+				return core.NewQVariant14("")
 			}
 		}
 
@@ -418,7 +420,7 @@ func (w *Window) initRecordModel(writable bool) {
 		} else if parent.IsValid() {
 			dRow = parent.Row()
 		} else {
-			dRow = model.RowCount(nil)
+			dRow = model.RowCount(nil) - extraRows
 		}
 
 		if dRow >= firstSRow && dRow <= lastSRow+1 {
@@ -441,7 +443,7 @@ func (w *Window) initRecordModel(writable bool) {
 		} else if parent.IsValid() {
 			dRow = parent.Row()
 		} else {
-			dRow = model.RowCount(nil)
+			dRow = model.RowCount(nil) - extraRows
 		}
 
 		rTypeString := "Drop Records"
