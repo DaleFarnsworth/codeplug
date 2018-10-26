@@ -1274,6 +1274,10 @@ func (window *Window) subscribe(sender codeplug.FieldType, receiver codeplug.Fie
 	subs[sender] = append(subs[sender], receiver)
 }
 
+func (w *Window) BeginRecord() {
+	w.subscriptions = make(map[codeplug.FieldType][]codeplug.FieldType)
+}
+
 func (w *FieldWidget) SetLabel(text string) {
 	if w.label == nil {
 		w.label = widgets.NewQLabel2(text, nil, 0)
