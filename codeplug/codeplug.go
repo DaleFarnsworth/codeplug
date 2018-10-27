@@ -264,6 +264,22 @@ func (cp *Codeplug) CodeplugInfo() *CodeplugInfo {
 	return cp.codeplugInfo
 }
 
+func (cp *Codeplug) ModelTypes() (model string, types []string) {
+	model = cp.Model()
+
+	types = make([]string, 0)
+	for _, cpi := range codeplugInfos {
+		for _, cpModel := range cpi.Models {
+			if cpModel == model {
+				types = append(types, cpi.Type)
+				break
+			}
+		}
+	}
+
+	return model, types
+}
+
 func (cp *Codeplug) SetGPSEnabled(b bool) {
 	cp.gpsEnabled = b
 }

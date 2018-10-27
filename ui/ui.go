@@ -1544,6 +1544,16 @@ func setQSpinBox(sb *widgets.QSpinBox, f *codeplug.Field) {
 	sb.SetValue(value)
 }
 
+func NewLineEditWidget(str string) *FieldWidget {
+	qw := widgets.NewQLineEdit(nil)
+	widget := new(FieldWidget)
+	widget.qWidget = qw
+	qw.SetText(str)
+	qw.SetReadOnly(true)
+
+	return widget
+}
+
 func NewSpinboxWidget(value, min, max int, changedFunc func(int)) *FieldWidget {
 	qw := widgets.NewQSpinBox(nil)
 	widget := new(FieldWidget)
