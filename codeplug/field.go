@@ -2379,20 +2379,26 @@ func (f *Field) DeferredString() string {
 }
 
 func NameFieldChanged(change *Change) {
-	previousValue := change.previousValue()
 	f := change.Field()
+	r := f.record
+	cp := r.codeplug
+
+	previousValue := change.previousValue()
 	newValue := f.String()
-	rType := f.record.rType
 
-	for _, f := range f.record.codeplug.allFields() {
-		if f.listRecordType != rType {
-			continue
+	fieldRefs := rTypeFieldRefs[r.rType]
+	for _, fRef := range fieldRefs {
+		rType := fRef.rType
+		fType := fRef.fType
+		for _, r := range cp.Records(rType) {
+			for _, f := range r.Fields(fType) {
+				if f.String() != previousValue {
+					continue
+				}
+
+				f.value.setString(f, newValue, true)
+			}
 		}
 
-		if f.String() != previousValue {
-			continue
-		}
-
-		f.value.setString(f, newValue, true)
 	}
 }

@@ -317,6 +317,17 @@ func (cp *Codeplug) allFields() []*Field {
 	return fields
 }
 
+func (cp *Codeplug) fields(rType RecordType, fType FieldType) []*Field {
+	fields := make([]*Field, 0)
+	for _, r := range cp.records(rType) {
+		for _, f := range r.Fields(fType) {
+			fields = append(fields, f)
+		}
+	}
+
+	return fields
+}
+
 func (cp *Codeplug) TextLines() []string {
 	lines := make([]string, 0)
 	for _, rType := range cp.RecordTypes() {

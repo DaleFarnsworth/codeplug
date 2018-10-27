@@ -4290,4 +4290,81 @@ var fiZiName = fieldInfo{
 	defaultValue: "Zone1",
 }
 
+var rTypeFieldRefs = map[RecordType][]fieldRef{
+	"Channels": []fieldRef{
+		fieldRef{
+			rType: RecordType("Zones"),
+			fType: FieldType("Channel"),
+		},
+		fieldRef{
+			rType: RecordType("Zones"),
+			fType: FieldType("ChannelA"),
+		},
+		fieldRef{
+			rType: RecordType("Zones"),
+			fType: FieldType("ChannelB"),
+		},
+		fieldRef{
+			rType: RecordType("ScanLists"),
+			fType: FieldType("PriorityChannel1"),
+		},
+		fieldRef{
+			rType: RecordType("ScanLists"),
+			fType: FieldType("PriorityChannel2"),
+		},
+		fieldRef{
+			rType: RecordType("ScanLists"),
+			fType: FieldType("TxDesignatedChannel"),
+		},
+		fieldRef{
+			rType: RecordType("ScanLists"),
+			fType: FieldType("Channel"),
+		},
+		fieldRef{
+			rType: RecordType("GPSSystems"),
+			fType: FieldType("GPSRevertChannel"),
+		},
+	},
+	"Contacts": []fieldRef{
+		fieldRef{
+			rType: RecordType("OneTouch"),
+			fType: FieldType("Call"),
+		},
+		fieldRef{
+			rType: RecordType("NumberKey"),
+			fType: FieldType("Contact"),
+		},
+		fieldRef{
+			rType: RecordType("GroupLists"),
+			fType: FieldType("Contact"),
+		},
+		fieldRef{
+			rType: RecordType("Channels"),
+			fType: FieldType("ContactName"),
+		},
+		fieldRef{
+			rType: RecordType("GPSSystems"),
+			fType: FieldType("DestinationID"),
+		},
+	},
+	"GroupLists": []fieldRef{
+		fieldRef{
+			rType: RecordType("Channels"),
+			fType: FieldType("GroupList"),
+		},
+	},
+	"ScanLists": []fieldRef{
+		fieldRef{
+			rType: RecordType("Channels"),
+			fType: FieldType("ScanList"),
+		},
+	},
+	"TextMessages": []fieldRef{
+		fieldRef{
+			rType: RecordType("OneTouch"),
+			fType: FieldType("TextMessage"),
+		},
+	},
+}
+
 //go:generate genCodeplugInfo

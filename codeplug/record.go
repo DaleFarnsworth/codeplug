@@ -79,6 +79,11 @@ func deleteRecord(records *[]*Record, i int) {
 	*records = (*records)[:len(*records)-1]
 }
 
+type fieldRef struct {
+	rType RecordType
+	fType FieldType
+}
+
 // loadRecords loads all the records in rDesc from the codeplug's file.
 func (rd *rDesc) loadRecords() {
 	records := rd.records
@@ -717,12 +722,22 @@ func (r *Record) NameExists() bool {
 	return rv
 }
 
+func fieldRefFields(cp *Codeplug, fieldRefs []fieldRef) []*Field {
+	fields := make([]*Field, 0)
+	for _, fRef := range fieldRefs {
+		fields = append(fields, cp.fields(fRef.rType, fRef.fType)...)
+	}
+
+	return fields
+}
+
 func RecordsRemoved(change *Change) {
+	cp := change.Codeplug()
 	for _, r := range change.records {
 		name := r.Name()
-		rType := r.rType
-		for _, f := range r.codeplug.allFields() {
-			if f.listRecordType != rType {
+		fieldRefs := rTypeFieldRefs[r.rType]
+		for _, f := range fieldRefFields(cp, fieldRefs) {
+			if f.listRecordType != r.rType {
 				continue
 			}
 

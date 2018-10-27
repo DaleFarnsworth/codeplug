@@ -158,3 +158,16 @@ var fi{{$f.Type}} = fieldInfo{
 {{- end}}
 }
 {{- end}}
+
+var rTypeFieldRefs = map[RecordType][]fieldRef {
+{{- range $rts := $.ListRecordTypes}}
+	"{{$rts}}": []fieldRef {
+	{{- range $fr := index $.FieldRefsMap $rts}}
+		fieldRef{
+			rType: RecordType("{{$fr.RType}}"),
+			fType: FieldType("{{$fr.FType}}"),
+		},
+	{{- end}}
+	},
+{{- end}}
+}

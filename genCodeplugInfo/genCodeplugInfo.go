@@ -123,6 +123,11 @@ type Enable struct {
 	Enables bool
 }
 
+type FieldRef struct {
+	RType string
+	FType string
+}
+
 type ValueTypeMap map[string]int
 
 type TemplateVars struct {
@@ -132,6 +137,8 @@ type TemplateVars struct {
 	Fields           []*Field
 	SortedFields     []*Field
 	ValueTypes       []string
+	ListRecordTypes  []string
+	FieldRefsMap     map[string][]FieldRef
 	Sanitize         func(string) string
 	RecordTypeString func(string) string
 	FieldTypeString  func(string) string
@@ -251,6 +258,39 @@ func doEnables(r *Record, fieldMap map[string]*Field) {
 	}
 }
 
+func fieldRefsMap(records []*Record, fieldMap map[string]*Field) map[string][]FieldRef {
+	rfMapExists := make(map[string]map[FieldRef]bool)
+	rfMap := make(map[string][]FieldRef)
+	for _, r := range records {
+		for _, fType := range r.FieldTypes {
+			f := fieldMap[fType]
+			if f.ListType == nil {
+				continue
+			}
+			rType := *f.ListType
+			if rType == "" {
+				continue
+			}
+
+			rtStr := RecordTypeString(rType)
+			if rfMap[rtStr] == nil {
+				rfMap[rtStr] = make([]FieldRef, 0)
+				rfMapExists[rtStr] = make(map[FieldRef]bool)
+			}
+			fieldRef := FieldRef{
+				RType: RecordTypeString(r.Type),
+				FType: FieldTypeString(f.Type),
+			}
+			if !rfMapExists[rtStr][fieldRef] {
+				rfMap[rtStr] = append(rfMap[rtStr], fieldRef)
+			}
+			rfMapExists[rtStr][fieldRef] = true
+		}
+	}
+
+	return rfMap
+}
+
 func sortRecords(records []*Record) {
 	recordTypes := make([]string, len(records))
 	recordMap := make(map[string]*Record)
@@ -328,6 +368,7 @@ func readCodeplugJson(filename string) TemplateVars {
 		doEnables(r, fieldMap)
 		sortedRecords[i] = r
 	}
+
 	sortRecords(sortedRecords)
 	templateVars.Records = top.Records
 	templateVars.SortedRecords = sortedRecords
@@ -342,6 +383,16 @@ func readCodeplugJson(filename string) TemplateVars {
 	templateVars.Sanitize = sanitize
 	templateVars.RecordTypeString = RecordTypeString
 	templateVars.FieldTypeString = FieldTypeString
+
+	fieldRefsMap := fieldRefsMap(top.Records, fieldMap)
+	templateVars.FieldRefsMap = fieldRefsMap
+
+	lrtStrings := make([]string, 0)
+	for rtString := range fieldRefsMap {
+		lrtStrings = append(lrtStrings, rtString)
+	}
+	sort.Strings(lrtStrings)
+	templateVars.ListRecordTypes = lrtStrings
 
 	return templateVars
 }
