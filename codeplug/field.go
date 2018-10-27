@@ -185,8 +185,10 @@ func (f *Field) setString(s string) error {
 		f.value = invalidValue.value
 	}
 
-	if f.fType == f.record.nameFieldType {
-		f.record.rDesc.cachedListNames = nil
+	r := f.record
+	if f.fType == r.nameFieldType {
+		r.rDesc.cachedListNames = nil
+		r.makeNameUnique()
 	}
 
 	// Some fields may be dependent on this field's value
