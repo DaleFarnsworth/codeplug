@@ -175,7 +175,9 @@ func (mw *MainWindow) SetCodeplug(cp *codeplug.Codeplug) {
 		}
 
 		mw.CodeplugChanged(change)
-		mw.connectChange(change)
+		if mw.connectChange != nil {
+			mw.connectChange(change)
+		}
 	})
 }
 
