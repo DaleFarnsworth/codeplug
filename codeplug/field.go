@@ -1729,19 +1729,11 @@ type gpsListIndex struct {
 }
 
 func (v *gpsListIndex) setString(f *Field, s string, force bool) error {
-	if s == "" {
+	if s == "" || s == "\00065535" || s == "\00065534" {
 		s = f.IndexedStrings()[0].String
 	}
 
 	return v.listIndex.setString(f, s, force)
-}
-
-func (v *gpsListIndex) valid(f *Field) error {
-	if (*v).listIndex == listIndex("\00065536") {
-		(*v).listIndex = listIndex("\0000")
-	}
-
-	return v.listIndex.valid(f)
 }
 
 type contactListIndex struct {
@@ -1839,26 +1831,30 @@ func (v *listIndex) load(f *Field) {
 // store stores the listIndex's value into its bits in cp.bytes.
 func (v *listIndex) store(f *Field) {
 	value := string(*v)
-	invalidIndex := uint16(65534)
-	index := invalidIndex
 	fd := f.fDesc
+
+	index := -1
 
 	if fd.indexedStrings != nil {
 		for _, is := range *fd.indexedStrings {
 			if is.String == value {
-				index = is.Index
+				index = int(is.Index)
 				break
 			}
 		}
 	}
 
-	if index == invalidIndex {
+	if index == -1 {
 		for i, name := range f.listNames() {
 			if name == value {
-				index = uint16(i + 1)
+				index = i + 1
 				break
 			}
 		}
+	}
+
+	if index == -1 {
+		return
 	}
 
 	f.storeBytes(int64ToBytes(int64(index), f.size()))
