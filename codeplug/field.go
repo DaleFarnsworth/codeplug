@@ -329,7 +329,7 @@ func (f *Field) SpanStrings() []string {
 	span := f.span
 
 	strs := make([]string, 0)
-	for i := span.min; i < span.max; i += span.interval {
+	for i := span.min; i <= span.max; i += span.interval {
 		str := fmt.Sprintf("%d", i*span.scale)
 		if i == span.min && span.minString != "" {
 			str = span.minString
