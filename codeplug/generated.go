@@ -34,14 +34,12 @@ const (
 	RtBasicInformation_md40  RecordType = "BasicInformation"
 	RtBasicInformation_uv380 RecordType = "BasicInformation"
 	RtButtonDefinitions      RecordType = "ButtonDefinitions"
-	RtChannels_md2017        RecordType = "Channels"
 	RtChannels_md380         RecordType = "Channels"
 	RtChannels_md40          RecordType = "Channels"
 	RtChannels_uv380         RecordType = "Channels"
 	RtContacts               RecordType = "Contacts"
 	RtContacts_uv380         RecordType = "Contacts"
 	RtGPSSystems             RecordType = "GPSSystems"
-	RtGeneralSettings_md2017 RecordType = "GeneralSettings"
 	RtGeneralSettings_md380  RecordType = "GeneralSettings"
 	RtGeneralSettings_md40   RecordType = "GeneralSettings"
 	RtGeneralSettings_uv380  RecordType = "GeneralSettings"
@@ -231,7 +229,6 @@ const (
 	FtPsBasicKey                  FieldType = "BasicKey"
 	FtPsEnhancedKey               FieldType = "EnhancedKey"
 	FtRbButton                    FieldType = "Button"
-	FtRbButton_md2017             FieldType = "Button"
 	FtRbButton_md40               FieldType = "Button"
 	FtRbButton_uv380              FieldType = "Button"
 	FtSlChannel_md380             FieldType = "Channel"
@@ -625,9 +622,9 @@ var cpMD2017 = CodeplugInfo{
 	TrailerSize:   16,
 	RecordInfos: []*recordInfo{
 		&riBasicInformation_uv380,
-		&riGeneralSettings_md2017,
+		&riGeneralSettings_uv380,
 		&riMenuItems,
-		&riRadioButtons_md2017,
+		&riRadioButtons_uv380,
 		&riButtonDefinitions,
 		&riOneTouch,
 		&riNumberKey,
@@ -637,7 +634,7 @@ var cpMD2017 = CodeplugInfo{
 		&riGroupLists,
 		&riZones_uv380,
 		&riScanLists_uv380,
-		&riChannels_md2017,
+		&riChannels_uv380,
 		&riGPSSystems,
 	},
 }
@@ -654,9 +651,9 @@ var cpRT82 = CodeplugInfo{
 	TrailerSize:   16,
 	RecordInfos: []*recordInfo{
 		&riBasicInformation_uv380,
-		&riGeneralSettings_md2017,
+		&riGeneralSettings_uv380,
 		&riMenuItems,
-		&riRadioButtons_md2017,
+		&riRadioButtons_uv380,
 		&riButtonDefinitions,
 		&riOneTouch,
 		&riNumberKey,
@@ -666,7 +663,7 @@ var cpRT82 = CodeplugInfo{
 		&riGroupLists,
 		&riZones_uv380,
 		&riScanLists_uv380,
-		&riChannels_md2017,
+		&riChannels_uv380,
 		&riGPSSystems,
 	},
 }
@@ -746,71 +743,6 @@ var riButtonDefinitions = recordInfo{
 	size:     1,
 	fieldInfos: []*fieldInfo{
 		&fiBdLongPressDuration,
-	},
-}
-
-var riChannels_md2017 = recordInfo{
-	rType:    RtChannels_md2017,
-	typeName: "Channels",
-	max:      3000,
-	offset:   262709,
-	size:     64,
-	delDesc: &delDesc{
-		offset: 16,
-		size:   1,
-		value:  255,
-	},
-	fieldInfos: []*fieldInfo{
-		&fiCiName,
-		&fiCiRxFrequency,
-		&fiCiTxFrequencyOffset,
-		&fiCiChannelMode,
-		&fiCiBandwidth,
-		&fiCiScanList_md40,
-		&fiCiSquelch,
-		&fiCiRxRefFrequency,
-		&fiCiTxRefFrequency,
-		&fiCiTot,
-		&fiCiTotRekeyDelay,
-		&fiCiPower_uv380,
-		&fiCiAdmitCriteria,
-		&fiCiAutoscan,
-		&fiCiRxOnly,
-		&fiCiLoneWorker,
-		&fiCiVox,
-		&fiCiAllowTalkaround,
-		&fiCiSendGPSInfo,
-		&fiCiReceiveGPSInfo,
-		&fiCiPrivateCallConfirmed,
-		&fiCiEmergencyAlarmAck,
-		&fiCiDataCallConfirmed,
-		&fiCiDCDMSwitch,
-		&fiCiLeaderMS,
-		&fiCiEmergencySystem,
-		&fiCiContactName,
-		&fiCiGroupList,
-		&fiCiColorCode,
-		&fiCiRepeaterSlot,
-		&fiCiPrivacy,
-		&fiCiPrivacyNumber,
-		&fiCiGPSSystem,
-		&fiCiInCallCriteria,
-		&fiCiDisplayPTTID,
-		&fiCiCtcssEncode,
-		&fiCiTxSignallingSystem,
-		&fiCiDQTTurnoffFreq,
-		&fiCiQtReverse,
-		&fiCiReverseBurst,
-		&fiCiCtcssDecode,
-		&fiCiRxSignallingSystem,
-		&fiCiDecode1,
-		&fiCiDecode2,
-		&fiCiDecode3,
-		&fiCiDecode4,
-		&fiCiDecode5,
-		&fiCiDecode6,
-		&fiCiDecode7,
-		&fiCiDecode8,
 	},
 }
 
@@ -1049,60 +981,6 @@ var riGPSSystems = recordInfo{
 		&fiGpGPSRevertChannel,
 		&fiGpGPSDefaultReportInterval,
 		&fiGpDestinationID,
-	},
-}
-
-var riGeneralSettings_md2017 = recordInfo{
-	rType:    RtGeneralSettings_md2017,
-	typeName: "General Settings",
-	max:      1,
-	offset:   8805,
-	size:     144,
-	fieldInfos: []*fieldInfo{
-		&fiGsRadioName,
-		&fiGsRadioID,
-		&fiGsIntroScreen,
-		&fiGsIntroScreenLine1,
-		&fiGsIntroScreenLine2,
-		&fiGsSavePreamble,
-		&fiGsSaveModeReceive,
-		&fiGsDisableAllTones,
-		&fiGsChFreeIndicationTone,
-		&fiGsTalkPermitTone,
-		&fiGsCallAlertToneDuration,
-		&fiGsScanDigitalHangTime,
-		&fiGsScanAnalogHangTime,
-		&fiGsLoneWorkerResponseTime,
-		&fiGsLoneWorkerReminderTime,
-		&fiGsPwAndLockEnable,
-		&fiGsPowerOnPassword,
-		&fiGsCHVoiceAnnouncement,
-		&fiGsMonitorType,
-		&fiGsVoxSensitivity,
-		&fiGsTxPreambleDuration,
-		&fiGsRxLowBatteryInterval,
-		&fiGsChannelsHangTime,
-		&fiGsPcProgPassword,
-		&fiGsRadioProgPassword,
-		&fiGsBacklightTime,
-		&fiGsSetKeypadLockTime,
-		&fiGsFreqChannelMode_uv380,
-		&fiGsModeSelectA,
-		&fiGsModeSelectB,
-		&fiGsTimeZone,
-		&fiGsDisableAllLeds,
-		&fiGsGroupCallMatch,
-		&fiGsPrivateCallMatch,
-		&fiGsGroupCallHangTime,
-		&fiGsPrivateCallHangTime,
-		&fiGsRadioID1,
-		&fiGsRadioID2,
-		&fiGsRadioID3,
-		&fiGsMicLevel,
-		&fiGsTxMode,
-		&fiGsEditRadioID,
-		&fiGsPublicZone,
-		&fiGsEnableContactsCSV,
 	},
 }
 
@@ -1399,7 +1277,7 @@ var riRadioButtons_md2017 = recordInfo{
 		"P2 Long Press",
 	},
 	fieldInfos: []*fieldInfo{
-		&fiRbButton_md2017,
+		&fiRbButton_uv380,
 	},
 }
 
@@ -3939,44 +3817,6 @@ var fiRbButton = fieldInfo{
 		IndexedString{26, "Battery Indicator"},
 		IndexedString{30, "Manual Dial For Private"},
 		IndexedString{31, "Lone Work On/Off"},
-	},
-}
-
-var fiRbButton_md2017 = fieldInfo{
-	fType:     FtRbButton_md2017,
-	typeName:  "Button",
-	max:       1,
-	bitOffset: 0,
-	bitSize:   8,
-	valueType: VtRadioButton,
-	indexedStrings: &[]IndexedString{
-		IndexedString{0, "Unassigned (default)"},
-		IndexedString{1, "All alert Tones On/Off"},
-		IndexedString{2, "Emergency On"},
-		IndexedString{3, "Emergency Off"},
-		IndexedString{4, "Power Select"},
-		IndexedString{5, "Monitor"},
-		IndexedString{7, "One Touch Access 1"},
-		IndexedString{8, "One Touch Access 2"},
-		IndexedString{9, "One Touch Access 3"},
-		IndexedString{10, "One Touch Access 4"},
-		IndexedString{11, "One Touch Access 5"},
-		IndexedString{12, "One Touch Access 6"},
-		IndexedString{13, "Repeater/Talkaround"},
-		IndexedString{14, "Scan On/Off"},
-		IndexedString{21, "Squelch Tight/Normal"},
-		IndexedString{22, "Privacy On/Off"},
-		IndexedString{23, "VOX On/Off"},
-		IndexedString{25, "Zone Select"},
-		IndexedString{26, "Battery Indicator"},
-		IndexedString{31, "Lone Work On/Off"},
-		IndexedString{34, "Record On/Off (Firmware)"},
-		IndexedString{35, "Record Playback (Firmware)"},
-		IndexedString{36, "Delete All Recorded (Firmware)"},
-		IndexedString{38, "1750 Hz"},
-		IndexedString{47, "Toggle Up/Down"},
-		IndexedString{48, "Right Key"},
-		IndexedString{49, "Left Key"},
 	},
 }
 
