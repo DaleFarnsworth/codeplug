@@ -403,16 +403,11 @@ func (f *Field) SetDefault() {
 
 // valid returns nil if the field's value is valid.
 func (f *Field) valid() error {
-	if f.IsInvalidValue() {
-		if !f.IsEnabled() {
-			return nil
-		}
-		return errors.New("invalid value")
-	}
-
 	err := f.value.valid(f)
 	if err != nil {
 		f.value = invalidValue{value: f.value}
+	} else if f.IsInvalidValue() {
+		err = errors.New("invalid value")
 	}
 
 	if !f.IsEnabled() {
@@ -955,11 +950,11 @@ func (v *span) validValue(f *Field, value int) error {
 	}
 
 	if value%multiple != 0 {
-		return fmt.Errorf("must be a multiple of %d", multiple)
+		return fmt.Errorf("[%d] must be a multiple of %d", value, multiple)
 	}
 
 	if value < min || value > max {
-		return fmt.Errorf("must be between %d and %d", min, max)
+		return fmt.Errorf("[%d] must be between %d and %d", value, min, max)
 	}
 
 	return nil
