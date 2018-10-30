@@ -30,6 +30,8 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+
+	l "github.com/dalefarnsworth/codeplug/debug"
 )
 
 // A Record represents a record within a Codeplug.
@@ -431,7 +433,7 @@ func (r *Record) makeNameUnique() error {
 	}
 	n64, err := strconv.ParseInt(suffix, 10, 32)
 	if err != nil {
-		logFatal("trailing digits not numeric")
+		l.Fatal("trailing digits not numeric")
 	}
 	n := int(n64)
 
@@ -534,7 +536,7 @@ func (rd *rDesc) recordIsDeleted(cp *Codeplug, rIndex int) bool {
 func (rd *rDesc) deleteRecord(cp *Codeplug, rIndex int) {
 	dd := rd.delDesc
 	if dd == nil {
-		logFatal("can't delete record %s", rd.records[rIndex])
+		l.Fatal("can't delete record %s", rd.records[rIndex])
 	}
 
 	offset := rd.offset + rIndex*rd.size + int(dd.offset)
@@ -605,7 +607,7 @@ func (r *Record) RemoveField(f *Field) {
 		}
 	}
 	if index < 0 {
-		logFatal("RemoveField: bad field")
+		l.Fatal("RemoveField: bad field")
 	}
 
 	deleteField(&fields, index)

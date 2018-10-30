@@ -38,6 +38,7 @@ import (
 	"time"
 
 	"github.com/dalefarnsworth/codeplug/codeplug"
+	l "github.com/dalefarnsworth/codeplug/debug"
 	"github.com/dalefarnsworth/codeplug/dfu"
 	"github.com/dalefarnsworth/codeplug/userdb"
 	"github.com/microcosm-cc/bluemonday"
@@ -773,7 +774,7 @@ func writeFirmware() error {
 
 	file, err := os.Open(filename)
 	if err != nil {
-		logFatalf("writeFirmware: %s", err.Error())
+		l.Fatalf("writeFirmware: %s", err.Error())
 	}
 
 	defer file.Close()

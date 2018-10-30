@@ -38,6 +38,7 @@ import (
 	"strings"
 	"time"
 
+	l "github.com/dalefarnsworth/codeplug/debug"
 	"github.com/dalefarnsworth/codeplug/stdfu"
 	"github.com/dalefarnsworth/codeplug/userdb"
 )
@@ -1243,12 +1244,12 @@ func (dfu *Dfu) WriteCodeplug(data []byte) error {
 func (dfu *Dfu) WriteUsers(filename string) error {
 	fileInfo, err := os.Stat(filename)
 	if err != nil {
-		logFatalf("os.Stat: %s", err.Error())
+		l.Fatalf("os.Stat: %s", err.Error())
 	}
 
 	file, err := os.Open(filename)
 	if err != nil {
-		logFatalf("WriteUsers: %s", err.Error())
+		l.Fatalf("WriteUsers: %s", err.Error())
 	}
 	defer file.Close()
 
@@ -1305,7 +1306,7 @@ func ParseUV380Users(reader io.Reader) [][]string {
 		users = append(users, fields)
 	}
 	if err := scanner.Err(); err != nil {
-		logFatalf("ParseUsers: %s", err.Error())
+		l.Fatalf("ParseUsers: %s", err.Error())
 	}
 
 	return users

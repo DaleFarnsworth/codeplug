@@ -43,6 +43,7 @@ import (
 	"time"
 	"unicode"
 
+	l "github.com/dalefarnsworth/codeplug/debug"
 	"github.com/dalefarnsworth/codeplug/dfu"
 	"github.com/tealeg/xlsx"
 )
@@ -142,7 +143,7 @@ func NewCodeplug(fType FileType, filename string) (*Codeplug, error) {
 			if !found {
 				matches, err := filepath.Glob(filename + "*")
 				if err != nil {
-					logFatal(err.Error())
+					l.Fatal(err.Error())
 				}
 				if len(matches) != 0 {
 					found = true
@@ -154,7 +155,7 @@ func NewCodeplug(fType FileType, filename string) (*Codeplug, error) {
 			}
 		}
 	default:
-		logFatal("unknown file type")
+		l.Fatal("unknown file type")
 	}
 
 	cp.filename = filename
@@ -547,14 +548,14 @@ func (cp *Codeplug) readNew(filename string) error {
 			if err == io.EOF {
 				break
 			}
-			logFatal(err)
+			l.Fatal(err)
 		}
 		if hdr.Name != filename {
 			continue
 		}
 		bytes, err = ioutil.ReadAll(tarfile)
 		if err != nil {
-			logFatal(err)
+			l.Fatal(err)
 		}
 		break
 	}
@@ -898,7 +899,7 @@ func (cp *Codeplug) RemoveRecord(r *Record) {
 		}
 	}
 	if index < 0 || index >= len(records) {
-		logFatal("removeRecord: bad record")
+		l.Fatal("removeRecord: bad record")
 	}
 
 	deleteRecord(&records, index)

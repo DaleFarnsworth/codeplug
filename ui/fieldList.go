@@ -33,6 +33,7 @@ import (
 	"strings"
 
 	"github.com/dalefarnsworth/codeplug/codeplug"
+	l "github.com/dalefarnsworth/codeplug/debug"
 	"github.com/therecipe/qt/core"
 	"github.com/therecipe/qt/widgets"
 )
@@ -297,7 +298,7 @@ func (fnl *fieldNameList) initMemberModel(model *core.QStringListModel, r *codep
 	model.ConnectInsertRows(func(row int, count int, parent *core.QModelIndex) bool {
 		f := fnl.fieldToInsert
 		if count != 1 {
-			logFatal("bad insert fields count")
+			l.Fatal("bad insert fields count")
 		}
 
 		if len(r.Fields(fType)) >= r.MaxFields(fType) {
@@ -312,7 +313,7 @@ func (fnl *fieldNameList) initMemberModel(model *core.QStringListModel, r *codep
 		model.EndInsertRows()
 
 		if err != nil {
-			logFatal("ConnectInsertRows: InsertField failed")
+			l.Fatal("ConnectInsertRows: InsertField failed")
 		}
 
 		fnl.fieldToInsert = nil
@@ -465,7 +466,7 @@ func (fnl *fieldNameList) initFieldNameModel(model *core.QStringListModel, r *co
 
 	model.ConnectMoveRows(func(sParent *core.QModelIndex, sRow int, count int, dParent *core.QModelIndex, dRow int) bool {
 		if count != 1 {
-			logFatal("ConnectMoveRows count != 1")
+			l.Fatal("ConnectMoveRows count != 1")
 		}
 		fType := fnl.fieldMembers.fType
 		allFields := r.Fields(fType)
@@ -564,9 +565,7 @@ func (hBox *HBox) AddFieldMembers(r *codeplug.Record, memberType codeplug.FieldT
 	column = groupRow.AddVbox()
 	column.AddFiller()
 	add := column.AddButton("Add >>")
-	add.SetFixedHeight()
 	delete := column.AddButton("<< Delete")
-	delete.SetFixedHeight()
 	column.AddFiller()
 
 	column = groupRow.AddVbox()

@@ -30,6 +30,7 @@ import (
 	"strings"
 
 	"github.com/dalefarnsworth/codeplug/codeplug"
+	l "github.com/dalefarnsworth/codeplug/debug"
 	"github.com/therecipe/qt/core"
 	"github.com/therecipe/qt/gui"
 	"github.com/therecipe/qt/widgets"
@@ -186,12 +187,6 @@ func NewMainWindow() *MainWindow {
 	mainWindows = append(mainWindows, mw)
 
 	qmw := widgets.NewQMainWindow(nil, 0)
-
-	qmw.Resize2(600, 50)
-	//var aGeometry = widgets.QApplication_Desktop().AvailableGeometry2(qmw)
-	//qmw.Move2((aGeometry.Width()-qmw.Width())/2,
-	//(aGeometry.Height()-qmw.Height())/2)
-
 	mw.qMainWindow = *qmw
 
 	qmw.ConnectCloseEvent(func(event *gui.QCloseEvent) {
@@ -223,8 +218,13 @@ func NewMainWindow() *MainWindow {
 	return mw
 }
 
+func (mW *MainWindow) Resize(w, h int) {
+	mW.qMainWindow.Resize2(w, h)
+}
+
 func (parent *MainWindow) AddVbox() *VBox {
 	box := NewVbox()
+	box.SetContentsMargins(5, 5, 5, 5)
 	parent.qMainWindow.SetCentralWidget(&box.qWidget)
 
 	return box
@@ -232,6 +232,7 @@ func (parent *MainWindow) AddVbox() *VBox {
 
 func (parent *MainWindow) AddHbox() *HBox {
 	box := NewHbox()
+	box.SetContentsMargins(5, 5, 5, 5)
 	parent.qMainWindow.SetCentralWidget(&box.qWidget)
 
 	return box
@@ -532,7 +533,7 @@ func (mw *MainWindow) NewRecordWindow(rType codeplug.RecordType, writable bool) 
 				codeplug.RemoveFieldsChange:
 
 			default:
-				logFatal("Unknown change type ", changeType)
+				l.Fatal("Unknown change type ", changeType)
 			}
 		*/
 	}
@@ -553,11 +554,11 @@ func (w *Window) setWindow(window *Window) {
 }
 
 func (w *Window) AddWidget(widget Widget) {
-	logFatal("cannot add widget to Window")
+	l.Fatal("cannot add widget to Window")
 }
 
 func (w *Window) SetContentsMargins(left int, right int, top int, bottom int) {
-	logFatal("cannot set contents margin of Window")
+	l.Fatal("cannot set contents margin of Window")
 }
 
 func (w *Window) records() []*codeplug.Record {
@@ -864,18 +865,6 @@ func (box *VBox) SetFixedWidth() {
 	box.qWidget.SetSizePolicy(sizePolicy)
 }
 
-func (button *Button) SetFixedHeight() {
-	sizePolicy := button.qWidget.SizePolicy()
-	sizePolicy.SetVerticalPolicy(widgets.QSizePolicy__Fixed)
-	button.qWidget.SetSizePolicy(sizePolicy)
-}
-
-func (button *Button) SetFixedWidth() {
-	sizePolicy := button.qWidget.SizePolicy()
-	sizePolicy.SetHorizontalPolicy(widgets.QSizePolicy__Fixed)
-	button.qWidget.SetSizePolicy(sizePolicy)
-}
-
 func (form *Form) qWidget_ITF() widgets.QWidget_ITF {
 	return &form.qWidget
 }
@@ -893,7 +882,7 @@ func (parent *Form) AddWidget(w Widget) {
 	case *FieldWidget:
 		parent.AddFieldWidget(v)
 	default:
-		logFatalf("cannot add %T to form", v)
+		l.Fatalf("cannot add %T to form", v)
 	}
 }
 
@@ -946,7 +935,7 @@ func (parent *Form) AddFieldRows(labelFunc func(*codeplug.Field) string, fields 
 func (window *Window) NewFieldWidget(label string, f *codeplug.Field) *FieldWidget {
 	newFieldWidgetFunc := newFieldWidget[f.ValueType()]
 	if newFieldWidgetFunc == nil {
-		logFatalf("No %s entry in newFieldWidget slice", f.ValueType())
+		l.Fatalf("No %s entry in newFieldWidget slice", f.ValueType())
 	}
 
 	w := newFieldWidgetFunc(f)
@@ -963,17 +952,17 @@ func (window *Window) NewFieldWidget(label string, f *codeplug.Field) *FieldWidg
 
 	w.receive = func(sender *FieldWidget) {
 		if sender.field.Record().Type() != f.Record().Type() {
-			logFatal("sender record type", sender.field.Record().Type(), " receiver record type", f.Record().Type())
+			l.Fatal("sender record type", sender.field.Record().Type(), " receiver record type", f.Record().Type())
 		}
 		if sender.field.Record().Index() != f.Record().Index() {
-			logFatal("sender record index", sender.field.Record().Index(), " receiver record index", f.Record().Index())
+			l.Fatal("sender record index", sender.field.Record().Index(), " receiver record index", f.Record().Index())
 		}
 		if sender.field.Index() != f.Index() {
-			logFatal("sender field index", sender.field.Index(), " receiver field index", f.Index())
+			l.Fatal("sender field index", sender.field.Index(), " receiver field index", f.Index())
 		}
 		switch sender.field.Type() {
 		case "":
-			logFatal("receive(): invalid field type")
+			l.Fatal("receive(): invalid field type")
 
 		case fType:
 			w.update()
@@ -990,7 +979,7 @@ func (window *Window) NewFieldWidget(label string, f *codeplug.Field) *FieldWidg
 			setEnabled(w)
 
 		default:
-			logFatal("receive(): unexpected field type")
+			l.Fatal("receive(): unexpected field type")
 		}
 	}
 
@@ -1084,11 +1073,11 @@ func (t *Table) qWidget_ITF() widgets.QWidget_ITF {
 }
 
 func (t *Table) AddWidget(w Widget) {
-	logFatal("cannot add widget directly to Table")
+	l.Fatal("cannot add widget directly to Table")
 }
 
 func (t *Table) SetContentsMargins(left int, right int, top int, bottom int) {
-	logFatal("cannot set contents margin of Table")
+	l.Fatal("cannot set contents margin of Table")
 }
 
 func (t *Table) setWindow(window *Window) {
@@ -1277,11 +1266,11 @@ func (w *FieldWidget) setWindow(window *Window) {
 }
 
 func (fw *FieldWidget) AddWidget(w Widget) {
-	logFatal("cannot add widget to FieldWidget")
+	l.Fatal("cannot add widget to FieldWidget")
 }
 
 func (fw *FieldWidget) SetContentsMargins(left int, right int, top int, bottom int) {
-	logFatal("cannot set contents margin of FieldWidget")
+	l.Fatal("cannot set contents margin of FieldWidget")
 }
 
 func (window *Window) subscribe(sender codeplug.FieldType, receiver codeplug.FieldType) {
@@ -1324,7 +1313,7 @@ func (w *FieldWidget) update() {
 		qw.(*widgets.QComboBox).SetCurrentText(codeplug.RemoveSuffix(f, f.String()))
 
 	default:
-		logFatal("update(): unexpected widget type")
+		l.Fatal("update(): unexpected widget type")
 	}
 }
 
@@ -1353,7 +1342,7 @@ func (w *FieldWidget) SetEnabled(b bool) {
 		qw.(*widgets.QLineEdit).SetEnabled(b)
 
 	default:
-		logFatal("SetEnabled(): unexpected widget type")
+		l.Fatal("SetEnabled(): unexpected widget type")
 	}
 }
 
@@ -1368,7 +1357,7 @@ func (w *FieldWidget) SetReadOnly(b bool) {
 		qw.(*widgets.QLineEdit).SetReadOnly(b)
 
 	default:
-		logFatal("SetReadOnly(): unexpected widget type")
+		l.Fatal("SetReadOnly(): unexpected widget type")
 	}
 }
 
@@ -1392,7 +1381,7 @@ func (w *FieldWidget) SetVisible(b bool) {
 		qw.(*widgets.QLineEdit).SetVisible(b)
 
 	default:
-		logFatal("SetEnabled(): unexpected widget type")
+		l.Fatal("SetEnabled(): unexpected widget type")
 	}
 
 	if w.label != nil {
@@ -1413,7 +1402,7 @@ func (w *FieldWidget) Width() int {
 		width = qw.(*widgets.QLineEdit).Width()
 
 	default:
-		logFatal("SetMinimumWidth(): unexpected widget type")
+		l.Fatal("SetMinimumWidth(): unexpected widget type")
 	}
 
 	return width
@@ -1430,7 +1419,7 @@ func (w *FieldWidget) SetMinimumWidth(width int) {
 		qw.(*widgets.QLineEdit).SetMinimumWidth(width)
 
 	default:
-		logFatal("SetMinimumWidth(): unexpected widget type")
+		l.Fatal("SetMinimumWidth(): unexpected widget type")
 	}
 }
 
@@ -1457,7 +1446,7 @@ func newFieldCheckbox(f *codeplug.Field) *FieldWidget {
 		}
 		err := setFieldString(f, str)
 		if err != nil {
-			logFatal(err.Error())
+			l.Fatal(err.Error())
 		}
 	})
 
@@ -1505,7 +1494,7 @@ func newFieldCombobox(f *codeplug.Field) *FieldWidget {
 	}
 
 	if len(strings) == 0 {
-		logFatal("Combobox has no Strings()")
+		l.Fatal("Combobox has no Strings()")
 	}
 
 	qw.InsertItems(0, codeplug.RemoveSuffixes(strings))
@@ -1612,7 +1601,7 @@ func (sw *StackedWidget) setWindow(window *Window) {
 }
 
 func (sw *StackedWidget) SetContentsMargins(left int, right int, top int, bottom int) {
-	logFatal("cannot set contents margin of StackedWidget")
+	l.Fatal("cannot set contents margin of StackedWidget")
 }
 
 func (sw *StackedWidget) AddWidget(w Widget) {
@@ -1683,7 +1672,7 @@ func NewButtonWidget(text string, clicked func()) *FieldWidget {
 	w := new(FieldWidget)
 	b := widgets.NewQPushButton2(text, nil)
 	b.SetSizePolicy2(widgets.QSizePolicy__Fixed,
-		widgets.QSizePolicy__Preferred)
+		widgets.QSizePolicy__Fixed)
 	b.ConnectClicked(func(checked bool) {
 		clicked()
 	})
@@ -1770,7 +1759,7 @@ func newFieldSpinbox(f *codeplug.Field) *FieldWidget {
 }
 
 func newFieldTextEdit(f *codeplug.Field) *FieldWidget {
-	logFatal("newTextEdit: not implemented")
+	l.Fatal("newTextEdit: not implemented")
 	return nil
 }
 
@@ -1924,7 +1913,7 @@ func NewButton(text string) *Button {
 	b := new(Button)
 	b.qWidget = *widgets.NewQPushButton2(text, nil)
 	b.qWidget.SetSizePolicy2(widgets.QSizePolicy__Fixed,
-		widgets.QSizePolicy__Preferred)
+		widgets.QSizePolicy__Fixed)
 
 	return b
 }

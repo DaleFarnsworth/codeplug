@@ -35,6 +35,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	l "github.com/dalefarnsworth/codeplug/debug"
 )
 
 var specialUsersURL = "http://registry.dstar.su/api/node.php"
@@ -132,7 +134,7 @@ func init() {
 	for c, ac := range countryAbbreviations {
 		existing := reverseCountryAbbrevs[ac]
 		if existing != "" {
-			logFatalf("%s has abbreviations %s & %s", c, existing, ac)
+			l.Fatalf("%s has abbreviations %s & %s", c, existing, ac)
 
 		}
 		reverseCountryAbbrevs[ac] = c
@@ -142,7 +144,7 @@ func init() {
 		for s, as := range stateAbbreviations {
 			existing := reverseStateAbbrevs[as]
 			if existing != "" {
-				logFatalf("%s has abbreviations %s & %s", as, existing, s)
+				l.Fatalf("%s has abbreviations %s & %s", as, existing, s)
 			}
 			reverseStateAbbrevs[as] = s
 		}

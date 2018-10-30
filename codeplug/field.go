@@ -35,6 +35,8 @@ import (
 	"strings"
 	"time"
 	"unicode/utf8"
+
+	l "github.com/dalefarnsworth/codeplug/debug"
 )
 
 const invalidValueString = "=INVALID="
@@ -234,7 +236,7 @@ func (f *Field) listNames() []string {
 		r := f.record.codeplug.FindRecordByName(f.listRecordType, name)
 		fields := r.AllFields()
 		if len(fields) != 1 {
-			logFatal("deref: more than one field")
+			l.Fatal("deref: more than one field")
 		}
 		derefValues[i] = fields[0].String()
 	}
@@ -319,7 +321,7 @@ func (f *Field) Strings() []string {
 		strs = f.SpanStrings()
 
 	default:
-		logFatalf("f.Strings: unexpected f.valueType: %s", f.valueType)
+		l.Fatalf("f.Strings: unexpected f.valueType: %s", f.valueType)
 	}
 
 	return strs
@@ -1787,13 +1789,13 @@ func (v *listIndex) valid(f *Field) error {
 
 func (v *listIndex) init(f *Field, str string) {
 	if len(str) < 1 || str[0:1] != "\000" {
-		logFatal("listIndex.init() invalid value")
+		l.Fatal("listIndex.init() invalid value")
 	}
 	str = removeSuffix(f, str[1:])
 
 	index64, err := strconv.ParseUint(str, 10, 16)
 	if err != nil {
-		logFatalf("listIndex ParseInt failure: %s", err.Error())
+		l.Fatalf("listIndex ParseInt failure: %s", err.Error())
 	}
 	index := int(index64)
 
@@ -2321,7 +2323,7 @@ func (f *Field) mustDeferValue(str string) bool {
 		return false
 	}
 	if f.isDeferredValue() {
-		logFatal("already deferred: ", f.FullTypeName())
+		l.Fatal("already deferred: ", f.FullTypeName())
 	}
 
 	switch f.valueType {
@@ -2348,7 +2350,7 @@ func (f *Field) mustDeferValue(str string) bool {
 
 func (f *Field) deferValue(str string) {
 	if f.isDeferredValue() {
-		logFatal("already deferred: ", f.FullTypeName())
+		l.Fatal("already deferred: ", f.FullTypeName())
 	}
 
 	f.value = deferredValue{value: f.value, str: str}
@@ -2357,7 +2359,7 @@ func (f *Field) deferValue(str string) {
 func (f *Field) undeferValue() {
 	dValue, deferred := f.value.(deferredValue)
 	if !deferred {
-		logFatal("undeferValue: not deferred: ", f.FullTypeName())
+		l.Fatal("undeferValue: not deferred: ", f.FullTypeName())
 	}
 
 	f.value = dValue.value
