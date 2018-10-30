@@ -1812,7 +1812,7 @@ func (v *listIndex) init(f *Field, str string) {
 
 	index--
 	listNames := f.listNames()
-	if index < len(listNames) {
+	if index >= 0 && index < len(listNames) {
 		*v = listIndex(listNames[index])
 		return
 	}
