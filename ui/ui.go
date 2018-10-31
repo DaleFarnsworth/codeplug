@@ -487,6 +487,7 @@ func (mw *MainWindow) NewRecordWindow(rType codeplug.RecordType, writable bool) 
 			if f == f.Record().NameField() {
 				codeplug.NameFieldChanged(change)
 			}
+			w.enableWidgets()
 
 		case codeplug.RecordsFieldChange:
 			changes := change.Changes()
@@ -539,6 +540,15 @@ func (mw *MainWindow) NewRecordWindow(rType codeplug.RecordType, writable bool) 
 	}
 
 	return w
+}
+
+func (w *Window) fieldWidget(f *codeplug.Field) *FieldWidget {
+	widgets := w.widgets[f.Type()]
+	if widgets == nil {
+		return nil
+	}
+
+	return widgets[f]
 }
 
 func (w *Window) qWidget_ITF() widgets.QWidget_ITF {
@@ -976,7 +986,7 @@ func (window *Window) NewFieldWidget(label string, f *codeplug.Field) *FieldWidg
 			}
 
 		case enablerType:
-			setEnabled(w)
+			w.setEnabled()
 
 		default:
 			l.Fatal("receive(): unexpected field type")
@@ -1229,7 +1239,7 @@ type Widget interface {
 	Window() *Window
 }
 
-func setEnabled(w *FieldWidget) {
+func (w *FieldWidget) setEnabled() {
 	f := w.field
 	enabled := f.IsEnabled()
 	if enabled && f.IsInvalidValue() {
