@@ -1033,15 +1033,12 @@ func (parent *Form) AddReadOnlyFieldRow(labelFunc func(*codeplug.Field) string, 
 }
 
 func setFieldString(f *codeplug.Field, s string) error {
-	l.P("setFieldString", f.FullTypeName(), s)
 	err := f.TestSetString(s)
 	if err != nil {
-		l.P("setFieldString", f.FullTypeName(), err)
 		return err
 	}
 
 	if !setMultipleRecords(f, s) {
-		l.P("setFieldString", f.FullTypeName(), s)
 		f.SetString(s)
 	}
 	return nil
@@ -1514,11 +1511,8 @@ func newFieldCombobox(f *codeplug.Field) *FieldWidget {
 	}
 
 	qw.ConnectActivated(func(index int) {
-		l.P("combobox activated", f.FullTypeName(), index)
 		str := f.Strings()[index]
-		l.P("combobox activated", f.FullTypeName(), str)
 		err := setFieldString(f, str)
-		l.P("combobox activated", f.FullTypeName(), err)
 		if err != nil {
 			msg := f.TypeName() + " " + err.Error()
 			ErrorPopup("Value error", msg)
