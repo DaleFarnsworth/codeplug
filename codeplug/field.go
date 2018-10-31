@@ -837,23 +837,17 @@ func (v *iStrings) getString(f *Field) string {
 // setString sets the iStrings' value from a string.
 func (v *iStrings) setString(f *Field, s string, force bool) error {
 	fd := f.fDesc
-	strings := *fd.strings
-	for i, str := range strings {
-		if s == str && str != "" {
+	strs := *fd.strings
+	for i, str := range strs {
+		if s == str {
 			*v = iStrings(i)
 			return nil
 		}
 	}
 
-	strs := make([]string, 0, len(strings))
+	str := `"` + strings.Join(strs, `", "`) + `"`
 
-	for _, str := range strings {
-		if str != "" {
-			strs = append(strs, fmt.Sprintf(`"%s"`, str))
-		}
-	}
-
-	return fmt.Errorf("must be one of %+v", strs)
+	return fmt.Errorf("must be one of %+v", str)
 }
 
 // valid returns nil if the iStrings' value is valid.
@@ -862,7 +856,7 @@ func (v *iStrings) valid(f *Field) error {
 	strings := *fd.strings
 
 	i := int(*v)
-	if i >= len(strings) || (i == 0 && strings[0] == "") {
+	if i >= len(strings) {
 		return fmt.Errorf("%d: bad string index", i)
 	}
 
