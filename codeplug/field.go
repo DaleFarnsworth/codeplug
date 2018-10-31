@@ -1163,12 +1163,12 @@ func (v *introLine) store(f *Field) {
 }
 
 type callType struct {
-	iStrings
+	indexedStrings
 }
 
 func (v *callType) setString(f *Field, s string, force bool) error {
 	if s != "All" {
-		return v.iStrings.setString(f, s, force)
+		return v.indexedStrings.setString(f, s, force)
 	}
 
 	for _, r := range f.record.records {
@@ -1179,7 +1179,7 @@ func (v *callType) setString(f *Field, s string, force bool) error {
 		return fmt.Errorf("An \"All\" record already exists: %s", r.Name())
 	}
 
-	err := v.iStrings.setString(f, s, force)
+	err := v.indexedStrings.setString(f, s, force)
 	if err != nil {
 		return err
 	}

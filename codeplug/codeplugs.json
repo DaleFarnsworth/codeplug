@@ -2270,11 +2270,19 @@
       "bitSize": 5,
       "defaultValue": "Group",
       "valueType": "callType",
-      "strings": [
-        "",
-        "Group",
-        "Private",
-        "All"
+      "indexedStrings": [
+        {
+          "index": 1,
+          "string": "Group"
+        },
+        {
+          "index": 2,
+          "string": "Private"
+        },
+        {
+          "index": 3,
+          "string": "All"
+        }
       ]
     },
     {
@@ -2594,11 +2602,16 @@
       "bitOffset": 6,
       "bitSize": 2,
       "defaultValue": "Analog",
-      "valueType": "iStrings",
-      "strings": [
-        "",
-        "Analog",
-        "Digital"
+      "valueType": "indexedStrings",
+      "indexedStrings": [
+        {
+          "index": 1,
+          "string": "Analog"
+        },
+        {
+          "index": 2,
+          "string": "Digital"
+        }
       ],
       "enabler": {
         "value": "Digital",
@@ -2646,11 +2659,16 @@
       "bitOffset": 12,
       "bitSize": 2,
       "defaultValue": "1",
-      "valueType": "iStrings",
-      "strings": [
-        "",
-        "1",
-        "2"
+      "valueType": "indexedStrings",
+      "indexedStrings": [
+        {
+          "index": 1,
+          "string": "1"
+        },
+        {
+          "index": 2,
+          "string": "2"
+        }
       ]
     },
     {

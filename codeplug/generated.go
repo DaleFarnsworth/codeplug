@@ -1695,12 +1695,11 @@ var fiCiChannelMode = fieldInfo{
 	max:          1,
 	bitOffset:    6,
 	bitSize:      2,
-	valueType:    VtIStrings,
+	valueType:    VtIndexedStrings,
 	defaultValue: "Analog",
-	strings: &[]string{
-		"",
-		"Analog",
-		"Digital",
+	indexedStrings: &[]IndexedString{
+		IndexedString{1, "Analog"},
+		IndexedString{2, "Digital"},
 	},
 }
 
@@ -2285,12 +2284,11 @@ var fiCiRepeaterSlot = fieldInfo{
 	max:          1,
 	bitOffset:    12,
 	bitSize:      2,
-	valueType:    VtIStrings,
+	valueType:    VtIndexedStrings,
 	defaultValue: "1",
-	strings: &[]string{
-		"",
-		"1",
-		"2",
+	indexedStrings: &[]IndexedString{
+		IndexedString{1, "1"},
+		IndexedString{2, "2"},
 	},
 	enablerType: FtCiChannelMode,
 	enables: []enable{
@@ -2564,11 +2562,10 @@ var fiDcCallType = fieldInfo{
 	bitSize:      5,
 	valueType:    VtCallType,
 	defaultValue: "Group",
-	strings: &[]string{
-		"",
-		"Group",
-		"Private",
-		"All",
+	indexedStrings: &[]IndexedString{
+		IndexedString{1, "Group"},
+		IndexedString{2, "Private"},
+		IndexedString{3, "All"},
 	},
 }
 
