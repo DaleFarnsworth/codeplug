@@ -137,15 +137,22 @@ var fi{{$f.Type}} = fieldInfo{
 {{- if $f.ListType}}
 	listRecordType: Rt{{$f.ListType}},
 {{- end}}
-{{- if $f.Enabler}}
-	enablerType: Ft{{$f.Enabler}},
-{{- end}}
 {{- if $f.Enables}}
-	enables: []enable{
-	{{- range $i := $f.Enables}}
-		enable{
+	enables: []FieldType{
+	{{- range $e := $f.Enables}}
+		Ft{{$e}},
+	{{- end}}
+	},
+{{- end}}
+{{- if $f.EnablerType}}
+	enablerType: Ft{{$f.EnablerType}},
+{{- end}}
+{{- if $f.Enablers}}
+	enablers: []enabler{
+	{{- range $i := $f.Enablers}}
+		enabler{
 			value: "{{$i.Value}}",
-			enables: {{$i.Enables}},
+			enable: {{$i.Enable}},
 		},
 	{{- end}}
 	},

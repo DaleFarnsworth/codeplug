@@ -1242,7 +1242,7 @@
       "bitSize": 1,
       "defaultValue": "Off",
       "valueType": "onOff",
-      "enabler": {
+      "enable": {
         "value": "On",
         "enables": [
           "GsPowerOnPassword"
@@ -1340,7 +1340,7 @@
         "Frequency",
         "Channel"
       ],
-      "enabler": {
+      "enable": {
         "value": "Frequency",
         "enables": [
           "GsModeSelect"
@@ -1579,7 +1579,7 @@
         { "index": 0, "string": "Frequency" },
         { "index": 255, "string": "Channel" }
       ],
-      "enabler": {
+      "enable": {
         "value": "VFO",
         "enables": [
           "GsModeSelectA",
@@ -2115,7 +2115,7 @@
           "string": "Analog"
         }
       ],
-      "enablers": [
+      "enables": [
         {
           "value": "Digital",
           "enables": [
@@ -2162,7 +2162,7 @@
         "Call",
         "Text Message"
       ],
-      "enablers": [
+      "enables": [
         {
           "value": "Text Message",
           "enables": [
@@ -2391,7 +2391,7 @@
           "string": "None"
         }
       ],
-      "enabler": {
+      "enable": {
         "value": "None",
         "disables": [
           "SlPriorityChannel2_md380"
@@ -2416,7 +2416,7 @@
           "string": "None"
         }
       ],
-      "enabler": {
+      "enable": {
         "value": "None",
         "disables": [
           "SlPriorityChannel2_md40"
@@ -2613,7 +2613,7 @@
           "string": "Digital"
         }
       ],
-      "enabler": {
+      "enable": {
         "value": "Digital",
         "enables": [
           "CiPrivateCallConfirmed",
@@ -2715,7 +2715,7 @@
         "Basic",
         "Enhanced"
       ],
-      "enabler": {
+      "enable": {
         "value": "None",
         "disables": [
           "CiPrivacyNumber"
@@ -3076,7 +3076,7 @@
       "bitSize": 32,
       "defaultValue": "0",
       "valueType": "frequencyOffset",
-      "enabler": {
+      "enable": {
         "value": "+0.00000",
         "disables": [
           "CiAllowTalkaround"
@@ -3098,7 +3098,7 @@
       "bitSize": 16,
       "defaultValue": "None",
       "valueType": "ctcssDcs",
-      "enabler": {
+      "enable": {
         "value": "None",
         "disables": [
           "CiReverseBurst",
@@ -3120,7 +3120,7 @@
         "DTMF-3",
         "DTMF-4"
       ],
-      "enabler": {
+      "enable": {
         "value": "Off",
         "disables": [
           "CiDecode1",
@@ -3186,7 +3186,7 @@
       "bitSize": 1,
       "defaultValue": "Off",
       "valueType": "onOff",
-      "enabler": {
+      "enable": {
         "value": "On",
         "enables": [
           "CiLeaderMS"

@@ -1649,10 +1649,10 @@ var fiCiAllowTalkaround = fieldInfo{
 	valueType:    VtOffOn,
 	defaultValue: "Off",
 	enablerType:  FtCiTxFrequencyOffset,
-	enables: []enable{
-		enable{
-			value:   "+0.00000",
-			enables: false,
+	enablers: []enabler{
+		enabler{
+			value:  "+0.00000",
+			enable: false,
 		},
 	},
 }
@@ -1681,10 +1681,10 @@ var fiCiBandwidth = fieldInfo{
 		"25",
 	},
 	enablerType: FtCiChannelMode,
-	enables: []enable{
-		enable{
-			value:   "Digital",
-			enables: false,
+	enablers: []enabler{
+		enabler{
+			value:  "Digital",
+			enable: false,
 		},
 	},
 }
@@ -1701,6 +1701,28 @@ var fiCiChannelMode = fieldInfo{
 		IndexedString{1, "Analog"},
 		IndexedString{2, "Digital"},
 	},
+	enables: []FieldType{
+		FtCiTxSignallingSystem,
+		FtCiCompressedUdpDataHeader,
+		FtCiDCDMSwitch,
+		FtCiDisplayPTTID,
+		FtCiCtcssEncode,
+		FtCiGPSSystem,
+		FtCiCtcssDecode,
+		FtCiBandwidth,
+		FtCiEmergencyAlarmAck,
+		FtCiEmergencySystem,
+		FtCiContactName,
+		FtCiColorCode,
+		FtCiRepeaterSlot,
+		FtCiRxSignallingSystem,
+		FtCiInCallCriteria,
+		FtCiDQTTurnoffFreq,
+		FtCiPrivateCallConfirmed,
+		FtCiDataCallConfirmed,
+		FtCiGroupList,
+		FtCiPrivacy,
+	},
 }
 
 var fiCiColorCode = fieldInfo{
@@ -1716,10 +1738,10 @@ var fiCiColorCode = fieldInfo{
 		max: 15,
 	},
 	enablerType: FtCiChannelMode,
-	enables: []enable{
-		enable{
-			value:   "Digital",
-			enables: true,
+	enablers: []enabler{
+		enabler{
+			value:  "Digital",
+			enable: true,
 		},
 	},
 }
@@ -1733,10 +1755,10 @@ var fiCiCompressedUdpDataHeader = fieldInfo{
 	valueType:    VtOffOn,
 	defaultValue: "On",
 	enablerType:  FtCiChannelMode,
-	enables: []enable{
-		enable{
-			value:   "Digital",
-			enables: true,
+	enablers: []enabler{
+		enabler{
+			value:  "Digital",
+			enable: true,
 		},
 	},
 }
@@ -1754,10 +1776,10 @@ var fiCiContactName = fieldInfo{
 	},
 	listRecordType: RtContacts,
 	enablerType:    FtCiChannelMode,
-	enables: []enable{
-		enable{
-			value:   "Digital",
-			enables: true,
+	enablers: []enabler{
+		enabler{
+			value:  "Digital",
+			enable: true,
 		},
 	},
 }
@@ -1771,10 +1793,10 @@ var fiCiCtcssDecode = fieldInfo{
 	valueType:    VtCtcssDcs,
 	defaultValue: "None",
 	enablerType:  FtCiChannelMode,
-	enables: []enable{
-		enable{
-			value:   "Digital",
-			enables: false,
+	enablers: []enabler{
+		enabler{
+			value:  "Digital",
+			enable: false,
 		},
 	},
 }
@@ -1787,11 +1809,15 @@ var fiCiCtcssEncode = fieldInfo{
 	bitSize:      16,
 	valueType:    VtCtcssDcs,
 	defaultValue: "None",
-	enablerType:  FtCiChannelMode,
-	enables: []enable{
-		enable{
-			value:   "Digital",
-			enables: false,
+	enables: []FieldType{
+		FtCiReverseBurst,
+		FtCiQtReverse,
+	},
+	enablerType: FtCiChannelMode,
+	enablers: []enabler{
+		enabler{
+			value:  "Digital",
+			enable: false,
 		},
 	},
 }
@@ -1804,11 +1830,14 @@ var fiCiDCDMSwitch = fieldInfo{
 	bitSize:      1,
 	valueType:    VtOnOff,
 	defaultValue: "Off",
-	enablerType:  FtCiChannelMode,
-	enables: []enable{
-		enable{
-			value:   "Digital",
-			enables: true,
+	enables: []FieldType{
+		FtCiLeaderMS,
+	},
+	enablerType: FtCiChannelMode,
+	enablers: []enabler{
+		enabler{
+			value:  "Digital",
+			enable: true,
 		},
 	},
 }
@@ -1827,10 +1856,10 @@ var fiCiDQTTurnoffFreq = fieldInfo{
 		IndexedString{3, "None"},
 	},
 	enablerType: FtCiChannelMode,
-	enables: []enable{
-		enable{
-			value:   "Digital",
-			enables: false,
+	enablers: []enabler{
+		enabler{
+			value:  "Digital",
+			enable: false,
 		},
 	},
 }
@@ -1844,10 +1873,10 @@ var fiCiDataCallConfirmed = fieldInfo{
 	valueType:    VtOffOn,
 	defaultValue: "Off",
 	enablerType:  FtCiChannelMode,
-	enables: []enable{
-		enable{
-			value:   "Digital",
-			enables: true,
+	enablers: []enabler{
+		enabler{
+			value:  "Digital",
+			enable: true,
 		},
 	},
 }
@@ -1861,10 +1890,10 @@ var fiCiDecode1 = fieldInfo{
 	valueType:    VtOffOn,
 	defaultValue: "Off",
 	enablerType:  FtCiRxSignallingSystem,
-	enables: []enable{
-		enable{
-			value:   "Off",
-			enables: false,
+	enablers: []enabler{
+		enabler{
+			value:  "Off",
+			enable: false,
 		},
 	},
 }
@@ -1878,10 +1907,10 @@ var fiCiDecode2 = fieldInfo{
 	valueType:    VtOffOn,
 	defaultValue: "Off",
 	enablerType:  FtCiRxSignallingSystem,
-	enables: []enable{
-		enable{
-			value:   "Off",
-			enables: false,
+	enablers: []enabler{
+		enabler{
+			value:  "Off",
+			enable: false,
 		},
 	},
 }
@@ -1895,10 +1924,10 @@ var fiCiDecode3 = fieldInfo{
 	valueType:    VtOffOn,
 	defaultValue: "Off",
 	enablerType:  FtCiRxSignallingSystem,
-	enables: []enable{
-		enable{
-			value:   "Off",
-			enables: false,
+	enablers: []enabler{
+		enabler{
+			value:  "Off",
+			enable: false,
 		},
 	},
 }
@@ -1912,10 +1941,10 @@ var fiCiDecode4 = fieldInfo{
 	valueType:    VtOffOn,
 	defaultValue: "Off",
 	enablerType:  FtCiRxSignallingSystem,
-	enables: []enable{
-		enable{
-			value:   "Off",
-			enables: false,
+	enablers: []enabler{
+		enabler{
+			value:  "Off",
+			enable: false,
 		},
 	},
 }
@@ -1929,10 +1958,10 @@ var fiCiDecode5 = fieldInfo{
 	valueType:    VtOffOn,
 	defaultValue: "Off",
 	enablerType:  FtCiRxSignallingSystem,
-	enables: []enable{
-		enable{
-			value:   "Off",
-			enables: false,
+	enablers: []enabler{
+		enabler{
+			value:  "Off",
+			enable: false,
 		},
 	},
 }
@@ -1946,10 +1975,10 @@ var fiCiDecode6 = fieldInfo{
 	valueType:    VtOffOn,
 	defaultValue: "Off",
 	enablerType:  FtCiRxSignallingSystem,
-	enables: []enable{
-		enable{
-			value:   "Off",
-			enables: false,
+	enablers: []enabler{
+		enabler{
+			value:  "Off",
+			enable: false,
 		},
 	},
 }
@@ -1963,10 +1992,10 @@ var fiCiDecode7 = fieldInfo{
 	valueType:    VtOffOn,
 	defaultValue: "Off",
 	enablerType:  FtCiRxSignallingSystem,
-	enables: []enable{
-		enable{
-			value:   "Off",
-			enables: false,
+	enablers: []enabler{
+		enabler{
+			value:  "Off",
+			enable: false,
 		},
 	},
 }
@@ -1980,10 +2009,10 @@ var fiCiDecode8 = fieldInfo{
 	valueType:    VtOffOn,
 	defaultValue: "Off",
 	enablerType:  FtCiRxSignallingSystem,
-	enables: []enable{
-		enable{
-			value:   "Off",
-			enables: false,
+	enablers: []enabler{
+		enabler{
+			value:  "Off",
+			enable: false,
 		},
 	},
 }
@@ -1997,10 +2026,10 @@ var fiCiDisplayPTTID = fieldInfo{
 	valueType:    VtOnOff,
 	defaultValue: "Off",
 	enablerType:  FtCiChannelMode,
-	enables: []enable{
-		enable{
-			value:   "Digital",
-			enables: false,
+	enablers: []enabler{
+		enabler{
+			value:  "Digital",
+			enable: false,
 		},
 	},
 }
@@ -2014,10 +2043,10 @@ var fiCiEmergencyAlarmAck = fieldInfo{
 	valueType:    VtOffOn,
 	defaultValue: "Off",
 	enablerType:  FtCiChannelMode,
-	enables: []enable{
-		enable{
-			value:   "Digital",
-			enables: true,
+	enablers: []enabler{
+		enabler{
+			value:  "Digital",
+			enable: true,
 		},
 	},
 }
@@ -2036,10 +2065,10 @@ var fiCiEmergencySystem = fieldInfo{
 		minString: "None",
 	},
 	enablerType: FtCiChannelMode,
-	enables: []enable{
-		enable{
-			value:   "Digital",
-			enables: true,
+	enablers: []enabler{
+		enabler{
+			value:  "Digital",
+			enable: true,
 		},
 	},
 }
@@ -2058,10 +2087,10 @@ var fiCiGPSSystem = fieldInfo{
 		minString: "None",
 	},
 	enablerType: FtCiChannelMode,
-	enables: []enable{
-		enable{
-			value:   "Digital",
-			enables: true,
+	enablers: []enabler{
+		enabler{
+			value:  "Digital",
+			enable: true,
 		},
 	},
 }
@@ -2079,10 +2108,10 @@ var fiCiGroupList = fieldInfo{
 	},
 	listRecordType: RtGroupLists,
 	enablerType:    FtCiChannelMode,
-	enables: []enable{
-		enable{
-			value:   "Digital",
-			enables: true,
+	enablers: []enabler{
+		enabler{
+			value:  "Digital",
+			enable: true,
 		},
 	},
 }
@@ -2100,10 +2129,10 @@ var fiCiInCallCriteria = fieldInfo{
 		"Follow Admit Criteria",
 	},
 	enablerType: FtCiChannelMode,
-	enables: []enable{
-		enable{
-			value:   "Digital",
-			enables: true,
+	enablers: []enabler{
+		enabler{
+			value:  "Digital",
+			enable: true,
 		},
 	},
 }
@@ -2117,10 +2146,10 @@ var fiCiLeaderMS = fieldInfo{
 	valueType:    VtOnOff,
 	defaultValue: "Off",
 	enablerType:  FtCiDCDMSwitch,
-	enables: []enable{
-		enable{
-			value:   "On",
-			enables: true,
+	enablers: []enabler{
+		enabler{
+			value:  "On",
+			enable: true,
 		},
 	},
 }
@@ -2187,11 +2216,14 @@ var fiCiPrivacy = fieldInfo{
 		"Basic",
 		"Enhanced",
 	},
+	enables: []FieldType{
+		FtCiPrivacyNumber,
+	},
 	enablerType: FtCiChannelMode,
-	enables: []enable{
-		enable{
-			value:   "Digital",
-			enables: true,
+	enablers: []enabler{
+		enabler{
+			value:  "Digital",
+			enable: true,
 		},
 	},
 }
@@ -2222,10 +2254,10 @@ var fiCiPrivacyNumber = fieldInfo{
 		"16",
 	},
 	enablerType: FtCiPrivacy,
-	enables: []enable{
-		enable{
-			value:   "None",
-			enables: false,
+	enablers: []enabler{
+		enabler{
+			value:  "None",
+			enable: false,
 		},
 	},
 }
@@ -2239,10 +2271,10 @@ var fiCiPrivateCallConfirmed = fieldInfo{
 	valueType:    VtOffOn,
 	defaultValue: "Off",
 	enablerType:  FtCiChannelMode,
-	enables: []enable{
-		enable{
-			value:   "Digital",
-			enables: true,
+	enablers: []enabler{
+		enabler{
+			value:  "Digital",
+			enable: true,
 		},
 	},
 }
@@ -2260,10 +2292,10 @@ var fiCiQtReverse = fieldInfo{
 		"120",
 	},
 	enablerType: FtCiCtcssEncode,
-	enables: []enable{
-		enable{
-			value:   "None",
-			enables: false,
+	enablers: []enabler{
+		enabler{
+			value:  "None",
+			enable: false,
 		},
 	},
 }
@@ -2291,10 +2323,10 @@ var fiCiRepeaterSlot = fieldInfo{
 		IndexedString{2, "2"},
 	},
 	enablerType: FtCiChannelMode,
-	enables: []enable{
-		enable{
-			value:   "Digital",
-			enables: true,
+	enablers: []enabler{
+		enabler{
+			value:  "Digital",
+			enable: true,
 		},
 	},
 }
@@ -2308,10 +2340,10 @@ var fiCiReverseBurst = fieldInfo{
 	valueType:    VtOffOn,
 	defaultValue: "On",
 	enablerType:  FtCiCtcssEncode,
-	enables: []enable{
-		enable{
-			value:   "None",
-			enables: false,
+	enablers: []enabler{
+		enabler{
+			value:  "None",
+			enable: false,
 		},
 	},
 }
@@ -2366,11 +2398,21 @@ var fiCiRxSignallingSystem = fieldInfo{
 		"DTMF-3",
 		"DTMF-4",
 	},
+	enables: []FieldType{
+		FtCiDecode3,
+		FtCiDecode4,
+		FtCiDecode5,
+		FtCiDecode6,
+		FtCiDecode7,
+		FtCiDecode8,
+		FtCiDecode1,
+		FtCiDecode2,
+	},
 	enablerType: FtCiChannelMode,
-	enables: []enable{
-		enable{
-			value:   "Digital",
-			enables: false,
+	enablers: []enabler{
+		enabler{
+			value:  "Digital",
+			enable: false,
 		},
 	},
 }
@@ -2479,6 +2521,9 @@ var fiCiTxFrequencyOffset = fieldInfo{
 	bitSize:      32,
 	valueType:    VtFrequencyOffset,
 	defaultValue: "0",
+	enables: []FieldType{
+		FtCiAllowTalkaround,
+	},
 }
 
 var fiCiTxRefFrequency = fieldInfo{
@@ -2512,10 +2557,10 @@ var fiCiTxSignallingSystem = fieldInfo{
 		"DTMF-4",
 	},
 	enablerType: FtCiChannelMode,
-	enables: []enable{
-		enable{
-			value:   "Digital",
-			enables: false,
+	enablers: []enabler{
+		enabler{
+			value:  "Digital",
+			enable: false,
 		},
 	},
 }
@@ -2779,6 +2824,10 @@ var fiGsFreqChannelMode = fieldInfo{
 		"Frequency",
 		"Channel",
 	},
+	enables: []FieldType{
+		FtGsModeSelect,
+		FtGsLockUnlock,
+	},
 }
 
 var fiGsFreqChannelMode_uv380 = fieldInfo{
@@ -2792,6 +2841,11 @@ var fiGsFreqChannelMode_uv380 = fieldInfo{
 	indexedStrings: &[]IndexedString{
 		IndexedString{0, "Frequency"},
 		IndexedString{255, "Channel"},
+	},
+	enables: []FieldType{
+		FtGsModeSelectA,
+		FtGsModeSelectB,
+		FtGsLockUnlock,
 	},
 }
 
@@ -2876,14 +2930,14 @@ var fiGsLockUnlock = fieldInfo{
 		"Lock",
 	},
 	enablerType: FtGsFreqChannelMode_uv380,
-	enables: []enable{
-		enable{
-			value:   "Frequency",
-			enables: false,
+	enablers: []enabler{
+		enabler{
+			value:  "Frequency",
+			enable: false,
 		},
-		enable{
-			value:   "VFO",
-			enables: false,
+		enabler{
+			value:  "VFO",
+			enable: false,
 		},
 	},
 }
@@ -2947,10 +3001,10 @@ var fiGsModeSelect = fieldInfo{
 		"Memory",
 	},
 	enablerType: FtGsFreqChannelMode,
-	enables: []enable{
-		enable{
-			value:   "Frequency",
-			enables: true,
+	enablers: []enabler{
+		enabler{
+			value:  "Frequency",
+			enable: true,
 		},
 	},
 }
@@ -2968,10 +3022,10 @@ var fiGsModeSelectA = fieldInfo{
 		"Memory",
 	},
 	enablerType: FtGsFreqChannelMode_uv380,
-	enables: []enable{
-		enable{
-			value:   "VFO",
-			enables: true,
+	enablers: []enabler{
+		enabler{
+			value:  "VFO",
+			enable: true,
 		},
 	},
 }
@@ -2989,10 +3043,10 @@ var fiGsModeSelectB = fieldInfo{
 		"Memory",
 	},
 	enablerType: FtGsFreqChannelMode_uv380,
-	enables: []enable{
-		enable{
-			value:   "VFO",
-			enables: true,
+	enablers: []enabler{
+		enabler{
+			value:  "VFO",
+			enable: true,
 		},
 	},
 }
@@ -3029,10 +3083,10 @@ var fiGsPowerOnPassword = fieldInfo{
 	valueType:    VtRadioPassword,
 	defaultValue: "00000000",
 	enablerType:  FtGsPwAndLockEnable,
-	enables: []enable{
-		enable{
-			value:   "On",
-			enables: true,
+	enablers: []enabler{
+		enabler{
+			value:  "On",
+			enable: true,
 		},
 	},
 }
@@ -3081,6 +3135,9 @@ var fiGsPwAndLockEnable = fieldInfo{
 	bitSize:      1,
 	valueType:    VtOnOff,
 	defaultValue: "Off",
+	enables: []FieldType{
+		FtGsPowerOnPassword,
+	},
 }
 
 var fiGsRadioID = fieldInfo{
@@ -3629,18 +3686,18 @@ var fiOtCall = fieldInfo{
 	valueType:      VtContactListIndex,
 	listRecordType: RtContacts,
 	enablerType:    FtOtMode,
-	enables: []enable{
-		enable{
-			value:   "Analog",
-			enables: false,
+	enablers: []enabler{
+		enabler{
+			value:  "Analog",
+			enable: false,
 		},
-		enable{
-			value:   "Digital",
-			enables: true,
+		enabler{
+			value:  "Digital",
+			enable: true,
 		},
-		enable{
-			value:   "None",
-			enables: false,
+		enabler{
+			value:  "None",
+			enable: false,
 		},
 	},
 }
@@ -3657,19 +3714,22 @@ var fiOtCallType = fieldInfo{
 		"Call",
 		"Text Message",
 	},
+	enables: []FieldType{
+		FtOtTextMessage,
+	},
 	enablerType: FtOtMode,
-	enables: []enable{
-		enable{
-			value:   "Analog",
-			enables: false,
+	enablers: []enabler{
+		enabler{
+			value:  "Analog",
+			enable: false,
 		},
-		enable{
-			value:   "Digital",
-			enables: true,
+		enabler{
+			value:  "Digital",
+			enable: true,
 		},
-		enable{
-			value:   "None",
-			enables: false,
+		enabler{
+			value:  "None",
+			enable: false,
 		},
 	},
 }
@@ -3689,18 +3749,18 @@ var fiOtDTMF = fieldInfo{
 		"DTMF-4",
 	},
 	enablerType: FtOtMode,
-	enables: []enable{
-		enable{
-			value:   "Analog",
-			enables: true,
+	enablers: []enabler{
+		enabler{
+			value:  "Analog",
+			enable: true,
 		},
-		enable{
-			value:   "Digital",
-			enables: false,
+		enabler{
+			value:  "Digital",
+			enable: false,
 		},
-		enable{
-			value:   "None",
-			enables: false,
+		enabler{
+			value:  "None",
+			enable: false,
 		},
 	},
 }
@@ -3716,18 +3776,18 @@ var fiOtEncode = fieldInfo{
 		"To be implemented",
 	},
 	enablerType: FtOtMode,
-	enables: []enable{
-		enable{
-			value:   "Analog",
-			enables: true,
+	enablers: []enabler{
+		enabler{
+			value:  "Analog",
+			enable: true,
 		},
-		enable{
-			value:   "Digital",
-			enables: false,
+		enabler{
+			value:  "Digital",
+			enable: false,
 		},
-		enable{
-			value:   "None",
-			enables: false,
+		enabler{
+			value:  "None",
+			enable: false,
 		},
 	},
 }
@@ -3745,6 +3805,12 @@ var fiOtMode = fieldInfo{
 		IndexedString{52, "Digital"},
 		IndexedString{58, "Analog"},
 	},
+	enables: []FieldType{
+		FtOtCall,
+		FtOtCallType,
+		FtOtDTMF,
+		FtOtEncode,
+	},
 }
 
 var fiOtTextMessage = fieldInfo{
@@ -3756,10 +3822,10 @@ var fiOtTextMessage = fieldInfo{
 	valueType:      VtDerefListIndex,
 	listRecordType: RtTextMessages,
 	enablerType:    FtOtCallType,
-	enables: []enable{
-		enable{
-			value:   "Text Message",
-			enables: true,
+	enablers: []enabler{
+		enabler{
+			value:  "Text Message",
+			enable: true,
 		},
 	},
 }
@@ -3934,6 +4000,9 @@ var fiSlPriorityChannel1_md380 = fieldInfo{
 		IndexedString{65535, "None"},
 	},
 	listRecordType: RtChannels_md380,
+	enables: []FieldType{
+		FtSlPriorityChannel2_md380,
+	},
 }
 
 var fiSlPriorityChannel1_md40 = fieldInfo{
@@ -3949,6 +4018,9 @@ var fiSlPriorityChannel1_md40 = fieldInfo{
 		IndexedString{65535, "None"},
 	},
 	listRecordType: RtChannels_md40,
+	enables: []FieldType{
+		FtSlPriorityChannel2_md40,
+	},
 }
 
 var fiSlPriorityChannel2_md380 = fieldInfo{
@@ -3965,10 +4037,10 @@ var fiSlPriorityChannel2_md380 = fieldInfo{
 	},
 	listRecordType: RtChannels_md380,
 	enablerType:    FtSlPriorityChannel1_md380,
-	enables: []enable{
-		enable{
-			value:   "None",
-			enables: false,
+	enablers: []enabler{
+		enabler{
+			value:  "None",
+			enable: false,
 		},
 	},
 }
@@ -3987,10 +4059,10 @@ var fiSlPriorityChannel2_md40 = fieldInfo{
 	},
 	listRecordType: RtChannels_md40,
 	enablerType:    FtSlPriorityChannel1_md40,
-	enables: []enable{
-		enable{
-			value:   "None",
-			enables: false,
+	enablers: []enabler{
+		enabler{
+			value:  "None",
+			enable: false,
 		},
 	},
 }

@@ -89,10 +89,11 @@ type Field struct {
 	ExtIndex       int             `json:"extIndex"`
 	ExtBitOffset   int             `json:"extBitOffset"`
 	ListType       *string         `json:"listType"`
-	Enablers       []*Enabler      `json:"enablers"`
-	Enable1        *Enabler        `json:"enabler"`
-	Enabler        string
-	Enables        []Enable
+	EnablesIn      []*EnableIn     `json:"enables"`
+	EnableIn       *EnableIn       `json:"enable"`
+	EnablerType    string
+	Enablers       []Enabler
+	Enables        []string
 }
 
 type Strings []string
@@ -112,15 +113,15 @@ type Span struct {
 	MinString string `json:"minString"`
 }
 
-type Enabler struct {
+type EnableIn struct {
 	Value    string   `json:"value"`
 	Enables  []string `json:"enables"`
 	Disables []string `json:"disables"`
 }
 
-type Enable struct {
-	Value   string
-	Enables bool
+type Enabler struct {
+	Value  string
+	Enable bool
 }
 
 type FieldRef struct {
@@ -167,7 +168,7 @@ func FieldTypeString(s string) string {
 var seenEnable = make(map[string]bool)
 
 func doEnables(r *Record, fieldMap map[string]*Field) {
-	fieldEnables := make(map[*Field]map[string]*Enable)
+	fieldEnables := make(map[*Field]map[string]*Enabler)
 
 	for _, fType := range r.FieldTypes {
 		f := fieldMap[fType]
@@ -176,69 +177,83 @@ func doEnables(r *Record, fieldMap map[string]*Field) {
 			os.Exit(1)
 		}
 
-		enablers := f.Enablers
-		if f.Enable1 != nil {
-			if len(enablers) != 0 {
-				fmt.Fprintf(os.Stderr, "both f.enabler f.enablers found: %s\n", fType)
+		enables := f.EnablesIn
+		if f.EnableIn != nil {
+			if len(enables) != 0 {
+				fmt.Fprintf(os.Stderr, "both f.enable & f.enables found: %s\n", fType)
 				os.Exit(1)
 			}
-			enablers = []*Enabler{f.Enable1}
+			enables = []*EnableIn{f.EnableIn}
 		}
 
-		for _, enabler := range enablers {
-			for _, fTypeEn := range enabler.Enables {
+		enablesMap := make(map[string]bool)
+
+		for _, enable := range enables {
+			for _, enable := range enable.Enables {
+				enablesMap[enable] = true
+			}
+			for _, enable := range enable.Disables {
+				enablesMap[enable] = true
+			}
+
+			for _, fTypeEn := range enable.Enables {
 				f := fieldMap[fTypeEn]
 				if f == nil {
 					fmt.Fprintf(os.Stderr, "2 found no field type: %s\n", fTypeEn)
 					os.Exit(1)
 				}
 
-				f.Enabler = fType
+				f.EnablerType = fType
 
 				fieldEnable := fieldEnables[f]
 				if fieldEnable == nil {
-					fieldEnable = make(map[string]*Enable)
+					fieldEnable = make(map[string]*Enabler)
 					fieldEnables[f] = fieldEnable
 				}
-				enable := fieldEnable[enabler.Value]
-				if enable == nil {
-					enable = new(Enable)
+				enabler := fieldEnable[enable.Value]
+				if enabler == nil {
+					enabler = new(Enabler)
 				}
-				enable.Value = enabler.Value
-				enable.Enables = true
-				fieldEnable[enabler.Value] = enable
+				enabler.Value = enable.Value
+				enabler.Enable = true
+				fieldEnable[enable.Value] = enabler
 				fieldEnables[f] = fieldEnable
 			}
 
-			for _, fTypeDis := range enabler.Disables {
+			for _, fTypeDis := range enable.Disables {
 				f := fieldMap[fTypeDis]
 				if f == nil {
 					fmt.Fprintf(os.Stderr, "3 found no field type: %s\n", fTypeDis)
 					os.Exit(1)
 				}
 
-				f.Enabler = fType
+				f.EnablerType = fType
 
 				fieldEnable := fieldEnables[f]
 				if fieldEnable == nil {
-					fieldEnable = make(map[string]*Enable)
+					fieldEnable = make(map[string]*Enabler)
 					fieldEnables[f] = fieldEnable
 				}
-				enable := fieldEnable[enabler.Value]
-				if enable == nil {
-					enable = new(Enable)
+				enabler := fieldEnable[enable.Value]
+				if enabler == nil {
+					enabler = new(Enabler)
 				}
-				enable.Value = enabler.Value
-				enable.Enables = false
-				fieldEnable[enabler.Value] = enable
+				enabler.Value = enable.Value
+				enabler.Enable = false
+				fieldEnable[enabler.Value] = enabler
 				fieldEnables[f] = fieldEnable
 			}
+		}
+
+		f.Enables = make([]string, 0)
+		for enable := range enablesMap {
+			f.Enables = append(f.Enables, enable)
 		}
 	}
 
 	for f, enables := range fieldEnables {
-		if f.Enables == nil {
-			f.Enables = make([]Enable, 0)
+		if f.Enablers == nil {
+			f.Enablers = make([]Enabler, 0)
 		}
 
 		values := make([]string, 0)
@@ -251,7 +266,7 @@ func doEnables(r *Record, fieldMap map[string]*Field) {
 			enable := enables[value]
 			seenKey := f.Type + ":" + value
 			if !seenEnable[seenKey] {
-				f.Enables = append(f.Enables, *enable)
+				f.Enablers = append(f.Enablers, *enable)
 				seenEnable[seenKey] = true
 			}
 		}

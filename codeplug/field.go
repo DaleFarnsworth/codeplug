@@ -78,8 +78,9 @@ type fieldInfo struct {
 	span           *Span
 	strings        *[]string
 	indexedStrings *[]IndexedString
+	enables        []FieldType
 	enablerType    FieldType
-	enables        []enable
+	enablers       []enabler
 	listRecordType RecordType
 	recordInfo     *recordInfo
 	extOffset      int
@@ -89,9 +90,9 @@ type fieldInfo struct {
 	index          int
 }
 
-type enable struct {
-	value   string
-	enables bool
+type enabler struct {
+	value  string
+	enable bool
 }
 
 // A FieldType represents a field's type
@@ -426,6 +427,10 @@ func (f *Field) IsInvalidValue() bool {
 	return invalid
 }
 
+func (f *Field) Enables() []FieldType {
+	return f.enables
+}
+
 // load sets the field's value from the field's part of cp.bytes.
 func (f *Field) load() {
 	f.value.load(f)
@@ -517,12 +522,12 @@ func (f *Field) IsEnabled() bool {
 		return false
 	}
 
-	for i, enable := range f.enables {
+	for i, enabler := range f.enablers {
 		if i == 0 {
-			enabled = !enable.enables
+			enabled = !enabler.enable
 		}
-		if enable.value == enablerValue {
-			enabled = enable.enables
+		if enabler.value == enablerValue {
+			enabled = enabler.enable
 			return enabled
 		}
 	}

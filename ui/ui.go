@@ -30,7 +30,7 @@ import (
 	"strings"
 
 	"github.com/dalefarnsworth/codeplug/codeplug"
-	l "github.com/dalefarnsworth/codeplug/debug"
+	"github.com/dalefarnsworth/codeplug/debug"
 	"github.com/therecipe/qt/core"
 	"github.com/therecipe/qt/gui"
 	"github.com/therecipe/qt/widgets"
@@ -265,14 +265,14 @@ func MainWindows() []*MainWindow {
 func (parent *Window) AddHbox() *HBox {
 	box := NewHbox()
 	parent.layout.AddWidget(&box.qWidget, 0, 0)
-	box.window = parent.window
+	box.window = parent
 	return box
 }
 
 func (parent *Window) AddVbox() *VBox {
 	box := NewVbox()
 	parent.layout.AddWidget(&box.qWidget, 0, 0)
-	box.window = parent.window
+	box.window = parent
 	return box
 }
 
@@ -288,7 +288,6 @@ func (w *Window) AddMenuBar() *MenuBar {
 	mb := new(MenuBar)
 	mb.qMenuBar = widgets.NewQMenuBar(nil)
 	w.layout.SetMenuBar(mb.qMenuBar)
-	//w.layout.AddWidget(mb.qMenuBar, 0, 0)
 	w.menuBar = mb
 	return mb
 }
@@ -297,19 +296,38 @@ func (w *Window) MenuBar() *MenuBar {
 	return w.menuBar
 }
 
-func (w *Window) enableWidgets() {
-	widgets := w.widgets
-	for senderType, subs := range w.subscriptions {
-		for _, receiverType := range subs {
-			for s, sender := range widgets[senderType] {
-				for r, receiver := range widgets[receiverType] {
-					if r.Record() == s.Record() {
-						receiver.receive(sender)
-					}
-				}
+func (enablerWidget *FieldWidget) enableWidgets() {
+	enablerField := enablerWidget.field
+	window := enablerWidget.window
+	if window == nil {
+		l.Fatal("nil window", enablerField.FullTypeName())
+		return
+	}
+	for _, enablerType := range enablerField.Enables() {
+		enableWidgetMap := window.widgets[enablerType]
+		if enableWidgetMap == nil {
+			continue
+		}
+		for enabledField, enabledWidget := range enableWidgetMap {
+			if enablerField.Record() != enabledField.Record() {
+				continue
 			}
+			enabledWidget.enable(enablerWidget)
 		}
 	}
+}
+
+func (w *Window) enableWidgets() {
+	for _, widget := range w.enablerWidgets {
+		widget.enableWidgets()
+	}
+}
+
+func (w *Window) AddEnablerWidget(widget *FieldWidget) {
+	if w.enablerWidgets == nil {
+		w.enablerWidgets = make([]*FieldWidget, 0)
+	}
+	w.enablerWidgets = append(w.enablerWidgets, widget)
 }
 
 func (w *Window) Show() {
@@ -422,7 +440,7 @@ type Window struct {
 	altRecordTypes  map[codeplug.RecordType]bool
 	recordFunc      func()
 	widgets         map[codeplug.FieldType]map[*codeplug.Field]*FieldWidget
-	subscriptions   map[codeplug.FieldType][]codeplug.FieldType
+	enablerWidgets  []*FieldWidget
 	recordModel     *core.QAbstractListModel
 	recordList      *RecordList
 	connectClose    func() bool
@@ -461,7 +479,6 @@ func (mw *MainWindow) NewRecordWindow(rType codeplug.RecordType, writable bool) 
 	w.window = w
 	w.recordType = rType
 	w.altRecordTypes = make(map[codeplug.RecordType]bool)
-	w.subscriptions = make(map[codeplug.FieldType][]codeplug.FieldType)
 	w.widgets = make(map[codeplug.FieldType]map[*codeplug.Field]*FieldWidget)
 
 	w.initRecordModel(writable)
@@ -487,7 +504,7 @@ func (mw *MainWindow) NewRecordWindow(rType codeplug.RecordType, writable bool) 
 			if f == f.Record().NameField() {
 				codeplug.NameFieldChanged(change)
 			}
-			w.enableWidgets()
+			w.fieldWidget(f).enableWidgets()
 
 		case codeplug.RecordsFieldChange:
 			changes := change.Changes()
@@ -498,45 +515,6 @@ func (mw *MainWindow) NewRecordWindow(rType codeplug.RecordType, writable bool) 
 		case codeplug.RemoveRecordsChange:
 			codeplug.RecordsRemoved(change)
 		}
-		/*
-			rl := w.recordList
-
-			changeType := change.Type()
-			switch changeType {
-			case codeplug.FieldChange:
-				w := recordWindow(f.Record())
-				if w != nil {
-					widgets := w.widgets[f.Type()]
-					if widgets == nil {
-						break
-					}
-					widget := widgets[f]
-					if widget != nil {
-						widget.receive(widget)
-					}
-				}
-
-			case codeplug.RecordsFieldChange:
-				changes := change.Changes()
-				for _, change := range changes {
-					w.handleChange(change)
-				}
-
-			case codeplug.MoveRecordsChange, codeplug.InsertRecordsChange:
-				rl.SetCurrent(change.Record().Index())
-				rl.SelectRecords(change.Records()...)
-
-			case codeplug.RemoveRecordsChange:
-				rl.SetCurrent(change.Record().Index())
-
-			case codeplug.MoveFieldsChange,
-				codeplug.InsertFieldsChange,
-				codeplug.RemoveFieldsChange:
-
-			default:
-				l.Fatal("Unknown change type ", changeType)
-			}
-		*/
 	}
 
 	return w
@@ -557,10 +535,6 @@ func (w *Window) qWidget_ITF() widgets.QWidget_ITF {
 
 func (w *Window) Window() *Window {
 	return w.window
-}
-
-func (w *Window) setWindow(window *Window) {
-	w.window = window
 }
 
 func (w *Window) AddWidget(widget Widget) {
@@ -704,7 +678,6 @@ func NewForm() *Form {
 	form.qWidget = *widgets.NewQWidget(nil, 0)
 	form.layout = widgets.NewQFormLayout(&form.qWidget)
 	form.layout.SetContentsMargins(0, 0, 0, 0)
-	//form.layout.SetLabelAlignment(core.Qt__AlignRight)
 
 	return form
 }
@@ -942,6 +915,18 @@ func (parent *Form) AddFieldRows(labelFunc func(*codeplug.Field) string, fields 
 	}
 }
 
+func (window *Window) AddFieldWidget(w *FieldWidget) {
+	w.window = window
+
+	widgets := window.widgets
+	f := w.field
+	fType := f.Type()
+	if widgets[fType] == nil {
+		window.widgets[fType] = make(map[*codeplug.Field]*FieldWidget)
+	}
+	window.widgets[fType][f] = w
+}
+
 func (window *Window) NewFieldWidget(label string, f *codeplug.Field) *FieldWidget {
 	newFieldWidgetFunc := newFieldWidget[f.ValueType()]
 	if newFieldWidgetFunc == nil {
@@ -951,50 +936,32 @@ func (window *Window) NewFieldWidget(label string, f *codeplug.Field) *FieldWidg
 	w := newFieldWidgetFunc(f)
 	w.label = widgets.NewQLabel2(label, nil, 0)
 
-	widgets := window.widgets
-	fType := f.Type()
-	if widgets[fType] == nil {
-		widgets[fType] = make(map[*codeplug.Field]*FieldWidget)
+	window.AddFieldWidget(w)
+
+	if f.Enables() != nil {
+		window.AddEnablerWidget(w)
 	}
-	widgets[fType][f] = w
 
 	enablerType := f.EnablerType()
 
-	w.receive = func(sender *FieldWidget) {
-		if sender.field.Record().Type() != f.Record().Type() {
-			l.Fatal("sender record type", sender.field.Record().Type(), " receiver record type", f.Record().Type())
+	w.enable = func(enabler *FieldWidget) {
+		ef := enabler.field
+		if ef.Record().Type() != f.Record().Type() {
+			l.Fatal("enabler record type", ef.Record().Type(), " enabled record type", f.Record().Type())
 		}
-		if sender.field.Record().Index() != f.Record().Index() {
-			l.Fatal("sender record index", sender.field.Record().Index(), " receiver record index", f.Record().Index())
+		if ef.Record().Index() != f.Record().Index() {
+			l.Fatal("enabler record index", ef.Record().Index(), " enabled record index", f.Record().Index())
 		}
-		if sender.field.Index() != f.Index() {
-			l.Fatal("sender field index", sender.field.Index(), " receiver field index", f.Index())
+		if ef.Index() != f.Index() {
+			l.Fatal("enabler field index", ef.Index(), " enabled field index", f.Index())
 		}
-		switch sender.field.Type() {
-		case "":
-			l.Fatal("receive(): invalid field type")
 
-		case fType:
-			w.update()
-			subs := window.subscriptions[fType]
-			for _, sub := range subs {
-				for f, receiver := range widgets[sub] {
-					if f.Record() == sender.field.Record() {
-						receiver.receive(w)
-					}
-				}
-			}
-
-		case enablerType:
-			w.setEnabled()
-
-		default:
-			l.Fatal("receive(): unexpected field type")
+		eft := ef.Type()
+		if eft != enablerType {
+			l.Fatal("enable(): unexpected field type:", eft)
 		}
-	}
 
-	if enablerType != "" {
-		window.subscribe(enablerType, f.Type())
+		w.setEnabled()
 	}
 
 	return w
@@ -1069,12 +1036,14 @@ func NewTable() *Table {
 func (parent *HBox) AddTable() *Table {
 	t := NewTable()
 	parent.AddWidget(t)
+	t.window = parent.window
 	return t
 }
 
 func (parent *VBox) AddTable() *Table {
 	t := NewTable()
 	parent.AddWidget(t)
+	t.window = parent.window
 	return t
 }
 
@@ -1248,7 +1217,8 @@ func (w *FieldWidget) setEnabled() {
 
 	w.SetEnabled(enabled)
 	w.label.SetEnabled(enabled)
-	w.receive(w)
+	w.update()
+	w.enableWidgets()
 	if enabled && w.stacker != nil {
 		w.stacker.enableOverlappingWidget(w)
 	}
@@ -1258,7 +1228,7 @@ type FieldWidget struct {
 	qWidget widgets.QWidget_ITF
 	label   *widgets.QLabel
 	field   *codeplug.Field
-	receive func(sender *FieldWidget)
+	enable  func(enabler *FieldWidget)
 	stacker *StackedWidget
 	window  *Window
 }
@@ -1281,18 +1251,6 @@ func (fw *FieldWidget) AddWidget(w Widget) {
 
 func (fw *FieldWidget) SetContentsMargins(left int, right int, top int, bottom int) {
 	l.Fatal("cannot set contents margin of FieldWidget")
-}
-
-func (window *Window) subscribe(sender codeplug.FieldType, receiver codeplug.FieldType) {
-	subs := window.subscriptions
-	if subs[sender] == nil {
-		subs[sender] = []codeplug.FieldType{}
-	}
-	subs[sender] = append(subs[sender], receiver)
-}
-
-func (w *Window) BeginRecord() {
-	w.subscriptions = make(map[codeplug.FieldType][]codeplug.FieldType)
 }
 
 func (w *FieldWidget) SetLabel(text string) {
@@ -1592,9 +1550,10 @@ type StackedWidget struct {
 	window         *Window
 }
 
-func NewStackedWidget() *StackedWidget {
+func NewStackedWidget(window *Window) *StackedWidget {
 	sw := new(StackedWidget)
 	sw.qStackedWidget = *widgets.NewQStackedWidget(nil)
+	sw.window = window
 	return sw
 }
 
@@ -1617,7 +1576,6 @@ func (sw *StackedWidget) SetContentsMargins(left int, right int, top int, bottom
 func (sw *StackedWidget) AddWidget(w Widget) {
 	sw.qStackedWidget.AddWidget(w.qWidget_ITF())
 	sw.widgets = append(sw.widgets, w)
-	w.setWindow(sw.window)
 
 	switch v := w.(type) {
 	case *FieldWidget:
@@ -1640,11 +1598,13 @@ func (sw *StackedWidget) setCurrentWidget(w *FieldWidget) {
 type TabWidget struct {
 	qTabWidget widgets.QTabWidget
 	widgets    []*FieldWidget
+	window     *Window
 }
 
-func NewTabWidget() *TabWidget {
+func NewTabWidget(window *Window) *TabWidget {
 	tw := new(TabWidget)
 	tw.qTabWidget = *widgets.NewQTabWidget(nil)
+	tw.window = window
 	return tw
 }
 
