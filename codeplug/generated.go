@@ -1702,26 +1702,26 @@ var fiCiChannelMode = fieldInfo{
 		IndexedString{2, "Digital"},
 	},
 	enables: []FieldType{
-		FtCiTxSignallingSystem,
-		FtCiCompressedUdpDataHeader,
-		FtCiDCDMSwitch,
-		FtCiDisplayPTTID,
-		FtCiCtcssEncode,
-		FtCiGPSSystem,
-		FtCiCtcssDecode,
 		FtCiBandwidth,
+		FtCiColorCode,
+		FtCiCompressedUdpDataHeader,
+		FtCiContactName,
+		FtCiCtcssDecode,
+		FtCiCtcssEncode,
+		FtCiDCDMSwitch,
+		FtCiDQTTurnoffFreq,
+		FtCiDataCallConfirmed,
+		FtCiDisplayPTTID,
 		FtCiEmergencyAlarmAck,
 		FtCiEmergencySystem,
-		FtCiContactName,
-		FtCiColorCode,
+		FtCiGPSSystem,
+		FtCiGroupList,
+		FtCiInCallCriteria,
+		FtCiPrivacy,
+		FtCiPrivateCallConfirmed,
 		FtCiRepeaterSlot,
 		FtCiRxSignallingSystem,
-		FtCiInCallCriteria,
-		FtCiDQTTurnoffFreq,
-		FtCiPrivateCallConfirmed,
-		FtCiDataCallConfirmed,
-		FtCiGroupList,
-		FtCiPrivacy,
+		FtCiTxSignallingSystem,
 	},
 }
 
@@ -1810,8 +1810,8 @@ var fiCiCtcssEncode = fieldInfo{
 	valueType:    VtCtcssDcs,
 	defaultValue: "None",
 	enables: []FieldType{
-		FtCiReverseBurst,
 		FtCiQtReverse,
+		FtCiReverseBurst,
 	},
 	enablerType: FtCiChannelMode,
 	enablers: []enabler{
@@ -2399,14 +2399,14 @@ var fiCiRxSignallingSystem = fieldInfo{
 		"DTMF-4",
 	},
 	enables: []FieldType{
+		FtCiDecode1,
+		FtCiDecode2,
 		FtCiDecode3,
 		FtCiDecode4,
 		FtCiDecode5,
 		FtCiDecode6,
 		FtCiDecode7,
 		FtCiDecode8,
-		FtCiDecode1,
-		FtCiDecode2,
 	},
 	enablerType: FtCiChannelMode,
 	enablers: []enabler{
@@ -2825,8 +2825,8 @@ var fiGsFreqChannelMode = fieldInfo{
 		"Channel",
 	},
 	enables: []FieldType{
-		FtGsModeSelect,
 		FtGsLockUnlock,
+		FtGsModeSelect,
 	},
 }
 
@@ -2843,9 +2843,9 @@ var fiGsFreqChannelMode_uv380 = fieldInfo{
 		IndexedString{255, "Channel"},
 	},
 	enables: []FieldType{
+		FtGsLockUnlock,
 		FtGsModeSelectA,
 		FtGsModeSelectB,
-		FtGsLockUnlock,
 	},
 }
 

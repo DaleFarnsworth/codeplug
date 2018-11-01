@@ -249,6 +249,7 @@ func doEnables(r *Record, fieldMap map[string]*Field) {
 		for enable := range enablesMap {
 			f.Enables = append(f.Enables, enable)
 		}
+		sort.Strings(f.Enables)
 	}
 
 	for f, enables := range fieldEnables {
