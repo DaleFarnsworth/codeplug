@@ -509,7 +509,10 @@ func (mw *MainWindow) NewRecordWindow(rType codeplug.RecordType, writable bool) 
 			if f == f.Record().NameField() {
 				codeplug.NameFieldChanged(change)
 			}
-			w.fieldWidget(f).enableWidgets()
+			fw := w.fieldWidget(f)
+			if fw != nil {
+				fw.enableWidgets()
+			}
 
 		case codeplug.RecordsFieldChange:
 			changes := change.Changes()
