@@ -299,7 +299,7 @@ func (f *Field) Strings() []string {
 	case VtCtcssDcs:
 		strs = ctcssDcsStrings()
 
-	case VtIStrings, VtCallType, VtBandwidth:
+	case VtIStrings, VtBandwidth:
 		strs = *f.strings
 
 	case VtPrivacyNumber:
@@ -309,7 +309,7 @@ func (f *Field) Strings() []string {
 			strs = strs[:8]
 		}
 
-	case VtIndexedStrings, VtRadioButton:
+	case VtIndexedStrings, VtRadioButton, VtCallType:
 		strs = []string{}
 
 		if f.indexedStrings != nil {
