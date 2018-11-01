@@ -306,10 +306,15 @@ func (enablerWidget *FieldWidget) enableWidgets() {
 	for _, enablerType := range enablerField.Enables() {
 		enableWidgetMap := window.widgets[enablerType]
 		if enableWidgetMap == nil {
+			// Not an error because some fields are not
+			// displayed for some codeplug types, slso
+			// some fields are not always enabled.
 			continue
 		}
 		for enabledField, enabledWidget := range enableWidgetMap {
 			if enablerField.Record() != enabledField.Record() {
+				// Not an error because some fields are not
+				// always enabled.
 				continue
 			}
 			enabledWidget.enable(enablerWidget)
