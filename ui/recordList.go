@@ -502,7 +502,7 @@ func (w *Window) initRecordModel(writable bool) {
 				}
 				dRow++
 			}
-			cp.ResolveDeferredValueFields()
+			cp.ResolveDeferredValueFields(nil)
 			change.Complete()
 
 		case id != cp.ID():
@@ -518,18 +518,39 @@ func (w *Window) initRecordModel(writable bool) {
 			}
 
 			if len(records) == 0 {
-				title := fmt.Sprintf("Drop %s", rTypeString)
+				title := fmt.Sprintf("Copying %s", rTypeString)
 				body := fmt.Sprintf("no new %s", rTypeString)
 				InfoPopup(title, body)
 				return false
 			}
 
+			fieldCount := len(cp.AllFields())
+			for _, r := range depRecords {
+				fieldCount += len(r.AllFields())
+			}
+			for _, r := range records {
+				fieldCount += len(r.AllFields())
+			}
+
+			progDivisor := 200
+			fieldCount = fieldCount/progDivisor + 1
+
+			title := "Copying " + string(records[0].Type())
+			pd := NewProgressDialog(title)
+			maxCount := len(depRecords) + len(records) + fieldCount
+			pd.SetRange(0, maxCount)
+			rCount := 0
+
 			change = cp.InsertRecordsChange(records)
 			mw.BeginChange(change)
 			for _, r := range depRecords {
+				rCount++
+				pd.SetValue(rCount)
+
 				if r.NameExists() {
 					continue
 				}
+
 				records := []*codeplug.Record{r}
 				subChange := cp.InsertRecordsChange(records)
 				change.AddChange(subChange)
@@ -537,6 +558,9 @@ func (w *Window) initRecordModel(writable bool) {
 			}
 
 			for _, r := range records {
+				rCount++
+				pd.SetValue(rCount)
+
 				w.recordList.recordToInsert = r
 				rv = model.InsertRows(dRow, 1, dParent)
 				if !rv {
@@ -545,9 +569,19 @@ func (w *Window) initRecordModel(writable bool) {
 				dRow++
 			}
 
-			cp.ResolveDeferredValueFields()
+			progFunc := func(i int) {
+				if i%progDivisor != 0 {
+					return
+				}
+				rCount++
+				pd.SetValue(rCount)
+			}
+
+			cp.ResolveDeferredValueFields(progFunc)
+			pd.Close()
 
 			change.Complete()
+
 		}
 
 		rl := w.recordList

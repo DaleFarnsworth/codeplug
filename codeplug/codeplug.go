@@ -303,7 +303,7 @@ func (cp *Codeplug) RecordTypeName(rType RecordType) string {
 	return str
 }
 
-func (cp *Codeplug) allFields() []*Field {
+func (cp *Codeplug) AllFields() []*Field {
 	fields := make([]*Field, 0)
 	for _, rType := range cp.RecordTypes() {
 		for _, r := range cp.records(rType) {
@@ -622,7 +622,7 @@ func (cp *Codeplug) Revert() error {
 
 	cp.load()
 
-	cp.ResolveDeferredValueFields()
+	cp.ResolveDeferredValueFields(nil)
 
 	cp.Valid()
 
@@ -2170,7 +2170,7 @@ func (cp *Codeplug) storeParsedRecords(records []*Record) error {
 		cp.InsertRecord(r)
 	}
 
-	cp.ResolveDeferredValueFields()
+	cp.ResolveDeferredValueFields(nil)
 
 	for _, rd := range cp.rDesc {
 		if len(rd.records) == 0 {
@@ -2189,12 +2189,15 @@ func (cp *Codeplug) clearCachedListNames() {
 	}
 }
 
-func (cp *Codeplug) ResolveDeferredValueFields() {
+func (cp *Codeplug) ResolveDeferredValueFields(progFunc func(int)) {
 	maxIters := 5
-	fields := cp.allFields()
+	fields := cp.AllFields()
 	for i := 0; len(fields) > 0 && i < maxIters; i++ {
 		unresolvedFields := make([]*Field, 0)
-		for _, f := range fields {
+		for j, f := range fields {
+			if progFunc != nil {
+				progFunc(j)
+			}
 			err := f.resolveDeferredValue()
 			if err != nil {
 				unresolvedFields = append(unresolvedFields, f)

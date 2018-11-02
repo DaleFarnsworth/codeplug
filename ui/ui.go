@@ -1918,17 +1918,6 @@ func (w *Window) RecordFunc() func() {
 	return w.recordFunc
 }
 
-func wrapProgress(title string, f func(func(int)), changeCount int) {
-	pd := NewProgressDialog(title)
-	progFunc := func(i int) {
-		pd.SetValue(i)
-	}
-
-	pd.SetRange(0, changeCount)
-	f(progFunc)
-	pd.Close()
-}
-
 func InfoPopup(title string, msg string) {
 	button := widgets.QMessageBox__Ok
 	defaultButton := widgets.QMessageBox__Ok
@@ -2024,7 +2013,7 @@ func NewProgressDialog(str string) *ProgressDialog {
 	pd.qWidget = qpd
 
 	qpd.SetWindowModality(core.Qt__ApplicationModal)
-	qpd.SetMinimumDuration(0)
+	qpd.SetMinimumDuration(250) // 250 mS
 	qpd.SetLabelText(str)
 
 	return pd
