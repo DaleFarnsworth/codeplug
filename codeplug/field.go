@@ -1754,41 +1754,40 @@ func (v *listIndex) getString(f *Field) string {
 
 // setString sets the listIndex's value from a string.
 func (v *listIndex) setString(f *Field, s string, force bool) error {
-	if len(s) > 1 && s[0:1] == "\000" {
-		v.init(f, s)
-		s = string(*v)
+	*v = listIndex(s)
+	err := v.init(f)
+	if err != nil {
+		return err
 	}
 
 	if force {
-		*v = listIndex(s)
 		return nil
 	}
 
-	for _, str := range f.Strings() {
-		if str == s {
-			*v = listIndex(s)
-			return nil
-		}
-	}
-	return fmt.Errorf("bad %s name: '%s'", f.listRecordType, s)
+	return v.valid(f)
 }
 
 // valid returns nil if the listIndex's value is valid.
 func (v *listIndex) valid(f *Field) error {
-	value := string(*v)
+	err := v.init(f)
+	if err != nil {
+		return err
+	}
 
+	s := string(*v)
 	for _, str := range f.Strings() {
-		if str == value {
+		if str == s {
 			return nil
 		}
 	}
 
-	return fmt.Errorf("bad %s name: '%s'", f.listRecordType, *v)
+	return fmt.Errorf("bad %s name: '%s'", f.listRecordType, s)
 }
 
-func (v *listIndex) init(f *Field, str string) {
+func (v *listIndex) init(f *Field) error {
+	str := string(*v)
 	if len(str) < 1 || str[0:1] != "\000" {
-		l.Fatal("listIndex.init() invalid value")
+		return nil
 	}
 	str = removeSuffix(f, str[1:])
 
@@ -1804,7 +1803,7 @@ func (v *listIndex) init(f *Field, str string) {
 		for _, is := range *fd.indexedStrings {
 			if is.Index == uint16(index) {
 				*v = listIndex(is.String)
-				return
+				return nil
 			}
 		}
 	}
@@ -1813,10 +1812,11 @@ func (v *listIndex) init(f *Field, str string) {
 	listNames := f.listNames()
 	if index >= 0 && index < len(listNames) {
 		*v = listIndex(listNames[index])
-		return
+		return nil
 	}
 
-	*v = listIndex(invalidValueString)
+	f.value = invalidValue{value: f.value}
+	return fmt.Errorf("bad %s list index %d", f.listRecordType, index+1)
 }
 
 // load sets the listIndex's value from its bits in cp.bytes.
