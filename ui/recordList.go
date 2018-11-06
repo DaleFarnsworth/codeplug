@@ -372,6 +372,10 @@ func (w *Window) initRecordModel(writable bool) {
 	})
 
 	model.ConnectFlags(func(index *core.QModelIndex) core.Qt__ItemFlag {
+		if index.Row() >= len(*record.ListNames()) {
+			return core.Qt__NoItemFlags
+		}
+
 		flags := core.Qt__ItemIsSelectable |
 			core.Qt__ItemIsEnabled |
 			core.Qt__ItemIsDragEnabled |
