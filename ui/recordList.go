@@ -28,6 +28,7 @@ import (
 	"bytes"
 	"fmt"
 	"math"
+	"sort"
 	"strings"
 
 	"github.com/dalefarnsworth/codeplug/codeplug"
@@ -294,6 +295,15 @@ func (w *Window) dataRecords(data *core.QMimeData, drop bool) (records []*codepl
 	return records, depRecords, id, nil
 }
 
+func sortByTypeAndIndex(r []*codeplug.Record) {
+	sort.Slice(r, func(i, j int) bool {
+		if r[i].Type() == r[j].Type() {
+			return r[i].Index() < r[j].Index()
+		}
+		return r[i].Type() < r[j].Type()
+	})
+}
+
 const extraRows = 1
 
 func (w *Window) initRecordModel(writable bool) {
@@ -527,6 +537,8 @@ func (w *Window) initRecordModel(writable bool) {
 				InfoPopup(title, body)
 				return false
 			}
+
+			sortByTypeAndIndex(depRecords)
 
 			fieldCount := len(cp.AllFields())
 			for _, r := range depRecords {
