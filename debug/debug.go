@@ -28,6 +28,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"regexp"
 	"runtime/debug"
 	"strings"
 )
@@ -95,4 +96,13 @@ func Println(v ...interface{}) {
 
 func Printf(s string, v ...interface{}) {
 	display("Debugging Information", fmt.Sprintf(s, v...))
+}
+
+func Match(re string, s string) bool {
+	match, err := regexp.MatchString(re, s)
+	if err != nil {
+		Fatal("Match", err)
+	}
+
+	return match
 }
