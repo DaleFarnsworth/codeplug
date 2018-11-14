@@ -1219,12 +1219,16 @@ type Widget interface {
 func (w *FieldWidget) setEnabled() {
 	f := w.field
 	enabled := f.IsEnabled()
-	if enabled && f.IsInvalidValue() {
+	invalid := f.IsInvalidValue()
+	if enabled && invalid {
 		f.SetDefault()
 	}
 
 	w.SetEnabled(enabled)
 	w.label.SetEnabled(enabled)
+	if invalid {
+		f.SetInvalidValue()
+	}
 	w.update()
 	w.enableWidgets()
 	if enabled && w.stacker != nil {
@@ -1286,7 +1290,21 @@ func (w *FieldWidget) update() {
 		qw.(*widgets.QLineEdit).SetText(str)
 
 	case *widgets.QComboBox:
-		qw.(*widgets.QComboBox).SetCurrentText(codeplug.RemoveSuffix(f, f.String()))
+		qwc := qw.(*widgets.QComboBox)
+		if f.IsInvalidValue() {
+			ivs := codeplug.InvalidValueString
+			qwc.InsertItems(0, []string{ivs})
+			qwc.SetCurrentText(ivs)
+			qwc.ConnectHighlighted(func(index int) {
+				qwc.DisconnectHighlighted()
+				if qwc.ItemData(0, 0).ToString() == ivs {
+					if len(f.Strings()) > 0 {
+						qwc.RemoveItem(0)
+					}
+				}
+			})
+		}
+		qwc.SetCurrentText(codeplug.RemoveSuffix(f, f.String()))
 
 	default:
 		l.Fatal("update(): unexpected widget type")
@@ -1298,11 +1316,26 @@ func (w *FieldWidget) SetEnabled(b bool) {
 
 	switch qw.(type) {
 	case *widgets.QComboBox:
-		qw.(*widgets.QComboBox).SetEnabled(b)
+		qwc := qw.(*widgets.QComboBox)
+		qwc.SetEnabled(b)
 		f := w.field
 		if f != nil {
-			strings := codeplug.RemoveSuffixes(f.Strings())
-			UpdateComboboxWidget(w, codeplug.RemoveSuffix(f, f.String()), strings)
+			strs := codeplug.RemoveSuffixes(f.Strings())
+			str := f.String()
+			if f.IsInvalidValue() {
+				ivs := codeplug.InvalidValueString
+				strs = append([]string{ivs}, strs...)
+				str = ivs
+				qwc.ConnectHighlighted(func(index int) {
+					qwc.DisconnectHighlighted()
+					if qwc.ItemData(0, 0).ToString() == ivs {
+						if len(f.Strings()) > 0 {
+							qwc.RemoveItem(0)
+						}
+					}
+				})
+			}
+			UpdateComboboxWidget(w, codeplug.RemoveSuffix(f, str), strs)
 		}
 
 	case *widgets.QPushButton:
@@ -1357,7 +1390,7 @@ func (w *FieldWidget) SetVisible(b bool) {
 		qw.(*widgets.QLineEdit).SetVisible(b)
 
 	default:
-		l.Fatal("SetEnabled(): unexpected widget type")
+		l.Fatal("SetVisible(): unexpected widget type")
 	}
 
 	if w.label != nil {
@@ -1477,12 +1510,16 @@ func newFieldCombobox(f *codeplug.Field) *FieldWidget {
 	qw.SetCurrentText(codeplug.RemoveSuffix(f, f.String()))
 
 	if f.IsInvalidValue() {
-		invalidValueString := f.String()
-		qw.InsertItems(0, []string{invalidValueString})
-		qw.SetCurrentText(invalidValueString)
-		qw.ConnectFocusInEvent(func(event *gui.QFocusEvent) {
-			qw.RemoveItem(0)
-			qw.DisconnectFocusInEvent()
+		ivs := codeplug.InvalidValueString
+		qw.InsertItems(0, []string{ivs})
+		qw.SetCurrentText(ivs)
+		qw.ConnectHighlighted(func(index int) {
+			qw.DisconnectHighlighted()
+			if qw.ItemData(0, 0).ToString() == ivs {
+				if len(f.Strings()) > 0 {
+					qw.RemoveItem(0)
+				}
+			}
 		})
 	}
 

@@ -39,7 +39,7 @@ import (
 	l "github.com/dalefarnsworth/codeplug/debug"
 )
 
-const invalidValueString = "=INVALID="
+const InvalidValueString = "=INVALID="
 const deferredValueString = "=DEFERRED="
 
 // A Field represents a field within a Record.
@@ -150,7 +150,7 @@ func (span *Span) MinString() string {
 // String returns the fields value as a string.
 func (f Field) String() string {
 	if f.IsInvalidValue() {
-		return invalidValueString
+		return InvalidValueString
 	}
 
 	return f.value.getString(&f)
@@ -173,13 +173,13 @@ func (f *Field) SetString(str string) error {
 }
 
 // setString set the strings value from the given string.
-func (f *Field) setString(s string) error {
-	if s == invalidValueString {
-		f.value = invalidValue{value: f.value}
+func (f *Field) setString(str string) error {
+	if str == InvalidValueString {
+		f.SetInvalidValue()
 		return nil
 	}
 
-	err := f.value.setString(f, s, false)
+	err := f.value.setString(f, str, false)
 	if err != nil {
 		return err
 	}
@@ -225,10 +225,14 @@ func (f *Field) TestSetString(str string) error {
 func (f *Field) listNames() []string {
 	pListNames := f.record.codeplug.rDesc[f.listRecordType].ListNames()
 	if pListNames == nil {
-		return nil
+		return []string{InvalidValueString}
 	}
 
-	if _, deref := f.value.(*derefListIndex); !deref {
+	_, deref := f.value.(*derefListIndex)
+	if iv, isiv := f.value.(invalidValue); isiv {
+		_, deref = iv.value.(*derefListIndex)
+	}
+	if !deref {
 		return *pListNames
 	}
 
@@ -325,6 +329,10 @@ func (f *Field) Strings() []string {
 		l.Fatalf("f.Strings: unexpected f.valueType: %s", f.valueType)
 	}
 
+	if len(strs) == 0 {
+		strs = []string{InvalidValueString}
+	}
+
 	return strs
 }
 
@@ -408,7 +416,7 @@ func (f *Field) SetDefault() {
 func (f *Field) valid() error {
 	err := f.value.valid(f)
 	if err != nil {
-		f.value = invalidValue{value: f.value}
+		f.SetInvalidValue()
 	} else if f.IsInvalidValue() {
 		err = errors.New("invalid value")
 	}
@@ -417,6 +425,12 @@ func (f *Field) valid() error {
 		return nil
 	}
 	return err
+}
+
+func (f *Field) SetInvalidValue() {
+	if !f.IsInvalidValue() {
+		f.value = invalidValue{value: f.value}
+	}
 }
 
 // IsInvalidValue returns true if the field has previously been determined
@@ -518,7 +532,7 @@ func (f *Field) IsEnabled() bool {
 	}
 
 	enablerValue := enabler.String()
-	if enablerValue == invalidValueString {
+	if enablerValue == InvalidValueString {
 		return false
 	}
 
@@ -833,7 +847,7 @@ func (v *iStrings) getString(f *Field) string {
 	i := int(*v)
 	strings := *f.strings
 	if i >= len(strings) {
-		return invalidValueString
+		return InvalidValueString
 	}
 
 	return strings[i]
@@ -1666,7 +1680,7 @@ func (v *memberListIndex) getString(f *Field) string {
 		}
 	}
 
-	return invalidValueString
+	return InvalidValueString
 }
 */
 
@@ -1815,7 +1829,7 @@ func (v *listIndex) init(f *Field) error {
 		return nil
 	}
 
-	f.value = invalidValue{value: f.value}
+	f.SetInvalidValue()
 	return fmt.Errorf("bad %s list index %d", f.listRecordType, index+1)
 }
 
@@ -2292,8 +2306,8 @@ func (f *Field) resolveDeferredValue() error {
 
 	f.value = dValue.value
 
-	if dValue.str == invalidValueString {
-		f.value = invalidValue{value: f.value}
+	if dValue.str == InvalidValueString {
+		f.SetInvalidValue()
 		f.valid()
 		return nil
 	}
