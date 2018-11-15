@@ -2005,10 +2005,19 @@
         { "index": 21, "string": "Squelch Tight/Normal" },
         { "index": 22, "string": "Privacy On/Off" },
         { "index": 23, "string": "VOX On/Off" },
+        { "index": 24, "string": "Zone +" },
         { "index": 25, "string": "Zone Toggle" },
         { "index": 26, "string": "Battery Indicator" },
         { "index": 30, "string": "Manual Dial For Private" },
-        { "index": 31, "string": "Lone Work On/Off" }
+        { "index": 31, "string": "Lone Work On/Off" },
+        { "index": 38, "string": "1750 Hz" },
+        { "index": 80, "string": "Toggle Backlight (md380tools)" },
+        { "index": 81, "string": "Set Talkgroup (md380tools)" },
+        { "index": 82, "string": "Morse Narrator (md380tools)" },
+        { "index": 83, "string": "Morse Repeat (md380tools)" },
+        { "index": 84, "string": "Screen Toggle (md380tools)" },
+        { "index": 85, "string": "Mic Gain 0/3/6 dB (md380tools)" },
+        { "index": 86, "string": "Promiscuous Mode On/Off (md380tools)" }
       ]
     },
     {
