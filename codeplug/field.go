@@ -174,6 +174,11 @@ func (f *Field) SetString(str string) error {
 
 // setString set the strings value from the given string.
 func (f *Field) setString(str string) error {
+	previousString := f.String()
+	if str == previousString {
+		return nil
+	}
+
 	if str == InvalidValueString {
 		f.SetInvalidValue()
 		return nil
