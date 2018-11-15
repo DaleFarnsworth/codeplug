@@ -84,6 +84,17 @@ func (app *App) Quit() {
 	app.qApp.Quit()
 }
 
+func ApplicationFontPointSize() int {
+	font := widgets.QApplication_Font()
+	return font.PointSize()
+}
+
+func SetApplicationFontPointSize(pointSize int) {
+	font := widgets.QApplication_Font()
+	font.SetPointSize(pointSize)
+	widgets.QApplication_SetFont(font, "")
+}
+
 type AppSettings struct {
 	qSettings *core.QSettings
 }
@@ -683,6 +694,7 @@ func NewForm() *Form {
 	form.qWidget = *widgets.NewQWidget(nil, 0)
 	form.layout = widgets.NewQFormLayout(&form.qWidget)
 	form.layout.SetContentsMargins(0, 0, 0, 0)
+	// form.layout.SetSpacing(6)
 
 	return form
 }
