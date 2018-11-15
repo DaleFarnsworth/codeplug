@@ -161,16 +161,17 @@ func (mw *MainWindow) SetCodeplug(cp *codeplug.Codeplug) {
 
 	mw.codeplug.ConnectChange(func(change *codeplug.Change) {
 		mw := mainWindow(change.Codeplug())
-		changes := append(change.Changes(), change)
+		windows := make([]*Window, 0)
+		for _, w := range mw.recordWindows {
+			windows = append(windows, w)
+		}
+		for _, w := range mw.altRecordWindows {
+			windows = append(windows, w)
+		}
 
-		for _, change := range changes {
-			w := mw.recordWindows[change.RecordType()]
-			if w != nil {
-				w.handleChange(change)
-				continue
-			}
-			w = mw.altRecordWindows[change.RecordType()]
-			if w != nil {
+		for _, w := range windows {
+			w.enableAllWidgets()
+			if w.recordType == change.RecordType() {
 				w.handleChange(change)
 			}
 		}
@@ -508,10 +509,6 @@ func (mw *MainWindow) NewRecordWindow(rType codeplug.RecordType, writable bool) 
 			f := change.Field()
 			if f == f.Record().NameField() {
 				codeplug.NameFieldChanged(change)
-			}
-			fw := w.fieldWidget(f)
-			if fw != nil {
-				fw.enableWidgets()
 			}
 
 		case codeplug.RecordsFieldChange:
@@ -933,6 +930,14 @@ func (window *Window) AddFieldWidget(w *FieldWidget) {
 		window.widgets[fType] = make(map[*codeplug.Field]*FieldWidget)
 	}
 	window.widgets[fType][f] = w
+}
+
+func (window *Window) enableAllWidgets() {
+	for _, widgetMap := range window.widgets {
+		for _, w := range widgetMap {
+			w.setEnabled()
+		}
+	}
 }
 
 func (window *Window) NewFieldWidget(label string, f *codeplug.Field) *FieldWidget {
