@@ -2225,7 +2225,7 @@
       "type": "NkContact",
       "bitOffset": 0,
       "bitSize": 16,
-      "valueType": "contactListIndex",
+      "valueType": "nkContactListIndex",
       "listType": "Contacts",
       "indexedStrings": [
         {

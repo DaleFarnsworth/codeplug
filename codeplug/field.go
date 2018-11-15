@@ -281,7 +281,7 @@ func (f *Field) Span() *Span {
 func (f *Field) Strings() []string {
 	var strs []string
 	switch f.valueType {
-	case VtListIndex, VtGpsListIndex, VtDerefListIndex, VtContactListIndex:
+	case VtListIndex, VtGpsListIndex, VtDerefListIndex, VtContactListIndex, VtNkContactListIndex:
 		strs = []string{}
 		if f.indexedStrings != nil {
 			strs = append(strs, (*f.indexedStrings)[0].String)
@@ -1763,6 +1763,18 @@ func (v *contactListIndex) setString(f *Field, s string, force bool) error {
 	return v.listIndex.setString(f, s, force)
 }
 
+type nkContactListIndex struct {
+	listIndex
+}
+
+func (v *nkContactListIndex) setString(f *Field, s string, force bool) error {
+	if s == "" || s == "\00065535" {
+		s = f.IndexedStrings()[0].String
+	}
+
+	return v.listIndex.setString(f, s, force)
+}
+
 // listIndex is a field value representing an index into a slice of records
 type listIndex string
 
@@ -2355,7 +2367,7 @@ func (f *Field) mustDeferValue(str string) bool {
 		listNames := f.memberListNames()
 		return len(listNames) <= 0 || listNames[0] == ""
 
-	case VtListIndex, VtGpsListIndex, VtDerefListIndex, VtContactListIndex:
+	case VtListIndex, VtGpsListIndex, VtDerefListIndex, VtContactListIndex, VtNkContactListIndex:
 		if !f.record.InCodeplug() {
 			return true
 		}

@@ -252,40 +252,41 @@ const (
 
 // The value types a field may contain
 const (
-	VtAscii             ValueType = "ascii"
-	VtBandwidth         ValueType = "bandwidth"
-	VtBiFrequency       ValueType = "biFrequency"
-	VtCallID            ValueType = "callID"
-	VtCallType          ValueType = "callType"
-	VtContactListIndex  ValueType = "contactListIndex"
-	VtContactName       ValueType = "contactName"
-	VtCpsVersion        ValueType = "cpsVersion"
-	VtCtcssDcs          ValueType = "ctcssDcs"
-	VtDerefListIndex    ValueType = "derefListIndex"
-	VtFrequency         ValueType = "frequency"
-	VtFrequencyOffset   ValueType = "frequencyOffset"
-	VtGpsListIndex      ValueType = "gpsListIndex"
-	VtGpsReportInterval ValueType = "gpsReportInterval"
-	VtHexadecimal32     ValueType = "hexadecimal32"
-	VtHexadecimal4      ValueType = "hexadecimal4"
-	VtIStrings          ValueType = "iStrings"
-	VtIndexedStrings    ValueType = "indexedStrings"
-	VtIntroLine         ValueType = "introLine"
-	VtListIndex         ValueType = "listIndex"
-	VtMemberListIndex   ValueType = "memberListIndex"
-	VtName              ValueType = "name"
-	VtOffOn             ValueType = "offOn"
-	VtOnOff             ValueType = "onOff"
-	VtPcPassword        ValueType = "pcPassword"
-	VtPrivacyNumber     ValueType = "privacyNumber"
-	VtRadioButton       ValueType = "radioButton"
-	VtRadioName         ValueType = "radioName"
-	VtRadioPassword     ValueType = "radioPassword"
-	VtRadioProgPassword ValueType = "radioProgPassword"
-	VtSpan              ValueType = "span"
-	VtSpanList          ValueType = "spanList"
-	VtTextMessage       ValueType = "textMessage"
-	VtTimeStamp         ValueType = "timeStamp"
+	VtAscii              ValueType = "ascii"
+	VtBandwidth          ValueType = "bandwidth"
+	VtBiFrequency        ValueType = "biFrequency"
+	VtCallID             ValueType = "callID"
+	VtCallType           ValueType = "callType"
+	VtContactListIndex   ValueType = "contactListIndex"
+	VtContactName        ValueType = "contactName"
+	VtCpsVersion         ValueType = "cpsVersion"
+	VtCtcssDcs           ValueType = "ctcssDcs"
+	VtDerefListIndex     ValueType = "derefListIndex"
+	VtFrequency          ValueType = "frequency"
+	VtFrequencyOffset    ValueType = "frequencyOffset"
+	VtGpsListIndex       ValueType = "gpsListIndex"
+	VtGpsReportInterval  ValueType = "gpsReportInterval"
+	VtHexadecimal32      ValueType = "hexadecimal32"
+	VtHexadecimal4       ValueType = "hexadecimal4"
+	VtIStrings           ValueType = "iStrings"
+	VtIndexedStrings     ValueType = "indexedStrings"
+	VtIntroLine          ValueType = "introLine"
+	VtListIndex          ValueType = "listIndex"
+	VtMemberListIndex    ValueType = "memberListIndex"
+	VtName               ValueType = "name"
+	VtNkContactListIndex ValueType = "nkContactListIndex"
+	VtOffOn              ValueType = "offOn"
+	VtOnOff              ValueType = "onOff"
+	VtPcPassword         ValueType = "pcPassword"
+	VtPrivacyNumber      ValueType = "privacyNumber"
+	VtRadioButton        ValueType = "radioButton"
+	VtRadioName          ValueType = "radioName"
+	VtRadioPassword      ValueType = "radioPassword"
+	VtRadioProgPassword  ValueType = "radioProgPassword"
+	VtSpan               ValueType = "span"
+	VtSpanList           ValueType = "spanList"
+	VtTextMessage        ValueType = "textMessage"
+	VtTimeStamp          ValueType = "timeStamp"
 )
 
 // newValue returns a new value of the given ValueType
@@ -335,6 +336,8 @@ func newValue(vt ValueType) value {
 		return new(memberListIndex)
 	case VtName:
 		return new(name)
+	case VtNkContactListIndex:
+		return new(nkContactListIndex)
 	case VtOffOn:
 		return new(offOn)
 	case VtOnOff:
@@ -3670,7 +3673,7 @@ var fiNkContact = fieldInfo{
 	max:       1,
 	bitOffset: 0,
 	bitSize:   16,
-	valueType: VtContactListIndex,
+	valueType: VtNkContactListIndex,
 	indexedStrings: &[]IndexedString{
 		IndexedString{0, "None"},
 	},
