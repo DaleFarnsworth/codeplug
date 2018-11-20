@@ -2267,6 +2267,11 @@ func (cp *Codeplug) WriteRadio(progress func(cur int) error) error {
 	savedBytes := make([]byte, len(cp.bytes))
 	copy(savedBytes, cp.bytes)
 
+	// Turn off talkaround toggle in the radio (for all channels)
+	for _, r := range cp.records(RtChannels_md380) {
+		r.Field(FtCiTalkaround).SetString("Off")
+	}
+
 	cp.store()
 
 	cpi := cp.codeplugInfo

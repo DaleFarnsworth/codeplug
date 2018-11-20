@@ -880,6 +880,7 @@
         "CiEmergencyAlarmAck",
         "CiDataCallConfirmed",
         "CiCompressedUdpDataHeader",
+        "CiTalkaround",
         "CiEmergencySystem",
         "CiContactName",
         "CiGroupList",
@@ -942,6 +943,7 @@
         "CiEmergencyAlarmAck",
         "CiDataCallConfirmed",
         "CiCompressedUdpDataHeader",
+        "CiTalkaround",
         "CiEmergencySystem",
         "CiContactName",
         "CiGroupList",
@@ -999,6 +1001,7 @@
         "CiSendGPSInfo",
         "CiReceiveGPSInfo",
         "CiPrivateCallConfirmed",
+        "CiTalkaround",
         "CiEmergencyAlarmAck",
         "CiDataCallConfirmed",
         "CiDCDMSwitch",
@@ -2771,6 +2774,14 @@
       "bitSize": 1,
       "defaultValue": "On",
       "valueType": "offOn"
+    },
+    {
+      "typeName": "Talkaround",
+      "type": "CiTalkaround",
+      "bitOffset": 26,
+      "bitSize": 1,
+      "defaultValue": "Off",
+      "valueType": "onOff"
     },
     {
       "typeName": "Emergency Alarm Ack",

@@ -127,6 +127,7 @@ const (
 	FtCiSendGPSInfo               FieldType = "SendGPSInfo"
 	FtCiSquelch                   FieldType = "Squelch"
 	FtCiSquelch_uv380             FieldType = "Squelch"
+	FtCiTalkaround                FieldType = "Talkaround"
 	FtCiTot                       FieldType = "Tot"
 	FtCiTotRekeyDelay             FieldType = "TotRekeyDelay"
 	FtCiTxFrequencyOffset         FieldType = "TxFrequencyOffset"
@@ -783,6 +784,7 @@ var riChannels_md380 = recordInfo{
 		&fiCiEmergencyAlarmAck,
 		&fiCiDataCallConfirmed,
 		&fiCiCompressedUdpDataHeader,
+		&fiCiTalkaround,
 		&fiCiEmergencySystem,
 		&fiCiContactName,
 		&fiCiGroupList,
@@ -846,6 +848,7 @@ var riChannels_md40 = recordInfo{
 		&fiCiEmergencyAlarmAck,
 		&fiCiDataCallConfirmed,
 		&fiCiCompressedUdpDataHeader,
+		&fiCiTalkaround,
 		&fiCiEmergencySystem,
 		&fiCiContactName,
 		&fiCiGroupList,
@@ -904,6 +907,7 @@ var riChannels_uv380 = recordInfo{
 		&fiCiSendGPSInfo,
 		&fiCiReceiveGPSInfo,
 		&fiCiPrivateCallConfirmed,
+		&fiCiTalkaround,
 		&fiCiEmergencyAlarmAck,
 		&fiCiDataCallConfirmed,
 		&fiCiDCDMSwitch,
@@ -2484,6 +2488,16 @@ var fiCiSquelch_uv380 = fieldInfo{
 		min: 0,
 		max: 9,
 	},
+}
+
+var fiCiTalkaround = fieldInfo{
+	fType:        FtCiTalkaround,
+	typeName:     "Talkaround",
+	max:          1,
+	bitOffset:    26,
+	bitSize:      1,
+	valueType:    VtOnOff,
+	defaultValue: "Off",
 }
 
 var fiCiTot = fieldInfo{
