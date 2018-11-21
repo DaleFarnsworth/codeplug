@@ -624,6 +624,13 @@ func (cp *Codeplug) Revert() error {
 
 	cp.ResolveDeferredValueFields(nil)
 
+	// Turn off talkaround toggle in the radio (for all channels)
+	for _, r := range cp.records(RtChannels_md380) {
+		r.Field(FtCiTalkaround).SetString("Off")
+	}
+
+	cp.store()
+
 	cp.Valid()
 
 	cp.changed = false
