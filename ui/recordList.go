@@ -39,9 +39,10 @@ import (
 )
 
 type RecordList struct {
-	window         *Window
-	qListView      *widgets.QListView
-	recordToInsert *codeplug.Record
+	window          *Window
+	qListView       *widgets.QListView
+	recordToInsert  *codeplug.Record
+	changingCurrent bool
 }
 
 func (parent *HBox) AddRecordList(rType codeplug.RecordType) *RecordList {
@@ -66,16 +67,24 @@ func (parent *HBox) AddRecordList(rType codeplug.RecordType) *RecordList {
 	view.SetSelectionBehavior(widgets.QAbstractItemView__SelectRows)
 
 	rl.qListView.ConnectCurrentChanged(func(selected *core.QModelIndex, deSelected *core.QModelIndex) {
-		w := rl.window
-		if w.recordFunc != nil && !w.mainWindow.changing {
-			rl.qListView.ScrollTo(selected, widgets.QAbstractItemView__EnsureVisible)
-			w.recordFunc()
+		if !rl.changingCurrent {
+			rl.currentChanged(selected)
 		}
 	})
 
 	parent.layout.AddWidget(view, 0, 0)
 
+	rl.SetCurrent(0)
+
 	return rl
+}
+
+func (rl *RecordList) currentChanged(selected *core.QModelIndex) {
+	w := rl.window
+	if w.recordFunc != nil && !w.mainWindow.changing {
+		w.recordFunc()
+		rl.qListView.ScrollTo(selected, widgets.QAbstractItemView__EnsureVisible)
+	}
 }
 
 func (rl *RecordList) Model() *core.QAbstractItemModel {
@@ -88,8 +97,10 @@ func (rl *RecordList) SelectionModel() *core.QItemSelectionModel {
 
 func (rl *RecordList) SetCurrent(i int) {
 	index := rl.Model().CreateIndex(i, 0, nil)
-	rl.qListView.ScrollTo(index, widgets.QAbstractItemView__EnsureVisible)
+	rl.changingCurrent = true
 	rl.qListView.SetCurrentIndex(index)
+	rl.changingCurrent = false
+	rl.currentChanged(index)
 }
 
 func (rl *RecordList) Current() int {
