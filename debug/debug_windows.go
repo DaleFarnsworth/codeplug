@@ -92,27 +92,36 @@ func copyPanicString(source, dest string) {
 	}
 	defer sourceFile.Close()
 
-	foundPanic := false
+	var line string
 	scanner := bufio.NewScanner(sourceFile)
 
-	var destFile *os.File
 	for scanner.Scan() {
-		line := scanner.Text()
-		if strings.HasPrefix(line, "panic: ") && !foundPanic {
-			foundPanic = true
+		line = scanner.Text()
 
-			destFile, err = os.Create(dest)
-			if err != nil {
-				return
-			}
-			defer destFile.Close()
+		if strings.HasPrefix(line, "panic: ") {
+			break
 		}
-
-		if !foundPanic {
-			continue
+		if strings.HasPrefix(line, "fatal error: ") {
+			break
 		}
+		line = ""
+	}
 
-		fmt.Fprintln(destFile, line)
+	if line == "" {
+		return
+	}
+
+	var destFile *os.File
+	destFile, err = os.Create(dest)
+	if err != nil {
+		return
+	}
+	defer destFile.Close()
+
+	fmt.Fprintln(destFile, line)
+
+	for scanner.Scan() {
+		fmt.Fprintln(destFile, scanner.Text())
 	}
 }
 
