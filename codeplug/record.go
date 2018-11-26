@@ -555,7 +555,7 @@ func (r *Record) NewFieldWithValue(fType FieldType, index int, str string) (*Fie
 		return f, nil
 	}
 
-	err := f.SetString(str)
+	err := f.setString(str)
 	if err != nil {
 		return f, err
 	}
