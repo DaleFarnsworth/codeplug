@@ -629,6 +629,7 @@ func (or *Record) Copy() *Record {
 			str = removeSuffix(of, str)
 			str = AddSuffix(of, str)
 			f, _ := r.NewFieldWithValue(of.fType, of.fIndex, str)
+			f.resolveDeferredValue()
 			r.addField(f)
 		}
 	}
