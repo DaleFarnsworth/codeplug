@@ -657,7 +657,13 @@ func (r *Record) FindFieldByName(fType FieldType, name string) *Field {
 }
 
 func (r *Record) HasFieldType(fType FieldType) bool {
-	return r.Field(fType) != nil
+	for _, fi := range r.fieldInfos {
+		if fi.fType == fType {
+			return true
+		}
+	}
+
+	return false
 }
 
 func DependentRecords(records []*Record) (newRecords []*Record, depRecords []*Record) {
