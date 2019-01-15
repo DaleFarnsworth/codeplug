@@ -40,6 +40,7 @@ const (
 	RtContacts               RecordType = "Contacts"
 	RtContacts_uv380         RecordType = "Contacts"
 	RtGPSSystems             RecordType = "GPSSystems"
+	RtGeneralSettings_md2017 RecordType = "GeneralSettings"
 	RtGeneralSettings_md380  RecordType = "GeneralSettings"
 	RtGeneralSettings_md40   RecordType = "GeneralSettings"
 	RtGeneralSettings_uv380  RecordType = "GeneralSettings"
@@ -164,6 +165,7 @@ const (
 	FtGsLockUnlock                FieldType = "LockUnlock"
 	FtGsLoneWorkerReminderTime    FieldType = "LoneWorkerReminderTime"
 	FtGsLoneWorkerResponseTime    FieldType = "LoneWorkerResponseTime"
+	FtGsMenuControl               FieldType = "MenuControl"
 	FtGsMicLevel                  FieldType = "MicLevel"
 	FtGsModeSelect                FieldType = "ModeSelect"
 	FtGsModeSelectA               FieldType = "ModeSelectA"
@@ -189,6 +191,7 @@ const (
 	FtGsSetKeypadLockTime         FieldType = "SetKeypadLockTime"
 	FtGsTalkPermitTone            FieldType = "TalkPermitTone"
 	FtGsTimeZone                  FieldType = "TimeZone"
+	FtGsTwoChannel                FieldType = "TwoChannel"
 	FtGsTxMode                    FieldType = "TxMode"
 	FtGsTxPreambleDuration        FieldType = "TxPreambleDuration"
 	FtGsVoxSensitivity            FieldType = "VoxSensitivity"
@@ -626,7 +629,7 @@ var cpMD2017 = CodeplugInfo{
 	TrailerSize:   16,
 	RecordInfos: []*recordInfo{
 		&riBasicInformation_uv380,
-		&riGeneralSettings_uv380,
+		&riGeneralSettings_md2017,
 		&riMenuItems,
 		&riRadioButtons_uv380,
 		&riButtonDefinitions,
@@ -655,7 +658,7 @@ var cpRT82 = CodeplugInfo{
 	TrailerSize:   16,
 	RecordInfos: []*recordInfo{
 		&riBasicInformation_uv380,
-		&riGeneralSettings_uv380,
+		&riGeneralSettings_md2017,
 		&riMenuItems,
 		&riRadioButtons_uv380,
 		&riButtonDefinitions,
@@ -988,6 +991,62 @@ var riGPSSystems = recordInfo{
 		&fiGpGPSRevertChannel,
 		&fiGpGPSDefaultReportInterval,
 		&fiGpDestinationID,
+	},
+}
+
+var riGeneralSettings_md2017 = recordInfo{
+	rType:    RtGeneralSettings_md2017,
+	typeName: "General Settings",
+	max:      1,
+	offset:   8805,
+	size:     144,
+	fieldInfos: []*fieldInfo{
+		&fiGsRadioName,
+		&fiGsRadioID,
+		&fiGsIntroScreen,
+		&fiGsIntroScreenLine1,
+		&fiGsIntroScreenLine2,
+		&fiGsSavePreamble,
+		&fiGsCHVoiceAnnouncement,
+		&fiGsSaveModeReceive,
+		&fiGsDisableAllTones,
+		&fiGsChFreeIndicationTone,
+		&fiGsTalkPermitTone,
+		&fiGsCallAlertToneDuration,
+		&fiGsScanDigitalHangTime,
+		&fiGsScanAnalogHangTime,
+		&fiGsLoneWorkerResponseTime,
+		&fiGsLoneWorkerReminderTime,
+		&fiGsPwAndLockEnable,
+		&fiGsPowerOnPassword,
+		&fiGsMonitorType,
+		&fiGsVoxSensitivity,
+		&fiGsTxPreambleDuration,
+		&fiGsRxLowBatteryInterval,
+		&fiGsChannelsHangTime,
+		&fiGsPcProgPassword,
+		&fiGsRadioProgPassword,
+		&fiGsSetKeypadLockTime,
+		&fiGsFreqChannelMode_uv380,
+		&fiGsModeSelectA,
+		&fiGsModeSelectB,
+		&fiGsTimeZone,
+		&fiGsBacklightTime,
+		&fiGsDisableAllLeds,
+		&fiGsGroupCallMatch,
+		&fiGsPrivateCallMatch,
+		&fiGsGroupCallHangTime,
+		&fiGsPrivateCallHangTime,
+		&fiGsRadioID1,
+		&fiGsRadioID2,
+		&fiGsRadioID3,
+		&fiGsMicLevel,
+		&fiGsTxMode,
+		&fiGsEditRadioID,
+		&fiGsPublicZone,
+		&fiGsEnableContactsCSV,
+		&fiGsMenuControl,
+		&fiGsTwoChannel,
 	},
 }
 
@@ -2987,6 +3046,15 @@ var fiGsLoneWorkerResponseTime = fieldInfo{
 	},
 }
 
+var fiGsMenuControl = fieldInfo{
+	fType:     FtGsMenuControl,
+	typeName:  "Menu Control",
+	max:       1,
+	bitOffset: 1303,
+	bitSize:   1,
+	valueType: VtOffOn,
+}
+
 var fiGsMicLevel = fieldInfo{
 	fType:        FtGsMicLevel,
 	typeName:     "MIC Level",
@@ -3349,6 +3417,15 @@ var fiGsTimeZone = fieldInfo{
 		"UTC+11:00",
 		"UTC+12:00",
 	},
+}
+
+var fiGsTwoChannel = fieldInfo{
+	fType:     FtGsTwoChannel,
+	typeName:  "Two Channel",
+	max:       1,
+	bitOffset: 1302,
+	bitSize:   1,
+	valueType: VtOnOff,
 }
 
 var fiGsTxMode = fieldInfo{

@@ -253,7 +253,7 @@
       "trailerSize": 16,
       "recordTypes": [
         "BasicInformation_uv380",
-        "GeneralSettings_uv380",
+        "GeneralSettings_md2017",
         "MenuItems",
         "RadioButtons_uv380",
         "ButtonDefinitions",
@@ -281,7 +281,7 @@
       "trailerSize": 16,
       "recordTypes": [
         "BasicInformation_uv380",
-        "GeneralSettings_uv380",
+        "GeneralSettings_md2017",
         "MenuItems",
         "RadioButtons_uv380",
         "ButtonDefinitions",
@@ -485,6 +485,60 @@
         "GsEditRadioID",
         "GsPublicZone",
         "GsEnableContactsCSV"
+      ]
+    },
+    {
+      "typeName": "General Settings",
+      "type": "GeneralSettings_md2017",
+      "offset": 8805,
+      "size": 144,
+      "fieldTypes": [
+        "GsRadioName",
+        "GsRadioID",
+        "GsIntroScreen",
+        "GsIntroScreenLine1",
+        "GsIntroScreenLine2",
+        "GsSavePreamble",
+        "GsCHVoiceAnnouncement",
+        "GsSaveModeReceive",
+        "GsDisableAllTones",
+        "GsChFreeIndicationTone",
+        "GsTalkPermitTone",
+        "GsCallAlertToneDuration",
+        "GsScanDigitalHangTime",
+        "GsScanAnalogHangTime",
+        "GsLoneWorkerResponseTime",
+        "GsLoneWorkerReminderTime",
+        "GsPwAndLockEnable",
+        "GsPowerOnPassword",
+        "GsMonitorType",
+        "GsVoxSensitivity",
+        "GsTxPreambleDuration",
+        "GsRxLowBatteryInterval",
+        "GsChannelsHangTime",
+        "GsPcProgPassword",
+        "GsRadioProgPassword",
+        "GsSetKeypadLockTime",
+        "GsFreqChannelMode_uv380",
+        "GsModeSelectA",
+        "GsModeSelectB",
+        "GsTimeZone",
+        "GsBacklightTime",
+        "GsDisableAllLeds",
+        "GsGroupCallMatch",
+        "GsPrivateCallMatch",
+        "GsGroupCallHangTime",
+        "GsPrivateCallHangTime",
+        "GsRadioID1",
+        "GsRadioID2",
+        "GsRadioID3",
+        "GsMicLevel",
+        "GsTxMode",
+        "GsEditRadioID",
+        "GsPublicZone",
+        "GsEnableContactsCSV",
+	"GsMenuControl",
+	"GsTwoChannel"
       ]
     },
     {
@@ -1745,6 +1799,20 @@
         "5",
         "6"
       ]
+    },
+    {
+      "typeName": "Two Channel",
+      "type": "GsTwoChannel",
+      "bitOffset": 1302,
+      "bitSize": 1,
+      "valueType": "onOff"
+    },
+    {
+      "typeName": "Menu Control",
+      "type": "GsMenuControl",
+      "bitOffset": 1303,
+      "bitSize": 1,
+      "valueType": "offOn"
     },
     {
       "typeName": "Hang Time",
