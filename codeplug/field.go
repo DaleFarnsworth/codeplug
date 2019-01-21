@@ -214,6 +214,25 @@ func (f *Field) setString(str string) error {
 	return err
 }
 
+// setInitialString sets a new field's value from the given string.
+func (f *Field) setInitialString(str string) error {
+	if str == InvalidValueString {
+		f.SetInvalidValue()
+		return nil
+	}
+
+	err := f.value.setString(f, str, true)
+	if err != nil {
+		return err
+	}
+
+	if invalidValue, invalid := f.value.(invalidValue); invalid {
+		f.value = invalidValue.value
+	}
+
+	return nil
+}
+
 func (f *Field) TestSetString(str string) error {
 	previousString := f.String()
 	err := f.setString(str)
@@ -413,7 +432,7 @@ func (f *Field) SetDefault() {
 
 	dv := fi.defaultValue
 	if dv != "" {
-		f.setString(dv)
+		f.value.setString(f, dv, true)
 	}
 }
 
@@ -719,6 +738,10 @@ func (v *frequencyOffset) setString(f *Field, s string, force bool) error {
 
 	save := *v
 	*v = frequencyOffset(freq)
+
+	if force {
+		return nil
+	}
 
 	err = v.valid(f)
 	if err != nil {

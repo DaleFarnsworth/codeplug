@@ -1717,7 +1717,7 @@ func (cp *Codeplug) parsedFileToRecs(pRecs []*parsedRecord, deferValues bool) (r
 
 			var f *Field
 			if deferValues {
-				f = r.NewFieldWithDeferredValue(fType, pf.index, pf.value)
+				f = r.newFieldWithDeferredValue(fType, pf.index, pf.value)
 			} else {
 				f, err = r.NewFieldWithValue(fType, pf.index, pf.value)
 				if err != nil {
@@ -2190,6 +2190,7 @@ func (cp *Codeplug) storeParsedRecords(records []*Record) error {
 			return fmt.Errorf("no %s found", rd.rType)
 		}
 	}
+	cp.Valid()
 	cp.store()
 	cp.changed = true
 
