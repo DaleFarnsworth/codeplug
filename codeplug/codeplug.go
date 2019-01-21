@@ -1,4 +1,4 @@
-// Copyright 2017-2018 Dale Farnsworth. All rights reserved.
+// Copyright 2017-2019 Dale Farnsworth. All rights reserved.
 
 // Dale Farnsworth
 // 1007 W Mendoza Ave
@@ -1062,8 +1062,11 @@ func (cp *Codeplug) store() {
 		for rIndex := 0; rIndex < rd.max; rIndex++ {
 			if rIndex < len(rd.records) {
 				rd.records[rIndex].store()
-			} else {
+			} else if rd.delDesc != nil {
 				rd.deleteRecord(cp, rIndex)
+			} else {
+				r := cp.newRecord(rd.rType, rIndex)
+				cp.InsertRecord(r)
 			}
 		}
 	}
