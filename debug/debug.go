@@ -1,4 +1,4 @@
-// Copyright 2017-2018 Dale Farnsworth. All rights reserved.
+// Copyright 2017-2019 Dale Farnsworth. All rights reserved.
 
 // Dale Farnsworth
 // 1007 W Mendoza Ave
@@ -64,7 +64,7 @@ func PrintStack() {
 	DisplayLog()
 }
 
-func Fatalf(s string, v ...interface{}) {
+func Warningf(s string, v ...interface{}) {
 	log.Output(2, fmt.Sprintf(s, v...))
 
 	log.Println(string(debug.Stack()))
@@ -72,17 +72,25 @@ func Fatalf(s string, v ...interface{}) {
 	log.Output(2, fmt.Sprintf(s, v...))
 
 	DisplayLog()
+}
+
+func Warning(v ...interface{}) {
+	log.Output(2, fmt.Sprintln(v...))
+
+	log.Println(string(debug.Stack()))
+
+	log.Output(2, fmt.Sprintln(v...))
+
+	DisplayLog()
+}
+
+func Fatalf(s string, v ...interface{}) {
+	Warningf(s, v...)
 	os.Exit(1)
 }
 
 func Fatal(v ...interface{}) {
-	log.Output(2, fmt.Sprintln(v...))
-
-	log.Println(string(debug.Stack()))
-
-	log.Output(2, fmt.Sprintln(v...))
-
-	DisplayLog()
+	Warning(v...)
 	os.Exit(1)
 }
 
