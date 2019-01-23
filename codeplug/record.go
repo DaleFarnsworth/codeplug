@@ -741,12 +741,22 @@ func fieldRefFields(cp *Codeplug, fieldRefs []fieldRef) []*Field {
 	return fields
 }
 
+func (r *Record) fieldRefs() []fieldRef {
+	fieldRefs := make([]fieldRef, 0)
+	for _, fieldRef := range rTypeFieldRefs[r.rType] {
+		if r.codeplug.HasRecordType(fieldRef.rType) {
+			fieldRefs = append(fieldRefs, fieldRef)
+		}
+	}
+
+	return fieldRefs
+}
+
 func RecordsRemoved(change *Change) {
 	cp := change.Codeplug()
 	for _, r := range change.records {
 		name := r.Name()
-		fieldRefs := rTypeFieldRefs[r.rType]
-		for _, f := range fieldRefFields(cp, fieldRefs) {
+		for _, f := range fieldRefFields(cp, r.fieldRefs()) {
 			if f.listRecordType != r.rType {
 				continue
 			}

@@ -2434,8 +2434,7 @@ func NameFieldChanged(change *Change) {
 	previousValue := change.previousValue()
 	newValue := f.String()
 
-	fieldRefs := rTypeFieldRefs[r.rType]
-	for _, fRef := range fieldRefs {
+	for _, fRef := range r.fieldRefs() {
 		rType := fRef.rType
 		fType := fRef.fType
 		for _, r := range cp.Records(rType) {
