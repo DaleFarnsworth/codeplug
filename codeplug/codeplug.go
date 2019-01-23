@@ -770,11 +770,7 @@ func (cp *Codeplug) FileType() FileType {
 
 // Records returns all of a codeplug's records of the given RecordType.
 func (cp *Codeplug) Records(rType RecordType) []*Record {
-	rDesc := cp.rDesc[rType]
-	if rDesc == nil {
-		return nil
-	}
-	records := rDesc.records
+	records := cp.rDesc[rType].records
 	if len(records) == 0 {
 		rIndex := 0
 		r := cp.newRecord(rType, rIndex)
