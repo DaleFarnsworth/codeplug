@@ -2143,8 +2143,8 @@ var fiCiGPSSystem = fieldInfo{
 	fType:        FtCiGPSSystem,
 	typeName:     "GPS System",
 	max:          1,
-	bitOffset:    107,
-	bitSize:      5,
+	bitOffset:    104,
+	bitSize:      8,
 	valueType:    VtSpanList,
 	defaultValue: "None",
 	span: &Span{

@@ -3075,8 +3075,8 @@
     {
       "typeName": "GPS System",
       "type": "CiGPSSystem",
-      "bitOffset": 107,
-      "bitSize": 5,
+      "bitOffset": 104,
+      "bitSize": 8,
       "defaultValue": "None",
       "valueType": "spanList",
       "span": {
