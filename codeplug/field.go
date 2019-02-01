@@ -1768,7 +1768,10 @@ type gpsListIndex struct {
 
 func (v *gpsListIndex) setString(f *Field, s string, force bool) error {
 	if s == "" || s == "\00065535" || s == "\00065534" {
-		s = f.IndexedStrings()[0].String
+		is := f.IndexedStrings()
+		if is != nil {
+			s = is[0].String
+		}
 	}
 
 	return v.listIndex.setString(f, s, force)
@@ -1780,7 +1783,10 @@ type contactListIndex struct {
 
 func (v *contactListIndex) setString(f *Field, s string, force bool) error {
 	if s == "" {
-		s = f.IndexedStrings()[0].String
+		is := f.IndexedStrings()
+		if is != nil {
+			s = is[0].String
+		}
 	}
 
 	return v.listIndex.setString(f, s, force)
@@ -1792,7 +1798,10 @@ type nkContactListIndex struct {
 
 func (v *nkContactListIndex) setString(f *Field, s string, force bool) error {
 	if s == "" || s == "\00065535" {
-		s = f.IndexedStrings()[0].String
+		is := f.IndexedStrings()
+		if is != nil {
+			s = is[0].String
+		}
 	}
 
 	return v.listIndex.setString(f, s, force)
