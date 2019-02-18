@@ -1,0 +1,1 @@
+../genCodeplugInfo/jsonCodeplugDesc.go

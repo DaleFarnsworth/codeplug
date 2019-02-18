@@ -1,0 +1,1172 @@
+Radio Type: MD-380
+Model names in header: MD380, DR780
+Codeplug size: 262709
+Header size: 549
+
+Record: Basic Information
+Offset: 0x000000
+Size:     0x2265
+
+	Field: Model Name
+	Offset: 0x000125
+	Size:     0x0008
+	Value Type: ascii
+
+	Field: Frequency Range (MHz)
+	Offset: 0x000136
+	Size:     0x0001
+	Value Type: iStrings
+	Value indexes into strings:
+		"136-174"
+		"350-400"
+		"400-480"
+		"450-520"
+
+	Field: Low Frequency
+	Offset: 0x000139
+	Size:     0x0002
+	Value Type: biFrequency
+
+	Field: High Frequency
+	Offset: 0x00013b
+	Size:     0x0002
+	Value Type: biFrequency
+
+	Field: Last Programmed Time
+	Offset: 0x002226
+	Size:     0x0007
+	Value Type: timeStamp
+
+	Field: CPS Version
+	Offset: 0x00222d
+	Size:     0x0004
+	Value Type: cpsVersion
+
+Record: General Settings
+Offset: 0x002265
+Size:     0x0090
+
+	Field: Radio Name
+	Offset: 0x000070
+	Size:     0x0020
+	Value Type: radioName
+
+	Field: Radio ID
+	Offset: 0x000044
+	Size:     0x0003
+	Value Type: callID
+
+	Field: Intro Screen
+	Offset: 0x000042
+	Size:     0x0001
+	Bit Offset: 3, Bit Width: 1	|---X----|
+	Value Type: iStrings
+	Value indexes into strings:
+		"Character String"
+		"Picture"
+
+	Field: Intro Screen Line 1
+	Offset: 0x000000
+	Size:     0x0014
+	Value Type: introLine
+
+	Field: Intro Screen Line 2
+	Offset: 0x000014
+	Size:     0x0014
+	Value Type: introLine
+
+	Field: Save Preamble
+	Offset: 0x000041
+	Size:     0x0001
+	Bit Offset: 7, Bit Width: 1	|-------X|
+	Value Type: offOn
+		0 -> off
+		1 -> on
+
+	Field: Save Mode Receive
+	Offset: 0x000041
+	Size:     0x0001
+	Bit Offset: 6, Bit Width: 1	|------X-|
+	Value Type: offOn
+		0 -> off
+		1 -> on
+
+	Field: Disable All Tones
+	Offset: 0x000041
+	Size:     0x0001
+	Bit Offset: 5, Bit Width: 1	|-----X--|
+	Value Type: onOff
+		0 -> on
+		1 -> off
+
+	Field: Channel Free Indication Tone
+	Offset: 0x000041
+	Size:     0x0001
+	Bit Offset: 3, Bit Width: 1	|---X----|
+	Value Type: onOff
+		0 -> on
+		1 -> off
+
+	Field: Talk Permit Tone
+	Offset: 0x000041
+	Size:     0x0001
+	Bit Offset: 0, Bit Width: 2	|XX------|
+	Value Type: iStrings
+	Value indexes into strings:
+		"None"
+		"Digital"
+		"Analog"
+		"Digital and Analog"
+
+	Field: Keypad Tones
+	Offset: 0x000042
+	Size:     0x0001
+	Bit Offset: 2, Bit Width: 1	|--X-----|
+	Value Type: offOn
+		0 -> off
+		1 -> on
+
+	Field: Call Alert Tone Duration (S)
+	Offset: 0x00004f
+	Size:     0x0001
+	Value Type: span
+	Range of values:
+		minimum: 0, maximum: 240, step: 1, scale: 5
+
+	Field: Scan Digital Hang Time (mS)
+	Offset: 0x000053
+	Size:     0x0001
+	Value Type: spanList
+	Range of values:
+		minimum: 5, maximum: 100, step: 5, scale: 100
+
+	Field: Scan Analog Hang Time (mS)
+	Offset: 0x000054
+	Size:     0x0001
+	Value Type: spanList
+	Range of values:
+		minimum: 5, maximum: 100, step: 5, scale: 100
+
+	Field: Lone Worker Response Time (min)
+	Offset: 0x000050
+	Size:     0x0001
+	Value Type: span
+	Range of values:
+		minimum: 1, maximum: 255, step: 1, scale: 1
+
+	Field: Lone Worker Reminder Time (S)
+	Offset: 0x000051
+	Size:     0x0001
+	Value Type: span
+	Range of values:
+		minimum: 1, maximum: 255, step: 1, scale: 1
+
+	Field: Password And Lock Enable
+	Offset: 0x000041
+	Size:     0x0001
+	Bit Offset: 2, Bit Width: 1	|--X-----|
+	Value Type: onOff
+		0 -> on
+		1 -> off
+
+	Field: Power On Password
+	Offset: 0x000058
+	Size:     0x0004
+	Value Type: radioPassword
+
+	Field: Monitor Type
+	Offset: 0x000040
+	Size:     0x0001
+	Bit Offset: 3, Bit Width: 1	|---X----|
+	Value Type: iStrings
+	Value indexes into strings:
+		"Silent"
+		"Open Squelch"
+
+	Field: VOX Sensitivity
+	Offset: 0x00004b
+	Size:     0x0001
+	Value Type: spanList
+	Range of values:
+		minimum: 1, maximum: 10, step: 1, scale: 1
+
+	Field: Tx Preamble Duration (mS)
+	Offset: 0x000048
+	Size:     0x0001
+	Value Type: spanList
+	Range of values:
+		minimum: 0, maximum: 144, step: 1, scale: 60
+
+	Field: Rx Low Battery Interval (S)
+	Offset: 0x00004e
+	Size:     0x0001
+	Value Type: span
+	Range of values:
+		minimum: 0, maximum: 127, step: 1, scale: 5
+
+	Field: PC Programming Password
+	Offset: 0x000060
+	Size:     0x0008
+	Value Type: pcPassword
+
+	Field: Radio Programming Password
+	Offset: 0x00005c
+	Size:     0x0004
+	Value Type: radioProgPassword
+
+	Field: Backlight Time (S)
+	Offset: 0x000055
+	Size:     0x0001
+	Bit Offset: 6, Bit Width: 2	|------XX|
+	Value Type: iStrings
+	Value indexes into strings:
+		"Always"
+		"5"
+		"10"
+		"15"
+
+	Field: Set Keypad Lock Time (S)
+	Offset: 0x000056
+	Size:     0x0001
+	Value Type: indexedStrings
+		5 -> "5"
+		10 -> "10"
+		15 -> "15"
+		255 -> "Manual"
+
+	Field: Disable All LEDS
+	Offset: 0x000040
+	Size:     0x0001
+	Bit Offset: 5, Bit Width: 1	|-----X--|
+	Value Type: onOff
+		0 -> on
+		1 -> off
+
+	Field: Group Call Hang Time (mS)
+	Offset: 0x000049
+	Size:     0x0001
+	Value Type: spanList
+	Range of values:
+		minimum: 0, maximum: 70, step: 5, scale: 100
+
+	Field: Private Call Hang Time (mS)
+	Offset: 0x00004a
+	Size:     0x0001
+	Value Type: spanList
+	Range of values:
+		minimum: 0, maximum: 70, step: 5, scale: 100
+
+Record: Menu Items
+Offset: 0x002315
+Size:     0x0005
+
+	Field: Hang Time
+	Offset: 0x000000
+	Size:     0x0001
+	Value Type: spanList
+	Range of values:
+		minimum: 0, maximum: 30, step: 1, scale: 1
+
+	Field: Radio Disable
+	Offset: 0x000001
+	Size:     0x0001
+	Bit Offset: 0, Bit Width: 1	|X-------|
+	Value Type: offOn
+		0 -> off
+		1 -> on
+
+	Field: Radio Enable
+	Offset: 0x000001
+	Size:     0x0001
+	Bit Offset: 1, Bit Width: 1	|-X------|
+	Value Type: offOn
+		0 -> off
+		1 -> on
+
+	Field: Remote Monitor
+	Offset: 0x000001
+	Size:     0x0001
+	Bit Offset: 2, Bit Width: 1	|--X-----|
+	Value Type: offOn
+		0 -> off
+		1 -> on
+
+	Field: Radio Check
+	Offset: 0x000001
+	Size:     0x0001
+	Bit Offset: 3, Bit Width: 1	|---X----|
+	Value Type: offOn
+		0 -> off
+		1 -> on
+
+	Field: Manual Dial
+	Offset: 0x000001
+	Size:     0x0001
+	Bit Offset: 4, Bit Width: 1	|----X---|
+	Value Type: offOn
+		0 -> off
+		1 -> on
+
+	Field: Edit
+	Offset: 0x000001
+	Size:     0x0001
+	Bit Offset: 5, Bit Width: 1	|-----X--|
+	Value Type: offOn
+		0 -> off
+		1 -> on
+
+	Field: Call Alert
+	Offset: 0x000001
+	Size:     0x0001
+	Bit Offset: 6, Bit Width: 1	|------X-|
+	Value Type: offOn
+		0 -> off
+		1 -> on
+
+	Field: Text Messsage
+	Offset: 0x000001
+	Size:     0x0001
+	Bit Offset: 7, Bit Width: 1	|-------X|
+	Value Type: offOn
+		0 -> off
+		1 -> on
+
+	Field: Tone Or Alert
+	Offset: 0x000002
+	Size:     0x0001
+	Bit Offset: 0, Bit Width: 1	|X-------|
+	Value Type: offOn
+		0 -> off
+		1 -> on
+
+	Field: Talkaround
+	Offset: 0x000002
+	Size:     0x0001
+	Bit Offset: 1, Bit Width: 1	|-X------|
+	Value Type: offOn
+		0 -> off
+		1 -> on
+
+	Field: Outgoing Radio
+	Offset: 0x000002
+	Size:     0x0001
+	Bit Offset: 2, Bit Width: 1	|--X-----|
+	Value Type: offOn
+		0 -> off
+		1 -> on
+
+	Field: Answered
+	Offset: 0x000002
+	Size:     0x0001
+	Bit Offset: 3, Bit Width: 1	|---X----|
+	Value Type: offOn
+		0 -> off
+		1 -> on
+
+	Field: Missed
+	Offset: 0x000002
+	Size:     0x0001
+	Bit Offset: 4, Bit Width: 1	|----X---|
+	Value Type: offOn
+		0 -> off
+		1 -> on
+
+	Field: Edit List
+	Offset: 0x000002
+	Size:     0x0001
+	Bit Offset: 5, Bit Width: 1	|-----X--|
+	Value Type: offOn
+		0 -> off
+		1 -> on
+
+	Field: Scan
+	Offset: 0x000002
+	Size:     0x0001
+	Bit Offset: 6, Bit Width: 1	|------X-|
+	Value Type: offOn
+		0 -> off
+		1 -> on
+
+	Field: Program Key
+	Offset: 0x000002
+	Size:     0x0001
+	Bit Offset: 7, Bit Width: 1	|-------X|
+	Value Type: offOn
+		0 -> off
+		1 -> on
+
+	Field: VOX
+	Offset: 0x000003
+	Size:     0x0001
+	Bit Offset: 0, Bit Width: 1	|X-------|
+	Value Type: offOn
+		0 -> off
+		1 -> on
+
+	Field: Squelch
+	Offset: 0x000003
+	Size:     0x0001
+	Bit Offset: 2, Bit Width: 1	|--X-----|
+	Value Type: offOn
+		0 -> off
+		1 -> on
+
+	Field: LED Indicator
+	Offset: 0x000003
+	Size:     0x0001
+	Bit Offset: 3, Bit Width: 1	|---X----|
+	Value Type: offOn
+		0 -> off
+		1 -> on
+
+	Field: Keyboard Lock
+	Offset: 0x000003
+	Size:     0x0001
+	Bit Offset: 4, Bit Width: 1	|----X---|
+	Value Type: offOn
+		0 -> off
+		1 -> on
+
+	Field: Intro Screen
+	Offset: 0x000003
+	Size:     0x0001
+	Bit Offset: 5, Bit Width: 1	|-----X--|
+	Value Type: offOn
+		0 -> off
+		1 -> on
+
+	Field: Backlight
+	Offset: 0x000003
+	Size:     0x0001
+	Bit Offset: 6, Bit Width: 1	|------X-|
+	Value Type: offOn
+		0 -> off
+		1 -> on
+
+	Field: Power
+	Offset: 0x000003
+	Size:     0x0001
+	Bit Offset: 7, Bit Width: 1	|-------X|
+	Value Type: offOn
+		0 -> off
+		1 -> on
+
+	Field: GPS
+	Offset: 0x000004
+	Size:     0x0001
+	Bit Offset: 4, Bit Width: 1	|----X---|
+	Value Type: onOff
+		0 -> on
+		1 -> off
+
+	Field: Program Radio
+	Offset: 0x000004
+	Size:     0x0001
+	Bit Offset: 5, Bit Width: 1	|-----X--|
+	Value Type: onOff
+		0 -> on
+		1 -> off
+
+	Field: Display Mode
+	Offset: 0x000004
+	Size:     0x0001
+	Bit Offset: 6, Bit Width: 1	|------X-|
+	Value Type: offOn
+		0 -> off
+		1 -> on
+
+	Field: Password And Lock
+	Offset: 0x000004
+	Size:     0x0001
+	Bit Offset: 7, Bit Width: 1	|-------X|
+	Value Type: offOn
+		0 -> off
+		1 -> on
+
+Record: Radio Buttons
+Offset: 0x002327
+Size:     0x0001
+Max number of records: 4
+
+	Field: Button
+	Offset: 0x000000
+	Size:     0x0001
+	Value Type: radioButton
+		0 -> "Unassigned (default)"
+		1 -> "All alert Tones On/Off"
+		2 -> "Emergency On"
+		3 -> "Emergency Off"
+		4 -> "High/Low Power"
+		5 -> "Monitor"
+		6 -> "Nuisance Delete"
+		7 -> "One Touch Access 1"
+		8 -> "One Touch Access 2"
+		9 -> "One Touch Access 3"
+		10 -> "One Touch Access 4"
+		11 -> "One Touch Access 5"
+		12 -> "One Touch Access 6"
+		13 -> "Repeater/Talkaround"
+		14 -> "Scan On/Off"
+		21 -> "Squelch Tight/Normal"
+		22 -> "Privacy On/Off"
+		23 -> "VOX On/Off"
+		24 -> "Zone +"
+		25 -> "Zone Toggle"
+		26 -> "Battery Indicator"
+		30 -> "Manual Dial For Private"
+		31 -> "Lone Work On/Off"
+		38 -> "1750 Hz"
+		80 -> "Toggle Backlight (md380tools)"
+		81 -> "Set Talkgroup (md380tools)"
+		82 -> "Morse Narrator (md380tools)"
+		83 -> "Morse Repeat (md380tools)"
+		84 -> "Screen Toggle (md380tools)"
+		85 -> "Mic Gain 0/3/6 dB (md380tools)"
+		86 -> "Promiscuous Mode On/Off (md380tools)"
+
+Record: Button Definitions
+Offset: 0x002336
+Size:     0x0001
+
+	Field: Long Press Duration (mS)
+	Offset: 0x000000
+	Size:     0x0001
+	Value Type: span
+	Range of values:
+		minimum: 4, maximum: 15, step: 1, scale: 250
+
+Record: One Touch
+Offset: 0x002339
+Size:     0x0004
+Max number of records: 6
+
+	Field: Mode
+	Offset: 0x000000
+	Size:     0x0001
+	Bit Offset: 0, Bit Width: 6	|XXXXXX--|
+	Value Type: indexedStrings
+		48 -> "None"
+		52 -> "Digital"
+		58 -> "Analog"
+
+	Field: Call Type
+	Offset: 0x000000
+	Size:     0x0001
+	Bit Offset: 6, Bit Width: 2	|------XX|
+	Value Type: iStrings
+	Value indexes into strings:
+		"Call"
+		"Text Message"
+
+	Field: DTMF
+	Offset: 0x000000
+	Size:     0x0001
+	Bit Offset: 6, Bit Width: 2	|------XX|
+	Value Type: iStrings
+	Value indexes into strings:
+		"DTMF-1"
+		"DTMF-2"
+		"DTMF-3"
+		"DTMF-4"
+
+	Field: Text Message
+	Offset: 0x000001
+	Size:     0x0001
+	Value Type: derefListIndex
+
+	Field: Encode
+	Offset: 0x000001
+	Size:     0x0001
+	Value Type: iStrings
+	Value indexes into strings:
+		"To be implemented"
+
+	Field: Call
+	Offset: 0x000002
+	Size:     0x0002
+	Value Type: contactListIndex
+
+Record: Number Key
+Offset: 0x002351
+Size:     0x0002
+Max number of records: 10
+
+	Field: Contact
+	Offset: 0x000000
+	Size:     0x0002
+	Value Type: nkContactListIndex
+		0 -> "None"
+
+Record: Text Messages
+Offset: 0x0023a5
+Size:     0x0120
+Max number of records: 50
+
+	Field: Message
+	Offset: 0x000000
+	Size:     0x0120
+	Value Type: textMessage
+
+Record: Privacy Settings
+Offset: 0x005be5
+Size:     0x00b0
+
+	Field: Key Value (Enhanced)
+	Offset: 0x000000
+	Size:     0x0010
+	Max number of fields: 8
+	Value Type: hexadecimal32
+
+	Field: Key Value (Basic)
+	Offset: 0x000090
+	Size:     0x0002
+	Max number of fields: 16
+	Value Type: hexadecimal4
+
+Record: Contacts
+Offset: 0x0061a5
+Size:     0x0024
+Max number of records: 1000
+
+	Field: Contact Name
+	Offset: 0x000004
+	Size:     0x0020
+	Value Type: contactName
+
+	Field: Call ID
+	Offset: 0x000000
+	Size:     0x0003
+	Value Type: callID
+
+	Field: Call Type
+	Offset: 0x000003
+	Size:     0x0001
+	Bit Offset: 3, Bit Width: 5	|---XXXXX|
+	Value Type: callType
+		1 -> "Group"
+		2 -> "Private"
+		3 -> "All"
+
+	Field: Call Receive Tone
+	Offset: 0x000003
+	Size:     0x0001
+	Bit Offset: 2, Bit Width: 1	|--X-----|
+	Value Type: iStrings
+	Value indexes into strings:
+		"No"
+		"Yes"
+
+Record: RX Group Lists
+Offset: 0x00ee45
+Size:     0x0060
+Max number of records: 250
+
+	Field: RX Group List Name
+	Offset: 0x000000
+	Size:     0x0020
+	Value Type: name
+
+	Field: Contacts
+	Offset: 0x000020
+	Size:     0x0002
+	Max number of fields: 32
+	Value Type: contactListIndex
+
+Record: Zones
+Offset: 0x014c05
+Size:     0x0040
+Max number of records: 250
+
+	Field: Zone Name
+	Offset: 0x000000
+	Size:     0x0020
+	Value Type: name
+
+	Field: Channels
+	Offset: 0x000020
+	Size:     0x0002
+	Max number of fields: 16
+	Value Type: listIndex
+
+Record: Scan Lists
+Offset: 0x018a85
+Size:     0x0068
+Max number of records: 250
+
+	Field: Scan List Name
+	Offset: 0x000000
+	Size:     0x0020
+	Value Type: name
+
+	Field: Priority Channel 1
+	Offset: 0x000020
+	Size:     0x0002
+	Value Type: memberListIndex
+		0 -> "Selected"
+		65535 -> "None"
+
+	Field: Priority Channel 2
+	Offset: 0x000022
+	Size:     0x0002
+	Value Type: memberListIndex
+		0 -> "Selected"
+		65535 -> "None"
+
+	Field: Tx Designated Channel
+	Offset: 0x000024
+	Size:     0x0002
+	Value Type: listIndex
+		0 -> "Selected"
+		65535 -> "Last Active Channel"
+
+	Field: Signalling Hold Time (mS)
+	Offset: 0x000027
+	Size:     0x0001
+	Value Type: spanList
+	Range of values:
+		minimum: 2, maximum: 255, step: 1, scale: 25
+
+	Field: Priority Sample Time (mS)
+	Offset: 0x000028
+	Size:     0x0001
+	Value Type: spanList
+	Range of values:
+		minimum: 3, maximum: 31, step: 1, scale: 250
+
+	Field: Channels
+	Offset: 0x00002a
+	Size:     0x0002
+	Max number of fields: 31
+	Value Type: listIndex
+
+Record: Channels
+Offset: 0x01f025
+Size:     0x0040
+Max number of records: 1000
+
+	Field: Channel Name
+	Offset: 0x000020
+	Size:     0x0020
+	Value Type: name
+
+	Field: Rx Frequency (MHz)
+	Offset: 0x000010
+	Size:     0x0004
+	Value Type: frequency
+
+	Field: Tx Offset (MHz)
+	Offset: 0x000014
+	Size:     0x0004
+	Value Type: frequencyOffset
+
+	Field: Channel Mode
+	Offset: 0x000000
+	Size:     0x0001
+	Bit Offset: 6, Bit Width: 2	|------XX|
+	Value Type: indexedStrings
+		1 -> "Analog"
+		2 -> "Digital"
+
+	Field: Bandwidth (KHz)
+	Offset: 0x000000
+	Size:     0x0001
+	Bit Offset: 4, Bit Width: 2	|----XX--|
+	Value Type: bandwidth
+	Value indexes into strings:
+		"12.5"
+		"20"
+		"25"
+
+	Field: Scan List
+	Offset: 0x00000b
+	Size:     0x0001
+	Value Type: listIndex
+		0 -> "None"
+
+	Field: Squelch
+	Offset: 0x000000
+	Size:     0x0001
+	Bit Offset: 2, Bit Width: 1	|--X-----|
+	Value Type: iStrings
+	Value indexes into strings:
+		"Tight"
+		"Normal"
+
+	Field: Rx Ref Frequency
+	Offset: 0x000003
+	Size:     0x0001
+	Bit Offset: 6, Bit Width: 2	|------XX|
+	Value Type: iStrings
+	Value indexes into strings:
+		"Low"
+		"Medium"
+		"High"
+
+	Field: Tx Ref Frequency
+	Offset: 0x000004
+	Size:     0x0001
+	Bit Offset: 6, Bit Width: 2	|------XX|
+	Value Type: iStrings
+	Value indexes into strings:
+		"Low"
+		"Medium"
+		"High"
+
+	Field: TOT (S)
+	Offset: 0x000008
+	Size:     0x0001
+	Value Type: span
+	Range of values:
+		minimum: 0, maximum: 37, step: 1, scale: 15
+
+	Field: TOT Rekey Delay (S)
+	Offset: 0x000009
+	Size:     0x0001
+	Value Type: span
+	Range of values:
+		minimum: 0, maximum: 255, step: 1, scale: 1
+
+	Field: Power
+	Offset: 0x000004
+	Size:     0x0001
+	Bit Offset: 2, Bit Width: 1	|--X-----|
+	Value Type: iStrings
+	Value indexes into strings:
+		"Low"
+		"High"
+
+	Field: Admit Criteria
+	Offset: 0x000004
+	Size:     0x0001
+	Bit Offset: 0, Bit Width: 2	|XX------|
+	Value Type: iStrings
+	Value indexes into strings:
+		"Always"
+		"Channel free"
+		"CTCSS/DCS"
+		"Color code"
+
+	Field: Autoscan
+	Offset: 0x000000
+	Size:     0x0001
+	Bit Offset: 3, Bit Width: 1	|---X----|
+	Value Type: offOn
+		0 -> off
+		1 -> on
+
+	Field: Rx Only
+	Offset: 0x000001
+	Size:     0x0001
+	Bit Offset: 6, Bit Width: 1	|------X-|
+	Value Type: offOn
+		0 -> off
+		1 -> on
+
+	Field: Lone Worker
+	Offset: 0x000000
+	Size:     0x0001
+	Bit Offset: 0, Bit Width: 1	|X-------|
+	Value Type: offOn
+		0 -> off
+		1 -> on
+
+	Field: VOX
+	Offset: 0x000004
+	Size:     0x0001
+	Bit Offset: 3, Bit Width: 1	|---X----|
+	Value Type: offOn
+		0 -> off
+		1 -> on
+
+	Field: Allow Talkaround
+	Offset: 0x000001
+	Size:     0x0001
+	Bit Offset: 7, Bit Width: 1	|-------X|
+	Value Type: offOn
+		0 -> off
+		1 -> on
+
+	Field: Private Call Confimed
+	Offset: 0x000002
+	Size:     0x0001
+	Bit Offset: 1, Bit Width: 1	|-X------|
+	Value Type: offOn
+		0 -> off
+		1 -> on
+
+	Field: Emergency Alarm Ack
+	Offset: 0x000003
+	Size:     0x0001
+	Bit Offset: 4, Bit Width: 1	|----X---|
+	Value Type: offOn
+		0 -> off
+		1 -> on
+
+	Field: Data Call Confirmed
+	Offset: 0x000002
+	Size:     0x0001
+	Bit Offset: 0, Bit Width: 1	|X-------|
+	Value Type: offOn
+		0 -> off
+		1 -> on
+
+	Field: Compressed UDP Data Header
+	Offset: 0x000003
+	Size:     0x0001
+	Bit Offset: 1, Bit Width: 1	|-X------|
+	Value Type: offOn
+		0 -> off
+		1 -> on
+
+	Field: Talkaround
+	Offset: 0x000003
+	Size:     0x0001
+	Bit Offset: 2, Bit Width: 1	|--X-----|
+	Value Type: onOff
+		0 -> on
+		1 -> off
+
+	Field: Emergency System
+	Offset: 0x00000a
+	Size:     0x0001
+	Value Type: spanList
+	Range of values:
+		minimum: 0, maximum: 32, step: 1, scale: 1
+
+	Field: Contact Name
+	Offset: 0x000006
+	Size:     0x0002
+	Value Type: contactListIndex
+		0 -> "None"
+
+	Field: RX Group List
+	Offset: 0x00000c
+	Size:     0x0001
+	Value Type: listIndex
+		0 -> "None"
+
+	Field: Color Code
+	Offset: 0x000001
+	Size:     0x0001
+	Bit Offset: 0, Bit Width: 4	|XXXX----|
+	Value Type: spanList
+	Range of values:
+		minimum: 0, maximum: 15, step: 1, scale: 1
+
+	Field: Repeater Slot
+	Offset: 0x000001
+	Size:     0x0001
+	Bit Offset: 4, Bit Width: 2	|----XX--|
+	Value Type: indexedStrings
+		1 -> "1"
+		2 -> "2"
+
+	Field: Privacy
+	Offset: 0x000002
+	Size:     0x0001
+	Bit Offset: 2, Bit Width: 2	|--XX----|
+	Value Type: iStrings
+	Value indexes into strings:
+		"None"
+		"Basic"
+		"Enhanced"
+
+	Field: Privacy Number
+	Offset: 0x000002
+	Size:     0x0001
+	Bit Offset: 4, Bit Width: 4	|----XXXX|
+	Value Type: privacyNumber
+	Value indexes into strings:
+		"1"
+		"2"
+		"3"
+		"4"
+		"5"
+		"6"
+		"7"
+		"8"
+		"9"
+		"10"
+		"11"
+		"12"
+		"13"
+		"15"
+		"16"
+
+	Field: Display PTT ID
+	Offset: 0x000003
+	Size:     0x0001
+	Bit Offset: 0, Bit Width: 1	|X-------|
+	Value Type: onOff
+		0 -> on
+		1 -> off
+
+	Field: CTCSS/DCS Encode
+	Offset: 0x00001a
+	Size:     0x0002
+	Value Type: ctcssDcs
+
+	Field: Tx Signaling System
+	Offset: 0x00001d
+	Size:     0x0001
+	Value Type: iStrings
+	Value indexes into strings:
+		"Off"
+		"DTMF-1"
+		"DTMF-2"
+		"DTMF-3"
+		"DTMF-4"
+
+	Field: QT Reverse
+	Offset: 0x000004
+	Size:     0x0001
+	Bit Offset: 4, Bit Width: 1	|----X---|
+	Value Type: iStrings
+	Value indexes into strings:
+		"180"
+		"120"
+
+	Field: Reverse Burst/Turn Off Code
+	Offset: 0x000004
+	Size:     0x0001
+	Bit Offset: 5, Bit Width: 1	|-----X--|
+	Value Type: offOn
+		0 -> off
+		1 -> on
+
+	Field: CTCSS/DCS Decode
+	Offset: 0x000018
+	Size:     0x0002
+	Value Type: ctcssDcs
+
+	Field: Rx Signaling System
+	Offset: 0x00001c
+	Size:     0x0001
+	Value Type: iStrings
+	Value indexes into strings:
+		"Off"
+		"DTMF-1"
+		"DTMF-2"
+		"DTMF-3"
+		"DTMF-4"
+
+	Field: Decode 1
+	Offset: 0x00000e
+	Size:     0x0001
+	Bit Offset: 0, Bit Width: 1	|X-------|
+	Value Type: offOn
+		0 -> off
+		1 -> on
+
+	Field: Decode 2
+	Offset: 0x00000e
+	Size:     0x0001
+	Bit Offset: 1, Bit Width: 1	|-X------|
+	Value Type: offOn
+		0 -> off
+		1 -> on
+
+	Field: Decode 3
+	Offset: 0x00000e
+	Size:     0x0001
+	Bit Offset: 2, Bit Width: 1	|--X-----|
+	Value Type: offOn
+		0 -> off
+		1 -> on
+
+	Field: Decode 4
+	Offset: 0x00000e
+	Size:     0x0001
+	Bit Offset: 3, Bit Width: 1	|---X----|
+	Value Type: offOn
+		0 -> off
+		1 -> on
+
+	Field: Decode 5
+	Offset: 0x00000e
+	Size:     0x0001
+	Bit Offset: 4, Bit Width: 1	|----X---|
+	Value Type: offOn
+		0 -> off
+		1 -> on
+
+	Field: Decode 6
+	Offset: 0x00000e
+	Size:     0x0001
+	Bit Offset: 5, Bit Width: 1	|-----X--|
+	Value Type: offOn
+		0 -> off
+		1 -> on
+
+	Field: Decode 7
+	Offset: 0x00000e
+	Size:     0x0001
+	Bit Offset: 6, Bit Width: 1	|------X-|
+	Value Type: offOn
+		0 -> off
+		1 -> on
+
+	Field: Decode 8
+	Offset: 0x00000e
+	Size:     0x0001
+	Bit Offset: 7, Bit Width: 1	|-------X|
+	Value Type: offOn
+		0 -> off
+		1 -> on
+
+	Field: Receive GPS Info
+	Offset: 0x00001f
+	Size:     0x0001
+	Bit Offset: 6, Bit Width: 1	|------X-|
+	Value Type: onOff
+		0 -> on
+		1 -> off
+
+	Field: Send GPS Info
+	Offset: 0x00001f
+	Size:     0x0001
+	Bit Offset: 7, Bit Width: 1	|-------X|
+	Value Type: onOff
+		0 -> on
+		1 -> off
+
+	Field: GPS System
+	Offset: 0x00000d
+	Size:     0x0001
+	Bit Offset: 3, Bit Width: 5	|---XXXXX|
+	Value Type: spanList
+	Range of values:
+		minimum: 0, maximum: 16, step: 1, scale: 1
+
+	Field: In Call Criteria
+	Offset: 0x000005
+	Size:     0x0001
+	Bit Offset: 3, Bit Width: 1	|---X----|
+	Value Type: iStrings
+	Value indexes into strings:
+		"Always"
+		"Follow Admit Criteria"
+
+Record: GPS Systems
+Offset: 0x03ee65
+Size:     0x0010
+Max number of records: 16
+
+	Field: GPS Revert Channel
+	Offset: 0x000000
+	Size:     0x0002
+	Value Type: gpsListIndex
+		0 -> "Current Channel"
+
+	Field: GPS Default Report Interval (S)
+	Offset: 0x000002
+	Size:     0x0001
+	Value Type: gpsReportInterval
+	Range of values:
+		minimum: 0, maximum: 240, step: 1, scale: 30
+
+	Field: Destination ID
+	Offset: 0x000004
+	Size:     0x0002
+	Value Type: gpsListIndex
+		0 -> "None"
