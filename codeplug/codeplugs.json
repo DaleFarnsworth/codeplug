@@ -296,6 +296,33 @@
         "Channels_uv380",
         "GPSSystems"
       ]
+    },
+    {
+      "type": "RT84",
+      "models": [
+              "DM-1701"
+      ],
+      "ext": "rdt",
+      "rdtSize": 852533,
+      "headerSize": 549,
+      "trailerOffset": 262693,
+      "trailerSize": 16,
+      "recordTypes": [
+        "BasicInformation_uv380",
+        "GeneralSettings_rt84",
+        "MenuItems_noGPS",
+        "RadioButtons_rt84",
+        "ButtonDefinitions",
+        "OneTouch",
+        "NumberKey",
+        "TextMessages",
+        "PrivacySettings",
+        "Contacts_uv380",
+        "GroupLists",
+        "Zones_uv380",
+        "ScanLists_uv380",
+        "Channels_rt84"
+      ]
     }
   ],
   "records": [
@@ -391,6 +418,51 @@
         "GsBacklightTime",
         "GsSetKeypadLockTime",
         "GsDisableAllLeds",
+        "GsGroupCallHangTime",
+        "GsPrivateCallHangTime"
+      ]
+    },
+    {
+      "typeName": "General Settings",
+      "type": "GeneralSettings_rt84",
+      "offset": 8805,
+      "size": 144,
+      "fieldTypes": [
+        "GsRadioName",
+        "GsRadioID",
+        "GsIntroScreen",
+        "GsIntroScreenLine1",
+        "GsIntroScreenLine2",
+        "GsSavePreamble",
+        "GsSaveModeReceive",
+        "GsDisableAllTones",
+        "GsChFreeIndicationTone",
+        "GsTalkPermitTone",
+        "GsCallAlertToneDuration",
+        "GsScanDigitalHangTime",
+        "GsScanAnalogHangTime",
+        "GsLoneWorkerResponseTime",
+        "GsLoneWorkerReminderTime",
+        "GsPwAndLockEnable",
+        "GsPowerOnPassword",
+        "GsCHVoiceAnnouncement",
+        "GsMonitorType",
+        "GsVoxSensitivity",
+        "GsTxPreambleDuration",
+        "GsRxLowBatteryInterval",
+        "GsChannelsHangTime",
+        "GsPcProgPassword",
+        "GsRadioProgPassword",
+        "GsBacklightTime",
+        "GsSetKeypadLockTime",
+        "GsFreqChannelMode_uv380",
+        "GsModeSelectA",
+        "GsModeSelectB",
+        "GsTimeZone",
+        "GsBacklightTime",
+        "GsDisableAllLeds",
+        "GsGroupCallMatch",
+        "GsPrivateCallMatch",
         "GsGroupCallHangTime",
         "GsPrivateCallHangTime"
       ]
@@ -578,6 +650,41 @@
       ]
     },
     {
+      "typeName": "Menu Items",
+      "type": "MenuItems_noGPS",
+      "offset": 8981,
+      "size": 5,
+      "fieldTypes": [
+        "MiHangTime",
+        "MiRadioDisable",
+        "MiRadioEnable",
+        "MiRemoteMonitor",
+        "MiRadioCheck",
+        "MiManualDial",
+        "MiEdit",
+        "MiCallAlert",
+        "MiTextMessage",
+        "MiToneOrAlert",
+        "MiTalkaround",
+        "MiOutgoingRadio",
+        "MiAnswered",
+        "MiMissed",
+        "MiEditList",
+        "MiScan",
+        "MiProgramKey",
+        "MiVox",
+        "MiSquelch",
+        "MiLedIndicator",
+        "MiKeyboardLock",
+        "MiIntroScreen",
+        "MiBacklight",
+        "MiPower",
+        "MiProgramRadio",
+        "MiDisplayMode",
+        "MiPasswordAndLock"
+      ]
+    },
+    {
       "typeName": "Radio Buttons",
       "type": "RadioButtons",
       "offset": 8999,
@@ -591,6 +698,26 @@
         "Side Button 1 Long Press",
         "Side Button 2 Short Press",
         "Side Button 2 Long Press"
+      ]
+    },
+    {
+      "typeName": "Radio Buttons",
+      "type": "RadioButtons_rt84",
+      "offset": 8999,
+      "size": 1,
+      "max": 8,
+      "fieldTypes": [
+        "RbButton"
+      ],
+      "names": [
+        "Side Button 1 Short Press",
+        "Side Button 1 Long Press",
+        "Side Button 2 Short Press",
+        "Side Button 2 Long Press",
+        "P1 Short Press",
+        "P1 Long Press",
+        "P2 Short Press",
+        "P2 Long Press"
       ]
     },
     {
@@ -1072,6 +1199,69 @@
         "CiDisplayPTTID",
         "CiCtcssEncode",
         "CiTxSignallingSystem",
+        "CiQtReverse",
+        "CiReverseBurst",
+        "CiCtcssDecode",
+        "CiRxSignallingSystem",
+        "CiDecode1",
+        "CiDecode2",
+        "CiDecode3",
+        "CiDecode4",
+        "CiDecode5",
+        "CiDecode6",
+        "CiDecode7",
+        "CiDecode8"
+      ]
+    },
+    {
+      "typeName": "Channels",
+      "type": "Channels_rt84",
+      "offset": 262709,
+      "size": 64,
+      "max": 3000,
+      "delDesc": {
+        "offset": 16,
+        "size": 1,
+        "value": 255
+      },
+      "fieldTypes": [
+        "CiName",
+        "CiRxFrequency",
+        "CiTxFrequencyOffset",
+        "CiChannelMode",
+        "CiBandwidth",
+        "CiScanList_md40",
+        "CiSquelch",
+        "CiRxRefFrequency",
+        "CiTxRefFrequency",
+        "CiTot",
+        "CiTotRekeyDelay",
+        "CiPower_uv380",
+        "CiAdmitCriteria",
+        "CiAutoscan",
+        "CiRxOnly",
+        "CiLoneWorker",
+        "CiVox",
+        "CiAllowTalkaround",
+        "CiPrivateCallConfirmed",
+        "CiTalkaround",
+        "CiEmergencyAlarmAck",
+        "CiDataCallConfirmed",
+	"CiAllowInterrupt",
+        "CiDCDMSwitch",
+        "CiLeaderMS",
+        "CiEmergencySystem",
+        "CiContactName",
+        "CiGroupList",
+        "CiColorCode",
+        "CiRepeaterSlot",
+        "CiPrivacy",
+        "CiPrivacyNumber",
+        "CiInCallCriteria",
+        "CiDisplayPTTID",
+        "CiCtcssEncode",
+        "CiTxSignallingSystem",
+        "CiDQTTurnoffFreq",
         "CiQtReverse",
         "CiReverseBurst",
         "CiCtcssDecode",
@@ -2162,6 +2352,42 @@
       ]
     },
     {
+      "typeName": "Button",
+      "type": "RbButton_rt84",
+      "bitOffset": 0,
+      "bitSize": 8,
+      "valueType": "radioButton",
+      "indexedStrings": [
+        { "index": 0, "string": "Unassigned (default)" },
+        { "index": 1, "string": "All alert Tones On/Off" },
+        { "index": 2, "string": "Emergency On" },
+        { "index": 3, "string": "Emergency Off" },
+        { "index": 4, "string": "High/Low Power" },
+        { "index": 5, "string": "Monitor" },
+        { "index": 7, "string": "One Touch Access 1" },
+        { "index": 8, "string": "One Touch Access 2" },
+        { "index": 9, "string": "One Touch Access 3" },
+        { "index": 10, "string": "One Touch Access 4" },
+        { "index": 11, "string": "One Touch Access 5" },
+        { "index": 12, "string": "One Touch Access 6" },
+        { "index": 13, "string": "Repeater/Talkaround" },
+        { "index": 14, "string": "Scan On/Off" },
+        { "index": 21, "string": "Squelch Tight/Normal" },
+        { "index": 22, "string": "Privacy On/Off" },
+        { "index": 23, "string": "VOX On/Off" },
+        { "index": 24, "string": "Zone Select" },
+        { "index": 26, "string": "Battery Indicator" },
+        { "index": 31, "string": "Lone Work On/Off" },
+        { "index": 34, "string": "Record On/Off (Firmware)" },
+        { "index": 35, "string": "Record Playback (Firmware)" },
+        { "index": 36, "string": "Delete All Recorded (Firmware)" },
+        { "index": 38, "string": "1750 Hz" },
+        { "index": 47, "string": "Toggle Up/Down" },
+        { "index": 48, "string": "Right Key" },
+        { "index": 49, "string": "Left Key" }
+      ]
+    },
+   {
       "typeName": "Long Press Duration (mS)",
       "type": "BdLongPressDuration",
       "bitOffset": 0,
@@ -2986,7 +3212,13 @@
           "index": 0,
           "string": "None"
         }
-      ]
+      ],
+      "enable": {
+        "value": "None",
+        "disables": [
+          "CiAllowInterrupt"
+        ]
+      }
     },
     {
       "typeName": "TOT (S)",
@@ -3280,6 +3512,14 @@
           "CiLeaderMS"
         ]
       }
+    },
+    {
+      "typeName": "Allow Interrupt",
+      "type": "CiAllowInterrupt",
+      "bitOffset": 253,
+      "bitSize": 1,
+      "defaultValue": "Off",
+      "valueType": "onOff"
     },
     {
       "typeName": "Receive GPS Info",

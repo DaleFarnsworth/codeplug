@@ -36,6 +36,7 @@ const (
 	RtButtonDefinitions      RecordType = "ButtonDefinitions"
 	RtChannels_md380         RecordType = "Channels"
 	RtChannels_md40          RecordType = "Channels"
+	RtChannels_rt84          RecordType = "Channels"
 	RtChannels_uv380         RecordType = "Channels"
 	RtContacts               RecordType = "Contacts"
 	RtContacts_uv380         RecordType = "Contacts"
@@ -43,9 +44,11 @@ const (
 	RtGeneralSettings_md2017 RecordType = "GeneralSettings"
 	RtGeneralSettings_md380  RecordType = "GeneralSettings"
 	RtGeneralSettings_md40   RecordType = "GeneralSettings"
+	RtGeneralSettings_rt84   RecordType = "GeneralSettings"
 	RtGeneralSettings_uv380  RecordType = "GeneralSettings"
 	RtGroupLists             RecordType = "GroupLists"
 	RtMenuItems              RecordType = "MenuItems"
+	RtMenuItems_noGPS        RecordType = "MenuItems"
 	RtNumberKey              RecordType = "NumberKey"
 	RtOneTouch               RecordType = "OneTouch"
 	RtPrivacySettings        RecordType = "PrivacySettings"
@@ -53,6 +56,7 @@ const (
 	RtRadioButtons2          RecordType = "RadioButtons2"
 	RtRadioButtons_md2017    RecordType = "RadioButtons"
 	RtRadioButtons_md40      RecordType = "RadioButtons"
+	RtRadioButtons_rt84      RecordType = "RadioButtons"
 	RtRadioButtons_uv380     RecordType = "RadioButtons"
 	RtScanLists_md380        RecordType = "ScanLists"
 	RtScanLists_md40         RecordType = "ScanLists"
@@ -81,6 +85,7 @@ const (
 	FtBiLowFrequencyB             FieldType = "LowFrequencyB"
 	FtBiModel                     FieldType = "Model"
 	FtCiAdmitCriteria             FieldType = "AdmitCriteria"
+	FtCiAllowInterrupt            FieldType = "AllowInterrupt"
 	FtCiAllowTalkaround           FieldType = "AllowTalkaround"
 	FtCiAutoscan                  FieldType = "Autoscan"
 	FtCiBandwidth                 FieldType = "Bandwidth"
@@ -234,6 +239,7 @@ const (
 	FtPsEnhancedKey               FieldType = "EnhancedKey"
 	FtRbButton                    FieldType = "Button"
 	FtRbButton_md40               FieldType = "Button"
+	FtRbButton_rt84               FieldType = "Button"
 	FtRbButton_uv380              FieldType = "Button"
 	FtSlChannel_md380             FieldType = "Channel"
 	FtSlChannel_md40              FieldType = "Channel"
@@ -382,6 +388,7 @@ var codeplugInfos = []*CodeplugInfo{
 	&cpRT3S,
 	&cpMD2017,
 	&cpRT82,
+	&cpRT84,
 }
 
 var cpMD380 = CodeplugInfo{
@@ -675,6 +682,34 @@ var cpRT82 = CodeplugInfo{
 	},
 }
 
+var cpRT84 = CodeplugInfo{
+	Type: "RT84",
+	Models: []string{
+		"DM-1701",
+	},
+	Ext:           "rdt",
+	RdtSize:       852533,
+	HeaderSize:    549,
+	TrailerOffset: 262693,
+	TrailerSize:   16,
+	RecordInfos: []*recordInfo{
+		&riBasicInformation_uv380,
+		&riGeneralSettings_rt84,
+		&riMenuItems_noGPS,
+		&riRadioButtons_rt84,
+		&riButtonDefinitions,
+		&riOneTouch,
+		&riNumberKey,
+		&riTextMessages,
+		&riPrivacySettings,
+		&riContacts_uv380,
+		&riGroupLists,
+		&riZones_uv380,
+		&riScanLists_uv380,
+		&riChannels_rt84,
+	},
+}
+
 var riBasicInformation_md380 = recordInfo{
 	rType:    RtBasicInformation_md380,
 	typeName: "Basic Information",
@@ -862,6 +897,70 @@ var riChannels_md40 = recordInfo{
 		&fiCiDisplayPTTID,
 		&fiCiCtcssEncode,
 		&fiCiTxSignallingSystem,
+		&fiCiQtReverse,
+		&fiCiReverseBurst,
+		&fiCiCtcssDecode,
+		&fiCiRxSignallingSystem,
+		&fiCiDecode1,
+		&fiCiDecode2,
+		&fiCiDecode3,
+		&fiCiDecode4,
+		&fiCiDecode5,
+		&fiCiDecode6,
+		&fiCiDecode7,
+		&fiCiDecode8,
+	},
+}
+
+var riChannels_rt84 = recordInfo{
+	rType:    RtChannels_rt84,
+	typeName: "Channels",
+	max:      3000,
+	offset:   262709,
+	size:     64,
+	delDesc: &delDesc{
+		offset: 16,
+		size:   1,
+		value:  255,
+	},
+	fieldInfos: []*fieldInfo{
+		&fiCiName,
+		&fiCiRxFrequency,
+		&fiCiTxFrequencyOffset,
+		&fiCiChannelMode,
+		&fiCiBandwidth,
+		&fiCiScanList_md40,
+		&fiCiSquelch,
+		&fiCiRxRefFrequency,
+		&fiCiTxRefFrequency,
+		&fiCiTot,
+		&fiCiTotRekeyDelay,
+		&fiCiPower_uv380,
+		&fiCiAdmitCriteria,
+		&fiCiAutoscan,
+		&fiCiRxOnly,
+		&fiCiLoneWorker,
+		&fiCiVox,
+		&fiCiAllowTalkaround,
+		&fiCiPrivateCallConfirmed,
+		&fiCiTalkaround,
+		&fiCiEmergencyAlarmAck,
+		&fiCiDataCallConfirmed,
+		&fiCiAllowInterrupt,
+		&fiCiDCDMSwitch,
+		&fiCiLeaderMS,
+		&fiCiEmergencySystem,
+		&fiCiContactName,
+		&fiCiGroupList,
+		&fiCiColorCode,
+		&fiCiRepeaterSlot,
+		&fiCiPrivacy,
+		&fiCiPrivacyNumber,
+		&fiCiInCallCriteria,
+		&fiCiDisplayPTTID,
+		&fiCiCtcssEncode,
+		&fiCiTxSignallingSystem,
+		&fiCiDQTTurnoffFreq,
 		&fiCiQtReverse,
 		&fiCiReverseBurst,
 		&fiCiCtcssDecode,
@@ -1131,6 +1230,53 @@ var riGeneralSettings_md40 = recordInfo{
 	},
 }
 
+var riGeneralSettings_rt84 = recordInfo{
+	rType:    RtGeneralSettings_rt84,
+	typeName: "General Settings",
+	max:      1,
+	offset:   8805,
+	size:     144,
+	fieldInfos: []*fieldInfo{
+		&fiGsRadioName,
+		&fiGsRadioID,
+		&fiGsIntroScreen,
+		&fiGsIntroScreenLine1,
+		&fiGsIntroScreenLine2,
+		&fiGsSavePreamble,
+		&fiGsSaveModeReceive,
+		&fiGsDisableAllTones,
+		&fiGsChFreeIndicationTone,
+		&fiGsTalkPermitTone,
+		&fiGsCallAlertToneDuration,
+		&fiGsScanDigitalHangTime,
+		&fiGsScanAnalogHangTime,
+		&fiGsLoneWorkerResponseTime,
+		&fiGsLoneWorkerReminderTime,
+		&fiGsPwAndLockEnable,
+		&fiGsPowerOnPassword,
+		&fiGsCHVoiceAnnouncement,
+		&fiGsMonitorType,
+		&fiGsVoxSensitivity,
+		&fiGsTxPreambleDuration,
+		&fiGsRxLowBatteryInterval,
+		&fiGsChannelsHangTime,
+		&fiGsPcProgPassword,
+		&fiGsRadioProgPassword,
+		&fiGsBacklightTime,
+		&fiGsSetKeypadLockTime,
+		&fiGsFreqChannelMode_uv380,
+		&fiGsModeSelectA,
+		&fiGsModeSelectB,
+		&fiGsTimeZone,
+		&fiGsBacklightTime,
+		&fiGsDisableAllLeds,
+		&fiGsGroupCallMatch,
+		&fiGsPrivateCallMatch,
+		&fiGsGroupCallHangTime,
+		&fiGsPrivateCallHangTime,
+	},
+}
+
 var riGeneralSettings_uv380 = recordInfo{
 	rType:    RtGeneralSettings_uv380,
 	typeName: "General Settings",
@@ -1234,6 +1380,43 @@ var riMenuItems = recordInfo{
 		&fiMiBacklight,
 		&fiMiPower,
 		&fiMiGps,
+		&fiMiProgramRadio,
+		&fiMiDisplayMode,
+		&fiMiPasswordAndLock,
+	},
+}
+
+var riMenuItems_noGPS = recordInfo{
+	rType:    RtMenuItems_noGPS,
+	typeName: "Menu Items",
+	max:      1,
+	offset:   8981,
+	size:     5,
+	fieldInfos: []*fieldInfo{
+		&fiMiHangTime,
+		&fiMiRadioDisable,
+		&fiMiRadioEnable,
+		&fiMiRemoteMonitor,
+		&fiMiRadioCheck,
+		&fiMiManualDial,
+		&fiMiEdit,
+		&fiMiCallAlert,
+		&fiMiTextMessage,
+		&fiMiToneOrAlert,
+		&fiMiTalkaround,
+		&fiMiOutgoingRadio,
+		&fiMiAnswered,
+		&fiMiMissed,
+		&fiMiEditList,
+		&fiMiScan,
+		&fiMiProgramKey,
+		&fiMiVox,
+		&fiMiSquelch,
+		&fiMiLedIndicator,
+		&fiMiKeyboardLock,
+		&fiMiIntroScreen,
+		&fiMiBacklight,
+		&fiMiPower,
 		&fiMiProgramRadio,
 		&fiMiDisplayMode,
 		&fiMiPasswordAndLock,
@@ -1363,6 +1546,27 @@ var riRadioButtons_md40 = recordInfo{
 	},
 	fieldInfos: []*fieldInfo{
 		&fiRbButton_md40,
+	},
+}
+
+var riRadioButtons_rt84 = recordInfo{
+	rType:    RtRadioButtons_rt84,
+	typeName: "Radio Buttons",
+	max:      8,
+	offset:   8999,
+	size:     1,
+	names: []string{
+		"Side Button 1 Short Press",
+		"Side Button 1 Long Press",
+		"Side Button 2 Short Press",
+		"Side Button 2 Long Press",
+		"P1 Short Press",
+		"P1 Long Press",
+		"P2 Short Press",
+		"P2 Long Press",
+	},
+	fieldInfos: []*fieldInfo{
+		&fiRbButton,
 	},
 }
 
@@ -1706,6 +1910,23 @@ var fiCiAdmitCriteria = fieldInfo{
 	},
 }
 
+var fiCiAllowInterrupt = fieldInfo{
+	fType:        FtCiAllowInterrupt,
+	typeName:     "Allow Interrupt",
+	max:          1,
+	bitOffset:    253,
+	bitSize:      1,
+	valueType:    VtOnOff,
+	defaultValue: "Off",
+	enablerType:  FtCiContactName,
+	enablers: []enabler{
+		enabler{
+			value:  "None",
+			enable: false,
+		},
+	},
+}
+
 var fiCiAllowTalkaround = fieldInfo{
 	fType:        FtCiAllowTalkaround,
 	typeName:     "Allow Talkaround",
@@ -1841,7 +2062,10 @@ var fiCiContactName = fieldInfo{
 		IndexedString{0, "None"},
 	},
 	listRecordType: RtContacts,
-	enablerType:    FtCiChannelMode,
+	enables: []FieldType{
+		FtCiAllowInterrupt,
+	},
+	enablerType: FtCiChannelMode,
 	enablers: []enabler{
 		enabler{
 			value:  "Digital",
@@ -3008,11 +3232,11 @@ var fiGsLockUnlock = fieldInfo{
 	enablerType: FtGsFreqChannelMode_uv380,
 	enablers: []enabler{
 		enabler{
-			value:  "Frequency",
+			value:  "VFO",
 			enable: false,
 		},
 		enabler{
-			value:  "VFO",
+			value:  "Frequency",
 			enable: false,
 		},
 	},
@@ -4015,6 +4239,44 @@ var fiRbButton_md40 = fieldInfo{
 		IndexedString{34, "Record On/Off (Firmware)"},
 		IndexedString{35, "Record Playback (Firmware)"},
 		IndexedString{36, "Delete All Recorded (Firmware)"},
+	},
+}
+
+var fiRbButton_rt84 = fieldInfo{
+	fType:     FtRbButton_rt84,
+	typeName:  "Button",
+	max:       1,
+	bitOffset: 0,
+	bitSize:   8,
+	valueType: VtRadioButton,
+	indexedStrings: &[]IndexedString{
+		IndexedString{0, "Unassigned (default)"},
+		IndexedString{1, "All alert Tones On/Off"},
+		IndexedString{2, "Emergency On"},
+		IndexedString{3, "Emergency Off"},
+		IndexedString{4, "High/Low Power"},
+		IndexedString{5, "Monitor"},
+		IndexedString{7, "One Touch Access 1"},
+		IndexedString{8, "One Touch Access 2"},
+		IndexedString{9, "One Touch Access 3"},
+		IndexedString{10, "One Touch Access 4"},
+		IndexedString{11, "One Touch Access 5"},
+		IndexedString{12, "One Touch Access 6"},
+		IndexedString{13, "Repeater/Talkaround"},
+		IndexedString{14, "Scan On/Off"},
+		IndexedString{21, "Squelch Tight/Normal"},
+		IndexedString{22, "Privacy On/Off"},
+		IndexedString{23, "VOX On/Off"},
+		IndexedString{24, "Zone Select"},
+		IndexedString{26, "Battery Indicator"},
+		IndexedString{31, "Lone Work On/Off"},
+		IndexedString{34, "Record On/Off (Firmware)"},
+		IndexedString{35, "Record Playback (Firmware)"},
+		IndexedString{36, "Delete All Recorded (Firmware)"},
+		IndexedString{38, "1750 Hz"},
+		IndexedString{47, "Toggle Up/Down"},
+		IndexedString{48, "Right Key"},
+		IndexedString{49, "Left Key"},
 	},
 }
 
