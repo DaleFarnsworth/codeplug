@@ -3262,7 +3262,7 @@
     {
       "typeName": "Leader/MS",
       "type": "CiLeaderMS",
-      "bitOffset": 252,
+      "bitOffset": 251,
       "bitSize": 1,
       "defaultValue": "Off",
       "valueType": "onOff"
@@ -3270,7 +3270,7 @@
     {
       "typeName": "DCDM Switch",
       "type": "CiDCDMSwitch",
-      "bitOffset": 253,
+      "bitOffset": 252,
       "bitSize": 1,
       "defaultValue": "Off",
       "valueType": "onOff",
