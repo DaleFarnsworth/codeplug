@@ -439,9 +439,12 @@ func (r *Record) makeNameUnique() error {
 
 	maxNameLen := nameField.bitSize / 16
 
-	for len(baseName) > 0 {
+	for {
 		suffix := fmt.Sprintf("%d", n)
 		for len(baseName)+len(suffix) > maxNameLen {
+			if len(baseName) <= 0 {
+				break
+			}
 			baseName = baseName[:len(baseName)-1]
 		}
 		newName := baseName + fmt.Sprintf("%d", n)
