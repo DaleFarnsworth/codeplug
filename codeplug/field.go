@@ -1568,7 +1568,7 @@ func (v *name) setString(f *Field, s string, force bool) error {
 	if length > f.size()/2 {
 		return fmt.Errorf("name too long")
 	} else if length == 0 {
-		return fmt.Errorf("name cannot be empth")
+		return fmt.Errorf("name cannot be empty")
 	}
 
 	_, err := stringToUcs2Bytes(string(*v), f.size())
