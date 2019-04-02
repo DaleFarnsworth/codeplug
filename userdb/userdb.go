@@ -41,7 +41,7 @@ import (
 
 var specialUsersURL = "http://registry.dstar.su/api/node.php"
 var fixedUsersURL = "https://raw.githubusercontent.com/travisgoodspeed/md380tools/master/db/fixed.csv"
-var radioidUsersURL = "https://www.radioid.net/static/users_quoted.csv"
+var radioidUsersURL = "https://www.radioid.net/static/users.json"
 var hamdigitalUsersURL = "https://ham-digital.org/status/users_quoted.csv"
 var reflectorUsersURL = "http://registry.dstar.su/reflector.db"
 var curatedUsersURL = "https://farnsworth.org/dale/md380tools/userdb/curated.csv"
@@ -549,45 +549,53 @@ func getURLLines(url string) ([]string, error) {
 	return lines[:len(lines)-1], nil
 }
 
+type RadioidTop struct {
+	RadioidUsers []*RadioidUser `json:"users"`
+}
+
+type RadioidUser struct {
+	ID       string `json:"radio_id"`
+	Callsign string `json:"callsign"`
+	Name     string `json:"name"`
+	Surname  string `json:"surname"`
+	City     string `json:"city"`
+	State    string `json:"state"`
+	Country  string `json:"country"`
+}
+
 func getRadioidUsers() ([]*User, error) {
-	lines, err := getURLLines(radioidUsersURL)
+	bytes, err := getURLBytes(radioidUsersURL)
+	if err != nil {
+		return nil, err
+	}
+
+	var top RadioidTop
+	err = json.Unmarshal(bytes, &top)
 	if err != nil {
 		errFmt := "error getting radioid users database: %s: %s"
 		err = fmt.Errorf(errFmt, radioidUsersURL, err.Error())
 		return nil, err
 	}
 
-	if len(lines) < 50000 {
+	if len(top.RadioidUsers) < 50000 {
 		errFmt := "too few radioid users database entries: %s: %d"
-		err = fmt.Errorf(errFmt, radioidUsersURL, len(lines))
+		err = fmt.Errorf(errFmt, radioidUsersURL, len(top.RadioidUsers))
 		return nil, err
 	}
 
-	users := make([]*User, 0, len(lines))
-	for _, line := range lines {
-		line = strings.Trim(line, `"`)
-		fields := strings.Split(line, `","`)
-
-		u := &User{
-			ID:       fields[0],
-			Callsign: fields[1],
-			Name:     fields[2],
-			City:     fields[3],
-			State:    fields[4],
-			Country:  fields[5],
+	users := make([]*User, 0)
+	for _, ru := range top.RadioidUsers {
+		if ru.Callsign == "RADIOID" {
+			continue
 		}
 
-		switch len(fields) {
-		case 7:
-		case 6:
-			if strings.HasSuffix(u.Country, `",`) {
-				u.Country = u.Country[0 : len(u.Country)-2]
-				break
-			}
-			continue
-
-		default:
-			continue
+		u := &User{
+			ID:       ru.ID,
+			Callsign: ru.Callsign,
+			Name:     ru.Name + " " + ru.Surname,
+			City:     ru.City,
+			State:    ru.State,
+			Country:  ru.Country,
 		}
 
 		users = append(users, u)
