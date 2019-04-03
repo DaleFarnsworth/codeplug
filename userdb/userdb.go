@@ -36,7 +36,7 @@ import (
 	"strings"
 	"time"
 
-	l "github.com/dalefarnsworth/codeplug/debug"
+	"github.com/dalefarnsworth/codeplug/debug"
 )
 
 var specialUsersURL = "http://registry.dstar.su/api/node.php"
@@ -44,6 +44,8 @@ var fixedUsersURL = "https://raw.githubusercontent.com/travisgoodspeed/md380tool
 var radioidUsersURL = "https://www.radioid.net/static/users.json"
 var hamdigitalUsersURL = "https://ham-digital.org/status/users_quoted.csv"
 var reflectorUsersURL = "http://registry.dstar.su/reflector.db"
+var overrideUsersURL = "https://farnsworth.org/dale/md380tools/userdb/override.csv"
+var pd1wpUsersURL = "https://farnsworth.org/dale/md380tools/userdb/pd1wp.csv"
 var curatedUsersURL = "https://farnsworth.org/dale/md380tools/userdb/curated.csv"
 
 var transportTimeout = 20
@@ -113,11 +115,18 @@ var DefaultOptions = &Options{
 	TitleCase:          true,
 }
 
-var nonCuratedGetUsersFuncs = []func() ([]*User, error){
+var getInputUsersFuncs = []func() ([]*User, error){
+	getpd1wpUsers,
 	getFixedUsers,
+	getReflectorUsers,
 	getHamdigitalUsers,
 	getRadioidUsers,
-	getReflectorUsers,
+	getpd1wpUsersNames,
+	getOverrideUsers,
+}
+
+var getCuratedUsersFuncs = []func() ([]*User, error){
+	getCuratedUsers,
 }
 
 var stateAbbreviations map[string]string
@@ -171,15 +180,28 @@ func init() {
 	}
 }
 
-// New - Instantiate and initialize a new users db and return a pointer to it.
-func New() *UsersDB {
+// Curated - Instantiate and initialize a new users db and return a pointer to it.
+func Curated() *UsersDB {
 	db := &UsersDB{
 		progressFunc: func() error { return nil },
 	}
 
 	db.SetOptions(DefaultOptions)
-	db.getUsersFuncs = nonCuratedGetUsersFuncs
-	db.getUsersFuncs = append(db.getUsersFuncs, getCuratedUsers)
+	db.getUsersFuncs = getCuratedUsersFuncs
+
+	return db
+}
+
+var New = Curated
+
+// Input - Instantiate and initialize a new users db and return a pointer to it.
+func Input() *UsersDB {
+	db := &UsersDB{
+		progressFunc: func() error { return nil },
+	}
+
+	db.SetOptions(DefaultOptions)
+	db.getUsersFuncs = getInputUsersFuncs
 
 	return db
 }
@@ -621,7 +643,9 @@ func getHamdigitalUsers() ([]*User, error) {
 	for i, line := range lines {
 		line = strings.Trim(line, `"`)
 		fields := strings.Split(line, `","`)
-
+		if len(fields) < 6 {
+			continue
+		}
 		users[i] = &User{
 			ID:       fields[0],
 			Callsign: fields[1],
@@ -751,9 +775,89 @@ func getFixedUsers() ([]*User, error) {
 	users := make([]*User, len(lines))
 	for i, line := range lines {
 		fields := strings.Split(line, ",")
+		if len(fields) < 2 {
+			continue
+		}
 		users[i] = &User{
 			ID:       fields[0],
 			Callsign: fields[1],
+		}
+	}
+	return users, nil
+}
+
+func getpd1wpUsers() ([]*User, error) {
+	lines, err := getURLLines(pd1wpUsersURL)
+	if err != nil {
+		errFmt := "getting pd1wp users: %s: %s"
+		err = fmt.Errorf(errFmt, pd1wpUsersURL, err.Error())
+		return nil, err
+	}
+
+	users := make([]*User, len(lines))
+	for i, line := range lines {
+		fields := strings.Split(line, ",")
+		if len(fields) < 7 {
+			continue
+		}
+		users[i] = &User{
+			ID:       fields[0],
+			Callsign: fields[1],
+			Name:     fields[2],
+			City:     fields[3],
+			State:    fields[4],
+			Nick:     fields[5],
+			Country:  fields[6],
+		}
+	}
+	return users, nil
+}
+
+func getpd1wpUsersNames() ([]*User, error) {
+	lines, err := getURLLines(pd1wpUsersURL)
+	if err != nil {
+		errFmt := "getting pd1wp users: %s: %s"
+		err = fmt.Errorf(errFmt, pd1wpUsersURL, err.Error())
+		return nil, err
+	}
+
+	users := make([]*User, len(lines))
+	for i, line := range lines {
+		fields := strings.Split(line, ",")
+		if len(fields) < 7 {
+			continue
+		}
+		users[i] = &User{
+			ID:   fields[0],
+			Name: fields[2],
+			Nick: fields[5],
+		}
+	}
+	return users, nil
+}
+
+func getOverrideUsers() ([]*User, error) {
+	lines, err := getURLLines(overrideUsersURL)
+	if err != nil {
+		errFmt := "getting override users: %s: %s"
+		err = fmt.Errorf(errFmt, overrideUsersURL, err.Error())
+		return nil, err
+	}
+
+	users := make([]*User, len(lines))
+	for i, line := range lines {
+		fields := strings.Split(line, ",")
+		if len(fields) < 7 {
+			continue
+		}
+		users[i] = &User{
+			ID:       fields[0],
+			Callsign: fields[1],
+			Name:     fields[2],
+			City:     fields[3],
+			State:    fields[4],
+			Nick:     fields[5],
+			Country:  fields[6],
 		}
 	}
 	return users, nil
@@ -819,6 +923,9 @@ func getReflectorUsers() ([]*User, error) {
 	for i, line := range lines[1:] {
 		line := strings.Replace(line, "@", ",", 2)
 		fields := strings.Split(line, ",")
+		if len(fields) < 2 {
+			continue
+		}
 		users[i] = &User{
 			ID:       fields[0],
 			Callsign: fields[1],
@@ -900,15 +1007,12 @@ func do(index int, f func() ([]*User, error), resultChan chan result) {
 
 // CuratedUsers - Return a slice containing the PD1WP list of DMR users
 func (db *UsersDB) CuratedUsers() ([]*User, error) {
-	db.getUsersFuncs = []func() ([]*User, error){
-		getCuratedUsers,
-	}
+	db.getUsersFuncs = getCuratedUsersFuncs
 	return db.Users()
 }
 
-// NonCuratedUsers - Return a list of users retrieved by conventional means
-func (db *UsersDB) NonCuratedUsers() ([]*User, error) {
-	db.getUsersFuncs = nonCuratedGetUsersFuncs
+func (db *UsersDB) InputUsers() ([]*User, error) {
+	db.getUsersFuncs = getInputUsersFuncs
 	return db.Users()
 }
 
