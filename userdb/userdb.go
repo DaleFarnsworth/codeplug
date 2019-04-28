@@ -79,7 +79,7 @@ type Options struct {
 
 // User - A structure holding information about a user in the databae
 type User struct {
-	ID       string
+	ID       int
 	Callsign string
 	Name     string
 	City     string
@@ -373,12 +373,7 @@ func asciify(field string) string {
 }
 
 func (u *User) fixCallsigns() {
-	id64, err := strconv.ParseUint(u.ID, 10, 24)
-	if err != nil {
-		return
-	}
-	id := int(id64)
-	if id < 1000000 {
+	if u.ID < 1000000 {
 		return
 	}
 	u.Callsign = strings.Replace(u.Callsign, " ", "", -1)
@@ -576,7 +571,7 @@ type RadioidTop struct {
 }
 
 type RadioidUser struct {
-	ID       string `json:"radio_id"`
+	ID       int    `json:"radio_id"`
 	Callsign string `json:"callsign"`
 	Name     string `json:"name"`
 	Surname  string `json:"surname"`
@@ -625,6 +620,18 @@ func getRadioidUsers() ([]*User, error) {
 	return users, nil
 }
 
+func stringToID(s string) (int, error) {
+	s = strings.TrimPrefix(s, "#")
+	if s == "" {
+		return 0, nil
+	}
+	id64, err := strconv.ParseUint(s, 10, 24)
+	if err != nil {
+		return 0, err
+	}
+	return int(id64), nil
+}
+
 func getHamdigitalUsers() ([]*User, error) {
 	lines, err := getURLLines(hamdigitalUsersURL)
 	if err != nil {
@@ -646,8 +653,12 @@ func getHamdigitalUsers() ([]*User, error) {
 		if len(fields) < 6 {
 			continue
 		}
+		id, err := stringToID(fields[0])
+		if err != nil {
+			return nil, err
+		}
 		users[i] = &User{
-			ID:       fields[0],
+			ID:       id,
 			Callsign: fields[1],
 			Name:     fields[2],
 			City:     fields[3],
@@ -670,8 +681,12 @@ func getCuratedUsers() ([]*User, error) {
 		if len(fields) < 7 {
 			continue
 		}
+		id, err := stringToID(fields[0])
+		if err != nil {
+			return nil, err
+		}
 		users[i] = &User{
-			ID:       fields[0],
+			ID:       id,
 			Callsign: fields[1],
 			Name:     fields[2],
 			City:     fields[3],
@@ -712,7 +727,7 @@ func linesToUsers(url string, lines []string) ([]*User, error) {
 			fields = fields[:7]
 		}
 		user := &User{
-			ID:       fields[0],
+			ID:       int(id),
 			Callsign: fields[1],
 			Name:     fields[2],
 			City:     fields[3],
@@ -778,8 +793,12 @@ func getFixedUsers() ([]*User, error) {
 		if len(fields) < 2 {
 			continue
 		}
+		id, err := stringToID(fields[0])
+		if err != nil {
+			return nil, err
+		}
 		users[i] = &User{
-			ID:       fields[0],
+			ID:       id,
 			Callsign: fields[1],
 		}
 	}
@@ -800,8 +819,12 @@ func getpd1wpUsers() ([]*User, error) {
 		if len(fields) < 7 {
 			continue
 		}
+		id, err := stringToID(fields[0])
+		if err != nil {
+			return nil, err
+		}
 		users[i] = &User{
-			ID:       fields[0],
+			ID:       id,
 			Callsign: fields[1],
 			Name:     fields[2],
 			City:     fields[3],
@@ -827,8 +850,12 @@ func getpd1wpUsersNames() ([]*User, error) {
 		if len(fields) < 7 {
 			continue
 		}
+		id, err := stringToID(fields[0])
+		if err != nil {
+			return nil, err
+		}
 		users[i] = &User{
-			ID:   fields[0],
+			ID:   id,
 			Name: fields[2],
 			Nick: fields[5],
 		}
@@ -850,8 +877,12 @@ func getOverrideUsers() ([]*User, error) {
 		if len(fields) < 7 {
 			continue
 		}
+		id, err := stringToID(fields[0])
+		if err != nil {
+			return nil, err
+		}
 		users[i] = &User{
-			ID:       fields[0],
+			ID:       id,
 			Callsign: fields[1],
 			Name:     fields[2],
 			City:     fields[3],
@@ -901,8 +932,12 @@ func getSpecialUsers(url string) ([]*User, error) {
 		if len(fields) < 7 {
 			continue
 		}
+		id, err := stringToID(fields[0])
+		if err != nil {
+			return nil, err
+		}
 		users[i] = &User{
-			ID:       fields[0],
+			ID:       id,
 			Callsign: fields[1],
 			Name:     fields[2],
 			Country:  fields[6],
@@ -926,8 +961,12 @@ func getReflectorUsers() ([]*User, error) {
 		if len(fields) < 2 {
 			continue
 		}
+		id, err := stringToID(fields[0])
+		if err != nil {
+			return nil, err
+		}
 		users[i] = &User{
-			ID:       fields[0],
+			ID:       id,
 			Callsign: fields[1],
 		}
 	}
@@ -937,15 +976,10 @@ func getReflectorUsers() ([]*User, error) {
 func mergeAndSort(users []*User, opts *Options) []*User {
 	idMap := make(map[int]*User)
 	for _, u := range users {
-		if u == nil || u.ID == "" {
+		if u == nil || u.ID == 0 {
 			continue
 		}
-		u.ID = strings.TrimPrefix(u.ID, "#")
-		id64, err := strconv.ParseUint(u.ID, 10, 24)
-		if err != nil {
-			continue
-		}
-		id := int(id64)
+		id := u.ID
 		existing := idMap[id]
 		if existing == nil {
 			idMap[int(id)] = u
@@ -1147,7 +1181,7 @@ func (db *UsersDB) WriteMD380ToolsFile(filename string, progress func(cur int) e
 	db.filename = filename
 	db.progressCallback = progress
 	db.printFunc = func(u *User) string {
-		return fmt.Sprintf("%s,%s,%s,%s,%s,%s,%s\n",
+		return fmt.Sprintf("%d,%s,%s,%s,%s,%s,%s\n",
 			u.ID, u.Callsign, u.Name, u.City, u.State, u.Nick, u.Country)
 	}
 
