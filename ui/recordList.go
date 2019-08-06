@@ -336,10 +336,10 @@ func (w *Window) initRecordModel(writable bool) {
 			names := *record.ListNames()
 			names = codeplug.RemoveSuffixes(names)
 			if row >= 0 && row < len(names) {
-				return core.NewQVariant14(names[row])
+				return core.NewQVariant12(names[row])
 			}
 			if row < len(names)+extraRows {
-				return core.NewQVariant14("")
+				return core.NewQVariant12("")
 			}
 		}
 

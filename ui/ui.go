@@ -104,28 +104,28 @@ func (as *AppSettings) Sync() {
 }
 
 func (as *AppSettings) SetBool(str string, b bool) {
-	as.qSettings.SetValue(str, core.NewQVariant11(b))
+	as.qSettings.SetValue(str, core.NewQVariant9(b))
 }
 
 func (as *AppSettings) Bool(str string, deflt bool) bool {
-	return as.qSettings.Value(str, core.NewQVariant11(deflt)).ToBool()
+	return as.qSettings.Value(str, core.NewQVariant9(deflt)).ToBool()
 }
 
 func (as *AppSettings) SetInt(str string, i int) {
-	as.qSettings.SetValue(str, core.NewQVariant7(i))
+	as.qSettings.SetValue(str, core.NewQVariant5(i))
 }
 
 func (as *AppSettings) Int(str string, deflt int) int {
-	var ok bool
-	return as.qSettings.Value(str, core.NewQVariant7(deflt)).ToInt(ok)
+	var ok *bool
+	return as.qSettings.Value(str, core.NewQVariant5(deflt)).ToInt(ok)
 }
 
 func (as *AppSettings) SetString(str string, s string) {
-	as.qSettings.SetValue(str, core.NewQVariant17(s))
+	as.qSettings.SetValue(str, core.NewQVariant15(s))
 }
 
 func (as *AppSettings) String(str string, deflt string) string {
-	return as.qSettings.Value(str, core.NewQVariant17(deflt)).ToString()
+	return as.qSettings.Value(str, core.NewQVariant15(deflt)).ToString()
 }
 
 func (as *AppSettings) BeginWriteArray(prefix string, size int) {
@@ -1681,14 +1681,14 @@ func (tw *TabWidget) ConnectChange(f func(w *FieldWidget)) {
 	})
 }
 
-func NewComboboxWidget(opt string, opts []string, changed func(string)) *FieldWidget {
+func NewComboboxWidget(opt string, opts []string, changed func(int)) *FieldWidget {
 	qw := widgets.NewQComboBox(nil)
 	widget := new(FieldWidget)
 	widget.qWidget = qw
 	qw.InsertItems(0, opts)
 	qw.SetCurrentText(opt)
 
-	qw.ConnectCurrentIndexChanged2(changed)
+	qw.ConnectCurrentIndexChanged(changed)
 
 	return widget
 }
